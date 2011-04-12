@@ -10,11 +10,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+
 import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Parser;
+import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -41,6 +46,7 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.Multimap;
 
@@ -50,15 +56,69 @@ public class PCTMCInterpreter {
 	private Class<? extends TreeParser> compilerClass;
 	private Class<? extends PatternMatcher> patternMatcherClass; 
 	
-	public PCTMCInterpreter(Class<? extends Lexer> lexerClass, Class<? extends Parser> parserClass, Class<? extends TreeParser> compilerClass){
+	public PCTMCInterpreter(Class<? extends Lexer> lexerClass, Class<? extends Parser> parserClass, Class<? extends TreeParser> compilerClass,String[] args){
 		PCTMCLogging.debug("Creating a PCTMC interpreter with\n lexer: " + lexerClass + ",\n parser: " + parserClass + ",\n compiler: " + compilerClass);
 		this.lexerClass = lexerClass; 
 		this.parserClass = parserClass;
-		this.compilerClass = compilerClass; 		
+		this.compilerClass = compilerClass;
+		
+		OptionParser parser = new OptionParser() {
+			{
+				accepts("debug",
+						"generates debug output, including source files")
+						.withRequiredArg().ofType(String.class).describedAs(
+								"output folder");
+/*				accepts("matlab",
+						"generates matlab output, including source files")
+						.withRequiredArg().ofType(String.class).describedAs(
+								"output folder");*/
+
+				accepts("noGUI", "runs without graphical output");
+
+				accepts("help", "show help");
+			}
+		};
+
+		try {
+			OptionSet options = parser.parse(args);
+
+			if (options.has("help")) {
+				try {
+					parser.printHelpOn(System.out);
+				} catch (IOException e1) {
+					PCTMCLogging.error(e1.getMessage());
+				}
+			}
+
+			if (options.has("noGUI")) {
+				PCTMCChartUtilities.gui = false;
+				PCTMCLogging.info("Running without GUI.");
+			}
+
+			if (options.has("debug")) {
+				PCTMCOptions.debug = true;
+				PCTMCOptions.debugFolder = options.valueOf("debug").toString();
+				PCTMCLogging.info("Running in debug mode, output folder is "
+						+ PCTMCOptions.debugFolder + ".");
+			}
+
+		/*	if (options.has("matlab")) {
+				PCTMCOptions.matlab = true;
+				PCTMCOptions.matlabFolder = options.valueOf("matlab").toString();
+				PCTMCLogging.info("Generating matlab code, output folder is "
+						+ PCTMCLogging.matlabFolder + ".");
+			}*/
+
+			
+		} catch (OptionException e) {
+			PCTMCLogging.error(e.getMessage());
+		}
+
+		
 	}
 	
-	public PCTMCInterpreter(Class<? extends Lexer> lexerClass, Class<? extends Parser> parserClass, Class<? extends TreeParser> compilerClass,Class<? extends PatternMatcher> patternMatcherClass){
-		this(lexerClass,parserClass,compilerClass);
+	public PCTMCInterpreter(Class<? extends Lexer> lexerClass, Class<? extends Parser> parserClass, Class<? extends TreeParser> compilerClass,Class<? extends PatternMatcher> patternMatcherClass,String[] args){
+		this(lexerClass,parserClass,compilerClass,args);
 		this.patternMatcherClass = patternMatcherClass;
 		PCTMCLogging.debug("Registering pattern matcher " + patternMatcherClass);		 
 	}

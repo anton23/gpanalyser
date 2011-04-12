@@ -9,7 +9,7 @@ import uk.ac.imperial.doc.pctmc.PCTMCInterpreter;
 public class GPAPMain {
 	
 	public static void main(String[] args){ 
-		new PCTMCInterpreter(GPALexer.class, GPAParser.class, GPACompiler.class,GPEPAPatternMatcher.class).run(args[0]);
+		new PCTMCInterpreter(GPALexer.class, GPAParser.class, GPACompiler.class,GPEPAPatternMatcher.class,args).run(args[args.length-1]);
 	}	
 
 }

@@ -1,4 +1,4 @@
-<!-- GPA PCTMC ANT build script. 
+<!-- GPA ANT build script. 
 (c) 2011 Anton Stefanek
 -->
 
@@ -6,7 +6,7 @@
     <property file="config.properties"/>
 
     <!-- global properties -->
-    <property name="version" value="0.5"/>
+    <property name="version" value="0.9"/>
 	<property name="java.library.path" value="lib"/>
     <!-- directories -->
     <property name="build.out" value="build"/>
@@ -33,7 +33,7 @@
 
     <!-- JAR properties -->
     <property name="author" value="Anton Stefanek" />
-    <property name="main.class" value="gpapctmc.GPAPMain"/>
+    <property name="main.class" value="uk.ac.imperial.doc.gpa.GPAPMain"/>
     <property name="jar.name" value="gpa-${version}.jar"/>
     <path id="CLASSPATH">
         <fileset dir="${lib}">

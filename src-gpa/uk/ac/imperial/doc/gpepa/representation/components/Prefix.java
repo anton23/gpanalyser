@@ -1,7 +1,7 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
 /**
  * Class representing a (action,rate parameter).continuation triple.
