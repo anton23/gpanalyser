@@ -10,6 +10,8 @@ LPAR: '(';
 RPAR: ')';  
 LBRACE: '{';
 RBRACE: '}';
+LBRACK: '[';
+RBRACK: ']';
 
 COMMA: ',';
  

@@ -18,7 +18,7 @@ public class CentralMomentOfLinearCombinationExpression extends AbstractExpressi
 	@Override
 	public String toString() {
 		if (order==2) return "Var{" + originalExpression.toString() + "}";
-		return "CM{"+originalExpression.toString() + "," + order +"}"; 
+		return "CM["+originalExpression.toString() + "," + order +"]"; 
 	}
 
 	AbstractExpression internalExpression; 	

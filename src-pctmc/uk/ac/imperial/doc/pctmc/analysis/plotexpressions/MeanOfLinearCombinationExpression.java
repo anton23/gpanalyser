@@ -62,7 +62,7 @@ public class MeanOfLinearCombinationExpression extends AbstractExpression{
 
 	@Override
 	public String toString() {
-		return "E{"+internalExpression.toString()+"}"; 
+		return "E["+internalExpression.toString()+"]"; 
 	}
 
 	private List<AbstractExpression> coefficients; 

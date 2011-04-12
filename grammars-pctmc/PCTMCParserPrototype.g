@@ -200,12 +200,12 @@ primaryExpression:
 
 
 mean:
-  MEAN LBRACE expression RBRACE -> ^(MEAN expression)
+  MEAN LBRACK expression RBRACK -> ^(MEAN expression)
 ;
 
 central:
-   CENTRAL LBRACE expression COMMA INTEGER RBRACE -> ^(CENTRAL expression INTEGER)
-  |VARIANCE LBRACE expression RBRACE -> ^(CENTRAL expression INTEGER["2"])
+   CENTRAL LBRACK expression COMMA INTEGER RBRACK -> ^(CENTRAL expression INTEGER)
+  |VARIANCE LBRACK expression RBRACK -> ^(CENTRAL expression INTEGER["2"])
 ;
 
 
