@@ -35,6 +35,7 @@
     <property name="author" value="Anton Stefanek" />
     <property name="main.class" value="uk.ac.imperial.doc.gpa.GPAPMain"/>
     <property name="jar.name" value="gpa-${version}.jar"/>
+    <property name="jar.name.link" value="gpa.jar"/>
     <path id="CLASSPATH">
         <fileset dir="${lib}">
             <include name="**/*.jar"/>

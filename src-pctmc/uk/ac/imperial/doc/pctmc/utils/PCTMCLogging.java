@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.utils;
 
 import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
@@ -38,8 +39,8 @@ public class PCTMCLogging {
 	}
 
 	public static void debug(String message) {
-		message=message.replaceAll("\n", "\n"+getSpaces()+getOverhead());
-		if (visible) LOGGER.debug("[D] " + message);
+			message=message.replaceAll("\n", "\n"+getSpaces()+getOverhead());
+			if (visible) LOGGER.debug("[D] " + message);
 	}
 
 	public static void increaseIndent() {
@@ -67,5 +68,12 @@ public class PCTMCLogging {
 		final ConsoleAppender appender = new ConsoleAppender(layout);
 		logger.removeAllAppenders();
 		logger.addAppender(appender);
+		if (PCTMCOptions.debug) {
+			logger.setLevel(Level.DEBUG);
+		} else {
+			logger.setLevel(Level.INFO);
+		}
 	}
+	
+	
 }

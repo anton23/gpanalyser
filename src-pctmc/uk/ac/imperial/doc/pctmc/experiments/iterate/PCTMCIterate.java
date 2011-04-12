@@ -22,6 +22,7 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.utils.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import com.google.common.collect.Lists;
@@ -163,9 +164,11 @@ public class PCTMCIterate {
 	    PCTMCLogging.setVisible(true);
 	    for (int i = 0; i<plots.size(); i++){
 	    	PlotAtDescription plot = plots.get(i);
-	    	PCTMCLogging.info("Plotting " + plot); 
-    		ChartUtils3D.drawChart(plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
-    								xRange.constant,yRange.constant,plot.getExpression().toString());
+	    	PCTMCLogging.info("Plotting " + plot);
+	    	if (PCTMCChartUtilities.gui){
+	    		ChartUtils3D.drawChart(plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
+	    				xRange.constant,yRange.constant,plot.getExpression().toString());
+	    	}
 			if (plot.getFilename().isEmpty()) continue; 
 	    	if (ranges.size()==2){
 	    		FileUtils.write3Dfile(plot.getFilename(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc());
