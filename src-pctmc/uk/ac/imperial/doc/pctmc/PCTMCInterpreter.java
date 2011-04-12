@@ -63,6 +63,8 @@ public class PCTMCInterpreter {
 		this.compilerClass = compilerClass;
 	}
 
+	
+	
 	public PCTMCInterpreter(Class<? extends Lexer> lexerClass,
 			Class<? extends Parser> parserClass,
 			Class<? extends TreeParser> compilerClass,
@@ -73,6 +75,7 @@ public class PCTMCInterpreter {
 
 	@SuppressWarnings("unchecked")
 	public void run(String[] args) {
+
 		OptionParser optionParser = new OptionParser() {
 			{
 				accepts("debug",

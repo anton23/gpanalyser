@@ -1,11 +1,15 @@
 package uk.ac.imperial.doc.pctmc.charts;
 
 import java.awt.Rectangle;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.jzy3d.bridge.swing.FrameSwing;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
@@ -97,7 +101,6 @@ public class ChartUtils3D{
 		mouse.addMouseSource(canvas);
 		
 		//ChartLauncher.openChart(chart, DEFAULT_WINDOW_DIMENSIONS, command);
-		PCTMCChartUtilities.addChart(panel3d, windowTitle);
+		PCTMCChartUtilities.addChart(panel3d, windowTitle);	
 	}
-
 }

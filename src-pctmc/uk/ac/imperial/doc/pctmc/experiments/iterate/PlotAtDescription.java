@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.experiments.iterate;
 
 
+ 
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public class PlotAtDescription {
 			constraintString = " when " + ToStringUtils.iterableToSSV(constraints, " and ");
 		}
 		
-		return expression.toString() + " at " + time + constraintString + (filename==null?"":" ->"+ filename); 
+		return expression.toString() + " at " + time + constraintString + ((filename==null||filename.isEmpty())?"":(" ->"+ filename)); 
 	}
 
 }

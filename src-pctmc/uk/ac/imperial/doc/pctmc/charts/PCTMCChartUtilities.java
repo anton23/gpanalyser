@@ -117,16 +117,18 @@ public class PCTMCChartUtilities {
 		tabs.put(windowTitle,tab); 
 	}
 	
-	static Map<String,JFrame> windows = new HashMap<String, JFrame>(); 
-	static Map<String,JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
+	private static Map<String,JFrame> windows = new HashMap<String, JFrame>(); 
+	private static Map<String,JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
+	
+	public static JFrame getWindow(String title){
+		return windows.get(title); 
+	}
 	
 	public static void addChart(Component component,String windowTitle){
 		if (!gui) return;
-		JFrame frame;	
 		JTabbedPane tab;
 		if (!windows.containsKey(windowTitle)) setWindow(windowTitle);
 		tab = tabs.get(windowTitle);
-		frame = windows.get(windowTitle);
 		tab.addTab("", component);
 	}
 
