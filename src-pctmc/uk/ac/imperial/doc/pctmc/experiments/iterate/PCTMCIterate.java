@@ -18,11 +18,11 @@ import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
+import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
+import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
-import uk.ac.imperial.doc.pctmc.utils.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import com.google.common.collect.Lists;
@@ -166,7 +166,7 @@ public class PCTMCIterate {
 	    	PlotAtDescription plot = plots.get(i);
 	    	PCTMCLogging.info("Plotting " + plot);
 	    	if (PCTMCChartUtilities.gui){
-	    		ChartUtils3D.drawChart(plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
+	    		ChartUtils3D.drawChart(toString(),plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
 	    				xRange.constant,yRange.constant,plot.getExpression().toString());
 	    	}
 			if (plot.getFilename().isEmpty()) continue; 

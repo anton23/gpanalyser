@@ -1,6 +1,7 @@
-package uk.ac.imperial.doc.pctmc.utils;
+package uk.ac.imperial.doc.pctmc.charts;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
@@ -118,6 +119,16 @@ public class PCTMCChartUtilities {
 	
 	static Map<String,JFrame> windows = new HashMap<String, JFrame>(); 
 	static Map<String,JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
+	
+	public static void addChart(Component component,String windowTitle){
+		if (!gui) return;
+		JFrame frame;	
+		JTabbedPane tab;
+		if (!windows.containsKey(windowTitle)) setWindow(windowTitle);
+		tab = tabs.get(windowTitle);
+		frame = windows.get(windowTitle);
+		tab.addTab("", component);
+	}
 
 	public static void drawChart(XYDataset dataset, String xlabel,
 			String ylabel, String chartTitle, String windowTitle) {

@@ -2,12 +2,16 @@
 <classpath>
 	<classpathentry kind="src" path="src-pctmc">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux64"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="genSrc"/>
 	<classpathentry kind="src" path="src-jexpressions"/>
-	<classpathentry kind="src" path="src-gpa"/>
+	<classpathentry kind="src" path="src-gpa">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/guava-r09.jar"/>

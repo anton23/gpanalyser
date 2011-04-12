@@ -1,8 +1,10 @@
-package uk.ac.imperial.doc.pctmc.utils;
+package uk.ac.imperial.doc.pctmc.charts;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JPanel;
 
 import org.jzy3d.chart.Chart;
 import org.jzy3d.colors.Color;
@@ -12,13 +14,17 @@ import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.Point;
 import org.jzy3d.plot3d.primitives.Polygon;
 import org.jzy3d.plot3d.primitives.Shape;
-import org.jzy3d.ui.ChartLauncher;
+import org.jzy3d.plot3d.rendering.canvas.CanvasSwing;
+
+
+
+
 
 public class ChartUtils3D{
 	
 	public static Rectangle DEFAULT_WINDOW_DIMENSIONS = new Rectangle(0,0,600,500);
 	
-	public static void drawChart(String command,double[][] data,double minx,double dx,double miny,double dy,String xlabel, String ylabel, String zlabel){
+	public static void drawChart(String windowTitle,String command,double[][] data,double minx,double dx,double miny,double dy,String xlabel, String ylabel, String zlabel){
 		List<Polygon> polygons = new ArrayList<Polygon>();	
 		for (int ix = 0; ix<data.length-1; ix++){
 			double x = minx+ix*dx; 
@@ -46,7 +52,7 @@ public class ChartUtils3D{
         surface.setWireframeDisplayed(true);
         surface.setWireframeColor(org.jzy3d.colors.Color.BLACK);
         
-        Chart chart = new Chart();
+        Chart chart = new Chart("swing");
         chart.getAxeLayout().setXAxeLabel(xlabel);
         chart.getAxeLayout().setYAxeLabel(ylabel);
         chart.getAxeLayout().setZAxeLabel(zlabel);
@@ -78,9 +84,20 @@ public class ChartUtils3D{
  
 		chart.getView().getCamera().setStretchToFill(true); 
 		chart.getView().setMaximized(true);
-		ChartLauncher.openChart(chart, DEFAULT_WINDOW_DIMENSIONS, command);
 		
-		 
+		CanvasSwing canvas = (CanvasSwing)chart.getCanvas(); 
+        
+        JPanel panel3d = new JPanel();
+        panel3d.setLayout(new java.awt.BorderLayout());
+        panel3d.add(canvas);
+        
+        ViewMouseControllerSwing mouse = new ViewMouseControllerSwing();
+        mouse.addTarget(chart.getView());
+
+		mouse.addMouseSource(canvas);
+		
+		//ChartLauncher.openChart(chart, DEFAULT_WINDOW_DIMENSIONS, command);
+		PCTMCChartUtilities.addChart(panel3d, windowTitle);
 	}
 
 }
