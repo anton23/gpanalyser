@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src-pctmc"/>
+	<classpathentry kind="src" path="src-pctmc">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux64"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="genSrc"/>
 	<classpathentry kind="src" path="src-jexpressions"/>
 	<classpathentry kind="src" path="src-gpa"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -10,5 +15,7 @@
 	<classpathentry kind="lib" path="lib/jfreechart-1.0.13.jar"/>
 	<classpathentry kind="lib" path="lib/org.jzy3d-0.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-3.3.jar"/>
+	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="lib/jogl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

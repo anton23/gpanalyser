@@ -1,0 +1,167 @@
+<!-- GPA PCTMC ANT build script. 
+(c) 2011 Anton Stefanek
+-->
+
+<project name="GPAPCTMC" default="build" basedir=".">
+    <property file="config.properties"/>
+
+    <!-- global properties -->
+    <property name="version" value="0.5"/>
+	<property name="java.library.path" value="lib"/>
+    <!-- directories -->
+    <property name="build.out" value="build"/>
+    <property name="dist.out" value="build/dist/"/>
+    <property name="build.class" value="${build.out}/classes" />
+    <property name="src" value="src-gpa"/>
+    <property name="src.generated" value="genSrc"/>
+    <property name="examples" value="inputs"/>
+    <property name="lib" value="lib"/>
+	<property name="jexpressions" value="src-jexpressions"/>
+	<property name="PCTMC" value="src-pctmc"/>
+	<property name="PCTMC.grammars" value="grammars-pctmc"/>
+    
+    <!-- ANTLR and grammars -->
+    <property name="antlr" value="antlr-3.3.jar"/>
+    <property name="grammars" value="grammars-gpa"/>
+    <property name="lexer" value="GPALexer.g"/>
+	<property name="lexer.prototype" value="PCTMCLexerPrototype.g"/>
+    <property name="parser" value="GPAParser.g"/>
+	<property name="parser.prototype" value="PCTMCParserPrototype.g"/>
+    <property name="compiler" value="GPACompiler.g"/>
+	<property name="compiler.prototype" value="PCTMCCompilerPrototype.g"/>
+    <property name="package.generated" value="uk/ac/imperial/doc/gpa/syntax"/>
+
+    <!-- JAR properties -->
+    <property name="author" value="Anton Stefanek" />
+    <property name="main.class" value="gpapctmc.GPAPMain"/>
+    <property name="jar.name" value="gpa-${version}.jar"/>
+    <path id="CLASSPATH">
+        <fileset dir="${lib}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="init">
+        <tstamp/>
+    </target>
+
+    <target name="needGrammar">
+        <uptodate property="grammar.dontGenerate"
+        targetfile="${src.generated}/${package.generated}/GPACompiler.java">
+            <srcfiles dir="${grammars}" includes="**/*.g" />
+        	<srcfiles dir="${PCTMC.grammars}" includes="**/*.g" />
+        </uptodate>
+    </target>
+
+    <target name="build.grammars" depends="init,needGrammar"
+    unless="grammar.dontGenerate" description="Generate lexer/parser/compiler." >
+
+        <mkdir dir="${src.generated}"/>
+        <java classname="org.antlr.Tool">
+        	<arg value="-lib" />
+        	<arg value="${PCTMC.grammars}" />
+            <arg value="-fo" />
+            <arg value="${src.generated}/${package.generated}" />
+            <arg value="${grammars}/${lexer}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+
+         <java classname="org.antlr.Tool">
+        	<arg value="-lib"/>
+        	<arg value="${PCTMC.grammars}"/>
+            <arg value="-fo" />
+            <arg value="${src.generated}/${package.generated}" />
+            <arg value="${grammars}/${parser}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+
+         <java classname="org.antlr.Tool">
+        	<arg value="-lib"/>
+        	<arg value="${PCTMC.grammars}"/>
+         	<arg value="-fo" />        
+            <arg value="${src.generated}/${package.generated}" />
+            <arg value="${grammars}/${compiler}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+   </target>
+
+    <target name="build" depends="build.grammars">
+        <mkdir dir="${build.class}"/>
+        <path id="test.path">
+        <fileset dir="${src}">
+            <include name="**/*.java"/>
+        </fileset>
+        </path>
+
+        <javac source="1.6" target="1.6" debug="true" destdir="${build.class}"
+        deprecation="true">
+            <classpath refid="CLASSPATH"/>
+            <src path="${src}"/>
+            <src path="${src.generated}"/>
+            <src path="${PCTMC}"/>
+        	<src path="${jexpressions}"/>
+        </javac>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.out}" includeemptydirs="true" includes="**"/>
+        <delete dir="${dist.out}" includeemptydirs="true" includes="**"/>
+        <delete dir="${src.generated}"  includeemptydirs="true" includes="**"/>     
+    </target>
+
+    <target name="dist">
+        <mkdir dir="${dist.out}"/>
+    </target>
+
+    <target name="jar" depends="build,dist">
+        <jar destfile="${dist.out}/${jar.name}" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Built-By" value="${author}"/>
+                <attribute name="Main-Class" value="${main.class}"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Java-Library-Path" value="lib"/>
+            </manifest>
+            <fileset dir="${build.class}"/>
+        	<zipgroupfileset dir="${lib}" includes="**/*.jar" excludes="META-INF/*.SF"/>
+        </jar>
+    </target>
+
+    <target name="dist-src" depends="init,dist">
+        <property name="zip.root" value="gpa-${version}"/>
+        <zip destfile="${dist.out}/gpa-src-${version}.zip">
+            <!-- java source and ANTLR grammars-->
+            <zipfileset dir="${src}" prefix="${zip.root}/src">
+                <include name="**/*.java" />
+            </zipfileset>
+
+            <zipfileset dir="${grammars}" prefix="${zip.root}/${grammars}">
+                <include name="**/*.g" />
+            </zipfileset>
+
+            
+            <!-- build file and license -->
+            <zipfileset dir="." prefix="${zip.root}">
+                <include name="build.xml"/>
+                <include name="COPYING" />
+                <include name="README" />
+            </zipfileset>
+            <!-- examples -->
+            <zipfileset dir="${examples}" prefix="${zip.root}/${examples}"/>
+
+            <!-- libraries -->
+            <zipfileset dir="${lib}" prefix="${zip.root}/${lib}"/>
+        </zip>
+    </target>
+
+    <target name="dist-examples" depends="init,dist">
+        <zip destfile="${dist.out}/${examples}.zip">
+            <zipfileset dir="${examples}" prefix="${examples}"/>
+        </zip>
+    </target>
+</project>
