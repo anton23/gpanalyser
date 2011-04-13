@@ -85,7 +85,7 @@ public class PCTMCChartUtilities {
 		
 		final JFrame frame = new JFrame(windowTitle);
 		
-		frame.setPreferredSize(new java.awt.Dimension(600, 400));
+		frame.setPreferredSize(new java.awt.Dimension(600, 500));
 		frame.setContentPane(chartPanel);
 		frame.pack();
 		frame.setVisible(true);
@@ -132,6 +132,8 @@ public class PCTMCChartUtilities {
 		if (!windows.containsKey(windowTitle)) setWindow(windowTitle);
 		tab = tabs.get(windowTitle);
 		tab.addTab("", component);
+		windows.get(windowTitle).setSize(new java.awt.Dimension(600, 500)); 
+		
 	}
 
 	public static void drawChart(XYDataset dataset, String xlabel,

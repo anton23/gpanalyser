@@ -165,7 +165,7 @@ public class PCTMCIterate {
 	    for (int i = 0; i<plots.size(); i++){
 	    	PlotAtDescription plot = plots.get(i);
 	    	PCTMCLogging.info("Plotting " + plot);
-	    	if (PCTMCChartUtilities.gui){
+	    	if (PCTMCChartUtilities.gui && ranges.size()==2){
 	    		ChartUtils3D.drawChart(toString(),plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
 	    				xRange.constant,yRange.constant,plot.getExpression().toString());
 	    	}

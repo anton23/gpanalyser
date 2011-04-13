@@ -1,9 +1,11 @@
 package uk.ac.imperial.doc.pctmc.charts;
 
+import java.awt.BorderLayout;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jzy3d.chart.Chart;
@@ -57,7 +59,10 @@ public class ChartUtils3D{
         chart.getAxeLayout().setXAxeLabel(xlabel);
         chart.getAxeLayout().setYAxeLabel(ylabel);
         chart.getAxeLayout().setZAxeLabel(zlabel);
+        
         chart.getScene().getGraph().add(surface);
+        
+
         
         
         double shadowZ = zmin - (zmax - zmin); 
@@ -89,15 +94,15 @@ public class ChartUtils3D{
 		CanvasSwing canvas = (CanvasSwing)chart.getCanvas(); 
         
         JPanel panel3d = new JPanel();
-        panel3d.setLayout(new java.awt.BorderLayout());
+        panel3d.setLayout(new BorderLayout());
+        panel3d.add(new JLabel(command),BorderLayout.SOUTH);
         panel3d.add(canvas);
+
         
         ViewMouseControllerSwing mouse = new ViewMouseControllerSwing();
         mouse.addTarget(chart.getView());
-
 		mouse.addMouseSource(canvas);
-		
-		//ChartLauncher.openChart(chart, DEFAULT_WINDOW_DIMENSIONS, command);
+
 		PCTMCChartUtilities.addChart(panel3d, windowTitle);	
 	}
 }
