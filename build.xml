@@ -13,12 +13,14 @@
     <property name="dist.out" value="build/dist/"/>
     <property name="build.class" value="${build.out}/classes" />
     <property name="src" value="src-gpa"/>
+	
     <property name="src.generated" value="genSrc"/>
     <property name="examples" value="inputs"/>
     <property name="lib" value="lib"/>
-	<property name="jexpressions" value="src-jexpressions"/>
+	<property name="jexpressions.src" value="src-jexpressions"/>
 	<property name="PCTMC" value="src-pctmc"/>
 	<property name="PCTMC.grammars" value="grammars-pctmc"/>
+	<property name="PCTMC.src" value="src-pctmc"/>
     
     <!-- ANTLR and grammars -->
     <property name="antlr" value="antlr-3.3.jar"/>
@@ -94,19 +96,16 @@
 
     <target name="build" depends="build.grammars">
         <mkdir dir="${build.class}"/>
-        <path id="test.path">
-        <fileset dir="${src}">
-            <include name="**/*.java"/>
-        </fileset>
-        </path>
-
+    	
         <javac source="1.6" target="1.6" debug="true" destdir="${build.class}"
         deprecation="true">
             <classpath refid="CLASSPATH"/>
             <src path="${src}"/>
             <src path="${src.generated}"/>
-            <src path="${PCTMC}"/>
-        	<src path="${jexpressions}"/>
+            <src path="${PCTMC.src}"/>
+        	<src path="${jexpressions.src}"/>
+            <include name="**/*.java"/> 
+         	<exclude name="**/package-info.java"/> 
         </javac>
     </target>
 
@@ -139,14 +138,26 @@
     </target>
 
     <target name="dist-src" depends="init,dist">
-        <property name="zip.root" value="gpa-${version}"/>
+        <property name="zip.root" value="gpa-src-${version}"/>
         <zip destfile="${dist.out}/gpa-src-${version}.zip">
             <!-- java source and ANTLR grammars-->
-            <zipfileset dir="${src}" prefix="${zip.root}/src">
+            <zipfileset dir="${src}" prefix="${zip.root}/${src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
+            <zipfileset dir="${PCTMC.src}" prefix="${zip.root}/${PCTMC.src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
+            <zipfileset dir="${jexpressions.src}" prefix="${zip.root}/${jexpressions.src}">
                 <include name="**/*.java" />
             </zipfileset>
 
             <zipfileset dir="${grammars}" prefix="${zip.root}/${grammars}">
+                <include name="**/*.g" />
+            </zipfileset>
+        	
+            <zipfileset dir="${PCTMC.grammars}" prefix="${zip.root}/${PCTMC.grammars}">
                 <include name="**/*.g" />
             </zipfileset>
 
@@ -156,18 +167,38 @@
                 <include name="build.xml"/>
             	<include name="LICENSE"/>	
             	<include name="LICENSES"/>
+            	<include name="gpa-linux-amd64.sh"/>
+            	<include name="gpa-windows-amd64.bat"/>
             </zipfileset>
-            <!-- examples -->
-            <zipfileset dir="${examples}" prefix="${zip.root}/${examples}"/>
+
 
             <!-- libraries -->
             <zipfileset dir="${lib}" prefix="${zip.root}/${lib}"/>
         </zip>
     </target>
+	
+	
+	<target name="dist-bin" depends="init,dist,jar">
+	        <property name="zip.root" value="gpa-${version}"/>
+	        <zip destfile="${dist.out}/gpa-${version}.zip">
+	            
+	            <zipfileset dir="." prefix="${zip.root}">
+	            	<include name="LICENSE"/>	
+	            	<include name="LICENSES"/>
+	            	<include name="gpa-linux-amd64.sh"/>
+	            	<include name="gpa-windows-amd64.bat"/>
+	            </zipfileset>
 
-    <target name="dist-examples" depends="init,dist">
-        <zip destfile="${dist.out}/${examples}.zip">
-            <zipfileset dir="${examples}" prefix="${examples}"/>
-        </zip>
-    </target>
+	            <!-- native libraries -->
+	            <zipfileset dir="${lib}" prefix="${zip.root}/${lib}">
+	            	<exclude name="**/*.jar"/>
+	            </zipfileset>
+	        	
+	        	<zipfileset dir="${dist.out}" prefix="${zip.root}/${dist.out}">
+	        		<include name="gpa-${version}.jar"/>
+	        	</zipfileset>
+	        </zip>
+	    </target>
+	
+	
 </project>
