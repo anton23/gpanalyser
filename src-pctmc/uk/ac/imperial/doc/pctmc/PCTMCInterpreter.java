@@ -118,7 +118,7 @@ public class PCTMCInterpreter {
 				}
 
 				if (options.has("noGUI")) {
-					PCTMCChartUtilities.gui = false;
+					PCTMCChartUtilities.setGui(false);
 					PCTMCLogging.info("Running without GUI.");
 				}
 

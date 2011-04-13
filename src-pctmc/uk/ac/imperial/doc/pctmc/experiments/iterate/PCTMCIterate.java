@@ -165,22 +165,27 @@ public class PCTMCIterate {
 	    for (int i = 0; i<plots.size(); i++){
 	    	PlotAtDescription plot = plots.get(i);
 	    	PCTMCLogging.info("Plotting " + plot);
-	    	if (PCTMCChartUtilities.gui && ranges.size()==2){
-	    		ChartUtils3D.drawChart(toString(),plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
-	    				xRange.constant,yRange.constant,plot.getExpression().toString());
+
+ 
+	    	if (ranges.size()==2 ){
+	    		ChartUtils3D.drawChart(toShortString(),plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
+		    		xRange.constant,yRange.constant,plot.getExpression().toString());
+		    	
+	    		if (!plot.getFilename().isEmpty()){
+	    			FileUtils.write3Dfile(plot.getFilename(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc());
+	    			FileUtils.write3DGnuplotFile(plot.getFilename(), xRange.getConstant(), yRange.getConstant(), plot.toString());
+	    		}
 	    	}
-			if (plot.getFilename().isEmpty()) continue; 
-	    	if (ranges.size()==2){
-	    		FileUtils.write3Dfile(plot.getFilename(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc());
-	    		FileUtils.write3DGnuplotFile(plot.getFilename(), xRange.getConstant(), yRange.getConstant(), plot.toString());
-	    	}
-	    	else{
+	    	if (ranges.size()==1 ){
 	    		double[][] newData = new double[yRange.getSteps()][1];
 	    		for (int j = 0; j<yRange.getSteps(); j++){
 	    			newData[j][0] = data[i][0][j]; 
 	    		}
 	    		XYSeriesCollection dataset = AnalysisUtils.getDataset(newData, yRange.getFrom(),yRange.getDc(), 
-	    				new String[]{yRange.getConstant()});
+	    				new String[]{plot.toString()});
+	    		
+	    		
+	    		PCTMCChartUtilities.drawChart(dataset, yRange.getConstant(), "count", "", toShortString());
 	    		
 	    		FileUtils.writeCSVfile(plot.getFilename(), dataset);
 	    		FileUtils.writeGnuplotFile(plot.getFilename(), "", Lists.newArrayList(plot.toString()), yRange.getConstant(), "");
@@ -198,6 +203,15 @@ public class PCTMCIterate {
 		return "Iterate " + ToStringUtils.iterableToSSV(ranges, ",") + "\n"
 		+ analysis.toString();/* + " plot {\n" +
 		ToStringUtils.iterableToSSV(plots, "\n") + "}";*/
+	}
+	
+	public String toShortString(){
+		String ret = "Iterate";
+		for (RangeSpecification r:ranges){
+			ret+= " ";
+			ret+=r.getConstant() + "("+r.getFrom() + "-"+r.getTo() + "," + r.getSteps()+" steps"+")";
+		}
+		return ret;
 	}
 	
 }
