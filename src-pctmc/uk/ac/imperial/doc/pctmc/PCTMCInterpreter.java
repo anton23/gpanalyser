@@ -90,6 +90,8 @@ public class PCTMCInterpreter {
 				 */
 
 				accepts("noGUI", "runs without graphical output");
+				
+				accepts("3D","displays 3D plots for iterate experiments");
 
 				accepts("help", "show help");
 			}
@@ -127,6 +129,9 @@ public class PCTMCInterpreter {
 					PCTMCLogging
 							.info("Running in debug mode, output folder is "
 									+ PCTMCOptions.debugFolder + ".");
+				}
+				if (options.has("3D")){
+					PCTMCChartUtilities.jogl = true; 
 				}
 
 				/*

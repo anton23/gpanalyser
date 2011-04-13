@@ -1,15 +1,11 @@
 package uk.ac.imperial.doc.pctmc.charts;
 
 import java.awt.Rectangle;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.jzy3d.bridge.swing.FrameSwing;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
@@ -29,6 +25,7 @@ public class ChartUtils3D{
 	public static Rectangle DEFAULT_WINDOW_DIMENSIONS = new Rectangle(0,0,600,500);
 	
 	public static void drawChart(String windowTitle,String command,double[][] data,double minx,double dx,double miny,double dy,String xlabel, String ylabel, String zlabel){
+		if (!PCTMCChartUtilities.jogl) return; 
 		List<Polygon> polygons = new ArrayList<Polygon>();	
 		for (int ix = 0; ix<data.length-1; ix++){
 			double x = minx+ix*dx; 

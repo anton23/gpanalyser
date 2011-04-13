@@ -29,6 +29,8 @@ import org.jfree.ui.RefineryUtilities;
 
 public class PCTMCChartUtilities {
 	public static boolean gui = true;
+	
+	public static boolean jogl = false;
 
 	private static double lastx = 0, lasty = 0;
 

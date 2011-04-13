@@ -10,8 +10,8 @@ for /f "tokens=3* skip=2" %%a in ('reg query "%key%" /v CurrentVersion') do set 
 for /f "tokens=2* skip=2" %%a in ('reg query "%key%\%JAVA_VERSION%" /v JavaHome') do set JAVA_HOME=%%b
 
 if not exist "%JAVA_HOME%\bin\java.exe" goto JAVAMISSING
-echo Running Jpcsp 64bit...
-"%JAVA_HOME%\bin\java" -Xmx1024m -Djava.library.path=lib/windows-amd64 -jar build/dist/gpa-0.9.jar %*
+echo Running gpanalyser 64bit...
+"%JAVA_HOME%\bin\java" -Xmx1024m -Djava.library.path=lib/windows-amd64 -jar build/dist/gpa-@version.jar -3D %*
 goto END
 
 :JAVA32

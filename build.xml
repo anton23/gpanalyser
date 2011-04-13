@@ -135,6 +135,12 @@
         	</fileset>
         	<zipgroupfileset dir="${lib}" includes="**/*.jar" excludes="META-INF/*.SF"/>
         </jar>
+
+    	
+        <copy file="gpa-linux-amd64.sh" tofile = "${dist.out}/gpa-${version}-linux-amd64.sh"/>
+        <replace file="${dist.out}/gpa-${version}-linux-amd64.sh" token="@version" value="${version}"/>
+        <copy file="gpa-windows-amd64.bat" tofile = "${dist.out}/gpa-${version}-windows-amd64.bat"/>
+        <replace file="${dist.out}/gpa-${version}-windows-amd64.bat" token="@version" value="${version}"/>
     </target>
 
     <target name="dist-src" depends="init,dist">
@@ -163,6 +169,7 @@
 
             
             <!-- build file and license -->
+        	
             <zipfileset dir="." prefix="${zip.root}">
                 <include name="build.xml"/>
             	<include name="LICENSE"/>	
@@ -185,9 +192,12 @@
 	            <zipfileset dir="." prefix="${zip.root}">
 	            	<include name="LICENSE"/>	
 	            	<include name="LICENSES"/>
-	            	<include name="gpa-linux-amd64.sh"/>
-	            	<include name="gpa-windows-amd64.bat"/>
 	            </zipfileset>
+	        	
+	        	<zipfileset dir="${dist.out}" prefix="${zip.root}">
+	             	<include name="gpa-${version}-linux-amd64.sh"/>
+	                <include name="gpa-${version}-windows-amd64.bat"/>
+	        	</zipfileset>
 
 	            <!-- native libraries -->
 	            <zipfileset dir="${lib}" prefix="${zip.root}/${lib}">
