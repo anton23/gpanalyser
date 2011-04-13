@@ -129,6 +129,11 @@
                 <attribute name="Java-Library-Path" value="lib"/>
             </manifest>
             <fileset dir="${build.class}"/>
+
+        	<fileset dir=".">
+        		<include name="LICENSE"/>	
+        		<include name="LICENSES"/>
+        	</fileset>
         	<zipgroupfileset dir="${lib}" includes="**/*.jar" excludes="META-INF/*.SF"/>
         </jar>
     </target>
@@ -149,8 +154,8 @@
             <!-- build file and license -->
             <zipfileset dir="." prefix="${zip.root}">
                 <include name="build.xml"/>
-                <include name="COPYING" />
-                <include name="README" />
+            	<include name="LICENSE"/>	
+            	<include name="LICENSES"/>
             </zipfileset>
             <!-- examples -->
             <zipfileset dir="${examples}" prefix="${zip.root}/${examples}"/>
