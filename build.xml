@@ -139,8 +139,14 @@
     	
         <copy file="gpa-linux-amd64.sh" tofile = "${dist.out}/gpa-${version}-linux-amd64.sh"/>
         <replace file="${dist.out}/gpa-${version}-linux-amd64.sh" token="@version" value="${version}"/>
+        <copy file="gpa-linux-i586.sh" tofile = "${dist.out}/gpa-${version}-linux-i586.sh"/>
+        <replace file="${dist.out}/gpa-${version}-linux-i586.sh" token="@version" value="${version}"/>
         <copy file="gpa-windows-amd64.bat" tofile = "${dist.out}/gpa-${version}-windows-amd64.bat"/>
         <replace file="${dist.out}/gpa-${version}-windows-amd64.bat" token="@version" value="${version}"/>
+        <copy file="gpa-windows-i586.bat" tofile = "${dist.out}/gpa-${version}-windows-i586.bat"/>
+        <replace file="${dist.out}/gpa-${version}-windows-i586.bat" token="@version" value="${version}"/>
+        <copy file="gpa-macosx.sh" tofile = "${dist.out}/gpa-${version}-macosx.sh"/>
+        <replace file="${dist.out}/gpa-${version}-macosx.sh" token="@version" value="${version}"/>    	
     </target>
 
     <target name="dist-src" depends="init,dist">
@@ -175,7 +181,10 @@
             	<include name="LICENSE"/>	
             	<include name="LICENSES"/>
             	<include name="gpa-linux-amd64.sh"/>
+            	<include name="gpa-linux-i586.sh"/>
             	<include name="gpa-windows-amd64.bat"/>
+                <include name="gpa-windows-i586.bat"/>            	
+                <include name="gpa-macosx.sh"/>            	
             </zipfileset>
 
 
@@ -196,7 +205,10 @@
 	        	
 	        	<zipfileset dir="${dist.out}" prefix="${zip.root}">
 	             	<include name="gpa-${version}-linux-amd64.sh"/>
+		            <include name="gpa-${version}-linux-i586.sh"/>	        		
 	                <include name="gpa-${version}-windows-amd64.bat"/>
+	                <include name="gpa-${version}-windows-i586.bat"/>
+		            <include name="gpa-${version}-macosx.sh"/>	        		
 	        	</zipfileset>
 
 	            <!-- native libraries -->

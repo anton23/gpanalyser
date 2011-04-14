@@ -25,7 +25,7 @@ goto END
 
 :JAVAMISSING
 echo The required version of Java has not been installed.
-echo Go to http://java.sun.com to install the 64bit Java JRE.
+echo Go to http://java.sun.com to install the 64bit Java JDK.
 pause
 
 :END

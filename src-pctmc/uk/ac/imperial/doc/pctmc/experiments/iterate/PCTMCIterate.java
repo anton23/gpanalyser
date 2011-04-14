@@ -186,9 +186,10 @@ public class PCTMCIterate {
 	    		
 	    		
 	    		PCTMCChartUtilities.drawChart(dataset, yRange.getConstant(), "count", "", toShortString());
-	    		
-	    		FileUtils.writeCSVfile(plot.getFilename(), dataset);
-	    		FileUtils.writeGnuplotFile(plot.getFilename(), "", Lists.newArrayList(plot.toString()), yRange.getConstant(), "");
+	    		if (!plot.getFilename().isEmpty()){
+	    			FileUtils.writeCSVfile(plot.getFilename(), dataset);
+	    			FileUtils.writeGnuplotFile(plot.getFilename(), "", Lists.newArrayList(plot.toString()), yRange.getConstant(), "");
+	    		}
 	    	}
 	    }
 	    PCTMCLogging.decreaseIndent(); 
