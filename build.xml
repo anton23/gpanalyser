@@ -6,7 +6,7 @@
     <property file="config.properties"/>
 
     <!-- global properties -->
-    <property name="version" value="0.9"/>
+    <property name="version" value="0.9.1"/>
 	<property name="java.library.path" value="lib"/>
     <!-- directories -->
     <property name="build.out" value="build"/>
@@ -185,6 +185,7 @@
             	<include name="gpa-windows-amd64.bat"/>
                 <include name="gpa-windows-i586.bat"/>            	
                 <include name="gpa-macosx.sh"/>            	
+                <include name="README.txt"/>
             </zipfileset>
 
 
@@ -201,6 +202,7 @@
 	            <zipfileset dir="." prefix="${zip.root}">
 	            	<include name="LICENSE"/>	
 	            	<include name="LICENSES"/>
+            		<include name="README.txt"/>            	
 	            </zipfileset>
 	        	
 	        	<zipfileset dir="${dist.out}" prefix="${zip.root}">
