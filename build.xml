@@ -21,7 +21,15 @@
 	<property name="PCTMC" value="src-pctmc"/>
 	<property name="PCTMC.grammars" value="grammars-pctmc"/>
 	<property name="PCTMC.src" value="src-pctmc"/>
-    
+	
+	<property name="plain" value="src-plain"/>
+	<property name="plain.grammars" value="grammars-plain"/>
+	<property name="plain.src" value="src-plain"/>
+	<property name="plain.package.generated" value="uk/ac/imperial/doc/gpa/plain/syntax"/>
+    <property name="plain.lexer" value="PlainLexer.g"/>
+    <property name="plain.parser" value="PlainParser.g"/>
+    <property name="plain.compiler" value="PlainCompiler.g"/>	
+	
     <!-- ANTLR and grammars -->
     <property name="antlr" value="antlr-3.3.jar"/>
     <property name="grammars" value="grammars-gpa"/>
@@ -53,6 +61,7 @@
         targetfile="${src.generated}/${package.generated}/GPACompiler.java">
             <srcfiles dir="${grammars}" includes="**/*.g" />
         	<srcfiles dir="${PCTMC.grammars}" includes="**/*.g" />
+           	<srcfiles dir="${plain.grammars}" includes="**/*.g" />        	
         </uptodate>
     </target>
 
@@ -92,6 +101,41 @@
                 <pathelement location="${lib}/${antlr}"/>
             </classpath>
         </java>
+    	
+    	
+        <java classname="org.antlr.Tool">
+        	<arg value="-lib" />
+        	<arg value="${PCTMC.grammars}" />
+            <arg value="-fo" />
+            <arg value="${src.generated}/${plain.package.generated}" />
+            <arg value="${plain.grammars}/${plain.lexer}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+
+         <java classname="org.antlr.Tool">
+        	<arg value="-lib"/>
+        	<arg value="${PCTMC.grammars}"/>
+            <arg value="-fo" />
+            <arg value="${src.generated}/${plain.package.generated}" />
+            <arg value="${plain.grammars}/${plain.parser}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+
+         <java classname="org.antlr.Tool">
+        	<arg value="-lib"/>
+        	<arg value="${PCTMC.grammars}"/>
+         	<arg value="-fo" />        
+            <arg value="${src.generated}/${plain.package.generated}" />
+            <arg value="${plain.grammars}/${plain.compiler}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+    	
    </target>
 
     <target name="build" depends="build.grammars">
@@ -103,6 +147,7 @@
             <src path="${src}"/>
             <src path="${src.generated}"/>
             <src path="${PCTMC.src}"/>
+        	<src path="${plain.src}"/>
         	<src path="${jexpressions.src}"/>
             <include name="**/*.java"/> 
          	<exclude name="**/package-info.java"/> 
@@ -161,6 +206,10 @@
                 <include name="**/*.java" />
             </zipfileset>
         	
+            <zipfileset dir="${plain.src}" prefix="${zip.root}/${plain.src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
             <zipfileset dir="${jexpressions.src}" prefix="${zip.root}/${jexpressions.src}">
                 <include name="**/*.java" />
             </zipfileset>
@@ -172,6 +221,10 @@
             <zipfileset dir="${PCTMC.grammars}" prefix="${zip.root}/${PCTMC.grammars}">
                 <include name="**/*.g" />
             </zipfileset>
+        	
+        	 <zipfileset dir="${plain.grammars}" prefix="${zip.root}/${plain.grammars}">
+        	                <include name="**/*.g" />
+        	 </zipfileset>
 
             
             <!-- build file and license -->

@@ -26,6 +26,10 @@ import org.antlr.runtime.tree.TreeNodeStream;
 import org.antlr.runtime.tree.TreeParser;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import uk.ac.imperial.doc.gpa.plain.expressions.TransactionPatternMatcher;
+import uk.ac.imperial.doc.gpa.plain.syntax.PlainCompiler;
+import uk.ac.imperial.doc.gpa.plain.syntax.PlainLexer;
+import uk.ac.imperial.doc.gpa.plain.syntax.PlainParser;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
@@ -91,6 +95,8 @@ public class PCTMCInterpreter {
 
 				accepts("noGUI", "runs without graphical output");
 				
+				accepts("plain", "reads model descriptions in plain PCTMC format");
+				
 				accepts("3D","displays 3D plots for iterate experiments");
 
 				accepts("help", "show help");
@@ -132,6 +138,12 @@ public class PCTMCInterpreter {
 				}
 				if (options.has("3D")){
 					PCTMCChartUtilities.jogl = true; 
+				}
+				if (options.has("plain")){
+					this.lexerClass = PlainLexer.class; 
+					this.parserClass = PlainParser.class; 
+					this.compilerClass = PlainCompiler.class;
+					this.patternMatcherClass = TransactionPatternMatcher.class; 
 				}
 
 				/*
