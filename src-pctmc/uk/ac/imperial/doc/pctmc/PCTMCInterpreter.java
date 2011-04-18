@@ -46,6 +46,7 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternSetterVisitor;
+import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -203,11 +204,17 @@ public class PCTMCInterpreter {
 							patternMatcher = patternMatcherClass
 									.getConstructor(PCTMC.class).newInstance(
 											pctmc);
+							
 						}
 						if (patternMatcher != null) {
 							// PCTMCLogging.debug("Registering a state pattern matcher.");
 							PatternSetterVisitor.unfoldPatterns(
 									unfoldedVariables, patternMatcher);
+							for (EvolutionEvent e:pctmc.getEvolutionEvents()){
+								AbstractExpression rate = e.getRate(); 
+								PatternSetterVisitor.unfoldPatterns(rate,
+										patternMatcher);
+							}
 						}
 
 						PCTMCLogging.info("Read a PCTMC with "
