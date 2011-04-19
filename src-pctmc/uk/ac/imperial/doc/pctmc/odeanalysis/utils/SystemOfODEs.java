@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc.utils;
+package uk.ac.imperial.doc.pctmc.odeanalysis.utils;
 
 public abstract class SystemOfODEs {
 	protected double[] r;

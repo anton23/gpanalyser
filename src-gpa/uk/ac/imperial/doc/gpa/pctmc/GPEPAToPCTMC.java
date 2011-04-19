@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.gpa.gpepa;
+package uk.ac.imperial.doc.gpa.pctmc;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import uk.ac.imperial.doc.gpa.pctmc.GPEPAPCTMC;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;

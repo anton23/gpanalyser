@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc.utils;
+package uk.ac.imperial.doc.pctmc.simulation.utils;
 
 public class Exponential {
 	public static double getSample(double rate) {

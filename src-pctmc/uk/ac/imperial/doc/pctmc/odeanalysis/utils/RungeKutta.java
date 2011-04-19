@@ -1,4 +1,5 @@
-package uk.ac.imperial.doc.pctmc.utils;
+package uk.ac.imperial.doc.pctmc.odeanalysis.utils;
+
 
 public class RungeKutta {
 	// see wikipedia

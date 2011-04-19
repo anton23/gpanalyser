@@ -21,9 +21,9 @@ import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
-import uk.ac.imperial.doc.pctmc.utils.AccumulatorUpdater;
-import uk.ac.imperial.doc.pctmc.utils.AggregatedStateNextEventGenerator;
-import uk.ac.imperial.doc.pctmc.utils.GillespieSimulator;
+import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
+import uk.ac.imperial.doc.pctmc.simulation.utils.AggregatedStateNextEventGenerator;
+import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 

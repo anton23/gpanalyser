@@ -11,11 +11,11 @@ import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
 import uk.ac.imperial.doc.pctmc.javaoutput.analysis.JavaMethodPrinter;
 import uk.ac.imperial.doc.pctmc.javaoutput.odeanalysis.JavaODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKutta;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
-import uk.ac.imperial.doc.pctmc.utils.RungeKutta;
-import uk.ac.imperial.doc.pctmc.utils.SystemOfODEs;
 
 import com.google.common.collect.BiMap;
 

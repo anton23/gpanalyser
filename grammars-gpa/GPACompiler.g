@@ -52,8 +52,7 @@ import PCTMCCompilerPrototype;
   import uk.ac.imperial.doc.gpepa.representation.model.*; 
   import uk.ac.imperial.doc.gpepa.representation.*;
   import uk.ac.imperial.doc.gpepa.states.*;
-  import uk.ac.imperial.doc.gpepa.patterns.*; 
-  import uk.ac.imperial.doc.gpa.gpepa.*;
+  import uk.ac.imperial.doc.gpa.patterns.*; 
   import uk.ac.imperial.doc.gpa.pctmc.*;
   
 }

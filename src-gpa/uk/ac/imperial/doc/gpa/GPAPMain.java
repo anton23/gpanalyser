@@ -1,9 +1,9 @@
 package uk.ac.imperial.doc.gpa;
 
+import uk.ac.imperial.doc.gpa.patterns.GPEPAPatternMatcher;
 import uk.ac.imperial.doc.gpa.syntax.GPACompiler;
 import uk.ac.imperial.doc.gpa.syntax.GPALexer;
 import uk.ac.imperial.doc.gpa.syntax.GPAParser;
-import uk.ac.imperial.doc.gpepa.patterns.GPEPAPatternMatcher;
 import uk.ac.imperial.doc.pctmc.PCTMCInterpreter;
 
 public class GPAPMain {

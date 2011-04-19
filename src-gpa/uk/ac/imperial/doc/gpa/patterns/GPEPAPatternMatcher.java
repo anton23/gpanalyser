@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.gpepa.patterns;
+package uk.ac.imperial.doc.gpa.patterns;
 
 import java.util.LinkedList;
 import java.util.List;
