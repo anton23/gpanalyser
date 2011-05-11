@@ -4,10 +4,11 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.javaoutput.JavaPrinterWithConstants;
+import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.matlaboutput.utils.MatlabOutputUtils;
 
 import com.google.common.collect.BiMap;
 
@@ -16,7 +17,7 @@ import com.google.common.collect.BiMap;
  * @author Anton Stefanek
  *
  */
-public class MatlabPrinterCombinedProductBased extends JavaPrinterWithConstants implements
+public class MatlabPrinterCombinedProductBased extends MatlabPrinterWithConstants implements
 		  ICombinedProductExpressionVisitor {
 
 
@@ -27,10 +28,9 @@ public class MatlabPrinterCombinedProductBased extends JavaPrinterWithConstants 
 		if (i==null){
 			throw new AssertionError("Unknown combined moment " + e.getProduct() + "!");
 		}
-		output.append(f + "[" + i + "]");		
+		output.append(f + "(" + MatlabOutputUtils.getMatlabIndex(i) + ")");		
 	}
 
- 
 	protected BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex;
 	protected Map<AbstractExpression,Integer> generalExpectationIndex;	 
 	

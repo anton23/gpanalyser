@@ -11,7 +11,12 @@ import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
  */
 public class PCTMCTools {
 	
-	private static PCTMCImplementationProvider provider = new PCTMCJavaImplementationProvider(); 
+	private static PCTMCImplementationProvider provider = new PCTMCJavaImplementationProvider();
+	
+	public static void setImplementationProvider(PCTMCImplementationProvider p){
+		provider = p; 
+		
+	}
 	
 	public static PCTMCImplementationProvider getImplementationProvider(){
 		return provider; 

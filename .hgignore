@@ -5,3 +5,5 @@ syntax: regexp
 ^genSrc$
 syntax: regexp
 ^tmp$
+syntax: regexp
+^matlab$

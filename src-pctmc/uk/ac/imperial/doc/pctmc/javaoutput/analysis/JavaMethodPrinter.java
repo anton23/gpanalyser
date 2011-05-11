@@ -55,7 +55,7 @@ public class JavaMethodPrinter {
 			s.accept(printer); 
 			ret.append("    " + printer+"\n");
 		}
-		ret.append("    return ret;\n");
+		ret.append("    return " + method.getReturnArray()+";\n");
 		ret.append("}\n}");
 		return ret.toString(); 
 	}

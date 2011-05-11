@@ -35,6 +35,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
@@ -46,6 +47,7 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternSetterVisitor;
+import uk.ac.imperial.doc.pctmc.matlaboutput.PCTMCJavaImplementationProviderWithMatlab;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
@@ -87,12 +89,11 @@ public class PCTMCInterpreter {
 						"generates debug output, including source files")
 						.withRequiredArg().ofType(String.class).describedAs(
 								"output folder");
-				/*
-				 * accepts("matlab",
-				 * "generates matlab output, including source files")
-				 * .withRequiredArg().ofType(String.class).describedAs(
-				 * "output folder");
-				 */
+
+				accepts("matlab",
+				 "generates matlab output, including source files")
+				 .withRequiredArg().ofType(String.class).describedAs(
+				"output folder");
 
 				accepts("noGUI", "runs without graphical output");
 				
@@ -147,13 +148,14 @@ public class PCTMCInterpreter {
 					this.patternMatcherClass = TransactionPatternMatcher.class; 
 				}
 
-				/*
-				 * if (options.has("matlab")) { PCTMCOptions.matlab = true;
-				 * PCTMCOptions.matlabFolder =
-				 * options.valueOf("matlab").toString();
-				 * PCTMCLogging.info("Generating matlab code, output folder is "
-				 * + PCTMCLogging.matlabFolder + "."); }
-				 */
+				
+				if (options.has("matlab")) { PCTMCOptions.matlab = true;
+					PCTMCOptions.matlabFolder =
+						options.valueOf("matlab").toString();
+					PCTMCLogging.info("Generating matlab code, output folder is "
+							+ PCTMCOptions.matlabFolder + ".");					
+				}
+				
 				PCTMCLogging.debug("Creating a PCTMC interpreter with\n lexer: "
 						+ lexerClass + ",\n parser: " + parserClass + ",\n compiler: "
 						+ compilerClass);
@@ -215,6 +217,9 @@ public class PCTMCInterpreter {
 								PatternSetterVisitor.unfoldPatterns(rate,
 										patternMatcher);
 							}
+						}
+						if (PCTMCOptions.matlab){
+							PCTMCTools.setImplementationProvider(new PCTMCJavaImplementationProviderWithMatlab(constants,pctmc));
 						}
 
 						PCTMCLogging.info("Read a PCTMC with "

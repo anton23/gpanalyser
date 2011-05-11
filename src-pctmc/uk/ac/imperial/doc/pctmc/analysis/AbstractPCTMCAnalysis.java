@@ -173,16 +173,17 @@ public abstract class AbstractPCTMCAnalysis {
 	protected EvaluatorMethod getEvaluatorMethod(List<PlotExpression> plotExpressions,
 			Constants constants) {
 		List<AbstractStatement> body = new LinkedList<AbstractStatement>();
-		body.add(new ArrayDeclaration("double", "ret", new IntegerExpression(
+		String returnArray = "ret";
+		body.add(new ArrayDeclaration("double", returnArray, new IntegerExpression(
 				plotExpressions.size())));
 		int iRet = 0;
 		for (PlotExpression plotExpression : plotExpressions) {
 			body.add(new Comment(plotExpression.toString()));
-			body.add(new ArrayElementAssignment("ret", new IntegerExpression(
+			body.add(new ArrayElementAssignment(returnArray, new IntegerExpression(
 					iRet), plotExpression.getExpression()));
 			iRet++;
 		}
-		return new EvaluatorMethod(body,plotExpressions.size());
+		return new EvaluatorMethod(body,plotExpressions.size(),returnArray);
 	}
 
 	@Override

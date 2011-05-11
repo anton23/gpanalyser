@@ -4,10 +4,9 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
-import uk.ac.imperial.doc.jexpressions.javaoutput.statements.JavaStatementPrinter;
 import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.matlaboutput.statements.MatlabStatementPrinter;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
 import com.google.common.collect.BiMap;
@@ -25,8 +24,6 @@ public class MatlabMethodPrinter {
 	private Map<AbstractExpression,Integer> generalExpectationIndex;
 	
 	
-
-	
 	public MatlabMethodPrinter(Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex) {
@@ -36,27 +33,19 @@ public class MatlabMethodPrinter {
 		this.generalExpectationIndex = generalExpectationIndex;
 	}
 
+	
+	public static String evaluatorName = "evaluator";
 
-
-
-	public String printEvaluatorMethod(EvaluatorMethod method,String className){
+	public String printEvaluatorMethod(EvaluatorMethod method,String className, String suffix){
 		StringBuilder ret = new StringBuilder();
-		ret.append("import " + AbstractExpressionEvaluator.class.getName()
-				+ ";\n");
-		ret.append("public class " + className + " extends "
-				+ AbstractExpressionEvaluator.class.getName() + "{\n");
-		ret.append("    public int getNumberOfExpressions(){\n");
-		ret.append("      return " + method.getNumberOfExpressions() + ";\n");
-		ret.append("    }\n");
-		
-		ret.append("    public double[] update(double[] values,double t, double[] oldValues, double stepSize){\n");
+		ret.append("function z = " + evaluatorName+suffix + "(y,t,param)\n");
 		for (AbstractStatement s:method.getBody()){
-			JavaStatementPrinter printer = new JavaStatementPrinter(new MatlabCombinedProductBasedExpressionPrinterFactory(constants, combinedMomentsIndex, generalExpectationIndex, "values"));
+			MatlabStatementPrinter printer = new MatlabStatementPrinter(new MatlabCombinedProductBasedExpressionPrinterFactory(constants, combinedMomentsIndex, generalExpectationIndex, "y"));
 			s.accept(printer); 
 			ret.append("    " + printer+"\n");
 		}
-		ret.append("    return ret;\n");
-		ret.append("}\n}");
+		ret.append("    z=" + method.getReturnArray() + ";\n");
+		ret.append("end\n");
 		return ret.toString(); 
 	}
 }

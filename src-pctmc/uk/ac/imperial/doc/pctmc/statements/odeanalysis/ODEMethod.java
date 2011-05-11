@@ -4,7 +4,7 @@ import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 
 public class ODEMethod {
 
-	AbstractStatement[] body;
+	private AbstractStatement[] body;
 
 	public AbstractStatement[] getBody() {
 		return body;
