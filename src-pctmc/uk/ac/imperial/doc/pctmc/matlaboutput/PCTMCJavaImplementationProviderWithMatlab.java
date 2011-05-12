@@ -1,8 +1,6 @@
 package uk.ac.imperial.doc.pctmc.matlaboutput;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -57,7 +55,7 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 		for(Map.Entry<CombinedPopulationProduct, Integer> e:combinedMomentsIndex.entrySet()){
 			out.append("   y("+MatlabOutputUtils.getMatlabIndex(e.getValue())+")=");
 			if (!e.getKey().getAccumulatedProducts().isEmpty()){
-				out.append("0;\n");
+				out.append("0;");
 			} else {
 				boolean first = true; 
 				boolean zero = true; 
@@ -70,9 +68,10 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 					if (first) first = false; else rhs.append("*");
 					rhs.append("("+printer.toString()+")^"+p.getValue());
 				}
-				if (!zero) out.append(rhs.toString()+";\n");
-				else out.append("0;\n");
+				if (!zero) out.append(rhs.toString()+";");
+				else out.append("0;");
 			}
+			out.append("\t\t%"+e.getKey().toString()+"\n");
 		}
 		out.append("end\n");		
 		
@@ -121,10 +120,8 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 			ODEMethod method, Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex) {
-		PCTMCLogging.info("Generating MATLAB source files " + PCTMCOptions.matlabFolder+"/analysis"+analysis+"/*.m");
-		
 		analysis++;
- 
+		PCTMCLogging.info("Generating MATLAB source files " + PCTMCOptions.matlabFolder+"/analysis"+analysis+"/*.m");
         String analysisFolder = "analysis"+analysis;
 		String fileName = PCTMCOptions.matlabFolder + "/" +analysisFolder +"/"+ MatlabODEMethodPrinter.ODESNAME + ".m";
 		writeODEFile(method, constants, combinedMomentsIndex, generalExpectationIndex, fileName); 
@@ -134,6 +131,7 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 		
 		MatlabOutputUtils.writeODEMain(PCTMCOptions.matlabFolder+"/"+analysisFolder);
 		MatlabOutputUtils.writeEvaluate(PCTMCOptions.matlabFolder+"/"+analysisFolder);
+		MatlabOutputUtils.writePEPAFunctions(PCTMCOptions.matlabFolder+"/"+analysisFolder);
 		return javaImplementation.getPreprocessedODEImplementation(method, constants, combinedMomentsIndex, generalExpectationIndex);
 	}
 	

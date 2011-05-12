@@ -14,7 +14,7 @@ public class MatlabPrinterWithConstants extends MatlabExpressionPrinter implemen
 
 	protected Constants constants;
 	
-	public static String param="param";
+	public static String param="p";
 
 	public MatlabPrinterWithConstants(Constants constants) {
 		super();

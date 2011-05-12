@@ -4,6 +4,7 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.matlaboutput.statements.MatlabStatementPrinter;
@@ -38,7 +39,7 @@ public class MatlabMethodPrinter {
 
 	public String printEvaluatorMethod(EvaluatorMethod method,String className, String suffix){
 		StringBuilder ret = new StringBuilder();
-		ret.append("function z = " + evaluatorName+suffix + "(y,t,param)\n");
+		ret.append("function z = " + evaluatorName+suffix + "(y,t,"+MatlabPrinterWithConstants.param+")\n");
 		for (AbstractStatement s:method.getBody()){
 			MatlabStatementPrinter printer = new MatlabStatementPrinter(new MatlabCombinedProductBasedExpressionPrinterFactory(constants, combinedMomentsIndex, generalExpectationIndex, "y"));
 			s.accept(printer); 

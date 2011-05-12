@@ -35,4 +35,27 @@ public class MatlabOutputUtils {
 		PCTMCLogging.debug("Writing evaluate MATLAB function in file " + fileName);
 		FileUtils.writeGeneralFile(code, fileName);		
 	}
+	
+	public static void writePEPAFunctions(String folder){
+		PCTMCLogging.debug("Writing PEPA div MATLAB functions.");
+		String codeDiv = "function ret = div(a,b)\n"+
+			             "  if (b==0.0) ret = 0.0;\n"+
+						 "  else\n"+    
+						 "   ret = a/b;\n"+
+						 "end\n"; 
+		String fileNameDiv = folder+"/div.m";
+		FileUtils.writeGeneralFile(codeDiv, fileNameDiv);
+		
+		String codeDivMin = "function ret = divmin(a,b,c)\n"+
+			  				"   ret = div(a,b)*min(b,c);\n"+
+			  				"end\n";
+		String fileNameDivMin = folder + "/divmin.m";
+		FileUtils.writeGeneralFile(codeDivMin, fileNameDivMin);
+		
+		String codeDivDivMin = "function ret = divdivmin(a,b,c,d)\n"+
+							   "    ret = div(a*b,c*d)*min(c,d);\n"+
+							   "end\n";
+		String fileNameDivDivMin = folder+"/divdivmin.m";
+		FileUtils.writeGeneralFile(codeDivDivMin, fileNameDivDivMin);
+	}
 }
