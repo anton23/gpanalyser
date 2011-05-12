@@ -121,16 +121,19 @@ experiment[PCTMC pctmc,Map<ExpressionVariable,AbstractExpression> unfoldedVariab
   List<RangeSpecification> ranges = new LinkedList<RangeSpecification>(); 
   List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>(); 
   Map<String,AbstractExpression> reEvaluation = new HashMap<String,AbstractExpression>(); 
+  List<RangeSpecification> minRanges = new LinkedList<RangeSpecification>();;
+  PlotAtDescription minSpecification=null; 
 }
 :
   ^(ITERATE (r=rangeSpecification {ranges.add($r.range);})+
+    (MINIMISE m=plotAtSpecification  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
    (WHERE 
        ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
   
     a=analysis[$pctmc,null]   
     (p=plotAtSpecification {plots.add($p.p);})*
    )
-  {$iterate = new PCTMCIterate(ranges,reEvaluation,$a.analysis,plots,$unfoldedVariables);}
+  {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,plots,$unfoldedVariables);}
 ;
 
 rangeSpecification returns[RangeSpecification range]:

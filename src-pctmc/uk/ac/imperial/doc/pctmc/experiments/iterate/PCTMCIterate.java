@@ -34,6 +34,9 @@ public class PCTMCIterate {
 	private Map<String,AbstractExpression> reEvaluations; 
 	private Map<ExpressionVariable,AbstractExpression> unfoldedVariables;
 	
+	private PlotAtDescription minSpecification; 
+	private List<RangeSpecification> minRanges; 
+	
 	
 	public List<PlotAtDescription> getPlots(){
 		return plots; 
@@ -47,7 +50,15 @@ public class PCTMCIterate {
 		this.analysis = analysis;
 		this.plots = plots;
 		this.unfoldedVariables = unfoldedVariables;
+		minRanges = new LinkedList<RangeSpecification>();
 	} 
+	
+	public PCTMCIterate(List<RangeSpecification> ranges,PlotAtDescription minSpecification,List<RangeSpecification> minRanges,Map<String,AbstractExpression> reEvaluations,
+			AbstractPCTMCAnalysis analysis, List<PlotAtDescription> plots,Map<ExpressionVariable,AbstractExpression> unfoldedVariables){
+		this(ranges,reEvaluations,analysis,plots,unfoldedVariables);
+		this.minSpecification = minSpecification; 
+		this.minRanges = minRanges; 
+	}
 	
 	public void iterate(Constants constants){
 		Constants tmpConstants = constants.getCopyOf();
@@ -70,8 +81,12 @@ public class PCTMCIterate {
 		PCTMCLogging.increaseIndent(); 
 		List<PlotExpression> usedExpressions = new LinkedList<PlotExpression>();
 		
-		List<List<PlotExpression>> plotExpressions = new LinkedList<List<PlotExpression>>(); 
-		for (PlotAtDescription plot:plots){			
+		List<List<PlotExpression>> plotExpressions = new LinkedList<List<PlotExpression>>();
+		List<PlotAtDescription> tmpPlots = new LinkedList<PlotAtDescription>(plots); 
+		if (!minRanges.isEmpty()){
+			tmpPlots.add(minSpecification);
+		}
+		for (PlotAtDescription plot:tmpPlots){			
 			List<PlotExpression> pExpressions = new LinkedList<PlotExpression>();
 			List<AbstractExpression> pAExpressions = new LinkedList<AbstractExpression>(); 
 			pAExpressions.add(plot.getExpression()); 
@@ -125,11 +140,31 @@ public class PCTMCIterate {
 		    }
 		}
 		
+		
 		int iterations = xRange.getSteps()*yRange.getSteps();
 		int show = Math.max(iterations/5,1); 
-		PCTMCLogging.info("Starting " + iterations + " iterations:"); 
+		
+	    
+	    
+	    int steps[] = new int[minRanges.size()];
+	    RangeSpecification[] minRangesArray = new RangeSpecification[minRanges.size()];
+	    int r = 0; 
+	    int totalSteps = 1; 
+	    for (RangeSpecification ra:minRanges){
+	    	steps[r] = ra.getSteps();
+	    	totalSteps*=steps[r];
+	    	minRangesArray[r] = ra; 
+	    	r++;
+	    }
+	    PCTMCLogging.info("Starting " + iterations*totalSteps + " iterations:"); 
 		PCTMCLogging.increaseIndent(); 
 	    PCTMCLogging.setVisible(false);
+	    
+	    AbstractExpressionEvaluator minUpdater = null;
+	    if (!minRanges.isEmpty()){
+	    	List<PlotExpression> minSpecificationExpressions = plotExpressions.get(plots.size());
+			minUpdater = analysis.getExpressionEvaluator(minSpecificationExpressions, constants);
+	    }
 	    
 	    for (int x = 0; x<xRange.getSteps(); x++){
 	    	double xValue = xRange.getStep(x);
@@ -137,26 +172,52 @@ public class PCTMCIterate {
 	    	for (int y = 0; y<yRange.getSteps(); y++){
 		    	if ((x*yRange.getSteps()+y+1 )%show == 0){
 		    		PCTMCLogging.setVisible(true);
-		    		PCTMCLogging.info((x*yRange.getSteps()+y) + "iterations finished.");
+		    		PCTMCLogging.info((x*yRange.getSteps()+y)*totalSteps + "iterations finished.");
 		    		PCTMCLogging.setVisible(false);
 		    	}	    		
 	    		double yValue = yRange.getStep(y);	    			    		
 	    		constants.setConstantValue(yRange.getConstant(), yValue);
-	    		reEvaluate(constants); 
+ 
+	    		/*
+	    		 * The minimisation comes here - finds parameters which minimise the given reward
+	    		 * and satisfy constraints. 
+	    		 */
+	    		if (!minRanges.isEmpty()){
+	    			int step[] = new int[minRanges.size()];
+	    			double min = 0.0; 
+	    			boolean notYet = true;
+	    			Constants minConstants = null;
+	    			do{	
+	    				for (int s = 0; s<step.length; s++){
+	    					constants.setConstantValue(minRangesArray[s].getConstant(),
+	    							minRangesArray[s].getStep(step[s]));
+	    				}
+	    				reEvaluate(constants);
+	    				analysis.analyse(constants);
+	    				double[][] tmp = analysis.evaluateExpressions(minUpdater, constants);
+	    				if (isSatisfied(minSpecification, tmp)){
+	    					double reward = tmp[getTimeIndex(minSpecification.getTime())][0];
+	    					if (notYet||reward<min){	    						
+								min = reward;
+	    						notYet = false;
+	    						minConstants = constants.getCopyOf(); 
+	    					} 
+	    				}
+	    			} while(next(step,steps));
+	    			if (notYet) continue; 
+	    			else constants = minConstants; 
+	    		}
+	    		
+	    		reEvaluate(constants);	    		
 	    		analysis.analyse(constants);
 	    		
 	    		for (int i = 0; i<plots.size(); i++){
 	    			double[][] tmp = analysis.evaluateExpressions(updaters.get(i), constants);
 	    			
-	    			boolean satisfied = true; 
-	    			for (int j = 0; j<plots.get(i).getConstraints().size(); j++){
-	    				PlotConstraint pc = plots.get(i).getConstraints().get(j); 
-	    				double cValue = tmp[getTimeIndex(pc.getAtTime())][j+1];
-	    				if (cValue<pc.getMinValue()){
-	    					satisfied = false; 
-	    				}
-	    			}
-	    			if (satisfied) data[i][x][y] = tmp[getTimeIndex(plots.get(i).getTime())][0];
+	    			if (isSatisfied(plots.get(i),tmp)) {
+						double reward = tmp[getTimeIndex(plots.get(i).getTime())][0];
+						data[i][x][y] = reward;
+					}
 	    		}
 	    	}
 	    }
@@ -195,6 +256,31 @@ public class PCTMCIterate {
 	    PCTMCLogging.decreaseIndent(); 
 	}
 	
+	
+	private boolean isSatisfied(PlotAtDescription plot,double [][] tmp){
+		boolean satisfied = true; 
+		for (int j = 0; j<plot.getConstraints().size(); j++){
+			PlotConstraint pc = plot.getConstraints().get(j); 
+			double cValue = tmp[getTimeIndex(pc.getAtTime())][j+1];
+			if (cValue<pc.getMinValue()){
+				satisfied = false; 
+			}
+		}
+		return satisfied;
+	}
+	
+	private boolean next(int[] is,int[] steps){
+		int i = 0; 
+		
+		while(i<steps.length && ++is[i]==steps[i]){
+			is[i]=0;
+			i++;
+		}
+		return i < steps.length;
+	}
+
+	
+	
 	private int getTimeIndex(double time){
 		return (int) Math.floor(time/analysis.getStepSize());
 	}
@@ -211,6 +297,9 @@ public class PCTMCIterate {
 		for (RangeSpecification r:ranges){
 			ret+= " ";
 			ret+=r.getConstant() + "("+r.getFrom() + "-"+r.getTo() + "," + r.getSteps()+" steps"+")";
+		}
+		if (!minRanges.isEmpty()){
+			ret+=" minimise "+minSpecification;
 		}
 		return ret;
 	}

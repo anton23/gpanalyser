@@ -65,13 +65,18 @@ compare:
 
 experiment:
   ITERATE 
-    rangeSpecification+ 
+    ir=rangeSpecifications 
+  (MINIMISE minSpec=plotAtSpecification mr=rangeSpecifications)?
     (WHERE
       constantReEvaluation+)?
     analysis PLOT LBRACE
-      plotAtSpecification+
+      plots=plotAtSpecifications
     RBRACE
-  -> ^(ITERATE rangeSpecification+ (WHERE constantReEvaluation+)? analysis plotAtSpecification+)
+  -> ^(ITERATE $ir (MINIMISE $minSpec $mr)? (WHERE constantReEvaluation+)? analysis $plots)
+;
+
+rangeSpecifications:
+rangeSpecification+
 ;
 
 constantReEvaluation:
@@ -83,7 +88,9 @@ rangeSpecification:
   -> ^(RANGE $constant $from $to $steps)
 ;
 
-
+plotAtSpecifications:
+  plotAtSpecification+
+;
 
 plotAtSpecification:
  plotAt (WHEN constraints)? (TO FILENAME)? SEMI -> 

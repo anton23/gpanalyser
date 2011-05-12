@@ -45,6 +45,7 @@ ODES: 'ODEs';
 SIMULATION: 'Simulation';
 COMPARE: 'Compare';
 ITERATE: 'Iterate';
+MINIMISE: 'Minimise';
 
 FROMVALUE: 'from'; 
 TOVALUE:'to'; 

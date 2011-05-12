@@ -80,7 +80,7 @@ public class Constants {
 	 * @return A copy of the current Constants instance with the same index. 
 	 */
 	public Constants getCopyOf() {
-		return new Constants(constants, constantIndex);
+		return new Constants(new HashMap<String,Double>(constants), new HashMap<String,Integer>(constantIndex));
 	}
 
 	/**
