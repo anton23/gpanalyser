@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.pctmc.experiments.iterate;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -186,7 +187,7 @@ public class PCTMCIterate {
 	    			int step[] = new int[minRanges.size()];
 	    			double min = 0.0; 
 	    			boolean notYet = true;
-	    			Constants minConstants = null;
+	    			int[] minStep = null;
 	    			do{	
 	    				for (int s = 0; s<step.length; s++){
 	    					constants.setConstantValue(minRangesArray[s].getConstant(),
@@ -199,13 +200,18 @@ public class PCTMCIterate {
 	    					double reward = tmp[getTimeIndex(minSpecification.getTime())][0];
 	    					if (notYet||reward<min){	    						
 								min = reward;
-	    						notYet = false;
-	    						minConstants = constants.getCopyOf(); 
+	    						notYet = false; 
+	    						minStep = Arrays.copyOf(step, step.length);
 	    					} 
 	    				}
 	    			} while(next(step,steps));
 	    			if (notYet) continue; 
-	    			else constants = minConstants; 
+	    			else{
+	    				for (int s = 0; s<step.length; s++){
+	    					constants.setConstantValue(minRangesArray[s].getConstant(),
+	    							minRangesArray[s].getStep(minStep[s]));
+	    				}
+	    			}
 	    		}
 	    		
 	    		reEvaluate(constants);	    		
