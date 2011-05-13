@@ -25,7 +25,8 @@ public class EvaluatorMethod {
 	public EvaluatorMethod(List<AbstractStatement> body, int numberOfExpressions, String returnArray) {
 		super();
 		this.body = body;
-		this.returnArray = returnArray; 
+		this.returnArray = returnArray;
+		this.numberOfExpressions = numberOfExpressions;
 	}
 
 	int numberOfExpressions;

@@ -3,10 +3,17 @@ package uk.ac.imperial.doc.pctmc.experiments.iterate;
 
  
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
+import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 
 
 
@@ -14,8 +21,44 @@ public class PlotAtDescription {
 	private AbstractExpression expression; 
 	private double time;	
 	private String filename;
-	private List<PlotConstraint> constraints; 
+	private List<PlotConstraint> constraints;
 	
+	private List<PlotExpression> plotExpressions; 
+	private double[] atTimes; 
+	
+	private AbstractExpressionEvaluator evaluator; 
+	
+	
+	public double[] getAtTimes() {
+		return atTimes;
+	}
+
+	public AbstractExpressionEvaluator getEvaluator() {
+		return evaluator;
+	}
+
+	public void setEvaluator(AbstractExpressionEvaluator evaluator) {
+		this.evaluator = evaluator;
+	}
+
+	public List<PlotExpression> getPlotExpressions() {
+		return plotExpressions;
+	}
+
+	public void unfoldExpressions(Map<ExpressionVariable,AbstractExpression> unfoldedVariables){
+		plotExpressions = new ArrayList<PlotExpression>(constraints.size()+1);
+		List<AbstractExpression> pAExpressions = new LinkedList<AbstractExpression>(); 
+		pAExpressions.add(getExpression()); 
+		for (PlotConstraint pc:getConstraints()){
+			pAExpressions.add(pc.getExpression());
+		}
+		for (AbstractExpression e:pAExpressions){
+			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(unfoldedVariables);
+			e.accept(setter); 					
+			PlotExpression pe = new PlotExpression(e);			
+			plotExpressions.add(pe); 
+		}
+	}
 	
 	public PlotAtDescription(AbstractExpression expression, double time,List<PlotConstraint> constraints,
 			String filename) {
@@ -23,7 +66,13 @@ public class PlotAtDescription {
 		this.expression = expression;
 		this.time = time;
 		this.filename = filename;
-		this.constraints = constraints; 
+		this.constraints = new ArrayList<PlotConstraint>(constraints);
+		atTimes = new double[constraints.size()+1];
+		atTimes[0] = time;
+		int i = 1; 
+		for (PlotConstraint c:constraints){
+			atTimes[i++] = c.getAtTime(); 
+		}
 	}
 	
 	

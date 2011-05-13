@@ -95,7 +95,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
         }
         List<State> increasing = new LinkedList<State>();
         for (State t:es.getIncreasing()){
-          states.add(t);
+          states.add(t);  
           increasing.add(t); 
         }
         ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC($unfoldedVariables); 

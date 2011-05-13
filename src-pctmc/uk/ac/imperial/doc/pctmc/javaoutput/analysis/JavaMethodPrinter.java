@@ -49,7 +49,7 @@ public class JavaMethodPrinter {
 		ret.append("      return " + method.getNumberOfExpressions() + ";\n");
 		ret.append("    }\n");
 		
-		ret.append("    public double[] update(double[] values,double t, double[] oldValues, double stepSize){\n");
+		ret.append("    public double[] update(double[] values,double t){\n");
 		for (AbstractStatement s:method.getBody()){
 			JavaStatementPrinter printer = new JavaStatementPrinter(new JavaCombinedProductBasedExpressionPrinterFactory(constants, combinedMomentsIndex, generalExpectationIndex, "values"));
 			s.accept(printer); 

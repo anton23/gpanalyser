@@ -157,16 +157,30 @@ public abstract class AbstractPCTMCAnalysis {
 		
 		double[][] selectedData = new double[dataPoints.length][evaluator.getNumberOfExpressions()];
 
-		double[] zeroVector = new double[evaluator.getNumberOfExpressions()];
-
 		for (int t = 0; t < selectedData.length; t++) {
-			selectedData[t] = evaluator.update(dataPoints[t], t * stepSize,
-					t == 0 ? zeroVector : selectedData[t - 1], t == 0 ? 0
-							: stepSize);
+			selectedData[t] = evaluator.update(dataPoints[t], t * stepSize);
 		}
 
 		return selectedData;
 	}
+	
+	public int getTimeIndex(double time){
+		return (int) Math.floor(time/stepSize);
+	}
+	
+	public double[] evaluateExpressionsAtTimes(AbstractExpressionEvaluator evaluator, double[] times,Constants constants){
+		evaluator.setRates(constants.getFlatConstants());
+		
+		double[] selectedData = new double[evaluator.getNumberOfExpressions()];
+
+		for (int e = 0; e<evaluator.getNumberOfExpressions(); e++){
+			double[] tmp = evaluator.update(dataPoints[getTimeIndex(times[e])], getTimeIndex(times[e]) * stepSize);
+			selectedData[e] = tmp[e];
+		}
+		
+		return selectedData;
+	}
+	
 
 	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
 

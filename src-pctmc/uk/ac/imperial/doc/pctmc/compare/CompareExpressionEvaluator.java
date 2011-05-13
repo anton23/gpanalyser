@@ -34,8 +34,7 @@ public class CompareExpressionEvaluator extends AbstractExpressionEvaluator{
 	}
 
 	@Override
-	public double[] update(double[] values, double t, double[] oldValues,
-			double stepSize) {
+	public double[] update(double[] values, double t) {
 		// TODO Auto-generated method stub
 		return null;
 	}

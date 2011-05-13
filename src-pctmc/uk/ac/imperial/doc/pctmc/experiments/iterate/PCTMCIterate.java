@@ -22,7 +22,6 @@ import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
@@ -82,27 +81,14 @@ public class PCTMCIterate {
 		PCTMCLogging.increaseIndent(); 
 		List<PlotExpression> usedExpressions = new LinkedList<PlotExpression>();
 		
-		List<List<PlotExpression>> plotExpressions = new LinkedList<List<PlotExpression>>();
+
 		List<PlotAtDescription> tmpPlots = new LinkedList<PlotAtDescription>(plots); 
 		if (!minRanges.isEmpty()){
 			tmpPlots.add(minSpecification);
 		}
-		for (PlotAtDescription plot:tmpPlots){			
-			List<PlotExpression> pExpressions = new LinkedList<PlotExpression>();
-			List<AbstractExpression> pAExpressions = new LinkedList<AbstractExpression>(); 
-			pAExpressions.add(plot.getExpression()); 
-			for (PlotConstraint pc:plot.getConstraints()){
-				pAExpressions.add(pc.getExpression());
-			}
-			for (AbstractExpression e:pAExpressions){
-				ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(unfoldedVariables);
-				
-				e.accept(setter); 					
-				PlotExpression pe = new PlotExpression(e);			
-				pExpressions.add(pe);
-				usedExpressions.add(pe); 
-			}
-			plotExpressions.add(pExpressions);
+		for (PlotAtDescription plot:tmpPlots){
+			plot.unfoldExpressions(unfoldedVariables); 
+			usedExpressions.addAll(plot.getPlotExpressions());
 		}
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
 		for (PlotExpression exp:usedExpressions){
@@ -116,10 +102,11 @@ public class PCTMCIterate {
 		analysis.setUsedMoments(usedProducts);
 		analysis.prepare(constants); 
 		PCTMCLogging.decreaseIndent();
-		List<AbstractExpressionEvaluator> updaters = new LinkedList<AbstractExpressionEvaluator>();
-		for (int i = 0; i<plots.size(); i++){
-			AbstractExpressionEvaluator updater = analysis.getExpressionEvaluator(plotExpressions.get(i), constants);
-			updaters.add(updater); 
+
+
+		for (PlotAtDescription p:tmpPlots){
+			AbstractExpressionEvaluator updater = analysis.getExpressionEvaluator(p.getPlotExpressions(), constants);
+			p.setEvaluator(updater);
 		}
 		
 		RangeSpecification xRange; 
@@ -161,11 +148,7 @@ public class PCTMCIterate {
 		PCTMCLogging.increaseIndent(); 
 	    PCTMCLogging.setVisible(false);
 	    
-	    AbstractExpressionEvaluator minUpdater = null;
-	    if (!minRanges.isEmpty()){
-	    	List<PlotExpression> minSpecificationExpressions = plotExpressions.get(plots.size());
-			minUpdater = analysis.getExpressionEvaluator(minSpecificationExpressions, constants);
-	    }
+
 	    
 	    for (int x = 0; x<xRange.getSteps(); x++){
 	    	double xValue = xRange.getStep(x);
@@ -195,9 +178,10 @@ public class PCTMCIterate {
 	    				}
 	    				reEvaluate(constants);
 	    				analysis.analyse(constants);
-	    				double[][] tmp = analysis.evaluateExpressions(minUpdater, constants);
-	    				if (isSatisfied(minSpecification, tmp)){
-	    					double reward = tmp[getTimeIndex(minSpecification.getTime())][0];
+
+	    				double reward = evaluateConstrainedReward(minSpecification, constants);
+	    				if (!Double.isNaN(reward)){
+
 	    					if (notYet||reward<min){	    						
 								min = reward;
 	    						notYet = false; 
@@ -218,12 +202,7 @@ public class PCTMCIterate {
 	    		analysis.analyse(constants);
 	    		
 	    		for (int i = 0; i<plots.size(); i++){
-	    			double[][] tmp = analysis.evaluateExpressions(updaters.get(i), constants);
-	    			
-	    			if (isSatisfied(plots.get(i),tmp)) {
-						double reward = tmp[getTimeIndex(plots.get(i).getTime())][0];
-						data[i][x][y] = reward;
-					}
+	    			data[i][x][y] = evaluateConstrainedReward(plots.get(i), constants);
 	    		}
 	    	}
 	    }
@@ -263,16 +242,19 @@ public class PCTMCIterate {
 	}
 	
 	
-	private boolean isSatisfied(PlotAtDescription plot,double [][] tmp){
-		boolean satisfied = true; 
+	private double evaluateConstrainedReward(PlotAtDescription plot, Constants constants){
+		double[] values = analysis.evaluateExpressionsAtTimes(plot.getEvaluator(), plot.getAtTimes(), constants);
+		boolean satisfied = true;
 		for (int j = 0; j<plot.getConstraints().size(); j++){
 			PlotConstraint pc = plot.getConstraints().get(j); 
-			double cValue = tmp[getTimeIndex(pc.getAtTime())][j+1];
+			double cValue = values[j+1];
 			if (cValue<pc.getMinValue()){
 				satisfied = false; 
 			}
-		}
-		return satisfied;
+		}	
+		if (satisfied) return values[0];
+		else return Double.NaN; 
+		
 	}
 	
 	private boolean next(int[] is,int[] steps){
@@ -287,9 +269,9 @@ public class PCTMCIterate {
 
 	
 	
-	private int getTimeIndex(double time){
+	/*private int getTimeIndex(double time){
 		return (int) Math.floor(time/analysis.getStepSize());
-	}
+	}*/
 	
 	@Override
 	public String toString() {

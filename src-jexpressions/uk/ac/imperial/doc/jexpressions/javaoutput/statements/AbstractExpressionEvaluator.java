@@ -14,5 +14,5 @@ public abstract class AbstractExpressionEvaluator {
 	
 	public abstract int getNumberOfExpressions();
 	
-	public abstract double[] update(double[] values, double t, double[] oldValues, double stepSize);
+	public abstract double[] update(double[] values, double t);
 }
