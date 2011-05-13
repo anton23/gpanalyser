@@ -33,7 +33,7 @@ public class AnalysisUtils {
 
 		for (int p = 0; p < dataPoints.length; p++) {
 			for (int i = 0; i < dataPoints[p].length; i++) {
-				series.get(i).add(currentTime, dataPoints[p][i]);
+				if (!Double.isInfinite(dataPoints[p][i]))series.get(i).add(currentTime, dataPoints[p][i]);
 			}
 			currentTime += stepSize;
 		}

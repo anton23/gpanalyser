@@ -149,6 +149,7 @@ public class PCTMCChartUtilities {
 	public static void drawChart(XYDataset dataset, String xlabel,
 			String ylabel, String chartTitle, String windowTitle) {
 		if (!gui) return;
+
 		JFrame frame;	
 		JTabbedPane tab;
 		if (!windows.containsKey(windowTitle)) setWindow(windowTitle);
