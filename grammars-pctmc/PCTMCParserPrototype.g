@@ -84,8 +84,13 @@ constantReEvaluation:
 ;
 
 rangeSpecification:
-  constant=LOWERCASENAME FROMVALUE from=REALNUMBER TOVALUE to=REALNUMBER IN steps=INTEGER STEPS 
+  constant=LOWERCASENAME FROMVALUE from=REALNUMBER TOVALUE to=REALNUMBER steps=stepSpecification 
   -> ^(RANGE $constant $from $to $steps)
+;
+
+stepSpecification:
+    IN INTEGER STEPS 
+  | STEP REALNUMBER 
 ;
 
 plotAtSpecifications:

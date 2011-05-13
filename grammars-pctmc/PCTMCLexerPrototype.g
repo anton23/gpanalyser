@@ -51,6 +51,7 @@ FROMVALUE: 'from';
 TOVALUE:'to'; 
 IN:'in';
 STEPS:'steps';
+STEP:'with step';
 PLOT:'plot';
 ATTIME:'at';
 WHERE:'where';

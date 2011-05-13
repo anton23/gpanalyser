@@ -20,6 +20,16 @@ public class RangeSpecification {
 		this.steps = steps;
 		dc = (to - from) / (steps - 1);
 	}
+	
+	public RangeSpecification(String constant, double from, double to, double step) {
+		super();
+		this.constant = constant;
+		this.from = from;
+		this.dc = step;
+		this.steps = (int)Math.ceil((to-from)/step);
+		this.to = from+dc*steps;
+	}
+	
 
 	public String getConstant() {
 		return constant;

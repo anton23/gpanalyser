@@ -137,8 +137,11 @@ experiment[PCTMC pctmc,Map<ExpressionVariable,AbstractExpression> unfoldedVariab
 ;
 
 rangeSpecification returns[RangeSpecification range]:
-  ^(RANGE constant = LOWERCASENAME from=realnumber to=realnumber steps=integer)
-  {$range = new RangeSpecification($constant.text,$from.value,$to.value,$steps.value); }
+  ^(RANGE constant = LOWERCASENAME from=realnumber to=realnumber 
+    ((IN steps=integer STEPS) {$range = new RangeSpecification($constant.text,$from.value,$to.value,$steps.value); } 
+    | (STEP step=realnumber) {$range = new RangeSpecification($constant.text,$from.value,$to.value,$step.value);}
+    ))
+  
 ;
 
 plotAtSpecification returns [PlotAtDescription p]
