@@ -63,7 +63,7 @@ public class PCTMCIterate {
 	public void iterate(Constants constants){
 		Constants tmpConstants = constants.getCopyOf();
 		
-		if (ranges.size()==2||ranges.size()==1){
+		if (ranges.size()==2||ranges.size()==1||ranges.size()==0){
 			iterate2d(tmpConstants); 
 		}
 	}
@@ -111,12 +111,17 @@ public class PCTMCIterate {
 		
 		RangeSpecification xRange; 
 		RangeSpecification yRange;
-		if (ranges.size()==2){
+		if (ranges.size()>=2){
 			 xRange = ranges.get(0);
 			 yRange = ranges.get(1);
-		} else {
+		} else 
+		if (ranges.size()==1){
 			xRange = new RangeSpecification("tmp", 0.0, 0.0, 1);
 			yRange = ranges.get(0);
+		}
+		else{
+			xRange = new RangeSpecification("tmp", 0.0, 0.0, 1);
+			yRange = new RangeSpecification("tmp2",0.0,0.0,1);
 		}
 		double[][][] data = new double[plots.size()][xRange.getSteps()][yRange.getSteps()];
 		
@@ -236,6 +241,9 @@ public class PCTMCIterate {
 	    			FileUtils.writeCSVfile(plot.getFilename(), dataset);
 	    			FileUtils.writeGnuplotFile(plot.getFilename(), "", Lists.newArrayList(plot.toString()), yRange.getConstant(), "");
 	    		}
+	    	}
+	    	if (ranges.size()==0){
+	    		PCTMCLogging.info("The value of " + plot.toString() + " at optimum is " + data[i][0][0]);
 	    	}
 	    }
 	    PCTMCLogging.decreaseIndent(); 

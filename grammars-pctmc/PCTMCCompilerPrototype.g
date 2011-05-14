@@ -125,7 +125,7 @@ experiment[PCTMC pctmc,Map<ExpressionVariable,AbstractExpression> unfoldedVariab
   PlotAtDescription minSpecification=null; 
 }
 :
-  ^(ITERATE (r=rangeSpecification {ranges.add($r.range);})+
+  ^(ITERATE (r=rangeSpecification {ranges.add($r.range);})*
     (MINIMISE m=plotAtSpecification  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
    (WHERE 
        ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
