@@ -254,6 +254,11 @@ public class PCTMCInterpreter {
 									}
 								}
 							}
+							iterate.prepare(constants);
+							if (PCTMCOptions.matlab){
+								PCTMCJavaImplementationProviderWithMatlab matlabImplementer = (PCTMCJavaImplementationProviderWithMatlab) PCTMCTools.getImplementationProvider();
+								matlabImplementer.writePCTMCIterateFile(iterate, constants);
+					    	}
 							iterate.iterate(constants);
 						}
 						PCTMCLogging.decreaseIndent();

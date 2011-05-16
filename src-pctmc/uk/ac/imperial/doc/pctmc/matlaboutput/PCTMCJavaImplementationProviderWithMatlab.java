@@ -8,7 +8,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotConstraint;
@@ -31,7 +30,6 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.Lists;
 
 public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplementationProvider{
 	
@@ -212,48 +210,90 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 	
 	private void writeIterateMainFile(PCTMCIterate iterate,String folder){
 		StringBuilder out = new StringBuilder(); 
-		out.append("function [x,ode_calls]="+globalOptimName+"()\n");
-		out.append("param = "+getConstantsName+"();\n");
-		out.append("stopTime = "+ iterate.getAnalysis().getStopTime() +";\n");
-		out.append("stepSize = "+ iterate.getAnalysis().getStepSize() +";\n");
+		out.append("function [x,exitflag,output,solutions]="+globalOptimName+"()\n");
+		out.append("   param = "+getConstantsName+"();\n");
+		out.append("   stopTime = "+ iterate.getAnalysis().getStopTime() +";\n");
+		out.append("   stepSize = "+ iterate.getAnalysis().getStepSize() +";\n\n");
 		for (RangeSpecification r:iterate.getMinRanges()){
-			out.append("start"+r.getConstant()+" = param." + r.getConstant() + ";\n");
+			out.append("   start"+r.getConstant()+" = param." + r.getConstant() + ";\n");
 		}
-		out.append("startx = [");
+		out.append("   startx = [");
 		boolean first = true; 
 		for (RangeSpecification r:iterate.getMinRanges()){
 			if (first) first = false; else out.append(",");
 			out.append("start"+r.getConstant());
 		}
-		out.append("];\n");
-		out.append("lb=[");
+		out.append("];\n\n");
+		out.append("   lb=[");
 		first = true; 
 		for (RangeSpecification r:iterate.getMinRanges()){
 			if (first) first = false; else out.append(",");
 			out.append(r.getFrom());
 		}		
 		out.append("];\n");
-		out.append("ub=[");
+		out.append("   ub=[");
 		first = true; 
 		for (RangeSpecification r:iterate.getMinRanges()){
 			if (first) first = false; else out.append(",");
 			out.append(r.getTo());
 		}
-		out.append("];\n");
-		out.append("rewardAtTime = " + iterate.getMinSpecification().getTime()+"\n");
-		out.append("rewardTimeIndex = " + ((int)Math.floor(iterate.getMinSpecification().getTime()/iterate.getAnalysis().getStepSize())+1)+";\n");
+		out.append("];\n\n");
+		out.append("   rewardAtTime = " + iterate.getMinSpecification().getTime()+"\n");
+		out.append("   rewardTimeIndex = " + ((int)Math.floor(iterate.getMinSpecification().getTime()/iterate.getAnalysis().getStepSize())+1)+";\n\n");
+		out.append("   reward_evaluator = @evaluator_minSpecification;\n\n" );
+		out.append("   ode_calls = 0;\n");
 		
 		int i = 0;
 		for (PlotConstraint c:iterate.getMinSpecification().getConstraints()){
-			out.append("threshold"+i+" = " + c.getMinValue() + ";\n");
-			out.append("atTime"+i+" = " + c.getAtTime() + ";\n");
-			out.append("timeIndex"+i+" = " + ((int)Math.floor(c.getAtTime()/iterate.getAnalysis().getStepSize())+1)+";\n"); 
+			out.append("   threshold"+i+" = " + c.getMinValue() + ";\n");
+			out.append("   atTime"+i+" = " + c.getAtTime() + ";\n");
+			out.append("   timeIndex"+i+" = " + ((int)Math.floor(c.getAtTime()/iterate.getAnalysis().getStepSize())+1)+";\n"); 
 			i++;
 		}
-		out.append("options optimset('Algorithm','interior-point');\n");
-		out.append("options optimset(options,'AlwaysHonorConstraints','None');\n");
+		out.append("\n   options = optimset('Algorithm','interior-point');\n");
+		out.append("   options = optimset(options,'AlwaysHonorConstraints','None');\n\n");
+		
+		out.append("   problem=createOptimProblem('fmincon',...\n'objective',@cost,'nonlcon',@nlcon,'x0',startx,'options',options);\n");
+		out.append("   problem.lb = lb;\n");
+		out.append("   problem.ub = ub;\n\n");
+		out.append("   gs = globalSearch('Display','iter');\n\n");
+		out.append("   [x,fval,exitflag,output,solutions] = run(gs,problem);\n\n");
 		
 		
+		out.append("   function c = cost(x)\n");
+		out.append("      [t,y] = solve_odes(x);\n");
+		out.append("      tmp = reward_evaluator(y(rewardTimeIndex,:),rewardTimeIndex*stepSize,param);\n");
+		out.append("      c = tmp(1);\n");
+		out.append("   end\n\n");
+		
+		out.append("   function [c,ceq] = nlcon(x)\n");
+		out.append("      ceq = [];\n");
+		out.append("      [t,y] = solve_odes(x);\n");
+		//out.append("      updateParam(x);\n");
+		out.append("      c = zeros("+iterate.getMinSpecification().getConstraints().size()+",1);\n");
+		i = 0; 
+		for (PlotConstraint pc:iterate.getMinSpecification().getConstraints()){
+			out.append("     tmp = reward_evaluator(y(timeIndex"+i+",:),timeIndex"+i+"*stepSize,param);\n");
+			out.append("     c("+(i+1)+") = threshold"+i+" - tmp(" + (i+2) + ");\n");
+			i++;
+		}
+		out.append("   end\n\n");
+
+		out.append("   function [t,y] = solve_odes(x)\n");
+		out.append("      ode_calls = ode_calls+1;\n");
+		out.append("      updateParam(x);\n");
+		out.append("      init = getInitialValues(param);\n");
+		out.append("      [t,y] = main(@odes,init,stopTime,stepSize,param);\n");
+		out.append("   end\n\n");
+		
+		out.append("   function updateParam(x)\n");
+		i = 1; 
+		for (RangeSpecification r:iterate.getMinRanges()){
+			out.append("      param."+r.getConstant() + " = x(" + i + ");\n");
+			i++;
+		}
+		out.append("   end\n");
+		out.append("end\n");
 		
 		FileUtils.writeGeneralFile(out.toString(), folder+"/global_optim.m");
 	}

@@ -15,20 +15,15 @@ import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorW
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
-import uk.ac.imperial.doc.pctmc.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
-import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
-import uk.ac.imperial.doc.pctmc.matlaboutput.PCTMCJavaImplementationProviderWithMatlab;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.Lists;
 
@@ -104,9 +99,8 @@ public class PCTMCIterate {
 	
 	int show; 
 	
-	private void iterate2d(Constants constants){
-		PCTMCLogging.info("Running experiment " + this.toString());
-		PCTMCLogging.increaseIndent(); 
+	
+	public void prepare(Constants constants){
 		List<PlotExpression> usedExpressions = new LinkedList<PlotExpression>();
 		
 
@@ -136,6 +130,12 @@ public class PCTMCIterate {
 			AbstractExpressionEvaluator updater = analysis.getExpressionEvaluator(p.getPlotExpressions(), constants);
 			p.setEvaluator(updater);
 		}
+
+	}
+	
+	private void iterate2d(Constants constants){
+		PCTMCLogging.info("Running experiment " + this.toString());
+		PCTMCLogging.increaseIndent(); 
 		
 		RangeSpecification xRange; 
 		RangeSpecification yRange;
@@ -192,10 +192,7 @@ public class PCTMCIterate {
 		PCTMCLogging.info("Expected run time is " + ((double)(mil*iterations*totalSteps)/10000000000.0) + " seconds");
 		PCTMCLogging.setVisible(false);*/
 	    
-	    if (PCTMCOptions.matlab){
-	    	PCTMCJavaImplementationProviderWithMatlab matlabImplementer = (PCTMCJavaImplementationProviderWithMatlab) PCTMCTools.getImplementationProvider();
-	    	matlabImplementer.writePCTMCIterateFile(this, constants);
-	    }
+
 	    
 	    iterations = 0; 
 	    for (int x = 0; x<xRange.getSteps(); x++){
