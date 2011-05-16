@@ -7,6 +7,12 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
+import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
+import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
+import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
+import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotConstraint;
+import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
@@ -14,6 +20,7 @@ import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.matlaboutput.analysis.MatlabMethodPrinter;
 import uk.ac.imperial.doc.pctmc.matlaboutput.odeanalysis.MatlabODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.matlaboutput.utils.MatlabOutputUtils;
+import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -24,6 +31,7 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.Lists;
 
 public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplementationProvider{
 	
@@ -104,15 +112,22 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 			EvaluatorMethod method, String className, Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex) {
-		 MatlabMethodPrinter printer = new MatlabMethodPrinter(constants, combinedMomentsIndex, generalExpectationIndex);
 		String suffix = "_"+command;
 		String analysisFolder = "analysis"+analysis; 
-		String code = printer.printEvaluatorMethod(method, className,suffix);
-		String fileName = PCTMCOptions.matlabFolder + "/" +analysisFolder +"/"+ MatlabMethodPrinter.evaluatorName + suffix + ".m";
-		PCTMCLogging.debug("Writing evaluator MATLAB function in file " + fileName);
-		FileUtils.writeGeneralFile(code, fileName);
+		String folder = PCTMCOptions.matlabFolder + "/" +analysisFolder;
+		writeEvaluatorMethod(method, folder, suffix, constants, combinedMomentsIndex, generalExpectationIndex);
 		command++;
 		return javaImplementation.getEvaluatorImplementation(method, className, constants, combinedMomentsIndex, generalExpectationIndex);
+	}
+	
+	private void writeEvaluatorMethod(EvaluatorMethod method, String folder,String suffix, Constants constants,
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex){
+		MatlabMethodPrinter printer = new MatlabMethodPrinter(constants, combinedMomentsIndex, generalExpectationIndex);
+		String code = printer.printEvaluatorMethod(method, suffix);	
+		String fileName = folder +"/"+ MatlabMethodPrinter.evaluatorName + suffix + ".m";
+		PCTMCLogging.debug("Writing evaluator MATLAB function in file " + fileName);
+		FileUtils.writeGeneralFile(code, fileName);
 	}
 
 	@Override
@@ -152,7 +167,6 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 		FileUtils.writeGeneralFile(code, fileName);
 	}
 	
-
 	@Override
 	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method,
 			String className, Constants constants,
@@ -169,4 +183,78 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 		return javaImplementation.runODEAnalysis(preprocessed, initial, stopTime, stepSize, density, constants);
 	}
 
+	int iterateIndex = 0; 
+	
+	public void writePCTMCIterateFile(PCTMCIterate iterate, Constants constants){
+		iterateIndex++;
+		String folder = PCTMCOptions.matlabFolder+"/iterate_"+iterateIndex;
+		AbstractPCTMCAnalysis analysis = iterate.getAnalysis(); 
+		if (analysis instanceof PCTMCODEAnalysis){
+			PCTMCODEAnalysis asODEAnalysis = (PCTMCODEAnalysis)analysis;
+			PCTMC pctmc = analysis.getPCTMC(); 
+			BiMap<CombinedPopulationProduct, Integer> momentIndex = analysis.getMomentIndex(); 
+			BiMap<AbstractExpression, Integer> generalExpectationIndex = analysis.getGeneralExpectationIndex();
+			writeODEFile(asODEAnalysis.getOdeMethod(), constants, momentIndex, generalExpectationIndex, folder+"/"+"odes.m");
+			MatlabOutputUtils.writeEvaluate(folder);
+			MatlabOutputUtils.writeODEMain(folder);
+			MatlabOutputUtils.writePEPAFunctions(folder);
+		
+			writeInitialValuesFile(asODEAnalysis.getOdeMethod(), constants, momentIndex, generalExpectationIndex, folder+"/"+getInitialValuesName+".m");
+			PlotAtDescription minSpecification = iterate.getMinSpecification();
+			EvaluatorMethod minSpecEvaluatorMethod = asODEAnalysis.getEvaluatorMethod(minSpecification.getPlotExpressions(),constants);
+			writeEvaluatorMethod(minSpecEvaluatorMethod, folder, "_minSpecification", constants, momentIndex, generalExpectationIndex);
+			writeIterateMainFile(iterate, folder);
+			
+		}
+	}
+	
+	private String globalOptimName = "gobal_optim";
+	
+	private void writeIterateMainFile(PCTMCIterate iterate,String folder){
+		StringBuilder out = new StringBuilder(); 
+		out.append("function [x,ode_calls]="+globalOptimName+"()\n");
+		out.append("param = "+getConstantsName+"();\n");
+		out.append("stopTime = "+ iterate.getAnalysis().getStopTime() +";\n");
+		out.append("stepSize = "+ iterate.getAnalysis().getStepSize() +";\n");
+		for (RangeSpecification r:iterate.getMinRanges()){
+			out.append("start"+r.getConstant()+" = param." + r.getConstant() + ";\n");
+		}
+		out.append("startx = [");
+		boolean first = true; 
+		for (RangeSpecification r:iterate.getMinRanges()){
+			if (first) first = false; else out.append(",");
+			out.append("start"+r.getConstant());
+		}
+		out.append("];\n");
+		out.append("lb=[");
+		first = true; 
+		for (RangeSpecification r:iterate.getMinRanges()){
+			if (first) first = false; else out.append(",");
+			out.append(r.getFrom());
+		}		
+		out.append("];\n");
+		out.append("ub=[");
+		first = true; 
+		for (RangeSpecification r:iterate.getMinRanges()){
+			if (first) first = false; else out.append(",");
+			out.append(r.getTo());
+		}
+		out.append("];\n");
+		out.append("rewardAtTime = " + iterate.getMinSpecification().getTime()+"\n");
+		out.append("rewardTimeIndex = " + ((int)Math.floor(iterate.getMinSpecification().getTime()/iterate.getAnalysis().getStepSize())+1)+";\n");
+		
+		int i = 0;
+		for (PlotConstraint c:iterate.getMinSpecification().getConstraints()){
+			out.append("threshold"+i+" = " + c.getMinValue() + ";\n");
+			out.append("atTime"+i+" = " + c.getAtTime() + ";\n");
+			out.append("timeIndex"+i+" = " + ((int)Math.floor(c.getAtTime()/iterate.getAnalysis().getStepSize())+1)+";\n"); 
+			i++;
+		}
+		out.append("options optimset('Algorithm','interior-point');\n");
+		out.append("options optimset(options,'AlwaysHonorConstraints','None');\n");
+		
+		
+		
+		FileUtils.writeGeneralFile(out.toString(), folder+"/global_optim.m");
+	}
 }

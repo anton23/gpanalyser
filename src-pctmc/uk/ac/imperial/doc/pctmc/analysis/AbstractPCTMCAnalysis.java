@@ -50,6 +50,20 @@ public abstract class AbstractPCTMCAnalysis {
 		return pctmc;
 	}
 
+	
+	
+	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
+		return momentIndex;
+	}
+
+
+
+	public BiMap<AbstractExpression, Integer> getGeneralExpectationIndex() {
+		return generalExpectationIndex;
+	}
+
+
+
 	/**
 	 * Prepares the analysis with given constants. 
 	 * @param constants
@@ -184,7 +198,7 @@ public abstract class AbstractPCTMCAnalysis {
 
 	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
 
-	protected EvaluatorMethod getEvaluatorMethod(List<PlotExpression> plotExpressions,
+	public EvaluatorMethod getEvaluatorMethod(List<PlotExpression> plotExpressions,
 			Constants constants) {
 		List<AbstractStatement> body = new LinkedList<AbstractStatement>();
 		String returnArray = "ret";

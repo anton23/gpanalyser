@@ -37,7 +37,7 @@ public class MatlabMethodPrinter {
 	
 	public static String evaluatorName = "evaluator";
 
-	public String printEvaluatorMethod(EvaluatorMethod method,String className, String suffix){
+	public String printEvaluatorMethod(EvaluatorMethod method,String suffix){
 		StringBuilder ret = new StringBuilder();
 		ret.append("function z = " + evaluatorName+suffix + "(y,t,"+MatlabPrinterWithConstants.param+")\n");
 		for (AbstractStatement s:method.getBody()){

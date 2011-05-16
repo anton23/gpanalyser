@@ -15,15 +15,20 @@ import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorW
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.pctmc.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
+import uk.ac.imperial.doc.pctmc.matlaboutput.PCTMCJavaImplementationProviderWithMatlab;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.Lists;
 
@@ -38,6 +43,22 @@ public class PCTMCIterate {
 	private List<RangeSpecification> minRanges; 
 	
 	
+	
+	
+	
+	
+	public AbstractPCTMCAnalysis getAnalysis() {
+		return analysis;
+	}
+
+	public PlotAtDescription getMinSpecification() {
+		return minSpecification;
+	}
+
+	public List<RangeSpecification> getMinRanges() {
+		return minRanges;
+	}
+
 	public List<PlotAtDescription> getPlots(){
 		return plots; 
 	}
@@ -75,6 +96,13 @@ public class PCTMCIterate {
 			constants.setConstantValue(e.getKey(), evaluator.getResult()); 
 		}
 	}
+	
+	RangeSpecification[] minRangesArray;
+	int[] steps; 
+	
+	int iterations;
+	
+	int show; 
 	
 	private void iterate2d(Constants constants){
 		PCTMCLogging.info("Running experiment " + this.toString());
@@ -134,13 +162,12 @@ public class PCTMCIterate {
 		}
 		
 		
-		int iterations = xRange.getSteps()*yRange.getSteps();
-		int show = Math.max(iterations/5,1); 
+ 
 		
 	    
 	    
-	    int steps[] = new int[minRanges.size()];
-	    RangeSpecification[] minRangesArray = new RangeSpecification[minRanges.size()];
+	    steps = new int[minRanges.size()];
+	    minRangesArray = new RangeSpecification[minRanges.size()];
 	    int r = 0; 
 	    int totalSteps = 1; 
 	    for (RangeSpecification ra:minRanges){
@@ -149,61 +176,43 @@ public class PCTMCIterate {
 	    	minRangesArray[r] = ra; 
 	    	r++;
 	    }
-	    PCTMCLogging.info("Starting " + iterations*totalSteps + " iterations:"); 
-		PCTMCLogging.increaseIndent(); 
-	    PCTMCLogging.setVisible(false);
+		int totalIterations = xRange.getSteps()*yRange.getSteps()*totalSteps;
+		show = Math.max(totalIterations/5,1);
 	    
+	    PCTMCLogging.info("Starting " + totalIterations + " iterations:"); 
+		PCTMCLogging.increaseIndent();
 
+ 
+	    PCTMCLogging.setVisible(false);
+/*		long before = System.nanoTime();
+		for (int i = 0; i<10; i++){analysis.analyse(constants);}
+		long after = System.nanoTime(); 
+		PCTMCLogging.setVisible(true);
+		double mil = after-before;
+		PCTMCLogging.info("Expected run time is " + ((double)(mil*iterations*totalSteps)/10000000000.0) + " seconds");
+		PCTMCLogging.setVisible(false);*/
 	    
+	    if (PCTMCOptions.matlab){
+	    	PCTMCJavaImplementationProviderWithMatlab matlabImplementer = (PCTMCJavaImplementationProviderWithMatlab) PCTMCTools.getImplementationProvider();
+	    	matlabImplementer.writePCTMCIterateFile(this, constants);
+	    }
+	    
+	    iterations = 0; 
 	    for (int x = 0; x<xRange.getSteps(); x++){
 	    	double xValue = xRange.getStep(x);
 	    	constants.setConstantValue(xRange.getConstant(), xValue); 
-	    	for (int y = 0; y<yRange.getSteps(); y++){
-		    	if ((x*yRange.getSteps()+y+1 )%show == 0){
-		    		PCTMCLogging.setVisible(true);
-		    		PCTMCLogging.info((x*yRange.getSteps()+y)*totalSteps + "iterations finished.");
-		    		PCTMCLogging.setVisible(false);
-		    	}	    		
+	    	for (int y = 0; y<yRange.getSteps(); y++){   		
 	    		double yValue = yRange.getStep(y);	    			    		
 	    		constants.setConstantValue(yRange.getConstant(), yValue);
  
-	    		/*
-	    		 * The minimisation comes here - finds parameters which minimise the given reward
-	    		 * and satisfy constraints. 
-	    		 */
+
 	    		if (!minRanges.isEmpty()){
-	    			int step[] = new int[minRanges.size()];
-	    			double min = 0.0; 
-	    			boolean notYet = true;
-	    			int[] minStep = null;
-	    			do{	
-	    				for (int s = 0; s<step.length; s++){
-	    					constants.setConstantValue(minRangesArray[s].getConstant(),
-	    							minRangesArray[s].getStep(step[s]));
-	    				}
-	    				reEvaluate(constants);
-	    				analysis.analyse(constants);
-
-	    				double reward = evaluateConstrainedReward(minSpecification, constants);
-	    				if (!Double.isNaN(reward)){
-
-	    					if (notYet||reward<min){	    						
-								min = reward;
-	    						notYet = false; 
-	    						minStep = Arrays.copyOf(step, step.length);
-	    					} 
-	    				}
-	    			} while(next(step,steps));
-	    			if (notYet) continue; 
-	    			else{
-	    				for (int s = 0; s<step.length; s++){
-	    					constants.setConstantValue(minRangesArray[s].getConstant(),
-	    							minRangesArray[s].getStep(minStep[s]));
-	    				}
-	    			}
+	    			if (!minimise(constants)) continue; 
+	    		} else {
+	    			iterations++;
 	    		}
 	    		
-	    		reEvaluate(constants);	    		
+	    		reEvaluate(constants);	
 	    		analysis.analyse(constants);
 	    		
 	    		for (int i = 0; i<plots.size(); i++){
@@ -249,6 +258,44 @@ public class PCTMCIterate {
 	    PCTMCLogging.decreaseIndent(); 
 	}
 	
+	private boolean minimise(Constants constants){
+		int step[] = new int[minRanges.size()];
+		double min = 0.0; 
+		boolean notYet = true;
+		int[] minStep = null;
+		do{	
+			for (int s = 0; s<step.length; s++){
+				constants.setConstantValue(minRangesArray[s].getConstant(),
+						minRangesArray[s].getStep(step[s]));
+			}
+			reEvaluate(constants);
+			analysis.analyse(constants);
+			iterations++;
+	    	if ((iterations )%show == 0){
+	    		PCTMCLogging.setVisible(true);
+	    		PCTMCLogging.info(iterations + "iterations finished.");
+	    		PCTMCLogging.setVisible(false);
+	    	}
+			
+			double reward = evaluateConstrainedReward(minSpecification, constants);
+			if (!Double.isNaN(reward)){
+
+				if (notYet||reward<min){	    						
+					min = reward;
+					notYet = false; 
+					minStep = Arrays.copyOf(step, step.length);
+				} 
+			}
+		} while(next(step,steps));
+		if (notYet) return false; 
+		else{
+			for (int s = 0; s<step.length; s++){
+				constants.setConstantValue(minRangesArray[s].getConstant(),
+						minRangesArray[s].getStep(minStep[s]));
+			}
+		}
+		return true; 
+	}
 	
 	private double evaluateConstrainedReward(PlotAtDescription plot, Constants constants){
 		double[] values = analysis.evaluateExpressionsAtTimes(plot.getEvaluator(), plot.getAtTimes(), constants);

@@ -63,12 +63,12 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		order = 1; 
 	}
 
-	ODEGenerator odeGenerator; 
+	private ODEGenerator odeGenerator; 
 	
  
-	Set<CombinedPopulationProduct> usedCombinedMoments;
+	private Set<CombinedPopulationProduct> usedCombinedMoments;
 	
-	PCTMCImplementationPreprocessed preprocessedImplementation;
+	private PCTMCImplementationPreprocessed preprocessedImplementation;
 
 	
 	
@@ -83,7 +83,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		getPreprocessedODEImplementation(odeMethod,variables, momentIndex, generalExpectationIndex);
 	}
 	
-	ODEMethod odeMethod;
+	private ODEMethod odeMethod;
 	
 	
 	@Override
@@ -138,5 +138,11 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		PCTMCLogging.info("Running Runge-Kutta solver.");
 		dataPoints = PCTMCTools.getImplementationProvider().runODEAnalysis(preprocessedImplementation, initial, stopTime, stepSize, density, variables);
 	}
+
+	public ODEMethod getOdeMethod() {
+		return odeMethod;
+	}
+	
+	
 	
 }
