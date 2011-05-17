@@ -238,7 +238,7 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 			out.append(r.getTo());
 		}
 		out.append("];\n\n");
-		out.append("   rewardAtTime = " + iterate.getMinSpecification().getTime()+"\n");
+		out.append("   rewardAtTime = " + iterate.getMinSpecification().getTime()+";\n");
 		out.append("   rewardTimeIndex = " + ((int)Math.floor(iterate.getMinSpecification().getTime()/iterate.getAnalysis().getStepSize())+1)+";\n\n");
 		out.append("   reward_evaluator = @evaluator_minSpecification;\n\n" );
 		out.append("   ode_calls = 0;\n");
@@ -256,7 +256,7 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 		out.append("   problem=createOptimProblem('fmincon',...\n'objective',@cost,'nonlcon',@nlcon,'x0',startx,'options',options);\n");
 		out.append("   problem.lb = lb;\n");
 		out.append("   problem.ub = ub;\n\n");
-		out.append("   gs = globalSearch('Display','iter');\n\n");
+		out.append("   gs = GlobalSearch('Display','iter');\n\n");
 		out.append("   [x,fval,exitflag,output,solutions] = run(gs,problem);\n\n");
 		
 		
