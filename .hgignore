@@ -7,3 +7,5 @@ syntax: regexp
 ^tmp$
 syntax: regexp
 ^matlab$
+syntax: regexp
+^debug$

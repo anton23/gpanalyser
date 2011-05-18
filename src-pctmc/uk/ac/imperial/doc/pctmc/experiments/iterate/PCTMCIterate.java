@@ -339,7 +339,11 @@ public class PCTMCIterate {
 			ret+=r.getConstant() + "("+r.getFrom() + "-"+r.getTo() + "," + r.getSteps()+" steps"+")";
 		}
 		if (!minRanges.isEmpty()){
-			ret+=" minimise "+minSpecification;
+			ret+=" minimise "+minSpecification + " ";
+			for (RangeSpecification r:minRanges){
+				ret+= " ";
+				ret+=r.getConstant() + "("+r.getFrom() + "-"+r.getTo() + "," + r.getSteps()+" steps"+")";
+			}
 		}
 		return ret;
 	}

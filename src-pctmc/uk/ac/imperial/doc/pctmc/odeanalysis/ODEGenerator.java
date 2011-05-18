@@ -242,7 +242,7 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 					for (Map<State, Integer> k : possibleKs) {
 
 						List<PopulationProduct> ms = getM(jminus, jplus, new PopulationProduct(k),order);
-						GetVVersionVisitor visitor = new GetVVersionVisitor(
+						GetVVersionVisitor visitor = new GetVVersionVisitorMomentClosure(
 								new PopulationProduct(k));
 						jointRateFunction.accept(visitor);
 						AbstractExpression jointRate = visitor.getResult();
