@@ -239,6 +239,15 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 					AbstractExpression jointRateFunction = e.getRate();
 					List<State> jminus =e.getDecreasing();
 					List<State> jplus = e.getIncreasing();
+					
+					Multiset<State> jminusMset = HashMultiset.<State>create(jminus); 
+					Multiset<State> jplusMset  = HashMultiset.<State>create(jplus);
+					for (State s:jminus){
+						jplusMset.remove(s); 
+					}
+					for (State s:jplus){
+						jminusMset.remove(s); 
+					}
 
 					for (Map<State, Integer> k : possibleKs) {
 
@@ -250,23 +259,19 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 
 
 						for (PopulationProduct moment : ms) {
-							Integer noneExp = 0;
-							//TODO check if the intersection of jminus and jplus is empty
-							for (State b : jminus) {
-								noneExp += moment.getPowerOf(b) - k.get(b);
-							}
+
 							Integer binom = 1;
-							for (State b : jminus) {
+							for (State b : jminusMset.elementSet()) {
 								binom *= Binomial.choose(moment.getPowerOf(b), k
 										.get(b));
+								binom *=(int)Math.pow(-jminusMset.count(b),moment.getPowerOf(b) - k.get(b));
 							}
-							for (State b : jplus) {
+							for (State b : jplusMset.elementSet()) {
 								binom *= Binomial.choose(moment.getPowerOf(b), k
 										.get(b));
+								binom *=(int)Math.pow(jplusMset.count(b),moment.getPowerOf(b) - k.get(b));								
 							}
-							if (Math.abs(noneExp) % 2 == 1) {
-								binom = -binom;
-							}
+
 							AbstractExpression binomExpression = new DoubleExpression(
 									(double) binom);
 							AbstractExpression term = ProductExpression.create(binomExpression, jointRate);
