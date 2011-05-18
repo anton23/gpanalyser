@@ -232,7 +232,8 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 		maxCounter = 0;
 		int products = 0;
 
-			for (EvolutionEvent e:pctmc.getEvolutionEvents()) {
+			Collection<EvolutionEvent> evolutionEvents = pctmc.getEvolutionEvents();
+			for (EvolutionEvent e:evolutionEvents) {
 
 					
 					AbstractExpression jointRateFunction = e.getRate();

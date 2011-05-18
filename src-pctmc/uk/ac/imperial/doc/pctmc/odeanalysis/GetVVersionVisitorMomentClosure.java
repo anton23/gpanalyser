@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.pctmc.odeanalysis;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -25,13 +26,17 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor{
 		if (e.getProduct().getNakedProduct().getOrder() == 2){
 			List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
 			boolean first = true; 
-			for (State s:e.getProduct().getNakedProduct().getProduct().keySet()){
+			for (Map.Entry<State,Integer> entry:e.getProduct().getNakedProduct().getProduct().entrySet() ){
+				CombinedPopulationProduct product;
 				if (first) {
-					terms.add(CombinedProductExpression.create(new CombinedPopulationProduct(moment.getV(s))));
+					product = new CombinedPopulationProduct(moment.getV(entry.getKey()));
 					first = false; 
 				}
 				else {
-					terms.add(CombinedProductExpression.create(new CombinedPopulationProduct(PopulationProduct.getMeanProduct(s))));
+					product = new CombinedPopulationProduct(PopulationProduct.getMeanProduct(entry.getKey()));
+				}
+				for (int i = 0; i<entry.getValue(); i++){
+					terms.add(CombinedProductExpression.create(product));
 				}
 			}
 			result = ProductExpression.create(terms);
