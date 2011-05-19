@@ -114,6 +114,14 @@ public class PopulationProduct{
 		return new PopulationProduct(map); 
 	}
 	
+	public Multiset<State> asMultiset(){
+		Multiset<State> tmp = HashMultiset.<State>create(); 
+		for (Map.Entry<State, Integer> e:this.getProduct().entrySet()){
+			tmp.add(e.getKey(),e.getValue());
+		}
+		return tmp;
+	}
+	
 	public PopulationProduct toThePower(int p){
 		Map<State,Integer> newProduct = new HashMap<State, Integer>();
 		for (Map.Entry<State, Integer> e:product.entrySet()){

@@ -88,11 +88,13 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 	}
 	
 	
+	int closeOrder = 1; 
+
 	
 	// also calculates the combined moment index
 	public ODEMethod getODEMethodWithCombinedMoments(int order,
 			Collection<CombinedPopulationProduct> combinedMoments) {
-
+		order = Math.max(order, closeOrder);
 		List<AbstractStatement> lines = getODEMethodBody(order);
 		int nmoments = momentIndex.size();
 		if (combinedMoments != null) {
@@ -253,7 +255,7 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 
 						List<PopulationProduct> ms = getM(jminus, jplus, new PopulationProduct(k),order);
 						GetVVersionVisitor visitor = new GetVVersionVisitorMomentClosure(
-								new PopulationProduct(k));
+								new PopulationProduct(k),order);
 						jointRateFunction.accept(visitor);
 						AbstractExpression jointRate = visitor.getResult();
 
