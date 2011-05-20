@@ -26,6 +26,8 @@ public abstract class AggregatedStateNextEventGenerator {
 
 	public double nextStep(double[] counts) {
 		recalculateWeights(counts);
+		if (totalRate == 0.0)
+			return -1;
 		int nextEvent = DiscreteSampler.getSample(weights, totalRate);
 		if (nextEvent == -1)
 			return -1;
@@ -35,12 +37,10 @@ public abstract class AggregatedStateNextEventGenerator {
 		for (Integer d : decreasing[nextEvent]) {
 			counts[d]--;
 			if (counts[d]<0.0){
-				counts[d] = 0.0;
+				//counts[d] = 0.0;
 				throw new AssertionError("Counts going negative");
 			}
-		}
-		if (totalRate == 0.0)
-			return -1;
+		}		
 		double duration = Exponential.getSample(totalRate);
 		return duration;
 	}

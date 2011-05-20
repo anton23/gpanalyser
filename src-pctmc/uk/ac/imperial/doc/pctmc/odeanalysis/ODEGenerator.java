@@ -248,10 +248,13 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 					for (State s:jplus){
 						jminusMset.remove(s); 
 					}
+					//the new jminus/jplus multi sets are disjoint now
+					List<State> jminusNew = new LinkedList<State>(jminusMset);
+					List<State> jplusNew = new LinkedList<State>(jplusMset);
 
 					for (Map<State, Integer> k : possibleKs) {
 
-						List<PopulationProduct> ms = getM(jminus, jplus, new PopulationProduct(k),order);
+						List<PopulationProduct> ms = getM(jminusNew, jplusNew, new PopulationProduct(k),order);
 						GetVVersionVisitor visitor = new GetVVersionVisitorMomentClosure(
 								new PopulationProduct(k));
 						jointRateFunction.accept(visitor);
