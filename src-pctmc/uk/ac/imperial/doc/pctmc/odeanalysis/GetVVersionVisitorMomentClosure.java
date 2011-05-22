@@ -94,43 +94,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor{
 			
 			result = ProductExpression.create(terms);
 		}
-		/*if (insert && e.getProduct().getOrder()>2){
-			throw new AssertionError("Unsupported rate function!");			
-		}
-		if (e.getProduct().getNakedProduct().getOrder() == 2){
-			List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-			boolean first = true; 
-			for (Map.Entry<State,Integer> entry:e.getProduct().getNakedProduct().getProduct().entrySet() ){
-				CombinedPopulationProduct product;
-				int exp; 
-				if (first && insert) {
-					product = new CombinedPopulationProduct(moment.getV(entry.getKey()));
-					terms.add(CombinedProductExpression.create(product));
-					exp = entry.getValue()-1; 
-					inserted = true;
-					first = false; 
-				}
-				else {
-					exp = entry.getValue();
-				}
-				product = new CombinedPopulationProduct(PopulationProduct.getMeanProduct(entry.getKey()));
-				for (int i = 0; i<exp; i++){
-					terms.add(CombinedProductExpression.create(product));
-				}
-			}
-			result = ProductExpression.create(terms);
-			
-		} else {
-			State state = e.getProduct().getNakedProduct().getProduct().keySet().iterator().next();
-			CombinedPopulationProduct product; 
-			if (insert){
-				product = new CombinedPopulationProduct(moment.getV(state));
-				inserted = true; 
-			} else {
-				product = new CombinedPopulationProduct(PopulationProduct.getMeanProduct(state));
-			}
-			result = CombinedProductExpression.create(product);
-		}*/
+	
 	}	
 	
 	

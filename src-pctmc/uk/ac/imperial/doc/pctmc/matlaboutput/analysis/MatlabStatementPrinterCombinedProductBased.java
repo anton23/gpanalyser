@@ -6,6 +6,8 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionPrinterFactory;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.statements.Assignment;
+import uk.ac.imperial.doc.jexpressions.statements.IAssignmentVisitor;
 import uk.ac.imperial.doc.jexpressions.statements.IIncrementVisitor;
 import uk.ac.imperial.doc.jexpressions.statements.Increment;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -19,7 +21,7 @@ import com.google.common.collect.BiMap;
  *
  */
 public class MatlabStatementPrinterCombinedProductBased extends MatlabStatementPrinter
-		implements IIncrementVisitor {
+		implements IIncrementVisitor,IAssignmentVisitor {
 
 	protected IExpressionPrinterFactory lhsFactory;
 	
@@ -44,6 +46,22 @@ public class MatlabStatementPrinterCombinedProductBased extends MatlabStatementP
 		output.append(lhsString);
 		output.append("=");
 		output.append(lhsString+"+");		
+		output.append(rhsString);
+		output.append(";");
+	}
+	
+	@Override
+	public void visit(Assignment s) {
+		IExpressionVisitor lhsPrinter = lhsFactory.createPrinter();
+		s.getLhs().accept(lhsPrinter);
+		String lhsString = lhsPrinter.toString();
+
+		IExpressionVisitor rhsPrinter = expressionPrinterFactory
+				.createPrinter();
+		s.getRhs().accept(rhsPrinter);
+		String rhsString = rhsPrinter.toString();
+		output.append(lhsString);
+		output.append("=");		
 		output.append(rhsString);
 		output.append(";");
 	}
