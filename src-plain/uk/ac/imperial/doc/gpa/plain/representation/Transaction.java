@@ -16,7 +16,7 @@ public class Transaction extends State{
 
 	@Override
 	public String toString() {
-		return "[" + ToStringUtils.iterableToSSV(components, ",")+"]";
+		return "{" + ToStringUtils.iterableToSSV(components, ",")+"}";
 	}
 
 	public Transaction(List<String> components) {

@@ -16,6 +16,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
+import uk.ac.imperial.doc.jexpressions.statements.Assignment;
 import uk.ac.imperial.doc.jexpressions.statements.Increment;
 import uk.ac.imperial.doc.jexpressions.statements.SkipStatement;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
@@ -88,13 +89,11 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 	}
 	
 	
-	int closeOrder = 1; 
-
 	
 	// also calculates the combined moment index
 	public ODEMethod getODEMethodWithCombinedMoments(int order,
 			Collection<CombinedPopulationProduct> combinedMoments) {
-		order = Math.max(order, closeOrder);
+
 		List<AbstractStatement> lines = getODEMethodBody(order);
 		int nmoments = momentIndex.size();
 		if (combinedMoments != null) {
@@ -250,10 +249,13 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 					for (State s:jplus){
 						jminusMset.remove(s); 
 					}
+					//the new jminus/jplus multi sets are disjoint now
+					List<State> jminusNew = new LinkedList<State>(jminusMset);
+					List<State> jplusNew = new LinkedList<State>(jplusMset);
 
 					for (Map<State, Integer> k : possibleKs) {
 
-						List<PopulationProduct> ms = getM(jminus, jplus, new PopulationProduct(k),order);
+						List<PopulationProduct> ms = getM(jminusNew, jplusNew, new PopulationProduct(k),order);
 						GetVVersionVisitor visitor = new GetVVersionVisitorMomentClosure(
 								new PopulationProduct(k),order);
 						jointRateFunction.accept(visitor);
@@ -277,17 +279,24 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 							AbstractExpression binomExpression = new DoubleExpression(
 									(double) binom);
 							AbstractExpression term = ProductExpression.create(binomExpression, jointRate);
-							Increment statement = new Increment(
+							/*Increment statement = new Increment(
 								CombinedProductExpression.create(new CombinedPopulationProduct(moment)),term);
-							incrementMap.put(moment, term);
 							lines.add(statement);
+							*/
+							incrementMap.put(moment, term);
+							
 							products++;
 						}
 
 					}
-					for (PopulationProduct p:incrementMap.keySet()){
-						rhs.put(new CombinedPopulationProduct(p), SumExpression.create(incrementMap.get(p)));
-					}
+					
+			}
+			for (PopulationProduct p:incrementMap.keySet()){
+				AbstractExpression pRhs = SumExpression.create(incrementMap.get(p));
+				rhs.put(new CombinedPopulationProduct(p), pRhs);						
+				Assignment statement = new Assignment(
+						CombinedProductExpression.create(new CombinedPopulationProduct(p)),pRhs);
+				lines.add(statement);						
 			}
 		
 		PCTMCLogging.info("Number of products in RHS: " + products);
