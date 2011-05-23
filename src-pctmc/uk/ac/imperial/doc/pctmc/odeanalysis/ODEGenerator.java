@@ -32,8 +32,8 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 public class ODEGenerator {
@@ -206,7 +206,7 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 		List<AbstractStatement> lines = new LinkedList<AbstractStatement>();
 		rhs = new HashMap<CombinedPopulationProduct, AbstractExpression>();
 
-		Multimap<PopulationProduct, AbstractExpression> incrementMap = HashMultimap.<PopulationProduct, AbstractExpression>create();
+		Multimap<PopulationProduct, AbstractExpression> incrementMap = LinkedListMultimap.<PopulationProduct, AbstractExpression>create();
 		
 		momentIndex = calculateProductIndex(order);
 		PCTMCLogging.info("Number of moments: "+momentIndex.size());
@@ -281,8 +281,8 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 							AbstractExpression term = ProductExpression.create(binomExpression, jointRate);
 							/*Increment statement = new Increment(
 								CombinedProductExpression.create(new CombinedPopulationProduct(moment)),term);
-							lines.add(statement);
-							*/
+							lines.add(statement);*/
+							
 							incrementMap.put(moment, term);
 							
 							products++;
@@ -296,7 +296,7 @@ private AbstractExpression getDerivative(CombinedPopulationProduct combinedProdu
 				rhs.put(new CombinedPopulationProduct(p), pRhs);						
 				Assignment statement = new Assignment(
 						CombinedProductExpression.create(new CombinedPopulationProduct(p)),pRhs);
-				lines.add(statement);						
+				lines.add(statement);					
 			}
 		
 		PCTMCLogging.info("Number of products in RHS: " + products);
