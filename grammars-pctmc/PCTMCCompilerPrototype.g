@@ -249,7 +249,7 @@ stateSum returns [List<State> t]
 @init{
   $t = new LinkedList<State>(); 
 }:
-  (tr=state{$t.add($tr.t);})+
+  (tr=state{$t.add($tr.t);})*
 ;
 
 primary_expression returns[AbstractExpression e]:

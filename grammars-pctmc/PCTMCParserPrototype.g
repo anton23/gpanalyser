@@ -179,7 +179,7 @@ varDefinition:
 //-----Rules for events
 
 eventDefinition:
-dec=stateSum TO inc=stateSum AT expression SEMI -> ^(EVENT $dec TO $inc AT expression)
+dec=stateSum? TO inc=stateSum? AT expression SEMI -> ^(EVENT $dec? TO $inc? AT expression)
 ;
 
 stateSum:
