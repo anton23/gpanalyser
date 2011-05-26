@@ -268,7 +268,7 @@ primary_expression returns[AbstractExpression e]:
  | cm=central {$e = $cm.c;}
  | ^(MIN exp1=expression COMMA exp2=expression) {$e = MinExpression.create($exp1.e,$exp2.e); }
  |  {List<AbstractExpression> args = new LinkedList<AbstractExpression>(); }        
-  ^(FUN name=LOWERCASENAME firstArg=expression {args.add($firstArg.e);} (COMMA arg=expression {args.add($arg.e);})*) {$e = new FunctionCallExpression($name.text,args);}
+  ^(FUN name=LOWERCASENAME firstArg=expression {args.add($firstArg.e);} (COMMA arg=expression {args.add($arg.e);})*) {$e = FunctionCallExpression.create($name.text,args);}
  | ^(PATTERN s=state) {$e = new PatternPopulationExpression($s.t);}  
 ;
 

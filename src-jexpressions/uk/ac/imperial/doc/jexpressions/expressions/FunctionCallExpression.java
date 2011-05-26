@@ -16,10 +16,17 @@ public class FunctionCallExpression extends AbstractExpression {
 	private String name;
 	
 
-	public FunctionCallExpression(String name, List<AbstractExpression> arguments) {
+	private FunctionCallExpression(String name, List<AbstractExpression> arguments) {
 		super();
 		this.name = name;
 		this.arguments = arguments;
+	}
+	
+	public static AbstractExpression create(String name,List<AbstractExpression> arguments){
+		if (name.equals("div")&&arguments.size()==2){
+			return PEPADivExpression.create(arguments.get(0), arguments.get(1));
+		}
+		return new FunctionCallExpression(name, arguments);
 	}
 
 	@Override
