@@ -4,7 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -21,6 +23,20 @@ import com.google.common.collect.Multiset;
 public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor{
 
 	protected boolean insert = true; 
+	
+	@Override
+	public void visit(PEPADivExpression e) {		
+		if (insert){
+			e.getNumerator().accept(this);
+			result = PEPADivExpression.create(result, e.getDenominator());
+		} else {
+			e.getNumerator().accept(this);
+			AbstractExpression newNumerator = result; 
+			e.getDenominator().accept(this); 
+			result = PEPADivExpression.create(newNumerator,result); 
+		}
+		
+	}
 	
 	public GetVVersionVisitorMomentClosure(PopulationProduct moment, int maxOrder) {
 		super(moment);

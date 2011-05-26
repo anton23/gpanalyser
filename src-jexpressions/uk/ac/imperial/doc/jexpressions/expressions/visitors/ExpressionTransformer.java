@@ -163,7 +163,7 @@ public class ExpressionTransformer implements IExpressionVisitor {
 			arg.accept(this); 
 			newArguments.add(result); 
 		}
-		result = new FunctionCallExpression(e.getName(), newArguments);
+		result = FunctionCallExpression.create(e.getName(), newArguments);
 		
 	}
 }
