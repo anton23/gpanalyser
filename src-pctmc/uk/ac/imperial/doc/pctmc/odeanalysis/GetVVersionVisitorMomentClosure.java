@@ -34,8 +34,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor{
 			AbstractExpression newNumerator = result; 
 			e.getDenominator().accept(this); 
 			result = PEPADivExpression.create(newNumerator,result); 
-		}
-		
+		}		
 	}
 	
 	public GetVVersionVisitorMomentClosure(PopulationProduct moment, int maxOrder) {

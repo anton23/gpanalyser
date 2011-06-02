@@ -199,9 +199,11 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 		
 			writeInitialValuesFile(asODEAnalysis.getOdeMethod(), constants, momentIndex, generalExpectationIndex, folder+"/"+getInitialValuesName+".m");
 			PlotAtDescription minSpecification = iterate.getMinSpecification();
-			EvaluatorMethod minSpecEvaluatorMethod = asODEAnalysis.getEvaluatorMethod(minSpecification.getPlotExpressions(),constants);
-			writeEvaluatorMethod(minSpecEvaluatorMethod, folder, "_minSpecification", constants, momentIndex, generalExpectationIndex);
-			writeIterateMainFile(iterate, folder);
+			if (minSpecification!=null){
+				EvaluatorMethod minSpecEvaluatorMethod = asODEAnalysis.getEvaluatorMethod(minSpecification.getPlotExpressions(),constants);
+				writeEvaluatorMethod(minSpecEvaluatorMethod, folder, "_minSpecification", constants, momentIndex, generalExpectationIndex);
+				writeIterateMainFile(iterate, folder);
+			}
 			
 		}
 	}
