@@ -6,7 +6,7 @@
     <property file="config.properties"/>
 
     <!-- global properties -->
-    <property name="version" value="0.9.1"/>
+    <property name="version" value="0.9.2"/>
 	<property name="java.library.path" value="lib"/>
     <!-- directories -->
     <property name="build.out" value="build"/>
