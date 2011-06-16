@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -16,7 +15,6 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 
 

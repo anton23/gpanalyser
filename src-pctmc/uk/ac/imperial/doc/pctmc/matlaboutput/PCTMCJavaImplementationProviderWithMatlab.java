@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.pctmc.matlaboutput;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
@@ -108,14 +109,13 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 	@Override
 	public AbstractExpressionEvaluator getEvaluatorImplementation(
 			EvaluatorMethod method, String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression, Integer> generalExpectationIndex) {
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
 		String suffix = "_"+command;
 		String analysisFolder = "analysis"+analysis; 
 		String folder = PCTMCOptions.matlabFolder + "/" +analysisFolder;
-		writeEvaluatorMethod(method, folder, suffix, constants, combinedMomentsIndex, generalExpectationIndex);
+		writeEvaluatorMethod(method, folder, suffix, constants, combinedMomentsIndex, new HashMap<AbstractExpression, Integer>());
 		command++;
-		return javaImplementation.getEvaluatorImplementation(method, className, constants, combinedMomentsIndex, generalExpectationIndex);
+		return javaImplementation.getEvaluatorImplementation(method, className, constants, combinedMomentsIndex);
 	}
 	
 	private void writeEvaluatorMethod(EvaluatorMethod method, String folder,String suffix, Constants constants,
@@ -131,21 +131,20 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 	@Override
 	public PCTMCImplementationPreprocessed getPreprocessedODEImplementation(
 			ODEMethod method, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression, Integer> generalExpectationIndex) {
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
 		analysis++;
 		PCTMCLogging.info("Generating MATLAB source files " + PCTMCOptions.matlabFolder+"/analysis"+analysis+"/*.m");
         String analysisFolder = "analysis"+analysis;
 		String fileName = PCTMCOptions.matlabFolder + "/" +analysisFolder +"/"+ MatlabODEMethodPrinter.ODESNAME + ".m";
-		writeODEFile(method, constants, combinedMomentsIndex, generalExpectationIndex, fileName); 
+		writeODEFile(method, constants, combinedMomentsIndex, new HashMap<AbstractExpression, Integer>(), fileName); 
 		
 		fileName = PCTMCOptions.matlabFolder + "/" +analysisFolder +"/"+ getInitialValuesName + ".m";
-		writeInitialValuesFile(method, constants, combinedMomentsIndex, generalExpectationIndex, fileName);
+		writeInitialValuesFile(method, constants, combinedMomentsIndex, new HashMap<AbstractExpression, Integer>(), fileName);
 		
 		MatlabOutputUtils.writeODEMain(PCTMCOptions.matlabFolder+"/"+analysisFolder);
 		MatlabOutputUtils.writeEvaluate(PCTMCOptions.matlabFolder+"/"+analysisFolder);
 		MatlabOutputUtils.writePEPAFunctions(PCTMCOptions.matlabFolder+"/"+analysisFolder);
-		return javaImplementation.getPreprocessedODEImplementation(method, constants, combinedMomentsIndex, generalExpectationIndex);
+		return javaImplementation.getPreprocessedODEImplementation(method, constants, combinedMomentsIndex);
 	}
 	
 	
@@ -168,10 +167,9 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 	@Override
 	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method,
 			String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression, Integer> generalExpectationIndex) {
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
         
-		return javaImplementation.getSystemOfODEsImplementation(method, className, constants, combinedMomentsIndex, generalExpectationIndex);
+		return javaImplementation.getSystemOfODEsImplementation(method, className, constants, combinedMomentsIndex);
 	}
 
 	@Override

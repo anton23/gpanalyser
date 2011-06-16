@@ -37,11 +37,6 @@ public class PCTMCIterate {
 	private PlotAtDescription minSpecification; 
 	private List<RangeSpecification> minRanges; 
 	
-	
-	
-	
-	
-	
 	public AbstractPCTMCAnalysis getAnalysis() {
 		return analysis;
 	}

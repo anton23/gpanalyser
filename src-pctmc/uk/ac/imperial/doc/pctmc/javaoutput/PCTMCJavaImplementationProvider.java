@@ -1,6 +1,6 @@
 package uk.ac.imperial.doc.pctmc.javaoutput;
 
-import java.util.Map;
+import java.util.HashMap;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -31,9 +31,8 @@ public class PCTMCJavaImplementationProvider implements PCTMCImplementationProvi
 
 	
 	public AbstractExpressionEvaluator getEvaluatorImplementation(EvaluatorMethod method,String className,Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression, Integer> generalExpectationIndex){
-		 JavaMethodPrinter printer = new JavaMethodPrinter(constants, combinedMomentsIndex, generalExpectationIndex);
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex){
+		 JavaMethodPrinter printer = new JavaMethodPrinter(constants, combinedMomentsIndex, new HashMap<AbstractExpression, Integer>());
 		 String code = printer.printEvaluatorMethod(method, className);
 		 AbstractExpressionEvaluator updater = (AbstractExpressionEvaluator) ClassCompiler
 			.getInstance(code, className);
@@ -41,17 +40,15 @@ public class PCTMCJavaImplementationProvider implements PCTMCImplementationProvi
 	}
 	
 	public PCTMCImplementationPreprocessed getPreprocessedODEImplementation(ODEMethod method,Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression, Integer> generalExpectationIndex){
-		SystemOfODEs odes = getSystemOfODEsImplementation(method, "GeneratedODEs", constants, combinedMomentsIndex, generalExpectationIndex);
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex){
+		SystemOfODEs odes = getSystemOfODEsImplementation(method, "GeneratedODEs", constants, combinedMomentsIndex);
 		return new JavaODEsPreprocessed(odes);
 	}
 	
 	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method, String className,Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression, Integer> generalExpectationIndex){
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex){
 		
-		JavaODEMethodPrinter printer = new JavaODEMethodPrinter(constants, combinedMomentsIndex,generalExpectationIndex);
+		JavaODEMethodPrinter printer = new JavaODEMethodPrinter(constants, combinedMomentsIndex,new HashMap<AbstractExpression, Integer>());
         method.accept(printer);
         String code = printer.toString(); 
 		SystemOfODEs ret = (SystemOfODEs) ClassCompiler.getInstance(code,
