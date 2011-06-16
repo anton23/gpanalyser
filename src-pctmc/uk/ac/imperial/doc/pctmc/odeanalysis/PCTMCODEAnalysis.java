@@ -62,6 +62,11 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		this.density = density;
 		order = 1; 
 	}
+	
+	public PCTMCODEAnalysis(PCTMC pctmc, double stopTime, double stepSize, int density, int order) {
+		this(pctmc,stopTime,stepSize,density); 
+		this.order = order; 
+	}
 
 	private ODEGenerator odeGenerator; 
 	
@@ -80,7 +85,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(order, usedCombinedMoments);		
 		momentIndex = odeGenerator.getMomentIndex();
 		preprocessedImplementation = PCTMCTools.getImplementationProvider().
-		getPreprocessedODEImplementation(odeMethod,variables, momentIndex, generalExpectationIndex);
+		getPreprocessedODEImplementation(odeMethod,variables, momentIndex);
 	}
 	
 	private ODEMethod odeMethod;
@@ -93,20 +98,15 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		PCTMCLogging.info("The analysis took " + (-time + System.currentTimeMillis()) + " mseconds.");
 	}
 	
-	double[] initial; 
+	private double[] initial; 
 	
-	private void solveMomentODEs(Constants variables) {
-		if (odeMethod==null){
-			prepare(variables); 
-		} 
+	public double[] getInitialValues(Constants constants){
 		initial = new double[momentIndex.size()];
 		
 		double[] initialCounts = new double[stateIndex.size()];
 
-
-		
 		for (int i = 0; i < stateIndex.size(); i++) {
-			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(variables);
+			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(constants);
 			pctmc.getInitCounts()[i].accept(evaluator);
 			initialCounts[i] = evaluator.getResult();
 		}
@@ -128,6 +128,14 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 				initial[e.getValue()] = tmp;
 			}
 		}
+		return initial;
+	}
+	
+	private void solveMomentODEs(Constants variables) {
+		if (odeMethod==null){
+			prepare(variables); 
+		} 
+		initial = getInitialValues(variables);
 		solveMomentODEs(initial,variables);
 	}
 	

@@ -143,7 +143,7 @@ public abstract class AbstractPCTMCAnalysis {
 		EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
 		AbstractExpressionEvaluator evaluator = PCTMCTools.getImplementationProvider()
 				.getEvaluatorImplementation(updaterMethod, evaluatorClassName,
-						constants, momentIndex, generalExpectationIndex);
+						constants, momentIndex);
 		return evaluator;
 	}
 
