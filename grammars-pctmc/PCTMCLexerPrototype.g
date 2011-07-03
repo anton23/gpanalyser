@@ -39,6 +39,7 @@ TO: '->';
 
 MEAN: 'E';  
 CENTRAL: 'CM';
+SCENTRAL: 'SCM';
 VARIANCE: 'Var';
 
 ODES: 'ODEs';

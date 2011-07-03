@@ -222,6 +222,7 @@ primaryExpression:
      | LOWERCASENAME     
      | mean 
      | central
+     | scentral
      | PATTERN state -> ^(PATTERN state)
 ;
 
@@ -234,6 +235,11 @@ central:
    CENTRAL LBRACK expression COMMA INTEGER RBRACK -> ^(CENTRAL expression INTEGER)
   |VARIANCE LBRACK expression RBRACK -> ^(CENTRAL expression INTEGER["2"])
 ;
+
+scentral:
+   SCENTRAL LBRACK expression COMMA INTEGER RBRACK -> ^(SCENTRAL expression INTEGER)
+;
+
 
 
 combinedPowerProduct:
