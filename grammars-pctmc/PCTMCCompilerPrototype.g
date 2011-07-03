@@ -266,6 +266,7 @@ primary_expression returns[AbstractExpression e]:
  | cp=combinedProduct {$e = CombinedProductExpression.create($cp.c);}
  | m=mean {$e = $m.m;} 
  | cm=central {$e = $cm.c;}
+ | scm=scentral {$e = $scm.c;}
  | ^(MIN exp1=expression COMMA exp2=expression) {$e = MinExpression.create($exp1.e,$exp2.e); }
  |  {List<AbstractExpression> args = new LinkedList<AbstractExpression>(); }        
   ^(FUN name=LOWERCASENAME firstArg=expression {args.add($firstArg.e);} (COMMA arg=expression {args.add($arg.e);})*) {$e = FunctionCallExpression.create($name.text,args);}
@@ -279,6 +280,11 @@ mean returns [MeanOfLinearCombinationExpression m]:
 central returns [CentralMomentOfLinearCombinationExpression c]:
   ^(CENTRAL e=expression n=integer) {$c = new CentralMomentOfLinearCombinationExpression($e.e,$n.value,vars);}
 ;
+
+scentral returns [StandardisedCentralMomentOfLinearCombinationExpression c]:
+  ^(SCENTRAL e=expression n=integer) {$c = new StandardisedCentralMomentOfLinearCombinationExpression($e.e,$n.value,vars);}
+;
+
 
 combinedProduct returns [CombinedPopulationProduct c]
 @init{
