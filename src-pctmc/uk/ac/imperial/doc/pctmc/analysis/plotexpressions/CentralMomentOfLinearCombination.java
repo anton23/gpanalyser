@@ -15,48 +15,7 @@ import uk.ac.imperial.doc.pctmc.utils.Multinomial;
 
 import com.google.common.collect.Multiset;
 
-public class CentralMomentOfLinearCombination  extends PlotExpression {
-
-
-	@Override
-	public boolean equals(Object o) {
-		if (this==o) return true; 
-		if (!(o instanceof CentralMomentOfLinearCombination)) return false; 
-		CentralMomentOfLinearCombination asCMLC = (CentralMomentOfLinearCombination) o; 
-		return combinedMoments.equals(asCMLC.getCombinedStateProducts()) && coefficients.equals(asCMLC.getCoefficients()) && order == asCMLC.getOrder();
-	}
-
-	
-	
-	public List<AbstractExpression> getCoefficients() {
-		return coefficients;
-	}
-
-	public List<CombinedPopulationProduct> getCombinedStateProducts() {
-		return combinedMoments;
-	}
-
-	public int getOrder() {
-		return order;
-	}
-
-	public CentralMomentOfLinearCombination(
-			List<AbstractExpression> coefficients,
-			List<CombinedPopulationProduct> combinedMoments, int order) {
-		super(createExpression(coefficients, combinedMoments, order));
-		this.coefficients = coefficients;
-		this.combinedMoments = combinedMoments;
-		this.order = order;
-		
-	}
-
-
-	List<AbstractExpression> coefficients; 
-	
-	List<CombinedPopulationProduct> combinedMoments; 
-	
-	int order; 
-
+public class CentralMomentOfLinearCombination  {
 
 
 	public static AbstractExpression createExpression(List<AbstractExpression> coefficients, List<CombinedPopulationProduct> combinedMoments, int order) {
@@ -89,23 +48,4 @@ public class CentralMomentOfLinearCombination  extends PlotExpression {
 		}
 		return SumExpression.create(sum); 
 	}
-
-	@Override
-	public String toString() {
-		String ret = "Central["; 
-		boolean first = true; 
-		for (int i = 0; i<combinedMoments.size(); i++){
-			if (first){
-				first = false;  
-			} else {
-				ret+="+"; 
-			}
-			ret+=coefficients.get(i).toString() + "*" + combinedMoments.get(i).toString();
-		}		
-		return ret + ","+order+"]"; 
-	}
-	
-	
-
-
 }

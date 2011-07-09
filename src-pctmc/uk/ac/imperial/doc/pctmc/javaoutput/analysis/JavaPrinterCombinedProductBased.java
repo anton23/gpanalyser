@@ -7,7 +7,9 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.JavaPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 
 import com.google.common.collect.BiMap;
 
@@ -17,8 +19,19 @@ import com.google.common.collect.BiMap;
  *
  */
 public class JavaPrinterCombinedProductBased extends JavaPrinterWithConstants implements
-		  ICombinedProductExpressionVisitor {
+		  ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor {
 
+
+	@Override
+	public void visit(GeneralExpectationExpression e) {
+		Integer i;		
+		Integer egIndex = generalExpectationIndex.get(e.getExpression());
+		if (egIndex==null){
+			throw new AssertionError("Unknown general expectation " + e.getExpression() + "!");
+		}
+		i = egIndex+combinedMomentsIndex.size();
+		output.append(f + "[" + i + "]");
+	}
 
 	@Override
 	public void visit(CombinedProductExpression e) {
