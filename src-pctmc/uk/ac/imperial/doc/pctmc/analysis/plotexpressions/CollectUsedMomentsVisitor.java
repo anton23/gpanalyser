@@ -22,7 +22,9 @@ import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 
 
 /**
@@ -31,7 +33,12 @@ import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
  *
  */
 public class CollectUsedMomentsVisitor implements IExpressionVisitor,
-		  ICombinedProductExpressionVisitor {
+		  ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor {
+	@Override
+	public void visit(GeneralExpectationExpression e) {
+		usedGeneralExpectations.add(e.getExpression());
+	}
+
 	@Override
 	public void visit(IntegerExpression e) {}
 

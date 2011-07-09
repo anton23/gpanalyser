@@ -108,15 +108,18 @@ public class PCTMCIterate {
 			usedExpressions.addAll(plot.getPlotExpressions());
 		}
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
+		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
 		for (PlotExpression exp:usedExpressions){
 			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor(); 
 			exp.getExpression().accept(visitor); 
 			usedProducts.addAll(visitor.getUsedCombinedMoments());
+			usedGeneralExpectations.addAll(visitor.getUsedGeneralExpectations());
 		}
 		
 		PCTMCLogging.info("Preparing analysis:"); 
 		PCTMCLogging.increaseIndent();
 		analysis.setUsedMoments(usedProducts);
+		
 		analysis.prepare(constants); 
 		PCTMCLogging.decreaseIndent();
 

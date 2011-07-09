@@ -56,7 +56,6 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	//private BiMap<StateProduct, Integer> productIndex;
 
 	private void prepareAccumulatedIndex() {
-
 		int j = 0;
 		accumulatedMomentIndex = HashBiMap.<PopulationProduct, Integer> create();
 		for (CombinedPopulationProduct combinedProduct : usedCombinedProducts) {
@@ -65,6 +64,14 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 				if (!accumulatedMomentIndex.containsKey(accumulatedProduct)) 
 					accumulatedMomentIndex.put(accumulatedProduct, j++);
 			}
+		}
+	}
+	
+	private void prepareGeneralExpectationIndex(){
+		int j = 0; 
+		generalExpectationIndex = HashBiMap.<AbstractExpression,Integer>create(); 
+		for (AbstractExpression eg: usedGeneralExpectations){
+			generalExpectationIndex.put(eg,j++);
 		}
 	}
 

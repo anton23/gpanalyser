@@ -30,7 +30,7 @@ public abstract class AbstractPCTMCAnalysis {
 	public abstract String toString();
 
 	protected Collection<CombinedPopulationProduct> usedCombinedProducts;
-	protected Collection<AbstractExpression> usedGeneralExpressions;
+	protected Collection<AbstractExpression> usedGeneralExpectations;
 
 	protected PCTMC pctmc;
 
@@ -77,8 +77,6 @@ public abstract class AbstractPCTMCAnalysis {
 	public double getStepSize() {
 		return stepSize;
 	}
-	
-	
 
 	public double getStopTime() {
 		return stopTime;
@@ -95,7 +93,7 @@ public abstract class AbstractPCTMCAnalysis {
 		generalExpectationIndex = HashBiMap
 				.<AbstractExpression, Integer> create();
 		usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
-		usedGeneralExpressions = new HashSet<AbstractExpression>();
+		usedGeneralExpectations = new HashSet<AbstractExpression>();
 	}
 	
 	/**
@@ -111,6 +109,10 @@ public abstract class AbstractPCTMCAnalysis {
 			usedCombinedProducts.add(p);
 			momentIndex.put(p, i++);
 		}
+	}
+	
+	public void setUsedGeneralExpectations(Collection<AbstractExpression> usedGeneralExpectations){
+		this.usedGeneralExpectations = usedGeneralExpectations;
 	}
 	
 	/**
