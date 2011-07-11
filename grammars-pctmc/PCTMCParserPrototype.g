@@ -221,11 +221,16 @@ primaryExpression:
      | LOWERCASENAME LPAR expressionList RPAR -> ^(FUN LOWERCASENAME expressionList) 
      | LOWERCASENAME     
      | mean 
+     | generalExpectation
      | central
      | scentral
      | PATTERN state -> ^(PATTERN state)
 ;
 
+
+generalExpectation:
+  GENEXPECTATION LBRACK expression RBRACK -> ^(GENEXPECTATION expression)
+;
 
 mean:
   MEAN LBRACK expression RBRACK -> ^(MEAN expression)

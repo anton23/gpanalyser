@@ -70,8 +70,6 @@ public class PCTMCInterpreter {
 		this.compilerClass = compilerClass;
 	}
 
-	
-	
 	public PCTMCInterpreter(Class<? extends Lexer> lexerClass,
 			Class<? extends Parser> parserClass,
 			Class<? extends TreeParser> compilerClass,
@@ -341,6 +339,7 @@ public class PCTMCInterpreter {
 			usedGeneralExpectations.addAll(visitor.getUsedGeneralExpectations());
 		}
 		analysis.setUsedMoments(usedProducts);
+		analysis.setUsedGeneralExpectations(usedGeneralExpectations);
 		analysis.analyse(variables);
 	}
 
