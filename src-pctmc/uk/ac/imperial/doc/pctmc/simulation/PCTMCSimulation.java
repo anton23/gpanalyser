@@ -48,12 +48,12 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	@Override
 	public void analyse(Constants variables) {
 		prepareAccumulatedIndex();
+		prepareGeneralExpectationIndex();
 		prepare(variables);
 		simulate(variables);
 	}
 
 	private BiMap<PopulationProduct, Integer> accumulatedMomentIndex;
-	//private BiMap<StateProduct, Integer> productIndex;
 
 	private void prepareAccumulatedIndex() {
 		int j = 0;

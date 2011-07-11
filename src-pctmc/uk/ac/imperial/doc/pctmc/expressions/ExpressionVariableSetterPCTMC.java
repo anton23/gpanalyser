@@ -7,7 +7,16 @@ import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariableSettter;
 
 
-public class ExpressionVariableSetterPCTMC extends ExpressionVariableSettter implements ICombinedProductExpressionVisitor{
+public class ExpressionVariableSetterPCTMC extends ExpressionVariableSettter implements 
+    ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor{
+	
+	
+	
+	@Override
+	public void visit(GeneralExpectationExpression e) {
+		e.getExpression().accept(this);
+	}
+
 	@Override
 	public void visit(CombinedProductExpression e) {
 	}

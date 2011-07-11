@@ -38,6 +38,7 @@ ACC: 'acc';
 TO: '->';
 
 MEAN: 'E';  
+GENEXPECTATION: 'Eg';
 CENTRAL: 'CM';
 SCENTRAL: 'SCM';
 VARIANCE: 'Var';

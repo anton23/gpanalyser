@@ -7,17 +7,26 @@ import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionWalkerWith
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.IExpressionVariableVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IPopulationVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 
-public class PatternSetterVisitor extends ExpressionWalkerWithConstants implements IPatternVisitor,IExpressionVariableVisitor,IPopulationVisitor,ICombinedProductExpressionVisitor {
+public class PatternSetterVisitor extends ExpressionWalkerWithConstants 
+ implements IPatternVisitor,IExpressionVariableVisitor,
+ IPopulationVisitor,ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor {
 	
 	protected PatternMatcher patternMatcher; 
 	
 	
 	
 	
+	@Override
+	public void visit(GeneralExpectationExpression e) {
+		e.getExpression().accept(this);
+	}
+
 	public PatternSetterVisitor(PatternMatcher patternMatcher) {
 		super();
 		this.patternMatcher = patternMatcher;

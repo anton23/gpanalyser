@@ -109,13 +109,13 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 	@Override
 	public AbstractExpressionEvaluator getEvaluatorImplementation(
 			EvaluatorMethod method, String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,BiMap<AbstractExpression,Integer> generalExpectationIndex) {
 		String suffix = "_"+command;
 		String analysisFolder = "analysis"+analysis; 
 		String folder = PCTMCOptions.matlabFolder + "/" +analysisFolder;
-		writeEvaluatorMethod(method, folder, suffix, constants, combinedMomentsIndex, new HashMap<AbstractExpression, Integer>());
+		writeEvaluatorMethod(method, folder, suffix, constants, combinedMomentsIndex, generalExpectationIndex);
 		command++;
-		return javaImplementation.getEvaluatorImplementation(method, className, constants, combinedMomentsIndex);
+		return javaImplementation.getEvaluatorImplementation(method, className, constants, combinedMomentsIndex,generalExpectationIndex);
 	}
 	
 	private void writeEvaluatorMethod(EvaluatorMethod method, String folder,String suffix, Constants constants,

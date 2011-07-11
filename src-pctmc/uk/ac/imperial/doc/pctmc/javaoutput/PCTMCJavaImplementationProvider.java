@@ -31,8 +31,8 @@ public class PCTMCJavaImplementationProvider implements PCTMCImplementationProvi
 
 	
 	public AbstractExpressionEvaluator getEvaluatorImplementation(EvaluatorMethod method,String className,Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex){
-		 JavaMethodPrinter printer = new JavaMethodPrinter(constants, combinedMomentsIndex, new HashMap<AbstractExpression, Integer>());
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,BiMap<AbstractExpression,Integer> generalExpectationIndex){
+		 JavaMethodPrinter printer = new JavaMethodPrinter(constants, combinedMomentsIndex, generalExpectationIndex);
 		 String code = printer.printEvaluatorMethod(method, className);
 		 AbstractExpressionEvaluator updater = (AbstractExpressionEvaluator) ClassCompiler
 			.getInstance(code, className);
