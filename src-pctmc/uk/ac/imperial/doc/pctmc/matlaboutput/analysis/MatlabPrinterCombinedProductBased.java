@@ -7,7 +7,9 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.matlaboutput.utils.MatlabOutputUtils;
 
 import com.google.common.collect.BiMap;
@@ -18,8 +20,18 @@ import com.google.common.collect.BiMap;
  *
  */
 public class MatlabPrinterCombinedProductBased extends MatlabPrinterWithConstants implements
-		  ICombinedProductExpressionVisitor {
+		  ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor {
 
+
+	@Override
+	public void visit(GeneralExpectationExpression e) {
+		Integer i;		
+		i = generalExpectationIndex.get(e.getExpression());
+		if (i==null){
+			throw new AssertionError("Unknown general expectation " + e.getExpression() + "!");
+		}
+		output.append(f + "(" + MatlabOutputUtils.getMatlabIndex(i+combinedMomentsIndex.size()) + ")");				
+	}
 
 	@Override
 	public void visit(CombinedProductExpression e) {
@@ -42,5 +54,4 @@ public class MatlabPrinterCombinedProductBased extends MatlabPrinterWithConstant
 		this.generalExpectationIndex = generalExpectationIndex;
 		this.f = f;
 	}
-
 }
