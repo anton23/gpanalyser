@@ -68,6 +68,9 @@ public class PCTMCInterpreter {
 		this.lexerClass = lexerClass;
 		this.parserClass = parserClass;
 		this.compilerClass = compilerClass;
+		
+		globalPostprocessors = new LinkedList<PCTMCAnalysisPostprocessor>();
+		
 	}
 
 	public PCTMCInterpreter(Class<? extends Lexer> lexerClass,
@@ -78,6 +81,8 @@ public class PCTMCInterpreter {
 		this.patternMatcherClass = patternMatcherClass;
 	}
 
+	private Collection<PCTMCAnalysisPostprocessor> globalPostprocessors; 
+	
 	@SuppressWarnings("unchecked")
 	public void run(String[] args) {
 
@@ -151,7 +156,8 @@ public class PCTMCInterpreter {
 					PCTMCOptions.matlabFolder =
 						options.valueOf("matlab").toString();
 					PCTMCLogging.info("Generating matlab code, output folder is "
-							+ PCTMCOptions.matlabFolder + ".");					
+							+ PCTMCOptions.matlabFolder + ".");	
+					globalPostprocessors.add(new MatlabAnalysisPostprocessor());
 				}
 				
 				PCTMCLogging.debug("Creating a PCTMC interpreter with\n lexer: "
@@ -216,17 +222,17 @@ public class PCTMCInterpreter {
 										patternMatcher);
 							}
 						}
-						if (PCTMCOptions.matlab){
+				/*		if (PCTMCOptions.matlab){
 							PCTMCTools.setImplementationProvider(new PCTMCJavaImplementationProviderWithMatlab(constants,pctmc));
-						}
+						}*/
 
 						PCTMCLogging.info("Read a PCTMC with "
 								+ pctmc.getStateIndex().size() + " states and "
 								+ pctmc.getEvolutionEvents().size()
 								+ " transition classes");
 						for (AbstractPCTMCAnalysis analysis : plots.keySet()) {
-							Collection<PlotDescription> aplots = plots
-									.get(analysis);
+							List<PlotDescription> aplots = new LinkedList<PlotDescription>(
+									plots.get(analysis));
 							if (patternMatcher != null) {
 								for (PlotDescription pd : aplots) {
 									for (AbstractExpression e : pd
@@ -295,7 +301,7 @@ public class PCTMCInterpreter {
 	}
 
 	private void processPlots(AbstractPCTMCAnalysis analysis,
-			Collection<PlotDescription> plotDescriptions,
+			List<PlotDescription> plotDescriptions,
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables,
 			Constants constants) {
 		PCTMCLogging.info("Running analysis " + analysis.toString());
@@ -324,6 +330,11 @@ public class PCTMCInterpreter {
 		for (int i = 0; i < plots.size(); i++) {
 			plotData(analysis, constants, plots.get(i), filenames.get(i));
 		}
+		
+		for (PCTMCAnalysisPostprocessor postProcessor:globalPostprocessors){
+			postProcessor.postprocessAnalysis(constants, analysis, plotDescriptions);			
+		}
+		
 
 		PCTMCLogging.decreaseIndent();
 	}
