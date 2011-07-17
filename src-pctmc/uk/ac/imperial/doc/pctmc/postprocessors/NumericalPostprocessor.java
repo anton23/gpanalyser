@@ -1,7 +1,5 @@
-package uk.ac.imperial.doc.pctmc.analysis;
+package uk.ac.imperial.doc.pctmc.postprocessors;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,28 +11,18 @@ import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 import uk.ac.imperial.doc.jexpressions.statements.ArrayDeclaration;
 import uk.ac.imperial.doc.jexpressions.statements.ArrayElementAssignment;
 import uk.ac.imperial.doc.jexpressions.statements.Comment;
+import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
-/*
- * Abstract class for transient analysis of PCTMCs. 
- */
-public abstract class AbstractPCTMCAnalysis {
-
-	public abstract String toString();
-
-	protected Collection<CombinedPopulationProduct> usedCombinedProducts;
-	protected Collection<AbstractExpression> usedGeneralExpectations;
-
-	protected PCTMC pctmc;
-
-	protected BiMap<State, Integer> stateIndex;
+public class NumericalPostprocessor implements PCTMCAnalysisPostprocessor {
+	
 	protected BiMap<CombinedPopulationProduct, Integer> momentIndex;
 
 	protected BiMap<AbstractExpression, Integer> generalExpectationIndex;
@@ -43,83 +31,19 @@ public abstract class AbstractPCTMCAnalysis {
 	protected double stepSize;
 
 	protected double[][] dataPoints;
-	
-	
-	
-	public PCTMC getPCTMC() {
-		return pctmc;
+
+
+	@Override
+	public void postprocessAnalysis(Constants constants,
+			AbstractPCTMCAnalysis analysis,
+			List<PlotDescription> plotDescriptions){
+		momentIndex = analysis.getMomentIndex();
+		generalExpectationIndex = analysis.getGeneralExpectationIndex(); 
+		stopTime = analysis.getStopTime(); 
+		stepSize = analysis.getStepSize(); 		
 	}
 
-	
-	
-	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
-		return momentIndex;
-	}
-
-
-
-	public BiMap<AbstractExpression, Integer> getGeneralExpectationIndex() {
-		return generalExpectationIndex;
-	}
-
-
-
-	/**
-	 * Prepares the analysis with given constants. 
-	 * @param constants
-	 */
-	public abstract void prepare(Constants constants);
-	
-	/**
-	 * Returns the explicit step size for data keeping.
-	 * @return
-	 */
-	public double getStepSize() {
-		return stepSize;
-	}
-
-	public double getStopTime() {
-		return stopTime;
-	}
-
-	public AbstractPCTMCAnalysis(PCTMC pctmc, double stopTime, double stepSize) {
-		this.pctmc = pctmc;
-		this.stopTime = stopTime;
-		this.stepSize = stepSize;
-
-		stateIndex = pctmc.getStateIndex();
-
-		momentIndex = HashBiMap.<CombinedPopulationProduct, Integer> create();
-		generalExpectationIndex = HashBiMap
-				.<AbstractExpression, Integer> create();
-		usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
-		usedGeneralExpectations = new HashSet<AbstractExpression>();
-	}
-	
-	/**
-	 * Sets the moments the analysis has to compute.
-	 * @param combinedProducts
-	 */
-	public void setUsedMoments(
-			Collection<CombinedPopulationProduct> combinedProducts) {
-		momentIndex = HashBiMap.<CombinedPopulationProduct, Integer> create();
-		usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
-		int i = 0;
-		for (CombinedPopulationProduct p : combinedProducts) {
-			usedCombinedProducts.add(p);
-			momentIndex.put(p, i++);
-		}
-	}
-	
-	public void setUsedGeneralExpectations(Collection<AbstractExpression> usedGeneralExpectations){
-		this.usedGeneralExpectations = usedGeneralExpectations;
-	}
-	
-	/**
-	 * Runs the analysis with given constants.
-	 * @param constants
-	 */
-	public abstract void analyse(Constants constants);
+	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
 	
 	/**
 	 * Returns an object providing updates to expressions from moment data. 
@@ -130,7 +54,7 @@ public abstract class AbstractPCTMCAnalysis {
 	public AbstractExpressionEvaluator getExpressionEvaluator(
 			final List<PlotExpression> plotExpressions, Constants constants) {
 		EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
-		AbstractExpressionEvaluator evaluator = PCTMCTools.getImplementationProvider()
+		AbstractExpressionEvaluator evaluator = new PCTMCJavaImplementationProvider()
 				.getEvaluatorImplementation(updaterMethod, evaluatorClassName,
 						constants, momentIndex,generalExpectationIndex);
 		return evaluator;
@@ -184,9 +108,6 @@ public abstract class AbstractPCTMCAnalysis {
 		return selectedData;
 	}
 	
-
-	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
-
 	public static EvaluatorMethod getEvaluatorMethod(List<PlotExpression> plotExpressions,
 			Constants constants) {
 		List<AbstractStatement> body = new LinkedList<AbstractStatement>();
@@ -203,40 +124,5 @@ public abstract class AbstractPCTMCAnalysis {
 		return new EvaluatorMethod(body,plotExpressions.size(),returnArray);
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((pctmc == null) ? 0 : pctmc.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(stepSize);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(stopTime);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractPCTMCAnalysis other = (AbstractPCTMCAnalysis) obj;
-		if (pctmc == null) {
-			if (other.pctmc != null)
-				return false;
-		} else if (!pctmc.equals(other.pctmc))
-			return false;
-		if (Double.doubleToLongBits(stepSize) != Double
-				.doubleToLongBits(other.stepSize))
-			return false;
-		if (Double.doubleToLongBits(stopTime) != Double
-				.doubleToLongBits(other.stopTime))
-			return false;
-		return true;
-	}
-
+	
 }
