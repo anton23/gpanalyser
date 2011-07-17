@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc;
+package uk.ac.imperial.doc.pctmc.postprocessors;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +9,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;

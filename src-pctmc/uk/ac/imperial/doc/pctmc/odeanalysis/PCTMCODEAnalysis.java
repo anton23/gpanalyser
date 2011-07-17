@@ -4,7 +4,6 @@ package uk.ac.imperial.doc.pctmc.odeanalysis;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorWithConstants;
@@ -50,7 +49,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 	
 	@Override
 	public void setUsedMoments(Collection<CombinedPopulationProduct> combinedProducts){
-		usedCombinedMoments = new HashSet<CombinedPopulationProduct>(combinedProducts);
+		usedCombinedProducts = new HashSet<CombinedPopulationProduct>(combinedProducts);
 		for (CombinedPopulationProduct product:combinedProducts){
 			int o = product.getOrder();
 			if (o>order) order = o;
@@ -71,7 +70,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 	private ODEGenerator odeGenerator; 
 	
  
-	private Set<CombinedPopulationProduct> usedCombinedMoments;
+
 	
 	private PCTMCImplementationPreprocessed preprocessedImplementation;
 
@@ -82,7 +81,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		this.odeGenerator = new ODEGenerator(pctmc);
 		dataPoints = null;
 
-		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(order, usedCombinedMoments);		
+		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(order, usedCombinedProducts);		
 		momentIndex = odeGenerator.getMomentIndex();
 		preprocessedImplementation = PCTMCTools.getImplementationProvider().
 		getPreprocessedODEImplementation(odeMethod,variables, momentIndex);
@@ -91,6 +90,12 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 	private ODEMethod odeMethod;
 	
 	
+	
+	
+	public int getDensity() {
+		return density;
+	}
+
 	@Override
 	public void analyse(Constants variables) {
 		long time = System.currentTimeMillis(); 
@@ -139,12 +144,12 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 		solveMomentODEs(initial,variables);
 	}
 	
-	private void solveMomentODEs(double[] initial,Constants variables) {
+	private void solveMomentODEs(double[] initial,Constants constants) {
 		if (odeMethod==null) {
-			prepare(variables);
+			prepare(constants);
 		}
 		PCTMCLogging.info("Running Runge-Kutta solver.");
-		dataPoints = PCTMCTools.getImplementationProvider().runODEAnalysis(preprocessedImplementation, initial, stopTime, stepSize, density, variables);
+		dataPoints = PCTMCTools.getImplementationProvider().runODEAnalysis(preprocessedImplementation, initial, stopTime, stepSize, density, constants);
 	}
 
 	public ODEMethod getOdeMethod() {
