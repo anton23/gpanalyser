@@ -3,6 +3,8 @@ package uk.ac.imperial.doc.pctmc.postprocessors;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jfree.data.xy.XYSeriesCollection;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
@@ -12,16 +14,19 @@ import uk.ac.imperial.doc.jexpressions.statements.ArrayDeclaration;
 import uk.ac.imperial.doc.jexpressions.statements.ArrayElementAssignment;
 import uk.ac.imperial.doc.jexpressions.statements.Comment;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
+import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import com.google.common.collect.BiMap;
 
-public class NumericalPostprocessor implements PCTMCAnalysisPostprocessor {
+public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocessor {
 	
 	protected BiMap<CombinedPopulationProduct, Integer> momentIndex;
 
@@ -32,7 +37,6 @@ public class NumericalPostprocessor implements PCTMCAnalysisPostprocessor {
 
 	protected double[][] dataPoints;
 
-
 	@Override
 	public void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
@@ -41,7 +45,42 @@ public class NumericalPostprocessor implements PCTMCAnalysisPostprocessor {
 		generalExpectationIndex = analysis.getGeneralExpectationIndex(); 
 		stopTime = analysis.getStopTime(); 
 		stepSize = analysis.getStepSize(); 		
+		calculateDataPoints(analysis, constants); 
+		if (dataPoints!=null){
+			for (PlotDescription pd:plotDescriptions){
+				List<PlotExpression> plotExpressions = new LinkedList<PlotExpression>(); 
+				for (AbstractExpression exp:pd.getExpressions()){
+					plotExpressions.add(new PlotExpression(exp));
+				}
+				plotData(analysis, constants, plotExpressions, pd.getFilename());
+			}
+		}
 	}
+	
+	public static void plotData(AbstractPCTMCAnalysis analysis,
+			Constants variables, List<PlotExpression> expressions,
+			String filename) {
+		String[] names = new String[expressions.size()];
+		for (int i = 0; i < expressions.size(); i++) {
+			names[i] = expressions.get(i).toString();
+		}
+		double[][] data = analysis.evaluateExpressions(expressions, variables);
+		XYSeriesCollection dataset = AnalysisUtils.getDataset(data,
+				analysis.getStepSize(), names);
+		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
+				analysis.toString());
+		if (!filename.equals("")) {
+			List<String> labels = new LinkedList<String>();
+			for (PlotExpression e : expressions) {
+				labels.add(e.toString());
+			}
+			FileUtils.writeGnuplotFile(filename, "", labels, "time", "count");
+			FileUtils.writeCSVfile(filename, dataset);
+		}
+	}
+
+	
+	protected abstract void calculateDataPoints(AbstractPCTMCAnalysis analysis, Constants constants);
 
 	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
 	

@@ -3,8 +3,6 @@ package uk.ac.imperial.doc.pctmc.postprocessors;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.BiMap;
-
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
@@ -16,6 +14,8 @@ import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
+import com.google.common.collect.BiMap;
+
 public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
 	PCTMCODEAnalysis odeAnalysis; 
@@ -26,6 +26,12 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 			List<PlotDescription> plotDescriptions) {
 		// TODO Auto-generated method stub
 		super.postprocessAnalysis(constants, analysis, plotDescriptions);
+	}
+	
+	
+
+	@Override
+	protected void calculateDataPoints(AbstractPCTMCAnalysis analysis, Constants constants) {
 		if (analysis instanceof PCTMCODEAnalysis){
 			this.odeAnalysis = (PCTMCODEAnalysis)analysis; 
 			PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider(); 
@@ -36,7 +42,10 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 			dataPoints = PCTMCTools.getImplementationProvider().runODEAnalysis(
 					preprocessedImplementation, initial, stopTime, stepSize, odeAnalysis.getDensity(), constants);
 		}
+		
 	}
+
+
 
 	protected double[] initial; 
 	
