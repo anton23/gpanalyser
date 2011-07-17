@@ -5,18 +5,12 @@ import java.util.Map;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 
-public class StandardisedCentralMomentOfLinearCombinationExpression extends AbstractExpression {
+public class StandardisedCentralMomentOfLinearCombinationExpression extends ExpressionWrapper {
 	
-	@Override
-	public void accept(IExpressionVisitor v) {
-		internalExpression.accept(v);
-		
-	}
 
 	@Override
 	public String toString() {
@@ -45,6 +39,7 @@ public class StandardisedCentralMomentOfLinearCombinationExpression extends Abst
 	
 	private List<AbstractExpression> coefficients; 
 	private List<CombinedPopulationProduct> combinedProducts;
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -77,7 +72,4 @@ public class StandardisedCentralMomentOfLinearCombinationExpression extends Abst
 			return false;
 		return true;
 	}
-	
-	
-
 }

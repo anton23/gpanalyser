@@ -11,7 +11,7 @@ import uk.ac.imperial.doc.pctmc.representation.State;
  * @author Anton Stefanek
  *
  */
-public class MeanExpression extends PlotExpression {
+public class MeanExpression extends ExpressionWrapper {
 
 	public MeanExpression(State state) {
 		super(createExpression(state));

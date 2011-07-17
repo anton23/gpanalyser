@@ -3,7 +3,6 @@ package uk.ac.imperial.doc.gpa.api;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +25,6 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
@@ -203,12 +201,7 @@ public class GPAAPI {
 	
 	
 	public AbstractExpressionEvaluator getExpressionEvaluator(List<AbstractExpression> expressions){
-		List<PlotExpression> plotExpressions = new LinkedList<PlotExpression>();
-		
-		for (AbstractExpression e:expressions){
-			plotExpressions.add(new PlotExpression(e));
-		}
-		return odeAnalysis.getExpressionEvaluator(plotExpressions, constants); 		
+		return odeAnalysis.getExpressionEvaluator(expressions, constants); 		
 	}
 	
 	

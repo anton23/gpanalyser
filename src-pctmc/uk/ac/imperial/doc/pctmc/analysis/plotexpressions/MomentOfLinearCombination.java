@@ -18,7 +18,7 @@ import com.google.common.collect.Multiset;
  * Expression for a moment of linear combination of combined population products. 
  * @author Anton Stefanek
  */
-public class MomentOfLinearCombination extends PlotExpression {
+public class MomentOfLinearCombination extends ExpressionWrapper {
 
 	@Override
 	public boolean equals(Object o) {

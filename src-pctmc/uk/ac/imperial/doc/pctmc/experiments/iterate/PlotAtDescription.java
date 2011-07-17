@@ -12,7 +12,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 
 
@@ -23,7 +22,7 @@ public class PlotAtDescription {
 	private String filename;
 	private List<PlotConstraint> constraints;
 	
-	private List<PlotExpression> plotExpressions; 
+	private List<AbstractExpression> plotExpressions; 
 	private double[] atTimes; 
 	
 	private AbstractExpressionEvaluator evaluator; 
@@ -41,12 +40,12 @@ public class PlotAtDescription {
 		this.evaluator = evaluator;
 	}
 
-	public List<PlotExpression> getPlotExpressions() {
+	public List<AbstractExpression> getPlotExpressions() {
 		return plotExpressions;
 	}
 
 	public void unfoldExpressions(Map<ExpressionVariable,AbstractExpression> unfoldedVariables){
-		plotExpressions = new ArrayList<PlotExpression>(constraints.size()+1);
+		plotExpressions = new ArrayList<AbstractExpression>(constraints.size()+1);
 		List<AbstractExpression> pAExpressions = new LinkedList<AbstractExpression>(); 
 		pAExpressions.add(getExpression()); 
 		for (PlotConstraint pc:getConstraints()){
@@ -54,9 +53,8 @@ public class PlotAtDescription {
 		}
 		for (AbstractExpression e:pAExpressions){
 			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(unfoldedVariables);
-			e.accept(setter); 					
-			PlotExpression pe = new PlotExpression(e);			
-			plotExpressions.add(pe); 
+			e.accept(setter); 								
+			plotExpressions.add(e); 
 		}
 	}
 	

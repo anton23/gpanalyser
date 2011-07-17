@@ -6,7 +6,6 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
@@ -15,16 +14,8 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 
 
 //only works for expressions of the form  (c_1*)?CM_1 + (c_2*)? CM_2 ...
-public class MeanOfLinearCombinationExpression extends AbstractExpression{
+public class MeanOfLinearCombinationExpression extends ExpressionWrapper{
 	
-	@Override
-	public void accept(IExpressionVisitor v) {
-		internalExpression.accept(v); 
-		
-	}
-
-
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -82,9 +73,7 @@ public class MeanOfLinearCombinationExpression extends AbstractExpression{
 
 	public AbstractExpression getInternalExpression() {
 		return internalExpression;
-	}
-
-	AbstractExpression internalExpression; 
+	} 
 	
 	public MeanOfLinearCombinationExpression(AbstractExpression e, Map<ExpressionVariable,AbstractExpression> var){		
 		AbstractExpression lsum = e; 

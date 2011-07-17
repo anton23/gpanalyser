@@ -18,7 +18,6 @@ import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -96,7 +95,7 @@ public class PCTMCIterate {
 	
 	
 	public void prepare(Constants constants){
-		List<PlotExpression> usedExpressions = new LinkedList<PlotExpression>();
+		List<AbstractExpression> usedExpressions = new LinkedList<AbstractExpression>();
 		
 
 		List<PlotAtDescription> tmpPlots = new LinkedList<PlotAtDescription>(plots); 
@@ -109,9 +108,9 @@ public class PCTMCIterate {
 		}
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
 		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
-		for (PlotExpression exp:usedExpressions){
+		for (AbstractExpression exp:usedExpressions){
 			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor(); 
-			exp.getExpression().accept(visitor); 
+			exp.accept(visitor); 
 			usedProducts.addAll(visitor.getUsedCombinedMoments());
 			usedGeneralExpectations.addAll(visitor.getUsedGeneralExpectations());
 		}
