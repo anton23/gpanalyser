@@ -17,7 +17,6 @@ import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
@@ -48,17 +47,13 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		calculateDataPoints(analysis, constants); 
 		if (dataPoints!=null){
 			for (PlotDescription pd:plotDescriptions){
-				List<PlotExpression> plotExpressions = new LinkedList<PlotExpression>(); 
-				for (AbstractExpression exp:pd.getExpressions()){
-					plotExpressions.add(new PlotExpression(exp));
-				}
-				plotData(analysis, constants, plotExpressions, pd.getFilename());
+				plotData(analysis, constants, pd.getExpressions(), pd.getFilename());
 			}
 		}
 	}
 	
 	public static void plotData(AbstractPCTMCAnalysis analysis,
-			Constants variables, List<PlotExpression> expressions,
+			Constants variables, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
 		for (int i = 0; i < expressions.size(); i++) {
@@ -71,7 +66,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 				analysis.toString());
 		if (!filename.equals("")) {
 			List<String> labels = new LinkedList<String>();
-			for (PlotExpression e : expressions) {
+			for (AbstractExpression e : expressions) {
 				labels.add(e.toString());
 			}
 			FileUtils.writeGnuplotFile(filename, "", labels, "time", "count");
@@ -91,7 +86,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	 * @return
 	 */
 	public AbstractExpressionEvaluator getExpressionEvaluator(
-			final List<PlotExpression> plotExpressions, Constants constants) {
+			final List<AbstractExpression> plotExpressions, Constants constants) {
 		EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
 		AbstractExpressionEvaluator evaluator = new PCTMCJavaImplementationProvider()
 				.getEvaluatorImplementation(updaterMethod, evaluatorClassName,
@@ -105,7 +100,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	 * @param constants
 	 * @return
 	 */
-	public double[][] evaluateExpressions(final List<PlotExpression> plotExpressions,
+	public double[][] evaluateExpressions(final List<AbstractExpression> plotExpressions,
 			Constants constants) {
 		AbstractExpressionEvaluator evaluator = getExpressionEvaluator(plotExpressions, constants); 
 		return evaluateExpressions(evaluator,constants); 
@@ -147,17 +142,17 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		return selectedData;
 	}
 	
-	public static EvaluatorMethod getEvaluatorMethod(List<PlotExpression> plotExpressions,
+	public static EvaluatorMethod getEvaluatorMethod(List<AbstractExpression> plotExpressions,
 			Constants constants) {
 		List<AbstractStatement> body = new LinkedList<AbstractStatement>();
 		String returnArray = "ret";
 		body.add(new ArrayDeclaration("double", returnArray, new IntegerExpression(
 				plotExpressions.size())));
 		int iRet = 0;
-		for (PlotExpression plotExpression : plotExpressions) {
+		for (AbstractExpression plotExpression : plotExpressions) {
 			body.add(new Comment(plotExpression.toString()));
 			body.add(new ArrayElementAssignment(returnArray, new IntegerExpression(
-					iRet), plotExpression.getExpression()));
+					iRet), plotExpression));
 			iRet++;
 		}
 		return new EvaluatorMethod(body,plotExpressions.size(),returnArray);

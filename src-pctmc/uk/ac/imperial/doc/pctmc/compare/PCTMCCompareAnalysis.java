@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 
 public class PCTMCCompareAnalysis extends AbstractPCTMCAnalysis{
@@ -48,7 +48,7 @@ public class PCTMCCompareAnalysis extends AbstractPCTMCAnalysis{
 	
 	@Override
 	public AbstractExpressionEvaluator getExpressionEvaluator(
-			List<PlotExpression> plotExpressions, Constants constants) {
+			List<AbstractExpression> plotExpressions, Constants constants) {
 		AbstractExpressionEvaluator evaluator1 = analysis1.getExpressionEvaluator(plotExpressions, constants);
 		AbstractExpressionEvaluator evaluator2 = analysis2.getExpressionEvaluator(plotExpressions, constants); 
 		return new CompareExpressionEvaluator(evaluator1, evaluator2);

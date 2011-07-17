@@ -39,7 +39,6 @@ import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
@@ -326,20 +325,19 @@ public class PCTMCInterpreter {
 			Constants constants) {
 		PCTMCLogging.info("Running analysis " + analysis.toString());
 		PCTMCLogging.increaseIndent();
-		List<List<PlotExpression>> plots = new ArrayList<List<PlotExpression>>(
+		List<List<AbstractExpression>> plots = new ArrayList<List<AbstractExpression>>(
 				plotDescriptions.size());
 		List<String> filenames = new ArrayList<String>(plotDescriptions.size());
 
-		List<PlotExpression> usedExpressions = new LinkedList<PlotExpression>();
+		List<AbstractExpression> usedExpressions = new LinkedList<AbstractExpression>();
 		for (PlotDescription pexp : plotDescriptions) {
-			List<PlotExpression> plotExpressions = new LinkedList<PlotExpression>();
+			List<AbstractExpression> plotExpressions = new LinkedList<AbstractExpression>();
 			for (AbstractExpression e : pexp.getExpressions()) {
 				ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(
 						unfoldedVariables);
 				e.accept(setter);
-				PlotExpression pe = new PlotExpression(e);
-				plotExpressions.add(pe);
-				usedExpressions.add(pe);
+				plotExpressions.add(e);
+				usedExpressions.add(e);
 			}
 			plots.add(plotExpressions);
 			filenames.add(pexp.getFilename());
@@ -360,12 +358,12 @@ public class PCTMCInterpreter {
 	}
 
 	private void analyse(AbstractPCTMCAnalysis analysis, Constants variables,
-			List<PlotExpression> expressions, double timeStep) {
+			List<AbstractExpression> expressions, double timeStep) {
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
 		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
-		for (PlotExpression exp : expressions) {
+		for (AbstractExpression exp : expressions) {
 			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
-			exp.getExpression().accept(visitor);
+			exp.accept(visitor);
 			usedProducts.addAll(visitor.getUsedCombinedMoments());
 			usedGeneralExpectations
 					.addAll(visitor.getUsedGeneralExpectations());
@@ -376,7 +374,7 @@ public class PCTMCInterpreter {
 	}
 
 	public static void plotData(AbstractPCTMCAnalysis analysis,
-			Constants variables, List<PlotExpression> expressions,
+			Constants variables, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
 		for (int i = 0; i < expressions.size(); i++) {
@@ -389,7 +387,7 @@ public class PCTMCInterpreter {
 				analysis.toString());
 		if (!filename.equals("")) {
 			List<String> labels = new LinkedList<String>();
-			for (PlotExpression e : expressions) {
+			for (AbstractExpression e : expressions) {
 				labels.add(e.toString());
 			}
 			FileUtils.writeGnuplotFile(filename, "", labels, "time", "count");

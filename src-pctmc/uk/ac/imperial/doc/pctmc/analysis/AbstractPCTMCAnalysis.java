@@ -13,7 +13,6 @@ import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 import uk.ac.imperial.doc.jexpressions.statements.ArrayDeclaration;
 import uk.ac.imperial.doc.jexpressions.statements.ArrayElementAssignment;
 import uk.ac.imperial.doc.jexpressions.statements.Comment;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -128,7 +127,7 @@ public abstract class AbstractPCTMCAnalysis {
 	 * @return
 	 */
 	public AbstractExpressionEvaluator getExpressionEvaluator(
-			final List<PlotExpression> plotExpressions, Constants constants) {
+			final List<AbstractExpression> plotExpressions, Constants constants) {
 		EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
 		AbstractExpressionEvaluator evaluator = PCTMCTools.getImplementationProvider()
 				.getEvaluatorImplementation(updaterMethod, evaluatorClassName,
@@ -142,7 +141,7 @@ public abstract class AbstractPCTMCAnalysis {
 	 * @param constants
 	 * @return
 	 */
-	public double[][] evaluateExpressions(final List<PlotExpression> plotExpressions,
+	public double[][] evaluateExpressions(final List<AbstractExpression> plotExpressions,
 			Constants constants) {
 		AbstractExpressionEvaluator evaluator = getExpressionEvaluator(plotExpressions, constants); 
 		return evaluateExpressions(evaluator,constants); 
@@ -187,17 +186,17 @@ public abstract class AbstractPCTMCAnalysis {
 
 	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
 
-	public static EvaluatorMethod getEvaluatorMethod(List<PlotExpression> plotExpressions,
+	public static EvaluatorMethod getEvaluatorMethod(List<AbstractExpression> plotExpressions,
 			Constants constants) {
 		List<AbstractStatement> body = new LinkedList<AbstractStatement>();
 		String returnArray = "ret";
 		body.add(new ArrayDeclaration("double", returnArray, new IntegerExpression(
 				plotExpressions.size())));
 		int iRet = 0;
-		for (PlotExpression plotExpression : plotExpressions) {
+		for (AbstractExpression plotExpression : plotExpressions) {
 			body.add(new Comment(plotExpression.toString()));
 			body.add(new ArrayElementAssignment(returnArray, new IntegerExpression(
-					iRet), plotExpression.getExpression()));
+					iRet), plotExpression));
 			iRet++;
 		}
 		return new EvaluatorMethod(body,plotExpressions.size(),returnArray);

@@ -11,7 +11,6 @@ import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.matlaboutput.analysis.MatlabMethodPrinter;
 import uk.ac.imperial.doc.pctmc.matlaboutput.odeanalysis.MatlabODEMethodPrinter;
@@ -44,9 +43,9 @@ public class MatlabAnalysisPostprocessor implements PCTMCAnalysisPostprocessor {
 		int i = 0; 
 		for (PlotDescription plotDescription:plotDescriptions){
 			MatlabMethodPrinter printer = new MatlabMethodPrinter(constants, analysis.getMomentIndex(), analysis.getGeneralExpectationIndex());
-			List<PlotExpression> plotExpressionList = new LinkedList<PlotExpression>(); 
+			List<AbstractExpression> plotExpressionList = new LinkedList<AbstractExpression>(); 
 			for (AbstractExpression e:plotDescription.getExpressions()){
-				plotExpressionList.add(new PlotExpression(e));
+				plotExpressionList.add(e);
 			}
 			String suffix = "_"+i;
 			String fileName = analysisFolder +"/"+ MatlabMethodPrinter.evaluatorName + suffix + ".m";
