@@ -1,13 +1,10 @@
 package uk.ac.imperial.doc.pctmc.postprocessors;
 
-import java.util.List;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
@@ -18,31 +15,28 @@ import com.google.common.collect.BiMap;
 
 public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
-	PCTMCODEAnalysis odeAnalysis; 
+	private PCTMCODEAnalysis odeAnalysis; 
 	
 	@Override
-	public void postprocessAnalysis(Constants constants,
-			AbstractPCTMCAnalysis analysis,
-			List<PlotDescription> plotDescriptions) {
-		// TODO Auto-generated method stub
-		super.postprocessAnalysis(constants, analysis, plotDescriptions);
-	}
-	
-	
-
-	@Override
-	protected void calculateDataPoints(AbstractPCTMCAnalysis analysis, Constants constants) {
+	protected void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
+		odeAnalysis = null;
 		if (analysis instanceof PCTMCODEAnalysis){
 			this.odeAnalysis = (PCTMCODEAnalysis)analysis; 
-			PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider(); 
-			
-			PCTMCImplementationPreprocessed preprocessedImplementation = 
+			PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider(); 			
+			preprocessedImplementation = 
 				javaImplementation.getPreprocessedODEImplementation(odeAnalysis.getOdeMethod(), constants,momentIndex);
-			initial = getInitialValues(constants); 
-			dataPoints = PCTMCTools.getImplementationProvider().runODEAnalysis(
-					preprocessedImplementation, initial, stopTime, stepSize, odeAnalysis.getDensity(), constants);
 		}
-		
+	}
+	
+	private PCTMCImplementationPreprocessed preprocessedImplementation;
+
+	@Override
+	protected void calculateDataPoints(Constants constants) {
+		if (odeAnalysis!=null){
+			initial = getInitialValues(constants); 
+			dataPoints = new PCTMCJavaImplementationProvider().runODEAnalysis(
+					preprocessedImplementation, initial, stopTime, stepSize, odeAnalysis.getDensity(), constants);
+		}		
 	}
 
 
