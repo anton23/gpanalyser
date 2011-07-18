@@ -54,6 +54,12 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	}
 
 	private BiMap<PopulationProduct, Integer> accumulatedMomentIndex;
+	
+	
+
+	public BiMap<PopulationProduct, Integer> getAccumulatedMomentIndex() {
+		return accumulatedMomentIndex;
+	}
 
 	private void prepareAccumulatedIndex() {
 		int j = 0;
@@ -91,9 +97,19 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
 	private AggregatedStateNextEventGenerator eventGenerator;
 	private double[] initial;
+	
+	
+
+	public AggregatedStateNextEventGenerator getEventGenerator() {
+		return eventGenerator;
+	}
 
 	private final String generatorName = "GeneratedNextEventGenerator";
 	
+	public int getReplications() {
+		return replications;
+	}
+
 	private final String accumulatorUpdaterName = "GeneratedAccumulatorUpdater";
 
 	private String getEventGeneratorCode(Constants variables) {

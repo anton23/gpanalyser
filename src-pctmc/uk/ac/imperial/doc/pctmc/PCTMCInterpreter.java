@@ -49,6 +49,8 @@ import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternSetterVisitor;
 import uk.ac.imperial.doc.pctmc.matlaboutput.PCTMCJavaImplementationProviderWithMatlab;
 import uk.ac.imperial.doc.pctmc.postprocessors.MatlabAnalysisPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.ODEAnalysisNumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
@@ -71,7 +73,8 @@ public class PCTMCInterpreter {
 		this.compilerClass = compilerClass;
 
 		globalPostprocessors = new LinkedList<PCTMCAnalysisPostprocessor>();
-
+		globalPostprocessors.add(new ODEAnalysisNumericalPostprocessor());
+		globalPostprocessors.add(new SimulationAnalysisNumericalPostprocessor());
 	}
 
 	public PCTMCInterpreter(Class<? extends Lexer> lexerClass,

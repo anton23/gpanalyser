@@ -37,14 +37,16 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	protected double[][] dataPoints;
 
 	@Override
-	public void postprocessAnalysis(Constants constants,
+	public final void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
 			List<PlotDescription> plotDescriptions){
 		momentIndex = analysis.getMomentIndex();
 		generalExpectationIndex = analysis.getGeneralExpectationIndex(); 
 		stopTime = analysis.getStopTime(); 
-		stepSize = analysis.getStepSize(); 		
-		calculateDataPoints(analysis, constants); 
+		stepSize = analysis.getStepSize();
+		dataPoints = null;
+		prepare(analysis, constants);
+		calculateDataPoints(constants); 
 		if (dataPoints!=null){
 			for (PlotDescription pd:plotDescriptions){
 				plotData(analysis, constants, pd.getExpressions(), pd.getFilename());
@@ -75,7 +77,9 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	}
 
 	
-	protected abstract void calculateDataPoints(AbstractPCTMCAnalysis analysis, Constants constants);
+	protected abstract void prepare(AbstractPCTMCAnalysis analysis, Constants constants);
+	
+	protected abstract void calculateDataPoints(Constants constants);
 
 	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
 	
