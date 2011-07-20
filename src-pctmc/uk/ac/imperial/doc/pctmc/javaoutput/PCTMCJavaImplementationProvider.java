@@ -39,7 +39,7 @@ public class PCTMCJavaImplementationProvider implements PCTMCImplementationProvi
 		return updater;
 	}
 	
-	public PCTMCImplementationPreprocessed getPreprocessedODEImplementation(ODEMethod method,Constants constants,
+	public JavaODEsPreprocessed getPreprocessedODEImplementation(ODEMethod method,Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex){
 		SystemOfODEs odes = getSystemOfODEsImplementation(method, "GeneratedODEs", constants, combinedMomentsIndex);
 		return new JavaODEsPreprocessed(odes);

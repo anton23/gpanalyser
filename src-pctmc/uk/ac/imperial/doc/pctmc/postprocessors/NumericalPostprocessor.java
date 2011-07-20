@@ -40,11 +40,6 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	public final void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
 			List<PlotDescription> plotDescriptions){
-		momentIndex = analysis.getMomentIndex();
-		generalExpectationIndex = analysis.getGeneralExpectationIndex(); 
-		stopTime = analysis.getStopTime(); 
-		stepSize = analysis.getStepSize();
-		dataPoints = null;
 		prepare(analysis, constants);
 		calculateDataPoints(constants); 
 		if (dataPoints!=null){
@@ -54,14 +49,14 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		}
 	}
 	
-	public static void plotData(AbstractPCTMCAnalysis analysis,
+	public void plotData(AbstractPCTMCAnalysis analysis,
 			Constants variables, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
 		for (int i = 0; i < expressions.size(); i++) {
 			names[i] = expressions.get(i).toString();
 		}
-		double[][] data = analysis.evaluateExpressions(expressions, variables);
+		double[][] data = evaluateExpressions(expressions, variables);
 		XYSeriesCollection dataset = AnalysisUtils.getDataset(data,
 				analysis.getStepSize(), names);
 		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
@@ -77,9 +72,15 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	}
 
 	
-	protected abstract void prepare(AbstractPCTMCAnalysis analysis, Constants constants);
+	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants){
+		momentIndex = analysis.getMomentIndex();
+		generalExpectationIndex = analysis.getGeneralExpectationIndex(); 
+		stopTime = analysis.getStopTime(); 
+		stepSize = analysis.getStepSize();
+		dataPoints = null;
+	}
 	
-	protected abstract void calculateDataPoints(Constants constants);
+	public abstract void calculateDataPoints(Constants constants);
 
 	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
 	

@@ -3,18 +3,12 @@ package uk.ac.imperial.doc.pctmc.odeanalysis;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 	@Override
@@ -72,10 +66,6 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
  
 
 	
-	private PCTMCImplementationPreprocessed preprocessedImplementation;
-
-	
-	
 	@Override
 	public void prepare(Constants variables) {
 		this.odeGenerator = new ODEGenerator(pctmc);
@@ -83,74 +73,20 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 
 		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(order, usedCombinedProducts);		
 		momentIndex = odeGenerator.getMomentIndex();
-		preprocessedImplementation = PCTMCTools.getImplementationProvider().
-		getPreprocessedODEImplementation(odeMethod,variables, momentIndex);
 	}
 	
 	private ODEMethod odeMethod;
 	
-	
-	
+
 	
 	public int getDensity() {
 		return density;
 	}
 
-	@Override
-	public void analyse(Constants variables) {
-		long time = System.currentTimeMillis(); 
-		solveMomentODEs(variables);
-		PCTMCLogging.info("The analysis took " + (-time + System.currentTimeMillis()) + " mseconds.");
-	}
 	
 	private double[] initial; 
 	
-	public double[] getInitialValues(Constants constants){
-		initial = new double[momentIndex.size()];
-		
-		double[] initialCounts = new double[stateIndex.size()];
-
-		for (int i = 0; i < stateIndex.size(); i++) {
-			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(constants);
-			pctmc.getInitCounts()[i].accept(evaluator);
-			initialCounts[i] = evaluator.getResult();
-		}
-
-		for (Map.Entry<CombinedPopulationProduct, Integer> e:momentIndex.entrySet()) {
-			if (!e.getKey().getAccumulatedProducts().isEmpty()){
-				initial[e.getValue()]=0;
-			} else {
-				double tmp = 1.0;
-				
-				for (Map.Entry<State, Integer> s:e.getKey().getNakedProduct().getProduct().entrySet()){
-					for (int p = 0; p < s.getValue(); p++) {
-						if (!stateIndex.containsKey(s.getKey())){
-							throw new AssertionError("State " + s.getKey() + " unknown!"); 
-						}
-						tmp *= initialCounts[stateIndex.get(s.getKey())];
-					}
-				}
-				initial[e.getValue()] = tmp;
-			}
-		}
-		return initial;
-	}
 	
-	private void solveMomentODEs(Constants variables) {
-		if (odeMethod==null){
-			prepare(variables); 
-		} 
-		initial = getInitialValues(variables);
-		solveMomentODEs(initial,variables);
-	}
-	
-	private void solveMomentODEs(double[] initial,Constants constants) {
-		if (odeMethod==null) {
-			prepare(constants);
-		}
-		PCTMCLogging.info("Running Runge-Kutta solver.");
-		dataPoints = PCTMCTools.getImplementationProvider().runODEAnalysis(preprocessedImplementation, initial, stopTime, stepSize, density, constants);
-	}
 
 	public ODEMethod getOdeMethod() {
 		return odeMethod;

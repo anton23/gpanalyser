@@ -28,7 +28,8 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	private AccumulatorUpdater accUpdater; 
 	
 	@Override
-	protected void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
+	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
+		super.prepare(analysis, constants);
 		simulation = null;
 		if (analysis instanceof PCTMCSimulation){
 		this.simulation = (PCTMCSimulation) analysis;  
@@ -44,7 +45,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	}
 
 	@Override
-	protected void calculateDataPoints(Constants constants) {
+	public void calculateDataPoints(Constants constants) {
 		if (simulation!=null){
 			simulate(constants);
 		}		

@@ -49,8 +49,9 @@ public class MatlabAnalysisPostprocessor implements PCTMCAnalysisPostprocessor {
 			}
 			String suffix = "_"+i;
 			String fileName = analysisFolder +"/"+ MatlabMethodPrinter.evaluatorName + suffix + ".m";
+ 
 			writeFile(fileName, 
-					  printer.printEvaluatorMethod(analysis.getEvaluatorMethod(plotExpressionList, constants), suffix),				
+					  printer.printEvaluatorMethod(NumericalPostprocessor.getEvaluatorMethod(plotExpressionList, constants), suffix),				
 					  "Writing evaluator MATLAB function in file " + fileName);
 			i++;
 		}
