@@ -31,7 +31,6 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.postprocessors.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
 import com.google.common.collect.BiMap;
 
