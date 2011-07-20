@@ -198,16 +198,8 @@ public class PCTMCIterate {
 
  
 	    PCTMCLogging.setVisible(false);
-/*		long before = System.nanoTime();
-		for (int i = 0; i<10; i++){analysis.analyse(constants);}
-		long after = System.nanoTime(); 
-		PCTMCLogging.setVisible(true);
-		double mil = after-before;
-		PCTMCLogging.info("Expected run time is " + ((double)(mil*iterations*totalSteps)/10000000000.0) + " seconds");
-		PCTMCLogging.setVisible(false);*/
-	    
 
-	    
+	     
 	    iterations = 0; 
 	    for (int x = 0; x<xRange.getSteps(); x++){
 	    	double xValue = xRange.getStep(x);
@@ -319,7 +311,7 @@ public class PCTMCIterate {
 			}
 		}	
 		if (satisfied) return values[0];
-		else return Double.NaN; 
+		else return Double.POSITIVE_INFINITY; 
 		
 	}
 	
