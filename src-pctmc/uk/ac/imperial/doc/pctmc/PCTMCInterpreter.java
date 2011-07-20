@@ -354,10 +354,10 @@ public class PCTMCInterpreter {
 	}
 
 	private void analyse(AbstractPCTMCAnalysis analysis, Constants variables,
-			List<AbstractExpression> expressions, double timeStep) {
+			List<AbstractExpression> usedExpressions, double timeStep) {
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
 		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
-		for (AbstractExpression exp : expressions) {
+		for (AbstractExpression exp : usedExpressions) {
 			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
 			exp.accept(visitor);
 			usedProducts.addAll(visitor.getUsedCombinedMoments());
