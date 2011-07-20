@@ -6,24 +6,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.javaoutput.simulation.JavaPrinterPopulationBased;
 import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
-import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AggregatedStateNextEventGenerator;
-import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
@@ -43,14 +37,6 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 		super(pctmc,stopTime,stepSize);
 		this.replications = replications;
 		n = pctmc.getStateIndex().size();
-	}
-
-	@Override
-	public void analyse(Constants variables) {
-		prepareAccumulatedIndex();
-		prepareGeneralExpectationIndex();
-		prepare(variables);
-		simulate(variables);
 	}
 
 	private BiMap<PopulationProduct, Integer> accumulatedMomentIndex;
@@ -83,7 +69,9 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
 	int n;
 
-	public void prepare(Constants variables) {
+	public void prepare(Constants variables) {		
+		prepareAccumulatedIndex();
+		prepareGeneralExpectationIndex();
 
 		PCTMCLogging.info("Generating one step generator.");
 		PCTMCLogging.increaseIndent();
@@ -96,8 +84,7 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	}
 
 	private AggregatedStateNextEventGenerator eventGenerator;
-	private double[] initial;
-	
+
 	
 
 	public AggregatedStateNextEventGenerator getEventGenerator() {
@@ -110,7 +97,6 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 		return replications;
 	}
 
-	private final String accumulatorUpdaterName = "GeneratedAccumulatorUpdater";
 
 	private String getEventGeneratorCode(Constants variables) {
 		StringBuilder code = new StringBuilder();
@@ -191,122 +177,8 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 		return code.toString();
 	}
 	
-	private String updaterClassName = "GeneratedProductUpdater";
-	
-	private String getProductUpdaterCode(Constants variables) {
-		StringBuilder ret = new StringBuilder();
-		ret.append("import " + SimulationUpdater.class.getName() + ";\n");
-		ret.append("public class " + updaterClassName + " extends "
-				+ SimulationUpdater.class.getName() + "{\n");
-		ret.append("double[] newValues = new double[" + 
-				(momentIndex.size() + accumulatedMomentIndex.size() + generalExpectationIndex.size()) + "];\n");
-		ret.append("    public void update(double[] values, double[] oldValues){\n");
-		
-		for (Map.Entry<CombinedPopulationProduct, Integer> entry:momentIndex.entrySet()){
-			ret.append("newValues[" + entry.getValue() + "]=(");
-			//!!
-			AbstractExpression tmp = CombinedProductExpression.create(entry.getKey());
-			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, stateIndex, accumulatedMomentIndex, "oldValues");
-			tmp.accept(printer); 
-			ret.append(printer.toString()); 
-			ret.append(");\n");
-			ret.append("values[" +entry.getValue() + "]+= newValues["+entry.getValue() +"];\n");
-			
-		}
-		
-		for (Map.Entry<AbstractExpression, Integer> entry:generalExpectationIndex.entrySet()){
-			ret.append("values["+(momentIndex.size() + entry.getValue()) + "]+=");
-			JavaPrinterPopulationBased printer =
-				  new JavaPrinterPopulationBased(variables, stateIndex, 
-						  accumulatedMomentIndex, "oldValues");
-			entry.getKey().accept(printer); 
-			ret.append(printer.toString()); 
-			ret.append(";\n"); 
-		}
-		
-		ret.append("    }");
-		ret.append("}");
-		return ret.toString();
-	}
 	
 		
-	private String getAccumulatorUpdaterCode(Constants variables) {
-
-		StringBuilder ret = new StringBuilder();
-		ret.append("import " + AccumulatorUpdater.class.getName() + ";\n");
-		ret.append("public class " + accumulatorUpdaterName + " extends "
-				+ AccumulatorUpdater.class.getName() + "{\n");
-		ret.append( "       {n = " + accumulatedMomentIndex.size() + " ;}\n");
-		ret.append("    public double[] update(double[] counts, double delta){\n");
-		ret.append("      double[] values = new double[" + accumulatedMomentIndex.size() + "];\n");
-		 
-		
-		for (Map.Entry<PopulationProduct, Integer> entry : accumulatedMomentIndex.entrySet()) {
-			ret.append("values[" + entry.getValue() + "]=delta*(");			
-			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, stateIndex,accumulatedMomentIndex, "counts");
-			PopulationProductExpression tmp = new PopulationProductExpression(entry.getKey()); 
-			tmp.accept(printer); 		
-			ret.append(printer.toString()); 
-			ret.append(");\n");
-		}
-		
-		ret.append("     return values;\n");
-		ret.append("    }");
-		ret.append("}");
-
-		return ret.toString();
-	}
-
-
-	private void simulate(Constants variables) {
-		if (eventGenerator == null) {
-			prepare(variables);
-		}
-
-		dataPoints = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
-				.size() + generalExpectationIndex.size()];
-
-		eventGenerator.setRates(variables.getFlatConstants());
-
-		initial = new double[stateIndex.size()];
-		for (int i = 0; i < n; i++) {
-			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(variables);
-			pctmc.getInitCounts()[i].accept(evaluator);
-			initial[i] = evaluator.getResult();
-		}
-
-		PCTMCLogging.info("Running Gillespie simulator.");
-		PCTMCLogging.increaseIndent();
-
-		SimulationUpdater updater = (SimulationUpdater) ClassCompiler
-				.getInstance(getProductUpdaterCode(variables), updaterClassName);
-		updater.setRates(variables.getFlatConstants());
-
-		AccumulatorUpdater accUpdater = (AccumulatorUpdater) ClassCompiler
-				.getInstance(getAccumulatorUpdaterCode(variables), accumulatorUpdaterName);
-		accUpdater.setRates(variables.getFlatConstants());
-
-		int m = momentIndex.size();
-
-		double[][] tmp;
-		for (int r = 0; r < replications; r++) {
-			if (r > 0 && r % (replications / 5 > 0 ? replications / 5 : 1) == 0) {
-				PCTMCLogging.info(r + " replications finished.");
-			}
-			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
-					initial, stopTime, stepSize, accUpdater);
-			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
-				updater.update(dataPoints[t], tmp[t]);				
-			}
-		}
-
-		for (int t = 0; t < dataPoints.length; t++) {
-			for (int i = 0; i < m + generalExpectationIndex.size(); i++) {
-				dataPoints[t][i] = dataPoints[t][i] / replications;
-			}
-		}
-		PCTMCLogging.decreaseIndent();
-	}
 
 	@Override
 	public int hashCode() {

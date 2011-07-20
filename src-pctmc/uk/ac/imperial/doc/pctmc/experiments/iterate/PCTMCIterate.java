@@ -21,6 +21,11 @@ import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisit
 import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
+import uk.ac.imperial.doc.pctmc.postprocessors.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.ODEAnalysisNumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.SimulationAnalysisNumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
@@ -121,14 +126,26 @@ public class PCTMCIterate {
 		
 		analysis.prepare(constants); 
 		PCTMCLogging.decreaseIndent();
-
-
+		
+		numericalPostprocessor = null;
+		
+		//TODO temporary hack
+		if (analysis instanceof PCTMCODEAnalysis){
+			numericalPostprocessor = new ODEAnalysisNumericalPostprocessor(); 
+		}
+		if (analysis instanceof PCTMCSimulation){
+			numericalPostprocessor = new SimulationAnalysisNumericalPostprocessor();
+		}
+		
+		numericalPostprocessor.prepare(analysis, constants);
+		
 		for (PlotAtDescription p:tmpPlots){
-			AbstractExpressionEvaluator updater = analysis.getExpressionEvaluator(p.getPlotExpressions(), constants);
+			AbstractExpressionEvaluator updater = numericalPostprocessor.getExpressionEvaluator(p.getPlotExpressions(), constants);
 			p.setEvaluator(updater);
 		}
-
 	}
+	
+	NumericalPostprocessor numericalPostprocessor;
 	
 	private void iterate2d(Constants constants){
 		PCTMCLogging.info("Running experiment " + this.toString());
@@ -207,7 +224,7 @@ public class PCTMCIterate {
 	    		}
 	    		
 	    		reEvaluate(constants);	
-	    		analysis.analyse(constants);
+	    		numericalPostprocessor.calculateDataPoints(constants);
 	    		
 	    		for (int i = 0; i<plots.size(); i++){
 	    			data[i][x][y] = evaluateConstrainedReward(plots.get(i), constants);
@@ -263,7 +280,7 @@ public class PCTMCIterate {
 						minRangesArray[s].getStep(step[s]));
 			}
 			reEvaluate(constants);
-			analysis.analyse(constants);
+			numericalPostprocessor.calculateDataPoints(constants);
 			iterations++;
 	    	if ((iterations )%show == 0){
 	    		PCTMCLogging.setVisible(true);
@@ -292,7 +309,7 @@ public class PCTMCIterate {
 	}
 	
 	private double evaluateConstrainedReward(PlotAtDescription plot, Constants constants){
-		double[] values = analysis.evaluateExpressionsAtTimes(plot.getEvaluator(), plot.getAtTimes(), constants);
+		double[] values = numericalPostprocessor.evaluateExpressionsAtTimes(plot.getEvaluator(), plot.getAtTimes(), constants);
 		boolean satisfied = true;
 		for (int j = 0; j<plot.getConstraints().size(); j++){
 			PlotConstraint pc = plot.getConstraints().get(j); 

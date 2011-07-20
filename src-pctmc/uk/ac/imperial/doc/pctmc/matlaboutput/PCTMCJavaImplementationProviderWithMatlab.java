@@ -22,6 +22,7 @@ import uk.ac.imperial.doc.pctmc.matlaboutput.odeanalysis.MatlabODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.matlaboutput.utils.MatlabOutputUtils;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
+import uk.ac.imperial.doc.pctmc.postprocessors.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
@@ -198,7 +199,7 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 			writeInitialValuesFile(asODEAnalysis.getOdeMethod(), constants, momentIndex, generalExpectationIndex, folder+"/"+getInitialValuesName+".m");
 			PlotAtDescription minSpecification = iterate.getMinSpecification();
 			if (minSpecification!=null){
-				EvaluatorMethod minSpecEvaluatorMethod = asODEAnalysis.getEvaluatorMethod(minSpecification.getPlotExpressions(),constants);
+				EvaluatorMethod minSpecEvaluatorMethod = NumericalPostprocessor.getEvaluatorMethod(minSpecification.getPlotExpressions(),constants);
 				writeEvaluatorMethod(minSpecEvaluatorMethod, folder, "_minSpecification", constants, momentIndex, generalExpectationIndex);
 				writeIterateMainFile(iterate, folder);
 			}

@@ -6,7 +6,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
+import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -18,7 +18,8 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	private PCTMCODEAnalysis odeAnalysis; 
 	
 	@Override
-	protected void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
+	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
+		super.prepare(analysis, constants);
 		odeAnalysis = null;
 		if (analysis instanceof PCTMCODEAnalysis){
 			this.odeAnalysis = (PCTMCODEAnalysis)analysis; 
@@ -28,18 +29,24 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		}
 	}
 	
-	private PCTMCImplementationPreprocessed preprocessedImplementation;
+	private JavaODEsPreprocessed preprocessedImplementation;
 
 	@Override
-	protected void calculateDataPoints(Constants constants) {
+	public void calculateDataPoints(Constants constants) {
 		if (odeAnalysis!=null){
 			initial = getInitialValues(constants); 
 			dataPoints = new PCTMCJavaImplementationProvider().runODEAnalysis(
 					preprocessedImplementation, initial, stopTime, stepSize, odeAnalysis.getDensity(), constants);
 		}		
 	}
+	
+	
 
 
+
+	public JavaODEsPreprocessed getPreprocessedImplementation() {
+		return preprocessedImplementation;
+	}
 
 	protected double[] initial; 
 	

@@ -24,7 +24,6 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.TreeNodeStream;
 import org.antlr.runtime.tree.TreeParser;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import uk.ac.imperial.doc.gpa.plain.expressions.TransactionPatternMatcher;
 import uk.ac.imperial.doc.gpa.plain.syntax.PlainCompiler;
@@ -34,7 +33,6 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
@@ -53,7 +51,6 @@ import uk.ac.imperial.doc.pctmc.postprocessors.ODEAnalysisNumericalPostprocessor
 import uk.ac.imperial.doc.pctmc.postprocessors.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
@@ -348,10 +345,6 @@ public class PCTMCInterpreter {
 
 		analyse(analysis, constants, usedExpressions, analysis.getStepSize());
 
-		for (int i = 0; i < plots.size(); i++) {
-			plotData(analysis, constants, plots.get(i), filenames.get(i));
-		}
-
 		for (PCTMCAnalysisPostprocessor postProcessor : globalPostprocessors) {
 			postProcessor.postprocessAnalysis(constants, analysis,
 					plotDescriptions);
@@ -373,28 +366,6 @@ public class PCTMCInterpreter {
 		}
 		analysis.setUsedMoments(usedProducts);
 		analysis.setUsedGeneralExpectations(usedGeneralExpectations);
-		analysis.analyse(variables);
-	}
-
-	public static void plotData(AbstractPCTMCAnalysis analysis,
-			Constants variables, List<AbstractExpression> expressions,
-			String filename) {
-		String[] names = new String[expressions.size()];
-		for (int i = 0; i < expressions.size(); i++) {
-			names[i] = expressions.get(i).toString();
-		}
-		double[][] data = analysis.evaluateExpressions(expressions, variables);
-		XYSeriesCollection dataset = AnalysisUtils.getDataset(data,
-				analysis.getStepSize(), names);
-		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
-				analysis.toString());
-		if (!filename.equals("")) {
-			List<String> labels = new LinkedList<String>();
-			for (AbstractExpression e : expressions) {
-				labels.add(e.toString());
-			}
-			FileUtils.writeGnuplotFile(filename, "", labels, "time", "count");
-			FileUtils.writeCSVfile(filename, dataset);
-		}
+		analysis.prepare(variables);
 	}
 }

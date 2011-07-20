@@ -27,10 +27,9 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionE
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
-import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
-import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
+import uk.ac.imperial.doc.pctmc.postprocessors.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
@@ -97,9 +96,6 @@ public class GPAAPI {
 							compilerReturn);
 			pctmc = (PCTMC) compilerReturn.getClass()
 			.getField("pctmc").get(compilerReturn);
-			
-			
-			
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -123,6 +119,9 @@ public class GPAAPI {
 			e.printStackTrace();
 		}
 	}
+	
+    ODEAnalysisNumericalPostprocessor numericalPostprocessor; 
+	
 	PCTMCODEAnalysis odeAnalysis;
 	public SystemOfODEs getODEs(int order){
 		Set<CombinedPopulationProduct> combinedProducts = new HashSet<CombinedPopulationProduct>();
@@ -135,17 +134,17 @@ public class GPAAPI {
 		odeAnalysis = new PCTMCODEAnalysis(pctmc, 1.0, 0.1, 1,order);
 		odeAnalysis.setUsedMoments(combinedProducts);
 		
-		odeAnalysis.prepare(constants);
-		ODEMethod odeMethod = odeAnalysis.getOdeMethod();
-		PCTMCImplementationProvider provider = new PCTMCJavaImplementationProvider();
-		SystemOfODEs odes = provider.getSystemOfODEsImplementation(odeMethod, "GeneratedODEs", constants, 
-				odeAnalysis.getMomentIndex());
+		odeAnalysis.prepare(constants);		
+		numericalPostprocessor = new ODEAnalysisNumericalPostprocessor(); 
+		numericalPostprocessor.prepare(odeAnalysis, constants);
+		
+		SystemOfODEs odes = numericalPostprocessor.getPreprocessedImplementation().getOdes();
 		odes.setRates(constants.getFlatConstants());
 		return odes;
 	}
 		
 	public double[] getInitialValues(){
-		return odeAnalysis.getInitialValues(constants);
+		return numericalPostprocessor.getInitialValues(constants);
 	}
 	
 	public List<AbstractExpression> parseExpressionList(String string){
@@ -201,7 +200,7 @@ public class GPAAPI {
 	
 	
 	public AbstractExpressionEvaluator getExpressionEvaluator(List<AbstractExpression> expressions){
-		return odeAnalysis.getExpressionEvaluator(expressions, constants); 		
+		return numericalPostprocessor.getExpressionEvaluator(expressions, constants); 		
 	}
 	
 	
