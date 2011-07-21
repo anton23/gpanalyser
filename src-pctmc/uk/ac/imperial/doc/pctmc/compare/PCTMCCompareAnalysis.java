@@ -24,10 +24,8 @@ public class PCTMCCompareAnalysis extends AbstractPCTMCAnalysis{
 	private AbstractPCTMCAnalysis analysis1, analysis2; 
 
 	public PCTMCCompareAnalysis(AbstractPCTMCAnalysis analysis1, AbstractPCTMCAnalysis analysis2) {
-		super(analysis1.getPCTMC(), analysis1.getStopTime(), analysis1.getStepSize());
-		if (analysis1.getStepSize()!=analysis2.getStepSize() || analysis1.getStopTime()!=analysis2.getStopTime()){
-			throw new AssertionError("Incompatible analyses in compare!"); 
-		}
+		super(analysis1.getPCTMC());
+		
 		this.analysis1 = analysis1; 
 		this.analysis2 = analysis2;
 	} 

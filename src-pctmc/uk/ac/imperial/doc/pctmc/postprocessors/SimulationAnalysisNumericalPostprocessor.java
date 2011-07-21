@@ -36,11 +36,20 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	private SimulationUpdater updater;
 	private AccumulatorUpdater accUpdater; 
 	private AggregatedStateNextEventGenerator eventGenerator;
-	
+
+	protected int replications; 
 
 	private final String generatorName = "GeneratedNextEventGenerator";
 	
 	
+	
+	public SimulationAnalysisNumericalPostprocessor(double stopTime,
+			double stepSize, int replications) {
+		super(stopTime, stepSize);
+		this.replications = replications;
+	}
+
+
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
 		super.prepare(analysis, constants);
@@ -99,8 +108,8 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		int m = momentIndex.size();
 
 		double[][] tmp;
-		for (int r = 0; r < simulation.getReplications(); r++) {
-			if (r > 0 && r % (simulation.getReplications() / 5 > 0 ? simulation.getReplications() / 5 : 1) == 0) {
+		for (int r = 0; r < replications; r++) {
+			if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {
 				PCTMCLogging.info(r + " replications finished.");
 			}
 			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
@@ -112,7 +121,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 		for (int t = 0; t < dataPoints.length; t++) {
 			for (int i = 0; i < m + generalExpectationIndex.size(); i++) {
-				dataPoints[t][i] = dataPoints[t][i] / simulation.getReplications();
+				dataPoints[t][i] = dataPoints[t][i] / replications;
 			}
 		}
 		PCTMCLogging.decreaseIndent();

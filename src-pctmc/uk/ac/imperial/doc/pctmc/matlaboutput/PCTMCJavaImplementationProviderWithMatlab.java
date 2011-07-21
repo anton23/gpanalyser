@@ -11,8 +11,6 @@ import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
-import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotConstraint;
-import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
@@ -210,7 +208,7 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 	private String globalOptimName = "gobal_optim";
 	
 	private void writeIterateMainFile(PCTMCIterate iterate,String folder){
-		StringBuilder out = new StringBuilder(); 
+/*		StringBuilder out = new StringBuilder(); 
 		out.append("function [x,exitflag,output,solutions]="+globalOptimName+"()\n");
 		out.append("   param = "+getConstantsName+"();\n");
 		out.append("   stopTime = "+ iterate.getAnalysis().getStopTime() +";\n");
@@ -296,6 +294,6 @@ public class PCTMCJavaImplementationProviderWithMatlab implements PCTMCImplement
 		out.append("   end\n");
 		out.append("end\n");
 		
-		FileUtils.writeGeneralFile(out.toString(), folder+"/global_optim.m");
+		FileUtils.writeGeneralFile(out.toString(), folder+"/global_optim.m");*/
 	}
 }

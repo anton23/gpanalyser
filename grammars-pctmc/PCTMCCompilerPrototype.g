@@ -37,6 +37,7 @@ options{
   import pctmc.experiments.iterate.*; 
   import pctmc.analysis.plotexpressions.*;
   import pctmc.expressions.patterns.*;
+  import pctmc.postprocessors.*; 
    
   import com.google.common.collect.Multimap;
   import com.google.common.collect.LinkedHashMultimap;
@@ -133,7 +134,7 @@ experiment[PCTMC pctmc,Map<ExpressionVariable,AbstractExpression> unfoldedVariab
     a=analysis[$pctmc,null]   
     (p=plotAtSpecification {plots.add($p.p);})*
    )
-  {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,plots,$unfoldedVariables);}
+  {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,$a.postprocessor,plots,$unfoldedVariables);}
 ;
 
 rangeSpecification returns[RangeSpecification range]:
@@ -167,9 +168,10 @@ plotAt returns [AbstractExpression e, double t]:
    {$e = $exp.e; $t = $time.value;} 
 ;
 
-analysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] returns [AbstractPCTMCAnalysis analysis]:
-   o=odeAnalysis[pctmc,plots] {$analysis=$o.analysis;}
- | s=simulation[pctmc,plots] {$analysis=$s.analysis;}
+analysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
+   o=odeAnalysis[pctmc,plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
+ | s=simulation[pctmc,plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc,plots] {$analysis=$c.analysis;}
 ;
 
@@ -181,23 +183,29 @@ compare[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] retur
   if ($plots!=null) $plots.putAll($analysis,$ps.p);   
 }
 ;
-odeAnalysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] returns [PCTMCODEAnalysis analysis]:
+odeAnalysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]:
   ^(ODES stop=realnumber step=realnumber den=integer LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
-      $analysis = new PCTMCODEAnalysis($pctmc,$stop.value,$step.value,$den.value);
+      $analysis = new PCTMCODEAnalysis($pctmc);
+      $postprocessor = new ODEAnalysisNumericalPostprocessor($stop.value,$step.value,$den.value);
+      $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
   
 ;
 
-simulation[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] returns [PCTMCSimulation analysis]:
+simulation[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]:
   ^(SIMULATION stop=realnumber step=realnumber replications=integer LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
-      $analysis = new PCTMCSimulation($pctmc,$stop.value,$step.value,$replications.value);
+      $analysis = new PCTMCSimulation($pctmc);
+      $postprocessor = new SimulationAnalysisNumericalPostprocessor($stop.value,$step.value,$replications.value);
+      $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
   

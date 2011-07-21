@@ -34,6 +34,14 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	protected double stopTime;
 	protected double stepSize;
 
+	
+	
+	public NumericalPostprocessor(double stopTime, double stepSize) {
+		super();
+		this.stopTime = stopTime;
+		this.stepSize = stepSize;
+	}
+
 	protected double[][] dataPoints;
 
 	@Override
@@ -58,7 +66,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		}
 		double[][] data = evaluateExpressions(expressions, variables);
 		XYSeriesCollection dataset = AnalysisUtils.getDataset(data,
-				analysis.getStepSize(), names);
+				stepSize, names);
 		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
 				analysis.toString());
 		if (!filename.equals("")) {
@@ -75,8 +83,6 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants){
 		momentIndex = analysis.getMomentIndex();
 		generalExpectationIndex = analysis.getGeneralExpectationIndex(); 
-		stopTime = analysis.getStopTime(); 
-		stepSize = analysis.getStepSize();
 		dataPoints = null;
 	}
 	

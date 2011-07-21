@@ -17,6 +17,18 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
 	private PCTMCODEAnalysis odeAnalysis; 
 	
+	private int density;
+	
+	public ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize,
+			int density) {
+		super(stopTime, stepSize);
+		this.density = density;
+	}
+
+
+
+
+
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
 		super.prepare(analysis, constants);
@@ -36,7 +48,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		if (odeAnalysis!=null){
 			initial = getInitialValues(constants); 
 			dataPoints = new PCTMCJavaImplementationProvider().runODEAnalysis(
-					preprocessedImplementation, initial, stopTime, stepSize, odeAnalysis.getDensity(), constants);
+					preprocessedImplementation, initial, stopTime, stepSize, density, constants);
 		}		
 	}
 	

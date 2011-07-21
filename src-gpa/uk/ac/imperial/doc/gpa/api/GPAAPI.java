@@ -130,11 +130,11 @@ public class GPAAPI {
 			combinedProducts.addAll(visitor.getUsedCombinedMoments());
 		}
 		
-		odeAnalysis = new PCTMCODEAnalysis(pctmc, 1.0, 0.1, 1,order);
+		odeAnalysis = new PCTMCODEAnalysis(pctmc,order);
 		odeAnalysis.setUsedMoments(combinedProducts);
 		
 		odeAnalysis.prepare(constants);		
-		numericalPostprocessor = new ODEAnalysisNumericalPostprocessor(); 
+		numericalPostprocessor = new ODEAnalysisNumericalPostprocessor(1.0,0.1,1); 
 		numericalPostprocessor.prepare(odeAnalysis, constants);
 		
 		SystemOfODEs odes = numericalPostprocessor.getPreprocessedImplementation().getOdes();
