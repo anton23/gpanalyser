@@ -36,7 +36,7 @@ import PCTMCCompilerPrototype;
   import uk.ac.imperial.doc.pctmc.representation.*; 
   import uk.ac.imperial.doc.pctmc.experiments.iterate.*; 
   import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.*; 
-  
+  import uk.ac.imperial.doc.pctmc.postprocessors.*;
   
   import com.google.common.collect.Multimap;
   import com.google.common.collect.LinkedHashMultimap;

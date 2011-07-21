@@ -12,16 +12,15 @@ import com.google.common.collect.HashBiMap;
 
 public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
-	private int replications;
+
 
 	@Override
 	public String toString() {
 		return "Simulation"; 
 	}
-
-	public PCTMCSimulation(PCTMC pctmc, double stopTime, double stepSize,int replications) {
-		super(pctmc,stopTime,stepSize);
-		this.replications = replications;
+	
+	public PCTMCSimulation(PCTMC pctmc) {
+		super(pctmc);
 		n = pctmc.getStateIndex().size();
 	}
 
@@ -59,43 +58,5 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 		prepareAccumulatedIndex();
 		prepareGeneralExpectationIndex();
 
-			}
-
-	
-
-	
-
-	
-	public int getReplications() {
-		return replications;
-	}
-
-
-	
-	
-		
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + replications;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PCTMCSimulation other = (PCTMCSimulation) obj;
-		if (replications != other.replications)
-			return false;
-		return true;
-	}
-	
-	
+			}	
 }

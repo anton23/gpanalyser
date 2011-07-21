@@ -47,8 +47,6 @@ import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternSetterVisitor;
 import uk.ac.imperial.doc.pctmc.matlaboutput.PCTMCJavaImplementationProviderWithMatlab;
 import uk.ac.imperial.doc.pctmc.postprocessors.MatlabAnalysisPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.ODEAnalysisNumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -70,8 +68,8 @@ public class PCTMCInterpreter {
 		this.compilerClass = compilerClass;
 
 		globalPostprocessors = new LinkedList<PCTMCAnalysisPostprocessor>();
-		globalPostprocessors.add(new ODEAnalysisNumericalPostprocessor());
-		globalPostprocessors.add(new SimulationAnalysisNumericalPostprocessor());
+		//globalPostprocessors.add(new ODEAnalysisNumericalPostprocessor());
+		//globalPostprocessors.add(new SimulationAnalysisNumericalPostprocessor());
 	}
 
 	public PCTMCInterpreter(Class<? extends Lexer> lexerClass,
@@ -171,7 +169,6 @@ public class PCTMCInterpreter {
 				}
 			}
 		}
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -343,7 +340,8 @@ public class PCTMCInterpreter {
 			filenames.add(pexp.getFilename());
 		}
 
-		analyse(analysis, constants, usedExpressions, analysis.getStepSize());
+		analyse(analysis, constants, usedExpressions);
+		analysis.notifyPostprocessors(constants, plotDescriptions);
 
 		for (PCTMCAnalysisPostprocessor postProcessor : globalPostprocessors) {
 			postProcessor.postprocessAnalysis(constants, analysis,
@@ -354,7 +352,7 @@ public class PCTMCInterpreter {
 	}
 
 	private void analyse(AbstractPCTMCAnalysis analysis, Constants variables,
-			List<AbstractExpression> usedExpressions, double timeStep) {
+			List<AbstractExpression> usedExpressions) {
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
 		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
 		for (AbstractExpression exp : usedExpressions) {

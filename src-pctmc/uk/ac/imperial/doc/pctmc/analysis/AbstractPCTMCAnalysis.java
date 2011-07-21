@@ -2,9 +2,12 @@ package uk.ac.imperial.doc.pctmc.analysis;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -28,13 +31,12 @@ public abstract class AbstractPCTMCAnalysis {
 	protected BiMap<CombinedPopulationProduct, Integer> momentIndex;
 
 	protected BiMap<AbstractExpression, Integer> generalExpectationIndex;
-
-	protected double stopTime;
-	protected double stepSize;
-
-	protected double[][] dataPoints;
 	
+	protected List<PCTMCAnalysisPostprocessor> postprocessors; 
 	
+	public void addPostprocessor(PCTMCAnalysisPostprocessor postprocessor){
+		postprocessors.add(postprocessor); 
+	}
 	
 	public PCTMC getPCTMC() {
 		return pctmc;
@@ -53,29 +55,21 @@ public abstract class AbstractPCTMCAnalysis {
 	}
 
 
-
 	/**
 	 * Prepares the analysis with given constants. 
 	 * @param constants
 	 */
 	public abstract void prepare(Constants constants);
 	
-	/**
-	 * Returns the explicit step size for data keeping.
-	 * @return
-	 */
-	public double getStepSize() {
-		return stepSize;
+	public void notifyPostprocessors(Constants constants, List<PlotDescription> plotDescriptions){
+		for (PCTMCAnalysisPostprocessor postprocessor:postprocessors){
+			postprocessor.postprocessAnalysis(constants, this, plotDescriptions);
+		}
 	}
-
-	public double getStopTime() {
-		return stopTime;
-	}
-
-	public AbstractPCTMCAnalysis(PCTMC pctmc, double stopTime, double stepSize) {
+	
+	
+	public AbstractPCTMCAnalysis(PCTMC pctmc) {
 		this.pctmc = pctmc;
-		this.stopTime = stopTime;
-		this.stepSize = stepSize;
 
 		stateIndex = pctmc.getStateIndex();
 
@@ -84,6 +78,7 @@ public abstract class AbstractPCTMCAnalysis {
 				.<AbstractExpression, Integer> create();
 		usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
 		usedGeneralExpectations = new HashSet<AbstractExpression>();
+		postprocessors = new LinkedList<PCTMCAnalysisPostprocessor>(); 
 	}
 	
 	/**
@@ -105,42 +100,4 @@ public abstract class AbstractPCTMCAnalysis {
 		this.usedGeneralExpectations = usedGeneralExpectations;
 	}
 	
-
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((pctmc == null) ? 0 : pctmc.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(stepSize);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(stopTime);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractPCTMCAnalysis other = (AbstractPCTMCAnalysis) obj;
-		if (pctmc == null) {
-			if (other.pctmc != null)
-				return false;
-		} else if (!pctmc.equals(other.pctmc))
-			return false;
-		if (Double.doubleToLongBits(stepSize) != Double
-				.doubleToLongBits(other.stepSize))
-			return false;
-		if (Double.doubleToLongBits(stopTime) != Double
-				.doubleToLongBits(other.stopTime))
-			return false;
-		return true;
-	}
-
 }
