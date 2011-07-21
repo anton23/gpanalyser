@@ -172,14 +172,17 @@ analysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
    o=odeAnalysis[pctmc,plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
  | s=simulation[pctmc,plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
- | c=compare[pctmc,plots] {$analysis=$c.analysis;}
+ | c=compare[pctmc,plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 ;
 
-compare[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] returns [AbstractPCTMCAnalysis analysis]:
+compare[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
 //{Multimap<AbstractPCTMCAnalysis,PlotDescription> tmp = HashMultimap.<AbstractPCTMCAnalysis,PlotDescription>create();}
 ^(COMPARE a1=analysis[pctmc,plots] a2=analysis[pctmc,plots] ps=plotDescriptions)
 {
   $analysis = new PCTMCCompareAnalysis($a1.analysis,$a2.analysis); 
+  $postprocessor = new CompareAnalysisNumericalPostprocessor($a1.postprocessor,$a2.postprocessor);
+  $analysis.addPostprocessor($postprocessor); 
   if ($plots!=null) $plots.putAll($analysis,$ps.p);   
 }
 ;

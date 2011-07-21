@@ -36,6 +36,14 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 
 	
 	
+	public double getStopTime() {
+		return stopTime;
+	}
+
+	public double getStepSize() {
+		return stepSize;
+	}
+
 	public NumericalPostprocessor(double stopTime, double stepSize) {
 		super();
 		this.stopTime = stopTime;
