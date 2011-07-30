@@ -70,9 +70,7 @@ public abstract class AbstractPCTMCAnalysis {
 	
 	public AbstractPCTMCAnalysis(PCTMC pctmc) {
 		this.pctmc = pctmc;
-
 		stateIndex = pctmc.getStateIndex();
-
 		momentIndex = HashBiMap.<CombinedPopulationProduct, Integer> create();
 		generalExpectationIndex = HashBiMap
 				.<AbstractExpression, Integer> create();
