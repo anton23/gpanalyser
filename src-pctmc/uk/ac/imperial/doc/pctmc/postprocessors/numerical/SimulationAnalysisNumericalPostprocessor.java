@@ -41,7 +41,10 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 	private final String generatorName = "GeneratedNextEventGenerator";
 	
-	
+	@Override
+	public String toString() {
+		return super.toString() + ", replications = " + replications;
+	}
 	
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,
 			double stepSize, int replications) {

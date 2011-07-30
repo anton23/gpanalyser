@@ -38,6 +38,14 @@ public abstract class AbstractPCTMCAnalysis {
 		postprocessors.add(postprocessor); 
 	}
 	
+	
+	
+	public List<PCTMCAnalysisPostprocessor> getPostprocessors() {
+		return postprocessors;
+	}
+
+
+
 	public PCTMC getPCTMC() {
 		return pctmc;
 	}

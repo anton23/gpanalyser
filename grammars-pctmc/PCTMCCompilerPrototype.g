@@ -37,7 +37,7 @@ options{
   import pctmc.experiments.iterate.*; 
   import pctmc.analysis.plotexpressions.*;
   import pctmc.expressions.patterns.*;
-  import pctmc.postprocessors.*; 
+  import pctmc.postprocessors.numerical.*; 
    
   import com.google.common.collect.Multimap;
   import com.google.common.collect.LinkedHashMultimap;
@@ -169,7 +169,8 @@ plotAt returns [AbstractExpression e, double t]:
 ;
 
 analysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
-returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
+returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
+:
    o=odeAnalysis[pctmc,plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
  | s=simulation[pctmc,plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc,plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
