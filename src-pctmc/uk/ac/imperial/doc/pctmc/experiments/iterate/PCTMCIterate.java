@@ -21,7 +21,7 @@ import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisit
 import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.postprocessors.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
