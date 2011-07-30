@@ -34,7 +34,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
-import uk.ac.imperial.doc.pctmc.analysis.PCTMCTools;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
@@ -45,7 +44,6 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternSetterVisitor;
-import uk.ac.imperial.doc.pctmc.matlaboutput.PCTMCJavaImplementationProviderWithMatlab;
 import uk.ac.imperial.doc.pctmc.postprocessors.MatlabAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -68,8 +66,6 @@ public class PCTMCInterpreter {
 		this.compilerClass = compilerClass;
 
 		globalPostprocessors = new LinkedList<PCTMCAnalysisPostprocessor>();
-		//globalPostprocessors.add(new ODEAnalysisNumericalPostprocessor());
-		//globalPostprocessors.add(new SimulationAnalysisNumericalPostprocessor());
 	}
 
 	public PCTMCInterpreter(Class<? extends Lexer> lexerClass,
@@ -216,9 +212,8 @@ public class PCTMCInterpreter {
 			for (PCTMCIterate iterate : experiments) {
 				iterate.prepare(constants);
 				if (PCTMCOptions.matlab) {
-					PCTMCJavaImplementationProviderWithMatlab matlabImplementer = (PCTMCJavaImplementationProviderWithMatlab) PCTMCTools
-							.getImplementationProvider();
-					matlabImplementer.writePCTMCIterateFile(iterate, constants);
+/*					MatlabIteratePostprocessor matlabImplementer = new MatlabIteratePostprocessor();
+					matlabImplementer.writePCTMCIterateFile(iterate, constants);*/
 				}
 				iterate.iterate(constants);
 			}
