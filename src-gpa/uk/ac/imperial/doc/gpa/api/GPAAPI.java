@@ -29,7 +29,7 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
-import uk.ac.imperial.doc.pctmc.postprocessors.ODEAnalysisNumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 
 import com.google.common.collect.BiMap;

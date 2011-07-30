@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc.postprocessors;
+package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
 import java.util.LinkedList;
 import java.util.List;
