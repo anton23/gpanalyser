@@ -22,14 +22,29 @@ tokens{
 }
 
 @members{
-protected Object recoverFromMismatchedToken(IntStream input,
-                                            int ttype,
-                                            BitSet follow)
-    throws RecognitionException
-{   
-    throw new MismatchedTokenException(ttype, input);
+protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException{   
+    throw new MissingTokenException(ttype, input, null);
 }   
 
+public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
+    throw e;
+}
+
+protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
+    throw new MismatchedTokenException(ttype, input);
+} 
+
+protected List<String> errors = new LinkedList<String>();
+
+public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        errors.add(hdr + " " + msg);
+    }
+    public List<String> getErrors() {
+        return errors;
+    }
 }
 
 
@@ -37,6 +52,7 @@ protected Object recoverFromMismatchedToken(IntStream input,
 @rulecatch {
   catch (RecognitionException re) {
     reportError(re);
+    //throw re;
   }
 }
 

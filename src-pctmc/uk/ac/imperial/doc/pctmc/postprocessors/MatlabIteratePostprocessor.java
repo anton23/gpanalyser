@@ -1,21 +1,9 @@
 package uk.ac.imperial.doc.pctmc.postprocessors;
 
-import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
-import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotConstraint;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
-import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.matlaboutput.utils.MatlabOutputUtils;
-import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
-import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
-
-import com.google.common.collect.BiMap;
 
 public class MatlabIteratePostprocessor {
 	

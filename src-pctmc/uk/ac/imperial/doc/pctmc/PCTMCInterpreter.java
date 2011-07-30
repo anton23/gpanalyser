@@ -31,6 +31,7 @@ import uk.ac.imperial.doc.gpa.plain.syntax.PlainLexer;
 import uk.ac.imperial.doc.gpa.plain.syntax.PlainParser;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
@@ -50,8 +51,14 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+/**
+ * Class with methods for parsing GPEPA files and executing the analyses.
+ * 
+ * @author tonkos
+ */
 public class PCTMCInterpreter {
 	private Class<? extends Lexer> lexerClass;
 	private Class<? extends Parser> parserClass;
@@ -104,15 +111,36 @@ public class PCTMCInterpreter {
 
 	}
 
-	private Object parseFile(String file) {
+	@SuppressWarnings("serial")
+	class ParseException extends Exception {
+		List<String> errors;
+
+		public ParseException(List<String> errors) {
+			super();
+			this.errors = errors;
+		} 
+	}
+
+	@SuppressWarnings("unchecked")
+	private Object parseFile(String file) throws ParseException {
 		try {
 			Lexer lexer = lexerClass.getConstructor(CharStream.class)
 					.newInstance(new ANTLRFileStream(file));
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
+
 			Parser parser = parserClass.getConstructor(TokenStream.class)
 					.newInstance(tokens);
+			
 			Object systemReturn = parserClass.getMethod("system",
 					(Class<?>[]) null).invoke(parser, (Object[]) null);
+			
+			List<String> errors = (List<String>)parser.getClass()
+					.getMethod("getErrors", (Class<?>[]) null)
+					.invoke(parser, (Object[]) null);
+			if (!errors.isEmpty()){
+				throw new ParseException(errors);
+			}
+					
 			CommonTree systemTree = (CommonTree) systemReturn.getClass()
 					.getMethod("getTree", (Class<?>[]) null)
 					.invoke(systemReturn, (Object[]) null);
@@ -121,23 +149,11 @@ public class PCTMCInterpreter {
 					TreeNodeStream.class).newInstance(nodes);
 			return compiler.getClass().getMethod("system", (Class<?>[]) null)
 					.invoke(compiler, (Object[]) null);
-
-		} catch (IllegalArgumentException e) {
+		} catch (Exception e) {
+			if (e instanceof ParseException) throw (ParseException)e;
 			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			throw new ParseException(Lists.newArrayList("Unexpected internal error: " + e));
 		}
-		return null;
 	}
 
 	private void unfoldPatterns(PCTMC pctmc,
@@ -172,9 +188,9 @@ public class PCTMCInterpreter {
 		PCTMCLogging.info("Opening file " + file);
 		PCTMCLogging.increaseIndent();
 
-		Object compilerReturn = parseFile(file);
 		Constants constants;
 		try {
+			Object compilerReturn = parseFile(file);
 			constants = (Constants) compilerReturn.getClass()
 					.getField("constants").get(compilerReturn);
 
@@ -212,27 +228,30 @@ public class PCTMCInterpreter {
 			for (PCTMCIterate iterate : experiments) {
 				iterate.prepare(constants);
 				if (PCTMCOptions.matlab) {
-/*					MatlabIteratePostprocessor matlabImplementer = new MatlabIteratePostprocessor();
-					matlabImplementer.writePCTMCIterateFile(iterate, constants);*/
+					/*
+					 * MatlabIteratePostprocessor matlabImplementer = new
+					 * MatlabIteratePostprocessor();
+					 * matlabImplementer.writePCTMCIterateFile(iterate,
+					 * constants);
+					 */
 				}
 				iterate.iterate(constants);
 			}
 			PCTMCLogging.decreaseIndent();
-		} catch (IllegalArgumentException e1) {
-			e1.printStackTrace();
-		} catch (SecurityException e1) {
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			e1.printStackTrace();
-		} catch (NoSuchFieldException e1) {
-			e1.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		}
+		} catch (ParseException e) {
+			PCTMCLogging
+					.error("Error when parsing the input file!\nFound " + e.errors.size() + " errors:\n" +
+							ToStringUtils.iterableToSSV(e.errors, "\n")
+			);
+		} 
+		  catch (IllegalArgumentException e1) { e1.printStackTrace(); } catch
+		  (SecurityException e1) { e1.printStackTrace(); } catch
+		  (IllegalAccessException e1) { e1.printStackTrace(); } catch
+		  (NoSuchFieldException e1) { e1.printStackTrace(); } catch
+		  (InstantiationException e) { e.printStackTrace(); } catch
+		  (InvocationTargetException e) { e.printStackTrace(); } catch
+		  (NoSuchMethodException e) { e.printStackTrace(); }
+		 
 
 	}
 
