@@ -30,4 +30,13 @@ public class GPEPAPCTMC extends PCTMC{
 		this.componentDefinitions = componentDefinitions; 
 		this.model = model;
 	}
+	
+	@Override
+	public String toString() {
+		String ret = "";
+		ret+=componentDefinitions.toString();
+		ret+="\n";
+		ret+=model.toString();
+		return ret; 
+	}
 }

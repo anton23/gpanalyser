@@ -35,6 +35,11 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	protected double stepSize;
 
 	
+	@Override
+	public String toString() {
+		return "stopTime = " + stopTime + ", stepSize = " + stepSize;
+	}
+	
 	
 	public double getStopTime() {
 		return stopTime;
@@ -43,6 +48,18 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	public double getStepSize() {
 		return stepSize;
 	}
+	
+	
+
+	public void setStopTime(double stopTime) {
+		this.stopTime = stopTime;
+	}
+
+
+	public void setStepSize(double stepSize) {
+		this.stepSize = stepSize;
+	}
+
 
 	public NumericalPostprocessor(double stopTime, double stepSize) {
 		super();
