@@ -14,7 +14,8 @@ import uk.ac.imperial.doc.gpa.syntax.GPALexer;
 import uk.ac.imperial.doc.gpa.syntax.GPAParser;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
-import uk.ac.imperial.doc.pctmc.postprocessors.MatlabAnalysisPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.languageoutput.JavaOutputAnalysisPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.languageoutput.MatlabAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
@@ -30,6 +31,11 @@ public class GPAPMain {
 
 				accepts("matlab",
 						"generates matlab output, including source files")
+						.withRequiredArg().ofType(String.class)
+						.describedAs("output folder");
+				
+				accepts("java",
+						"generates java output, including source files")
 						.withRequiredArg().ofType(String.class)
 						.describedAs("output folder");
 
@@ -94,6 +100,11 @@ public class GPAPMain {
 				PCTMCLogging.info("Generating matlab code, output folder is "
 						+ PCTMCOptions.matlabFolder + ".");
 				interpreter.addGlobalPostprocessor(new MatlabAnalysisPostprocessor());			
+			}
+			if (options.has("java")){
+				PCTMCOptions.javaFolder = options.valueOf("java").toString();
+				PCTMCLogging.info("Generating java code, output folder is " + PCTMCOptions.javaFolder);
+				interpreter.addGlobalPostprocessor(new JavaOutputAnalysisPostprocessor());
 			}
 			
 			 PCTMCLogging .debug("Creating a PCTMC interpreter with\n lexer: "

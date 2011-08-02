@@ -27,7 +27,7 @@ import com.google.common.collect.BiMap;
  */
 public class JavaODEMethodPrinter implements IODEMethodVisitor {
 
-	private Constants parameters;
+	private Constants constants;
 	
 	
 	private BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex; 
@@ -39,10 +39,10 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 		return output.toString();
 	}
 
-	public JavaODEMethodPrinter(Constants parameters,
+	public JavaODEMethodPrinter(Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex) {
 
-		this.parameters = parameters;
+		this.constants = constants;
 		this.combinedMomentsIndex = combinedMomentsIndex;
 		this.generalExpectationIndex = generalExpectationIndex; 
 		output = new StringBuilder();
@@ -50,7 +50,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 
 	private int methodCharacters = 6000;
 
-	private static final String GENERATEDCLASSNAME = "GeneratedODEs";
+	public static final String GENERATEDCLASSNAME = "GeneratedODEs";
 	private static final String OLDY = "y";
 	private static final String NEWY = "newy";
 
@@ -62,12 +62,12 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 		String[] javaMomentODEs = new String[s.getBody().length + 1];
 		for (int i = 0; i < s.getBody().length; i++) {
 			JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
-					parameters,  combinedMomentsIndex,generalExpectationIndex, OLDY, NEWY);
+					constants,  combinedMomentsIndex,generalExpectationIndex, OLDY, NEWY);
 			s.getBody()[i].accept(tmp);
 			javaMomentODEs[i] = tmp.toString() + "\n";
 		}
 		JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
-				parameters, combinedMomentsIndex, generalExpectationIndex,OLDY, NEWY);
+				constants, combinedMomentsIndex, generalExpectationIndex,OLDY, NEWY);
 		javaMomentODEs[s.getBody().length] = tmp.toString();
 
 		StringBuilder header = new StringBuilder();
