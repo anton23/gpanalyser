@@ -3,7 +3,9 @@ package uk.ac.imperial.doc.pctmc.utils;
 public class PCTMCOptions {
 	public static boolean matlab = false; 
 	
-	public static String matlabFolder = "matlab"; 
+	public static String matlabFolder = "matlab";
+	
+	public static String javaFolder = "java";
 	
 	public static boolean debug = false;
 	

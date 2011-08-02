@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc.postprocessors;
+package uk.ac.imperial.doc.pctmc.postprocessors.languageoutput;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +9,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.matlaboutput.analysis.MatlabMethodPrinter;
@@ -20,14 +19,17 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
-import uk.ac.imperial.doc.pctmc.utils.FileUtils;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.BiMap;
 
-public class MatlabAnalysisPostprocessor implements PCTMCAnalysisPostprocessor {
+public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 
+	public MatlabAnalysisPostprocessor(){
+		super(PCTMCOptions.matlabFolder);
+	}
+	
+	
 	@Override
 	public void postprocessAnalysis(Constants constants, AbstractPCTMCAnalysis analysis,
 			List<PlotDescription> plotDescriptions) {
@@ -40,7 +42,7 @@ public class MatlabAnalysisPostprocessor implements PCTMCAnalysisPostprocessor {
 	}
 	
 	private void processPlotDescriptions(Constants constants, AbstractPCTMCAnalysis analysis, List<PlotDescription> plotDescriptions){
-		String analysisFolder = PCTMCOptions.matlabFolder + "/" +"analysis"+analysisCounter;
+		String analysisFolder = getAnalysisFolder();
 		int i = 0; 
 		for (PlotDescription plotDescription:plotDescriptions){
 			MatlabMethodPrinter printer = new MatlabMethodPrinter(constants, analysis.getMomentIndex(), analysis.getGeneralExpectationIndex());
@@ -59,13 +61,7 @@ public class MatlabAnalysisPostprocessor implements PCTMCAnalysisPostprocessor {
 		MatlabOutputUtils.writeEvaluate(analysisFolder);
 		MatlabOutputUtils.writePEPAFunctions(analysisFolder);
 	}
-	
-	private void writeFile(String filename, String contents, String message){
-		PCTMCLogging.debug(message);
-		FileUtils.writeGeneralFile(contents, filename);
-	}
-	
-	private int analysisCounter = 0;
+
 	
 	private void processConstants(Constants constants){
 		String filenameConstants = PCTMCOptions.matlabFolder + "/" + getConstantsName + ".m";
@@ -75,7 +71,7 @@ public class MatlabAnalysisPostprocessor implements PCTMCAnalysisPostprocessor {
 	}
 	
 	private void processODEAnalysis(PCTMCODEAnalysis analysis, Constants constants){
-		String analysisFolder = PCTMCOptions.matlabFolder + "/" +"analysis"+analysisCounter;
+		String analysisFolder = getAnalysisFolder();
 		
 		String filenameInitial = analysisFolder +"/"+ getInitialValuesName + ".m";
 		writeFile(filenameInitial,
@@ -96,8 +92,6 @@ public class MatlabAnalysisPostprocessor implements PCTMCAnalysisPostprocessor {
         analysis.getOdeMethod().accept(printer);
 		return printer.toString();
 	}
-	
-	
 	
 	
 
