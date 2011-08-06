@@ -25,6 +25,9 @@ public class PowerExpression extends AbstractExpression {
 		if (exponent.equals(new DoubleExpression(1.0))){
 			return expression;
 		}
+		if (exponent.equals(DoubleExpression.ZERO)){
+			return new DoubleExpression(1.0);
+		}
 		return new PowerExpression(expression, exponent);
 	}
 

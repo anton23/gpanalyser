@@ -28,7 +28,7 @@ public class ClassCompiler {
 		
 		StringBuilder src = new StringBuilder();
 		src.append(code);
-
+		
 		// get an instance of Java compiler
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		JavaFileManager fileManager = new ClassFileManager(compiler

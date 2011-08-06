@@ -13,7 +13,7 @@ import uk.ac.imperial.doc.gpepa.representation.model.PEPAEvolutionEvent;
 import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -28,7 +28,7 @@ public class GPEPAToPCTMC {
 			initCounts.put(s,model.getCountExpression(p));
 		}
 		for (String a:countActions){
-			initCounts.put(new GPEPAActionCount(a), new ZeroExpression());
+			initCounts.put(new GPEPAActionCount(a), DoubleExpression.ZERO);
 		}
 		
 		List<PEPAEvolutionEvent> observableEvolutionEvents = model.getObservableEvolutionEvents(componentDefinitions);

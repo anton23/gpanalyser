@@ -5,6 +5,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="test-jexpressions"/>
 	<classpathentry kind="src" path="src-examples"/>
 	<classpathentry kind="src" path="genSrc"/>
 	<classpathentry kind="src" path="src-jexpressions"/>
@@ -24,5 +25,6 @@
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.jar"/>
 	<classpathentry kind="lib" path="lib/jopt-simple-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.9b3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

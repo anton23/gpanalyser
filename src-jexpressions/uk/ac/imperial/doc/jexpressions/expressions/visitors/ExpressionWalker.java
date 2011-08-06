@@ -16,7 +16,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 
 /**
  * An general expression visitor that traverses the syntax tree of the given expression.
@@ -101,8 +100,7 @@ public class ExpressionWalker implements IExpressionVisitor {
 		}
 	}
 
-	@Override
-	public void visit(ZeroExpression e) {}
+
 
 	@Override
 	public void visit(FunctionCallExpression e) { 

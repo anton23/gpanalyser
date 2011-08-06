@@ -24,8 +24,6 @@ public interface IExpressionVisitor {
 
 	void visit(SumExpression e);
 
-	void visit(ZeroExpression e);
-
 	void visit(PowerExpression e);
 
 	void visit(MinusExpression e);

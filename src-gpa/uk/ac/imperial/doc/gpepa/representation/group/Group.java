@@ -10,7 +10,6 @@ import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitio
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 
 import com.google.common.collect.Multimap;
 
@@ -42,7 +41,7 @@ public class Group {
 	private Map<PEPAComponent,AbstractExpression> counts; 
 	
 	public AbstractExpression getCountExpression(PEPAComponent component){
-		if (!counts.containsKey(component)) return new ZeroExpression(); 
+		if (!counts.containsKey(component)) return DoubleExpression.ZERO; 
 		return counts.get(component); 
 	}
 	

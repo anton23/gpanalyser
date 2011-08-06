@@ -18,7 +18,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 
 
 /**
@@ -187,11 +186,5 @@ public class ExpressionEvaluator
 		e.getE().accept(this); 
 		result = -result;
 	}
-
-	@Override
-	public void visit(ZeroExpression e) {
-		result = 0.0; 
-	}
-
 
 }

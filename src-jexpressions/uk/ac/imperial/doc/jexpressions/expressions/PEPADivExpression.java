@@ -13,11 +13,11 @@ public class PEPADivExpression extends AbstractExpression {
 		if (numerator.equals(denominator)) {
 			return new DoubleExpression(1.0);
 		}
-		if (numerator instanceof ZeroExpression) {
-			return new ZeroExpression();
+		if (numerator.equals(DoubleExpression.ZERO)) {
+			return DoubleExpression.ZERO;
 		}
-		if (denominator instanceof ZeroExpression) {
-			return new ZeroExpression();
+		if (denominator.equals(DoubleExpression.ZERO)) {
+			return DoubleExpression.ZERO;
 		}
 		return new PEPADivExpression(numerator, denominator);
 	}
