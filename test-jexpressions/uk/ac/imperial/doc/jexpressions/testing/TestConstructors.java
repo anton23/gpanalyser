@@ -1,29 +1,25 @@
 package uk.ac.imperial.doc.jexpressions.testing;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 
-public class TestConstructors {
-	@BeforeClass
-	public static void createObjects(){
-		d1 = new DoubleExpression(1.0);
-		d2 = new DoubleExpression(2.0);
-		d3 = new DoubleExpression(3.0);
-		d0 = new DoubleExpression(0.0);
-	}
-	
-	private static AbstractExpression d1, d2, d3, d0;
+import com.google.common.collect.Lists;
+
+public class TestConstructors extends TestExpressionsBase {
 	
 	@Test
 	public void testCreateZeroExpression(){
@@ -34,10 +30,9 @@ public class TestConstructors {
 	public void testCreateSumExpression(){
 		assertEquals(d1, SumExpression.create(d1));
 		String sumString = SumExpression.create(d1, d2).toString();
-		System.out.println(sumString);
 		assertEquals(sumString,"(1.0+2.0)");
-		assertEquals(SumExpression.create(d1,SumExpression.create(d2,d3)),SumExpression.create(d1,d2,d3));
-		assertEquals(SumExpression.create(d1,d0,d2,d0,d3),SumExpression.create(d1,d2,d3));
+		assertEquals(SumExpression.create(d1,SumExpression.create(d2,d3)),s123);
+		assertEquals(SumExpression.create(d1,d0,d2,d0,d3),s123);
 		assertEquals(SumExpression.create(), DoubleExpression.ZERO);
 	}
 	
@@ -72,5 +67,15 @@ public class TestConstructors {
 		assertEquals(DivMinExpression.create(d2,d2,d3),MinExpression.create(d2,d3));
 		assertEquals(DivMinExpression.create(d1, d2, d3).toString(),"(div(1.0,2.0)*min(3.0,2.0))");
 	}
-
+	
+	@Test
+	public void testCreateFunctionCallExpression(){
+		assertEquals(FunctionCallExpression.create("div", Lists.newArrayList(d1,d2)),PEPADivExpression.create(d1, d2));
+	}
+	
+	@Test
+	public void testCreateTimeExpression(){
+		assertNotSame(new TimeExpression(), new ConstantExpression("t"));
+		assertEquals(new TimeExpression().toString(), "t");
+	}
 }

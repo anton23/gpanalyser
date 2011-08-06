@@ -2,8 +2,8 @@ package uk.ac.imperial.doc.jexpressions.variables;
 
 import java.util.Map;
 
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionWalkerWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionWalkerWithConstants;
 
 
 public class ExpressionVariableSettter extends ExpressionWalkerWithConstants implements IExpressionVariableVisitor{

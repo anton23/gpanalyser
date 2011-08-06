@@ -1,8 +1,9 @@
-package uk.ac.imperial.doc.jexpressions.expressions.visitors;
+package uk.ac.imperial.doc.jexpressions.constants.visitors;
 
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluator;
 
 
 
@@ -15,19 +16,18 @@ public class ExpressionEvaluatorWithConstants extends ExpressionEvaluator implem
 	
 	@Override
 	public void visit(ConstantExpression e) {
-		Double parameterValue = parameters.getConstantValue(e.getConstant());
+		Double parameterValue = constants.getConstantValue(e.getConstant());
 		if (parameterValue == null){
-			throw new AssertionError("Parameter " + e + " unknown!");
+			throw new AssertionError("Constant " + e + " unknown!");
 		}
 		result = parameterValue;
 	}
 
-
-	private Constants parameters; 
+	protected Constants constants; 
 
 	public ExpressionEvaluatorWithConstants(Constants constants) {
 		super();
-		this.parameters = constants;
+		this.constants = constants;
 	}
 
 

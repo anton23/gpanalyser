@@ -1,6 +1,6 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis;
 
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionTransformerWithConstants;
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionTransformerWithConstants;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IPopulationVisitor;
