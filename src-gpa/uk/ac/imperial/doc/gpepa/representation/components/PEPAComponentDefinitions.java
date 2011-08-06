@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
 
@@ -35,7 +35,7 @@ public class PEPAComponentDefinitions {
 		}
 
 		if (summands.size() == 0) {
-			return new ZeroExpression();
+			return DoubleExpression.ZERO;
 		}
 		return SumExpression.create(summands);
 	}

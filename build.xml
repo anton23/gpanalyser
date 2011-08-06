@@ -14,6 +14,9 @@
     <property name="build.class" value="${build.out}/classes" />
     <property name="src" value="src-gpa"/>
 	
+	<property name="test.out" value="test-build"/>
+	<property name="test.class" value="${test.out}/classes"/>
+	
     <property name="src.generated" value="genSrc"/>
     <property name="examples" value="inputs"/>
     <property name="lib" value="lib"/>
@@ -21,6 +24,8 @@
 	<property name="PCTMC" value="src-pctmc"/>
 	<property name="PCTMC.grammars" value="grammars-pctmc"/>
 	<property name="PCTMC.src" value="src-pctmc"/>
+	
+	<property name="jexpressions.test" value="test-jexpressions"/>
 	
 	<property name="plain" value="src-plain"/>
 	<property name="plain.grammars" value="grammars-plain"/>
@@ -56,16 +61,19 @@
         <tstamp/>
     </target>
 
-    <target name="needGrammar">
+	
+ 	
+    <target name="needGrammars">
         <uptodate property="grammar.dontGenerate"
         targetfile="${src.generated}/${package.generated}/GPACompiler.java">
             <srcfiles dir="${grammars}" includes="**/*.g" />
         	<srcfiles dir="${PCTMC.grammars}" includes="**/*.g" />
-           	<srcfiles dir="${plain.grammars}" includes="**/*.g" />        	
+           	<srcfiles dir="${plain.grammars}" includes="**/*.g" /> 
         </uptodate>
     </target>
 
-    <target name="build.grammars" depends="init,needGrammar"
+
+    <target name="build.grammars" depends="init,needGrammars"
     unless="grammar.dontGenerate" description="Generate lexer/parser/compiler." >
 
         <mkdir dir="${src.generated}"/>
@@ -277,5 +285,44 @@
 	        </zip>
 	    </target>
 	
+	
+	
+	<target name="build-test" depends="build">
+		   <mkdir dir="${test.class}"/>
+		        <javac source="1.6" target="1.6" debug="true" destdir="${test.class}"
+		        deprecation="true">
+		        	<classpath>
+		        	  	<path location="${build.class}"/>		     
+		        		<fileset dir="${lib}">
+		        		      <include name="junit-4.9b3.jar"/>
+		        	    </fileset>
+		        	</classpath>
+		            <src path="${build.class}"/>
+		        	<src path="${jexpressions.test}"/>
+		            <include name="**/*.java"/> 
+		        	<include name="**/*.class"/>
+		         	<exclude name="**/package-info.java"/> 
+		        </javac>
+	</target>
+	
+	<target name="test" depends="build-test">
+	    <mkdir dir="reports/tests" />
+	    <junit fork="yes" printsummary="yes">
+	      <formatter type="xml"/>
+	      <classpath>
+	      	<path location="${build.class}"/>
+	        <path location="${test.class}"/>
+	        <fileset dir="${lib}">
+	            <include name="junit-4.9b3.jar"/>
+	        </fileset>
+	      </classpath>
+	      <batchtest todir="reports/tests">
+	        <fileset dir="${test.class}">
+	            <include name="**/Test*.class"/>
+	        </fileset>
+	      </batchtest>
+	    </junit>
+	</target>
+
 	
 </project>

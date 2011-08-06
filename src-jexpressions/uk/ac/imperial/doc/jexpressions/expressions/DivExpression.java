@@ -20,8 +20,8 @@ public class DivExpression extends AbstractExpression {
 		if (numerator.equals(denominator)) {
 			return new DoubleExpression(1.0);
 		}
-		if (numerator instanceof ZeroExpression) {
-			return new ZeroExpression();
+		if (numerator.equals(new DoubleExpression(0.0))) {
+			return new DoubleExpression(0.0);
 		}
 		return new DivExpression(numerator, denominator);
 	}

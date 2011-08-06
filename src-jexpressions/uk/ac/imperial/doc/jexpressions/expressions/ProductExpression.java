@@ -71,8 +71,8 @@ public class ProductExpression extends AbstractExpression {
 	 */
 	public static AbstractExpression create(AbstractExpression... t) {
 		for (AbstractExpression e : t) {
-			if (e instanceof ZeroExpression) {
-				return new ZeroExpression();
+			if (e.equals(DoubleExpression.ZERO)) {
+				return DoubleExpression.ZERO;
 			}
 		}
 		List<AbstractExpression> terms = new LinkedList<AbstractExpression>();

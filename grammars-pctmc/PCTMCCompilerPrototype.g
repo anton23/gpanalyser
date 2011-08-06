@@ -107,7 +107,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
       Map<State,AbstractExpression> initMap = new HashMap<State, AbstractExpression>(); 
       for (State t:states){
         if (!initCounts.containsKey(t)){
-          initMap.put(t,new ZeroExpression()); 
+          initMap.put(t, DoubleExpression.ZERO); 
         } else {
           initMap.put(t,initCounts.get(t)); 
         }

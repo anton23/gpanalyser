@@ -13,9 +13,9 @@ import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 
 /**
@@ -76,7 +76,7 @@ public class LabelledComponentGroup extends GroupedModel {
 		for (PEPAComponent p : componentDerivatives) {
 			AbstractExpression rate = definitions.getApparentRateExpression(
 					action, p);
-			if (!(rate instanceof ZeroExpression)) {
+			if (!(rate.equals(DoubleExpression.ZERO))) {
 				summands.add(ProductExpression.create(new PopulationExpression(
 						new GPEPAState(new GroupComponentPair(label, p))), rate));
 			}

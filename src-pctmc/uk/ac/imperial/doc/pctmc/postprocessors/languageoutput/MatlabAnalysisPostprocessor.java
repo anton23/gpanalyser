@@ -6,7 +6,7 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
@@ -112,7 +112,7 @@ public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 				StringBuilder rhs = new StringBuilder(); 
 				for (Map.Entry<State, Integer> p:e.getKey().getNakedProduct().getProduct().entrySet()){
 					AbstractExpression v = pctmc.getInitMap().get(p.getKey());
-					if (!(v instanceof ZeroExpression)) zero = false; 
+					if (!(v.equals(DoubleExpression.ZERO))) zero = false; 
 					MatlabPrinterWithConstants printer = new MatlabPrinterWithConstants(constants); 
 					v.accept(printer); 
 					if (first) first = false; else rhs.append("*");

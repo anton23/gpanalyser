@@ -16,7 +16,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.utils.JExpressionMatlabUtils;
 
 /**
@@ -185,11 +184,6 @@ public class MatlabExpressionPrinter implements IExpressionVisitor {
 		if (e.getSummands().size() > 1) {
 			output.append(")");
 		}
-	}
-
-	@Override
-	public void visit(ZeroExpression e) {
-		output.append("0.0");
 	}
 
 }

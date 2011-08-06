@@ -9,3 +9,7 @@ syntax: regexp
 ^matlab$
 syntax: regexp
 ^debug$
+syntax: regexp
+^reports$
+syntax: regexp
+^test-build$

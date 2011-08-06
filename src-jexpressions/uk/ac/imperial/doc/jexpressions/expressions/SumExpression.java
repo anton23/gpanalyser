@@ -54,12 +54,16 @@ public class SumExpression extends AbstractExpression {
 			return s[0];
 		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
 		for (AbstractExpression e : s) {
-			if (!(e instanceof ZeroExpression)) {
-				summands.add(e);
+			if (!e.equals(new DoubleExpression(0.0))) {
+				if (e instanceof SumExpression){
+					summands.addAll(((SumExpression)e).getSummands());
+				} else {
+					summands.add(e);
+				}
 			}
 		}
 		if (summands.isEmpty()) {
-			return new ZeroExpression();
+			return new DoubleExpression(0.0);
 		}
 		if (summands.size() == 1) {
 			return summands.get(0);

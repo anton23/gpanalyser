@@ -17,7 +17,7 @@ public class DivMinExpression extends AbstractExpression {
 	 */
 	public static AbstractExpression create(AbstractExpression a,
 			AbstractExpression b, AbstractExpression c) {
-		AbstractExpression minExpression = MinExpression.create(a, b);
+		AbstractExpression minExpression = MinExpression.create(b, c);
 
 		if (a.equals(b))
 			return minExpression;
@@ -72,7 +72,7 @@ public class DivMinExpression extends AbstractExpression {
 
 	@Override
 	public String toString() {
-		return ("(div(" + a + "," + b + "))*(min(" + c + "," + b + "))");
+		return ("(div(" + a + "," + b + ")*min(" + c + "," + b + "))");
 	}
 
 }

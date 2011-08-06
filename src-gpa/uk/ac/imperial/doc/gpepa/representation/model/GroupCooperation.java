@@ -10,9 +10,9 @@ import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitio
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ZeroExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -112,18 +112,18 @@ public class GroupCooperation extends GroupedModel {
 				action, definitions);
 
 		if (actions.contains(action)) {
-			if (leftRate instanceof ZeroExpression
-					|| rightRate instanceof ZeroExpression) {
-				return new ZeroExpression();
+			if (leftRate.equals(DoubleExpression.ZERO)
+					|| rightRate.equals(DoubleExpression.ZERO)) {
+				return DoubleExpression.ZERO;
 			}
 			return MinExpression.create(leftRate, rightRate);
 		} else {
-			if (leftRate instanceof ZeroExpression
-					&& rightRate instanceof ZeroExpression) {
-				return new ZeroExpression();
-			} else if (leftRate instanceof ZeroExpression) {
+			if (leftRate.equals(DoubleExpression.ZERO)
+					&& rightRate.equals(DoubleExpression.ZERO)) {
+				return DoubleExpression.ZERO;
+			} else if (leftRate.equals(DoubleExpression.ZERO)) {
 				return rightRate;
-			} else if (rightRate instanceof ZeroExpression) {
+			} else if (rightRate.equals(DoubleExpression.ZERO)) {
 				return leftRate;
 			} else
 				return SumExpression.create(leftRate, rightRate);
