@@ -1,7 +1,8 @@
-package uk.ac.imperial.doc.jexpressions.expressions.visitors;
+package uk.ac.imperial.doc.jexpressions.constants.visitors;
 
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionWalker;
 
 /**
  * An extension of ExpressionWalker supporting constants.

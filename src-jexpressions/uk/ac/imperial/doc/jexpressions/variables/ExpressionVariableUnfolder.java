@@ -3,8 +3,8 @@ package uk.ac.imperial.doc.jexpressions.variables;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionTransformerWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionTransformerWithConstants;
 
 
 public class ExpressionVariableUnfolder extends ExpressionTransformerWithConstants 

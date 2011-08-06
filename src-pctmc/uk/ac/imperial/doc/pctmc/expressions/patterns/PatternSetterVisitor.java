@@ -2,8 +2,8 @@ package uk.ac.imperial.doc.pctmc.expressions.patterns;
 
 import java.util.Map;
 
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionWalkerWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionWalkerWithConstants;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.IExpressionVariableVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
