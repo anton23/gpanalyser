@@ -11,6 +11,15 @@ public class PlotDescription {
 	private List<AbstractExpression> expressions;
 	private String filename;
 	
+	public String[] getLabels(){
+		String[] ret = new String[expressions.size()];
+		int i = 0; 
+		for (AbstractExpression e:expressions){
+			ret[i++] = e.toString();  
+		}
+		return ret; 
+	}
+	
 	public PlotDescription(List<AbstractExpression> expressions, String filename) {
 		super();
 		this.expressions = expressions;

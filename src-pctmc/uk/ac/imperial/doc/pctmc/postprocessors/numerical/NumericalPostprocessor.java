@@ -1,7 +1,9 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -68,7 +70,8 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	}
 
 	protected double[][] dataPoints;
-
+	
+	
 	@Override
 	public final void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
@@ -76,13 +79,22 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		prepare(analysis, constants);
 		calculateDataPoints(constants); 
 		if (dataPoints!=null){
+			results = new HashMap<PlotDescription, double[][]>();
 			for (PlotDescription pd:plotDescriptions){
-				plotData(analysis, constants, pd.getExpressions(), pd.getFilename());
+				double[][] data = plotData(analysis, constants, pd.getExpressions(), pd.getFilename());
+				results.put(pd, data);
 			}
 		}
 	}
 	
-	public void plotData(AbstractPCTMCAnalysis analysis,
+	protected Map<PlotDescription, double[][]> results;
+	
+	public Map<PlotDescription, double[][]> getResults() {
+		return results;
+	}
+
+
+	public double[][] plotData(AbstractPCTMCAnalysis analysis,
 			Constants variables, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
@@ -102,6 +114,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 			FileUtils.writeGnuplotFile(filename, "", labels, "time", "count");
 			FileUtils.writeCSVfile(filename, dataset);
 		}
+		return data;
 	}
 
 	
