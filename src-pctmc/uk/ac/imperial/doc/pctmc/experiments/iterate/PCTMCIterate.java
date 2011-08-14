@@ -202,13 +202,12 @@ public class PCTMCIterate {
 	    	for (int y = 0; y<yRange.getSteps(); y++){   		
 	    		double yValue = yRange.getStep(y);	    			    		
 	    		constants.setConstantValue(yRange.getConstant(), yValue);
- 
-
-	    		if (!minRanges.isEmpty()){
+	    		
+	    	//	if (!minRanges.isEmpty()){
 	    			if (!minimise(constants)) continue; 
-	    		} else {
+	    	/*	} else {
 	    			iterations++;
-	    		}
+	    		}*/
 	    		
 	    		reEvaluate(constants);	
 	    		postprocessor.calculateDataPoints(constants);
@@ -274,7 +273,9 @@ public class PCTMCIterate {
 	    		PCTMCLogging.info(iterations + "iterations finished.");
 	    		PCTMCLogging.setVisible(false);
 	    	}
-			
+			if (minSpecification == null){
+				return true;
+			}
 			double reward = evaluateConstrainedReward(minSpecification, constants);
 			if (!Double.isNaN(reward)){
 
