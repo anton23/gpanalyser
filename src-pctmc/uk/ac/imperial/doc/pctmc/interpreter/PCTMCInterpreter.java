@@ -1,6 +1,6 @@
 package uk.ac.imperial.doc.pctmc.interpreter;
 
-import java.lang.reflect.InvocationTargetException;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,11 +44,11 @@ public class PCTMCInterpreter {
 	private Class<? extends TreeParser> compilerClass;
 	private Class<? extends PatternMatcher> patternMatcherClass;
 	
-	public List<AbstractExpression> parseExpressionList(String string){
-		List<AbstractExpression> ret = null;
-
+	@SuppressWarnings("unchecked")
+	public List<AbstractExpression> parseExpressionList(String string) throws ParseException{
 		Lexer lexer;
 		try {
+	
 			lexer = lexerClass.getConstructor(
 					CharStream.class).newInstance(
 					new ANTLRStringStream(string));
@@ -71,28 +71,12 @@ public class PCTMCInterpreter {
 				"expressionList", (Class<?>[]) null).invoke(compiler,
 				(Object[]) null);
 		
-		ret = (List<AbstractExpression>) compilerReturn;
+		return (List<AbstractExpression>) compilerReturn;
 		
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			if (e instanceof ParseException) throw (ParseException)e;
+			throw new ParseException(Lists.newArrayList("Unexpected internal error: " + e));
 		} 
-		return ret; 
 	}
 
 	
@@ -151,17 +135,11 @@ public class PCTMCInterpreter {
 	}
 
 	
-	/**
-	 * Parses an input file and returns a file representation object.
-	 * @param file
-	 * @return
-	 * @throws ParseException
-	 */
 	@SuppressWarnings("unchecked")
-	public PCTMCFileRepresentation parseFile(String file) throws ParseException {
+	protected PCTMCFileRepresentation parseStream(ANTLRStringStream stream) throws ParseException {
 		try {
 			Lexer lexer = lexerClass.getConstructor(CharStream.class)
-					.newInstance(new ANTLRFileStream(file));
+					.newInstance(stream);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
 			Parser parser = parserClass.getConstructor(TokenStream.class)
@@ -198,9 +176,30 @@ public class PCTMCInterpreter {
 			return pctmcFileRepresentation;
 		} catch (Exception e) {
 			if (e instanceof ParseException) throw (ParseException)e;
-			e.printStackTrace();
 			throw new ParseException(Lists.newArrayList("Unexpected internal error: " + e));
 		}
+	}
+
+	
+	
+
+	
+	/**
+	 * Parses an input file and returns a file representation object.
+	 * @param file
+	 * @return
+	 * @throws ParseException
+	 */
+	public PCTMCFileRepresentation parsePCTMCFile(String file) throws ParseException {
+		try {
+			return parseStream(new ANTLRFileStream(file));
+		} catch (IOException e) {
+			throw new ParseException(Lists.newArrayList("The given file doesn't exist!"));
+		}
+	}
+	
+	public PCTMCFileRepresentation parsePCTMCFileInString(String string) throws ParseException {
+		return parseStream(new ANTLRStringStream(string));
 	}
 	
 	public void processFileRepresentation(PCTMCFileRepresentation fileRepresentation){
@@ -242,7 +241,7 @@ public class PCTMCInterpreter {
 		PCTMCLogging.increaseIndent();
 
 		try {
-			PCTMCFileRepresentation fileRepresentation = parseFile(file);
+			PCTMCFileRepresentation fileRepresentation = parsePCTMCFile(file);
 			processFileRepresentation(fileRepresentation);
 	
 		} catch (ParseException e) {
