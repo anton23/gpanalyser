@@ -48,6 +48,6 @@ public class GPEPAToPCTMC {
 			}
 			events.add(new EvolutionEvent(decreasing, increasing, event.getRate()));
 		}
-		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model); 
+		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions); 
 	}
 }

@@ -49,6 +49,10 @@ public class PCTMCIterate {
 		return minRanges;
 	}
 
+	public List<RangeSpecification> getRanges() {
+		return ranges;
+	}
+
 	public List<PlotAtDescription> getPlots(){
 		return plots; 
 	}
