@@ -10,6 +10,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
+import uk.ac.imperial.doc.pctmc.compare.PCTMCCompareAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.matlaboutput.analysis.MatlabMethodPrinter;
 import uk.ac.imperial.doc.pctmc.matlaboutput.odeanalysis.MatlabODEMethodPrinter;
@@ -37,7 +38,7 @@ public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 		if (analysis instanceof PCTMCODEAnalysis){
 			processODEAnalysis((PCTMCODEAnalysis) analysis, constants);
 		}
-		processPlotDescriptions(constants, analysis, plotDescriptions);
+		if (!(analysis instanceof PCTMCCompareAnalysis))processPlotDescriptions(constants, analysis, plotDescriptions);
 		analysisCounter++;
 	}
 	
