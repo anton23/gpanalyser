@@ -14,12 +14,11 @@ public class StandardisedCentralMomentOfLinearCombinationExpression extends Expr
 
 	@Override
 	public String toString() {
-		if (order==3) return "Skew{" + originalExpression.toString() + "}";
-		if (order==4) return "Kurt{" + originalExpression.toString() + "}";
+		if (order==3) return "Skew[" + originalExpression.toString() + "]";
+		if (order==4) return "Kurt[" + originalExpression.toString() + "]";
 		return "SCM["+originalExpression.toString() + "," + order +"]"; 
 	}
-
-	AbstractExpression internalExpression; 	
+ 	
 	AbstractExpression originalExpression;
 	int order; 
 	
