@@ -256,7 +256,8 @@ public class PCTMCIterate {
 	    			FileUtils.writeGnuplotFile(plot.getFilename(), "", Lists.newArrayList(plot.toString()), yRange.getConstant(), "");
 	    		}
 	    	}
-	    	if (ranges.size()==0){
+	    	if (ranges.size()==0){	    		
+	    		results.put(plot,data[i]);
 	    		PCTMCLogging.info("The value of " + plot.toString() + " at optimum is " + data[i][0][0]);
 	    	}
 	    }
