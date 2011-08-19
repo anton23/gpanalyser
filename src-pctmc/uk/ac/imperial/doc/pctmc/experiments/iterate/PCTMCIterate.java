@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.experiments.iterate;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -141,7 +142,15 @@ public class PCTMCIterate {
 		}
 	}
 	
+	private Map<PlotAtDescription, double[][]> results;
 	
+	
+	
+	
+	public Map<PlotAtDescription,double[][]> getResults() {
+		return results;
+	}
+
 	private void iterate2d(Constants constants){
 		PCTMCLogging.info("Running experiment " + this.toString());
 		PCTMCLogging.increaseIndent(); 
@@ -170,10 +179,6 @@ public class PCTMCIterate {
 		    }
 		}
 		
-		
- 
-		
-	    
 	    
 	    steps = new int[minRanges.size()];
 	    minRangesArray = new RangeSpecification[minRanges.size()];
@@ -219,12 +224,14 @@ public class PCTMCIterate {
 	    }
 	    PCTMCLogging.decreaseIndent(); 
 	    PCTMCLogging.setVisible(true);
+	    results = new HashMap<PlotAtDescription, double[][]>();
 	    for (int i = 0; i<plots.size(); i++){
 	    	PlotAtDescription plot = plots.get(i);
 	    	PCTMCLogging.info("Plotting " + plot);
-
+	    	
  
 	    	if (ranges.size()==2 ){
+	    		results.put(plot, data[i]);
 	    		ChartUtils3D.drawChart(toShortString(),plot.toString(),data[i],xRange.getFrom(),xRange.getDc(),yRange.getFrom(),yRange.getDc(),
 		    		xRange.constant,yRange.constant,plot.getExpression().toString());
 		    	
@@ -238,6 +245,7 @@ public class PCTMCIterate {
 	    		for (int j = 0; j<yRange.getSteps(); j++){
 	    			newData[j][0] = data[i][0][j]; 
 	    		}
+	    		results.put(plot, newData);
 	    		XYSeriesCollection dataset = AnalysisUtils.getDataset(newData, yRange.getFrom(),yRange.getDc(), 
 	    				new String[]{plot.toString()});
 	    		
