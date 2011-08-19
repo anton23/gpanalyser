@@ -83,6 +83,11 @@ public class ExampleUseOfAPI {
 					    		xRange.getConstant(),yRange.getConstant(),e.getKey().getExpression().toString());
 					}
 				}
+				if (dim==0){
+					for (Map.Entry<PlotAtDescription, double[][]> e:experiment.getResults().entrySet()){
+						System.out.println("The optimal value of " + e.getKey() + " is " + e.getValue()[0][0]);
+					}
+				}
 				
 			}
 			
