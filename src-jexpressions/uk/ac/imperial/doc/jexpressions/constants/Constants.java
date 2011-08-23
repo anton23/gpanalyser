@@ -14,7 +14,7 @@ import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
  */
 public class Constants {
 
-	private Map<String, Integer> constantIndex;
+	protected Map<String, Integer> constantIndex;
 
 	private Map<String, Double> constants;
 
