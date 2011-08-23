@@ -110,15 +110,33 @@ public class ExampleUseOfODEs {
 			XYDataset dataset = AnalysisUtils.getDataset(result, 0.1, new String[]{"prey", "predator"});
 			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
 			
-			// And we plot the value of the objective function, say at time 10.0, i.e. at index 101
+			// And we plot the value of the objective function, say at time 10.0, i.e. at index 100
 			System.out.println("The values of objective functions for prey0="+constants.getConstantValue("prey0")+":");
 			for (AbstractExpression of:getObjectiveFunctions()){
-				ExpressionEvaluator evaluator = new ExpressionEvaluatorWithODEVariables(result[101], odeVariableIndex);
+				ExpressionEvaluator evaluator = new ExpressionEvaluatorWithODEVariables(result[100], odeVariableIndex);
 				of.accept(evaluator);
 				System.out.println("   Value of " + of.toString() + " at time 10.0 is " + evaluator.getResult());
 			}
 		}
 	}
+	
+	public void exampleWithoutAbstractExpressions(){
+		SystemOfODEs odes = new PredatorPreyODEs();
+		//Let's solve the ODEs for different values of prey0, say 0,4,8,12,16,20,24,28,32
+		for (int v = 0; v<=8; v++){
+			double[] initial = new double[]{v*4.0, 4.0};
+			
+			// We tell the odes what the constants are
+			odes.setRates(new double[]{1.5, 3.0, 1.0, 1.0});
+			// And comput the solution
+			double[][] result = RungeKutta.rungeKutta(odes, initial, 20.0, 0.1, 10);
+			// Just for fun we plot the solution values of the ode variables
+			XYDataset dataset = AnalysisUtils.getDataset(result, 0.1, new String[]{"prey", "predator"});
+			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
+			System.out.println("The value of predator*prey at time 10.0 is " + (result[100][0]*result[100][1]));
+		}
+	}
+
 	
 	/**
 	 * @param args
