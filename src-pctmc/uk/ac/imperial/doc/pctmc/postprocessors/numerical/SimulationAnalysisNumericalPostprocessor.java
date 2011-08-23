@@ -43,7 +43,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	
 	@Override
 	public String toString() {
-		return super.toString() + ", replications = " + replications;
+		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", replications = " + replications+")";
 	}
 	
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,

@@ -39,7 +39,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	
 	@Override
 	public String toString() {
-		return "stopTime = " + stopTime + ", stepSize = " + stepSize;
+		return "(stopTime = " + stopTime + ", stepSize = " + stepSize+")";
 	}
 	
 	
@@ -105,7 +105,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		XYSeriesCollection dataset = AnalysisUtils.getDataset(data,
 				stepSize, names);
 		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
-				analysis.toString());
+				analysis.toString()+this.toString());
 		if (!filename.equals("")) {
 			List<String> labels = new LinkedList<String>();
 			for (AbstractExpression e : expressions) {

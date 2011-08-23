@@ -37,7 +37,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	@Override
 	public String toString() {
-		return super.toString() + ", density = " + density; 
+		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", density = " + density+")"; 
 	}
 
 	@Override
