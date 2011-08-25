@@ -6,6 +6,7 @@ package uk.ac.imperial.doc.jexpressions.expressions;
  *
  */
 public class IntegerExpression extends AbstractExpression{
+	
 	private int value;
 
 	public IntegerExpression(int value) {

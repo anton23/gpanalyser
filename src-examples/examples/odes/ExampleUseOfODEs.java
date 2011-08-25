@@ -46,10 +46,8 @@ public class ExampleUseOfODEs {
 			ret[1] = -y[1]*(r[2]-r[3]*y[0]);
 			return ret;
 		}
-
-		
-
 	}
+
 	
 	private static Constants createConstants(){
 		Map<String, Double> constantValues = new HashMap<String, Double>();
