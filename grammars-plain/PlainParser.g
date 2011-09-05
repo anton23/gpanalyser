@@ -33,7 +33,19 @@ tokens{
 
 //This is a hack until the composite grammars are implemented in a better way
 @members{
-  protected List<String> errors = new LinkedList<String>();
+  protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException{   
+    throw new MissingTokenException(ttype, input, null);
+}   
+
+public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
+    throw e;
+}
+
+protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
+    throw new MismatchedTokenException(ttype, input);
+} 
+
+protected List<String> errors = new LinkedList<String>();
 
 public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
@@ -42,10 +54,15 @@ public void displayRecognitionError(String[] tokenNames,
         errors.add(hdr + " " + msg);
     }
     public List<String> getErrors() {
-    	LinkedList<String> allErrors = new LinkedList<String>(errors); 
-    	allErrors.addAll(gPCTMCParserPrototype.getErrors());
         return errors;
     }
+}
+
+@rulecatch {
+  catch (RecognitionException re) {
+    reportError(re);
+    //throw re;
+  }
 }
 
 

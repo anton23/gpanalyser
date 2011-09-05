@@ -15,7 +15,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
 
 	@Override
 	public String toString() {
-		return "ODEs()"; 
+		return "ODEs"; 
 	}
  
 	private int order; 

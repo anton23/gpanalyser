@@ -176,6 +176,7 @@ public class PCTMCInterpreter {
 			return pctmcFileRepresentation;
 		} catch (Exception e) {
 			if (e instanceof ParseException) throw (ParseException)e;
+			//e.printStackTrace();
 			throw new ParseException(Lists.newArrayList("Unexpected internal error: " + e));
 		}
 	}
