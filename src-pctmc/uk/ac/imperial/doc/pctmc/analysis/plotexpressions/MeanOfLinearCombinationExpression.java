@@ -13,7 +13,7 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 
 
-//only works for expressions of the form  (c_1*)?CM_1 + (c_2*)? CM_2 ...
+// only works for expressions of the form  (c_1*)?CM_1 + (c_2*)? CM_2 ...
 public class MeanOfLinearCombinationExpression extends ExpressionWrapper{
 	
 	@Override

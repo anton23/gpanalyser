@@ -7,6 +7,13 @@ public class ExpressionWrapper extends AbstractExpression {
 	
 	protected AbstractExpression internalExpression; 
 
+	public ExpressionWrapper(AbstractExpression internalExpression) {
+		super();
+		this.internalExpression = internalExpression;
+	}
+	
+	public ExpressionWrapper(){}
+	
 	@Override
 	public int hashCode() {
 		return internalExpression.hashCode(); 
@@ -40,13 +47,4 @@ public class ExpressionWrapper extends AbstractExpression {
 	public void accept(IExpressionVisitor v) {
 		internalExpression.accept(v); 
 	}
-
-
-	public ExpressionWrapper(AbstractExpression internalExpression) {
-		super();
-		this.internalExpression = internalExpression;
-	}
-	
-	public ExpressionWrapper(){}
-
 }

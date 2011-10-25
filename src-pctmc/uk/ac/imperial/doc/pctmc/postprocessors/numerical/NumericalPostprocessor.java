@@ -102,7 +102,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 			names[i] = expressions.get(i).toString();
 		}
 		double[][] data = evaluateExpressions(expressions, variables);
-		XYSeriesCollection dataset = AnalysisUtils.getDataset(data,
+		XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,
 				stepSize, names);
 		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
 				analysis.toString()+this.toString());

@@ -8,12 +8,19 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class AnalysisUtils {
 
-	public static XYSeriesCollection getDataset(double[][] dataPoints,
+	/** 
+	 * Creates a Dataset from an array and step information.
+	 * @param dataPoints
+	 * @param stepSize
+	 * @param names
+	 * @return
+	 */
+	public static XYSeriesCollection getDatasetFromArray(double[][] dataPoints,
 			double stepSize, String[] names) {
-		return getDataset(dataPoints, 0.0, stepSize, names);		
+		return getDatasetFromArray(dataPoints, 0.0, stepSize, names);		
 	}
 
-	public static XYSeriesCollection getDataset(double[][] dataPoints,
+	public static XYSeriesCollection getDatasetFromArray(double[][] dataPoints,
 			double min, double stepSize, String[] names) {
 		List<XYSeries> series = new ArrayList<XYSeries>();
 

@@ -105,7 +105,7 @@ public class ExampleUseOfODEs {
 			// And comput the solution
 			double[][] result = RungeKutta.rungeKutta(odes, initial, 20.0, 0.1, 10);
 			// Just for fun we plot the solution values of the ode variables
-			XYDataset dataset = AnalysisUtils.getDataset(result, 0.1, new String[]{"prey", "predator"});
+			XYDataset dataset = AnalysisUtils.getDatasetFromArray(result, 0.1, new String[]{"prey", "predator"});
 			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
 			
 			// And we plot the value of the objective function, say at time 10.0, i.e. at index 100
@@ -129,7 +129,7 @@ public class ExampleUseOfODEs {
 			// And comput the solution
 			double[][] result = RungeKutta.rungeKutta(odes, initial, 20.0, 0.1, 10);
 			// Just for fun we plot the solution values of the ode variables
-			XYDataset dataset = AnalysisUtils.getDataset(result, 0.1, new String[]{"prey", "predator"});
+			XYDataset dataset = AnalysisUtils.getDatasetFromArray(result, 0.1, new String[]{"prey", "predator"});
 			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
 			System.out.println("The value of predator*prey at time 10.0 is " + (result[100][0]*result[100][1]));
 		}

@@ -25,43 +25,53 @@ import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 
-
 /**
- * Expression visitor for collecting used moments. 
+ * Expression visitor for collecting used moments.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class CollectUsedMomentsVisitor implements IExpressionVisitor,
-		  ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor {
+		ICombinedProductExpressionVisitor, IGeneralExpectationExpressionVisitor {
+
+	private Set<CombinedPopulationProduct> usedCombinedMoments;
+	private Set<AbstractExpression> usedGeneralExpectations;
+
+	public CollectUsedMomentsVisitor() {
+		usedGeneralExpectations = new HashSet<AbstractExpression>();
+		usedCombinedMoments = new HashSet<CombinedPopulationProduct>();
+	}
+
 	@Override
 	public void visit(GeneralExpectationExpression e) {
 		usedGeneralExpectations.add(e.getExpression());
 	}
 
 	@Override
-	public void visit(IntegerExpression e) {}
+	public void visit(IntegerExpression e) {
+	}
 
 	@Override
 	public void visit(CombinedProductExpression e) {
-			usedCombinedMoments.add(e.getProduct());		
+		usedCombinedMoments.add(e.getProduct());
 	}
 
 	@Override
 	public void visit(UMinusExpression e) {
-		e.getE().accept(this); 		
+		e.getE().accept(this);
 	}
 
 	@Override
 	public void visit(FunctionCallExpression e) {
-		for (AbstractExpression arg:e.getArguments()){
-			arg.accept(this); 
+		for (AbstractExpression arg : e.getArguments()) {
+			arg.accept(this);
 		}
-		
+
 	}
 
 	@Override
 	public void visit(TimeExpression e) {
-		
+
 	}
 
 	@Override
@@ -69,30 +79,11 @@ public class CollectUsedMomentsVisitor implements IExpressionVisitor,
 		e.getNumerator().accept(this);
 		e.getDenominator().accept(this);
 	}
-	
-	private Set<CombinedPopulationProduct> usedCombinedMoments; 
-	private Set<AbstractExpression> usedGeneralExpectations;
-
-	public Set<AbstractExpression> getUsedGeneralExpectations() {
-		return usedGeneralExpectations;
-	}
-
-
-	public Set<CombinedPopulationProduct> getUsedCombinedMoments() {
-		return usedCombinedMoments;
-	}
-
-	public CollectUsedMomentsVisitor() {
-		usedGeneralExpectations = new HashSet<AbstractExpression>(); 
-		usedCombinedMoments = new HashSet<CombinedPopulationProduct>();
-	}
 
 	@Override
 	public void visit(AbstractExpression e) {
-		throw new AssertionError("Unsupported expression!"); 
+		throw new AssertionError("Unsupported expression!");
 	}
-
-
 
 	@Override
 	public void visit(DoubleExpression e) {
@@ -152,5 +143,11 @@ public class CollectUsedMomentsVisitor implements IExpressionVisitor,
 
 	}
 
+	public Set<AbstractExpression> getUsedGeneralExpectations() {
+		return usedGeneralExpectations;
+	}
 
+	public Set<CombinedPopulationProduct> getUsedCombinedMoments() {
+		return usedCombinedMoments;
+	}
 }

@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.pctmc.expressions;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.representation.State;
 
 /**
  * AbstractExpression wrapper for a combined population product.
@@ -27,6 +28,10 @@ public class CombinedProductExpression extends AbstractExpression {
 		} else {
 			return new CombinedProductExpression(product); 
 		}
+	}
+	
+	public static AbstractExpression createMeanExpression(State state) {
+		return CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(state));
 	}
 
 	@Override

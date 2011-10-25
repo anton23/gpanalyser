@@ -9,7 +9,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.MeanExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -36,7 +36,7 @@ public class TransactionPatternMatcher extends PatternMatcher {
 				Transaction pt = (Transaction) p;
 				List<String> ptComponents = pt.getComponents(); 
 				Multiset<String> tmp = HashMultiset.<String>create(ptComponents);
-				ArrayList<AbstractExpression> terms = Lists.newArrayList(new DoubleExpression((double)tmp.count(countOf)),MeanExpression.createExpression(pt));
+				ArrayList<AbstractExpression> terms = Lists.newArrayList(new DoubleExpression((double)tmp.count(countOf)),CombinedProductExpression.createMeanExpression(pt));
 				summands.add(ProductExpression.create(terms));
 			}
 		}

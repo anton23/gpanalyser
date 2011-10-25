@@ -246,7 +246,7 @@ public class PCTMCIterate {
 	    			newData[j][0] = data[i][0][j]; 
 	    		}
 	    		results.put(plot, newData);
-	    		XYSeriesCollection dataset = AnalysisUtils.getDataset(newData, yRange.getFrom(),yRange.getDc(), 
+	    		XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(newData, yRange.getFrom(),yRange.getDc(), 
 	    				new String[]{plot.toString()});
 	    		
 	    		

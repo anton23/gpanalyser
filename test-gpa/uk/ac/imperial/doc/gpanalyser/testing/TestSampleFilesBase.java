@@ -17,11 +17,11 @@ import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CentralMomentOfLinearCombinationExpression;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.MeanExpression;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.MeanOfLinearCombinationExpression;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.StandardisedCentralMomentOfLinearCombinationExpression;
 import uk.ac.imperial.doc.pctmc.compare.PCTMCCompareAnalysis;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
@@ -67,7 +67,7 @@ public class TestSampleFilesBase {
 			for (int o = 1; o<=maxOrder; o++){				
 					List<AbstractExpression> tmp = new LinkedList<AbstractExpression>();
 					for (State s:states){
-						AbstractExpression mean = MeanExpression.createExpression(s);
+						AbstractExpression mean = CombinedProductExpression.createMeanExpression(s);
 						if (o==1){
 							tmp.add(new MeanOfLinearCombinationExpression(mean, new HashMap<ExpressionVariable, AbstractExpression>()));
 						} else
