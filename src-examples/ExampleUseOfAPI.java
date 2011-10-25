@@ -45,7 +45,7 @@ public class ExampleUseOfAPI {
 						
 			for (Map.Entry<PlotDescription, double[][]> e:results.entrySet()){
 				double stepSize = numericalPostprocessor.getStepSize();
-				XYDataset dataset = AnalysisUtils.getDataset(e.getValue(), stepSize, e.getKey().getLabels());
+				XYDataset dataset = AnalysisUtils.getDatasetFromArray(e.getValue(), stepSize, e.getKey().getLabels());
 				PCTMCChartUtilities.nextBatch();
 				PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
 						"Example plots from postprocessors");
@@ -68,7 +68,7 @@ public class ExampleUseOfAPI {
 					System.out.println("The results are standard plots:");
 					for (Map.Entry<PlotAtDescription, double[][]> e:experiment.getResults().entrySet()){
 						RangeSpecification range = experiment.getRanges().get(0);
-						XYSeriesCollection dataset = AnalysisUtils.getDataset(e.getValue(), 
+						XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(e.getValue(), 
 								range.getFrom(),range.getDc(), 
 			    		  new String[]{e.getKey().toString()});
 			    		PCTMCChartUtilities.drawChart(dataset, range.getConstant(), "count", "", "Example " + experiment.toShortString());

@@ -12,7 +12,7 @@ import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.MeanExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -40,7 +40,7 @@ public class GPEPAPatternMatcher extends PatternMatcher{
 		}
 		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();  
 		for (GroupComponentPair p:pairs){
-			summands.add(MeanExpression.createExpression(new GPEPAState(p))); 
+			summands.add(CombinedProductExpression.createMeanExpression(new GPEPAState(p))); 
 		}
 		return SumExpression.create(summands); 
 	}

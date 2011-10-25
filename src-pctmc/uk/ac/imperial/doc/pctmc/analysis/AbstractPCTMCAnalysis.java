@@ -31,51 +31,53 @@ public abstract class AbstractPCTMCAnalysis {
 	protected BiMap<CombinedPopulationProduct, Integer> momentIndex;
 
 	protected BiMap<AbstractExpression, Integer> generalExpectationIndex;
-	
-	protected List<PCTMCAnalysisPostprocessor> postprocessors; 
-	
-	public void addPostprocessor(PCTMCAnalysisPostprocessor postprocessor){
-		postprocessors.add(postprocessor); 
+
+	protected List<PCTMCAnalysisPostprocessor> postprocessors;
+
+	/**
+	 * Adds a postprocessor that will be notified when the analysis finishes.
+	 * @param postprocessor
+	 */
+	public void addPostprocessor(PCTMCAnalysisPostprocessor postprocessor) {
+		postprocessors.add(postprocessor);
 	}
-	
-	
-	
+
 	public List<PCTMCAnalysisPostprocessor> getPostprocessors() {
 		return postprocessors;
 	}
-
-
 
 	public PCTMC getPCTMC() {
 		return pctmc;
 	}
 
-	
-	
 	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
 		return momentIndex;
 	}
-
-
 
 	public BiMap<AbstractExpression, Integer> getGeneralExpectationIndex() {
 		return generalExpectationIndex;
 	}
 
-
 	/**
-	 * Prepares the analysis with given constants. 
+	 * Prepares the analysis with given constants.
+	 * 
 	 * @param constants
 	 */
 	public abstract void prepare(Constants constants);
-	
-	public void notifyPostprocessors(Constants constants, List<PlotDescription> plotDescriptions){
-		for (PCTMCAnalysisPostprocessor postprocessor:postprocessors){
-			postprocessor.postprocessAnalysis(constants, this, plotDescriptions);
+
+	/**
+	 * Notifies postprocessors about finished analysis generation.
+	 * @param constants
+	 * @param plotDescriptions
+	 */
+	public void notifyPostprocessors(Constants constants,
+			List<PlotDescription> plotDescriptions) {
+		for (PCTMCAnalysisPostprocessor postprocessor : postprocessors) {
+			postprocessor
+					.postprocessAnalysis(constants, this, plotDescriptions);
 		}
 	}
-	
-	
+
 	public AbstractPCTMCAnalysis(PCTMC pctmc) {
 		this.pctmc = pctmc;
 		stateIndex = pctmc.getStateIndex();
@@ -84,11 +86,12 @@ public abstract class AbstractPCTMCAnalysis {
 				.<AbstractExpression, Integer> create();
 		usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
 		usedGeneralExpectations = new HashSet<AbstractExpression>();
-		postprocessors = new LinkedList<PCTMCAnalysisPostprocessor>(); 
+		postprocessors = new LinkedList<PCTMCAnalysisPostprocessor>();
 	}
-	
+
 	/**
 	 * Sets the moments the analysis has to compute.
+	 * 
 	 * @param combinedProducts
 	 */
 	public void setUsedMoments(
@@ -101,9 +104,15 @@ public abstract class AbstractPCTMCAnalysis {
 			momentIndex.put(p, i++);
 		}
 	}
-	
-	public void setUsedGeneralExpectations(Collection<AbstractExpression> usedGeneralExpectations){
+
+	/**
+	 * Sets the used general expectations the analysis has to compute.
+	 * 
+	 * @param usedGeneralExpectations
+	 */
+	public void setUsedGeneralExpectations(
+			Collection<AbstractExpression> usedGeneralExpectations) {
 		this.usedGeneralExpectations = usedGeneralExpectations;
 	}
-	
+
 }

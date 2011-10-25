@@ -29,8 +29,8 @@ public class StandardisedCentralMomentOfLinearCombinationExpression extends Expr
 		this.order = order; 
 		MeanOfLinearCombinationExpression mean = new MeanOfLinearCombinationExpression(e, var);
 		internalExpression=DivExpression.create(
-				CentralMomentOfLinearCombination.createExpression(mean.getCoefficients(), mean.getCombinedProducts(), order),
-				PowerExpression.create(CentralMomentOfLinearCombination.createExpression(mean.getCoefficients(), mean.getCombinedProducts(), 2), 
+				CentralMomentOfLinearCombinationExpression.createExpression(mean.getCoefficients(), mean.getCombinedProducts(), order),
+				PowerExpression.create(CentralMomentOfLinearCombinationExpression.createExpression(mean.getCoefficients(), mean.getCombinedProducts(), 2), 
 						new DoubleExpression((double)order/2.0))
 				); 		
 	}
