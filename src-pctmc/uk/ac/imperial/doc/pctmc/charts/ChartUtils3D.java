@@ -18,10 +18,6 @@ import org.jzy3d.plot3d.primitives.Polygon;
 import org.jzy3d.plot3d.primitives.Shape;
 import org.jzy3d.plot3d.rendering.canvas.CanvasSwing;
 
-
-
-
-
 public class ChartUtils3D{
 	
 	public static Rectangle DEFAULT_WINDOW_DIMENSIONS = new Rectangle(0,0,600,500);
@@ -47,7 +43,6 @@ public class ChartUtils3D{
 			}
 		}
 		
-		
 		Shape surface = new Shape(polygons);
         float zmin = surface.getBounds().getZmin();
 		float zmax = surface.getBounds().getZmax();
@@ -61,9 +56,6 @@ public class ChartUtils3D{
         chart.getAxeLayout().setZAxeLabel(zlabel);
         
         chart.getScene().getGraph().add(surface);
-        
-
-        
         
         double shadowZ = zmin - (zmax - zmin); 
 		for (int ix = 0; ix<data.length-1; ix++){

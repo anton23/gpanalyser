@@ -28,9 +28,13 @@ import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.RefineryUtilities;
 
 public class PCTMCChartUtilities {
-	private static boolean gui = true;
 	
+	private static boolean gui = true;	
+	public static boolean jogl = false;
+	private static double lastx = 0, lasty = 0;
 	
+	private static Map<String,JFrame> windows = new HashMap<String, JFrame>(); 
+	private static Map<String,JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
 	
 	public static boolean isGui() {
 		return gui;
@@ -40,16 +44,10 @@ public class PCTMCChartUtilities {
 		PCTMCChartUtilities.gui = gui;
 	}
 
-	public static boolean jogl = false;
-
-	private static double lastx = 0, lasty = 0;
-
 	public static void nextBatch() {
 		lasty = 0;
 		lastx += 0.1;
 	}
-	
-	
 	
 	public static void drawBlockChart(XYZDataset dataset, String xlabel,
 			String ylabel, String zlabel, double dx, double dy, double minz, double maxz,String chartTitle, String windowTitle) {
@@ -107,10 +105,6 @@ public class PCTMCChartUtilities {
 		lasty += 0.05;
 	}
 	
-	
-	 
-	  
-	
 	public static void setWindow(String windowTitle){
 		if (!gui) return; 
 		String mainClass = "";// System.getenv("JAVA_MAIN_CLASS");
@@ -129,9 +123,7 @@ public class PCTMCChartUtilities {
 		tabs.put(windowTitle,tab); 
 	}
 	
-	private static Map<String,JFrame> windows = new HashMap<String, JFrame>(); 
-	private static Map<String,JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
-	
+
 	public static JFrame getWindow(String title){
 		return windows.get(title); 
 	}

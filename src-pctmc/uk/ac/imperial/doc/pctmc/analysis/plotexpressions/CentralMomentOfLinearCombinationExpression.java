@@ -19,9 +19,8 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.utils.Multinomial;
 
 public class CentralMomentOfLinearCombinationExpression extends
-		AbstractExpression {
+		ExpressionWrapper {
 
-	private AbstractExpression internalExpression;
 	private AbstractExpression originalExpression;
 	private int order;
 
@@ -30,14 +29,13 @@ public class CentralMomentOfLinearCombinationExpression extends
 
 	public CentralMomentOfLinearCombinationExpression(AbstractExpression e,
 			int order, Map<ExpressionVariable, AbstractExpression> var) {
-		super();
-		originalExpression = e;
+		super(CentralMomentOfLinearCombinationExpression
+				.createExpression(new MeanOfLinearCombinationExpression(e, var)
+						.getCoefficients(),
+						new MeanOfLinearCombinationExpression(e, var)
+								.getCombinedProducts(), order));
+		this.originalExpression = e;
 		this.order = order;
-		MeanOfLinearCombinationExpression mean = new MeanOfLinearCombinationExpression(
-				e, var);
-		internalExpression = CentralMomentOfLinearCombinationExpression
-				.createExpression(mean.getCoefficients(), mean
-						.getCombinedProducts(), order);
 	}
 
 	public static AbstractExpression createExpression(
@@ -77,11 +75,6 @@ public class CentralMomentOfLinearCombinationExpression extends
 			sum.add(ProductExpression.create(terms));
 		}
 		return SumExpression.create(sum);
-	}
-
-	@Override
-	public void accept(IExpressionVisitor v) {
-		internalExpression.accept(v);
 	}
 
 	@Override
