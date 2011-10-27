@@ -1,4 +1,5 @@
- package uk.ac.imperial.doc.pctmc.analysis.plotexpressions;
+package uk.ac.imperial.doc.pctmc.analysis.plotexpressions;
+
 import java.util.List;
 import java.util.Map;
 
@@ -9,36 +10,44 @@ import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 
-public class StandardisedCentralMomentOfLinearCombinationExpression extends ExpressionWrapper {
-	
+public class StandardisedCentralMomentOfLinearCombinationExpression extends
+		ExpressionWrapper {
+
+	private List<AbstractExpression> coefficients;
+	private List<CombinedPopulationProduct> combinedProducts;
+
+	private AbstractExpression originalExpression;
+	private int order;
+
+	public StandardisedCentralMomentOfLinearCombinationExpression(
+			AbstractExpression e, int order,
+			Map<ExpressionVariable, AbstractExpression> var) {
+		super(createExpression(e, order, var));
+		originalExpression = e;
+		this.order = order;
+	}
+
+	private static AbstractExpression createExpression(AbstractExpression e,
+			int order, Map<ExpressionVariable, AbstractExpression> var) {
+		MeanOfLinearCombinationExpression mean = new MeanOfLinearCombinationExpression(
+				e, var);
+		return DivExpression.create(CentralMomentOfLinearCombinationExpression
+				.createExpression(mean.getCoefficients(), mean
+						.getCombinedProducts(), order), PowerExpression.create(
+				CentralMomentOfLinearCombinationExpression.createExpression(
+						mean.getCoefficients(), mean.getCombinedProducts(), 2),
+				new DoubleExpression((double) order / 2.0)));
+	}
 
 	@Override
 	public String toString() {
-		if (order==3) return "Skew[" + originalExpression.toString() + "]";
-		if (order==4) return "Kurt[" + originalExpression.toString() + "]";
-		return "SCM["+originalExpression.toString() + "," + order +"]"; 
+		if (order == 3)
+			return "Skew[" + originalExpression.toString() + "]";
+		if (order == 4)
+			return "Kurt[" + originalExpression.toString() + "]";
+		return "SCM[" + originalExpression.toString() + "," + order + "]";
 	}
- 	
-	AbstractExpression originalExpression;
-	int order; 
-	
-	public StandardisedCentralMomentOfLinearCombinationExpression(
-			AbstractExpression e, int order, Map<ExpressionVariable,AbstractExpression> var) {
-		super();	
-		originalExpression = e;
-		this.order = order; 
-		MeanOfLinearCombinationExpression mean = new MeanOfLinearCombinationExpression(e, var);
-		internalExpression=DivExpression.create(
-				CentralMomentOfLinearCombinationExpression.createExpression(mean.getCoefficients(), mean.getCombinedProducts(), order),
-				PowerExpression.create(CentralMomentOfLinearCombinationExpression.createExpression(mean.getCoefficients(), mean.getCombinedProducts(), 2), 
-						new DoubleExpression((double)order/2.0))
-				); 		
-	}
-	
-	
-	private List<AbstractExpression> coefficients; 
-	private List<CombinedPopulationProduct> combinedProducts;
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -50,6 +59,7 @@ public class StandardisedCentralMomentOfLinearCombinationExpression extends Expr
 				+ ((combinedProducts == null) ? 0 : combinedProducts.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

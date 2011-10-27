@@ -8,7 +8,7 @@ public class IsConstantVisitor extends ExpressionWalkerWithConstants implements
 		ICombinedProductExpressionVisitor {
 
 	private boolean constant = true;
-	
+
 	@Override
 	public void visit(CombinedProductExpression e) {
 		constant = false;

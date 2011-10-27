@@ -12,10 +12,58 @@ import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 
-
 // only works for expressions of the form  (c_1*)?CM_1 + (c_2*)? CM_2 ...
-public class MeanOfLinearCombinationExpression extends ExpressionWrapper{
-	
+public class MeanOfLinearCombinationExpression extends ExpressionWrapper {
+
+	private List<AbstractExpression> coefficients;
+	private List<CombinedPopulationProduct> combinedProducts;
+
+	public MeanOfLinearCombinationExpression(AbstractExpression e,
+			Map<ExpressionVariable, AbstractExpression> var) {
+		super(e);
+		AbstractExpression lsum = e;
+		if (e instanceof ExpressionVariable) {
+			lsum = var.get(e);
+		}
+		coefficients = new LinkedList<AbstractExpression>();
+		combinedProducts = new LinkedList<CombinedPopulationProduct>();
+		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
+		if (lsum instanceof ProductExpression
+				|| lsum instanceof CombinedProductExpression) {
+			summands.add(lsum);
+		}
+		if (lsum instanceof SumExpression) {
+			summands.addAll(((SumExpression) lsum).getSummands());
+		}
+		for (AbstractExpression s : summands) {
+			if (s instanceof CombinedProductExpression) {
+				coefficients.add(new DoubleExpression(1.0));
+				combinedProducts.add(((CombinedProductExpression) s)
+						.getProduct());
+			}
+			if (s instanceof ProductExpression) {
+				List<AbstractExpression> terms = ((ProductExpression) s)
+						.getTerms();
+				if (terms.size() > 2
+						|| !(terms.get(1) instanceof CombinedProductExpression)) {
+					throw new AssertionError("Expression " + e
+							+ " is not a linear combination of moments!");
+				}
+				AbstractExpression coefficient = terms.get(0);
+				CombinedPopulationProduct product = ((CombinedProductExpression) terms
+						.get(1)).getProduct();
+				IsConstantVisitor visitor = new IsConstantVisitor();
+				coefficient.accept(visitor);
+				if (!visitor.isConstant()) {
+					throw new AssertionError("Expression " + e
+							+ " is not a linear combination of moments!");
+				}
+				coefficients.add(coefficient);
+				combinedProducts.add(product);
+			}
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -28,12 +76,11 @@ public class MeanOfLinearCombinationExpression extends ExpressionWrapper{
 		return result;
 	}
 
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		
+
 		if (getClass() != obj.getClass())
 			return false;
 		MeanOfLinearCombinationExpression other = (MeanOfLinearCombinationExpression) obj;
@@ -50,70 +97,21 @@ public class MeanOfLinearCombinationExpression extends ExpressionWrapper{
 		return true;
 	}
 
-
 	@Override
 	public String toString() {
-		return "E["+internalExpression.toString()+"]"; 
+		return "E[" + internalExpression.toString() + "]";
 	}
 
-	private List<AbstractExpression> coefficients; 
-	private List<CombinedPopulationProduct> combinedProducts;
-	
-	
-	
 	public List<AbstractExpression> getCoefficients() {
 		return coefficients;
 	}
-
 
 	public List<CombinedPopulationProduct> getCombinedProducts() {
 		return combinedProducts;
 	}
 
-
 	public AbstractExpression getInternalExpression() {
 		return internalExpression;
-	} 
-	
-	public MeanOfLinearCombinationExpression(AbstractExpression e, Map<ExpressionVariable,AbstractExpression> var){		
-		AbstractExpression lsum = e; 
-		if (e instanceof ExpressionVariable){
-			lsum = var.get(e); 
-		}
-		coefficients = new LinkedList<AbstractExpression>(); 
-		combinedProducts = new LinkedList<CombinedPopulationProduct>(); 
-		List<AbstractExpression> summands = new LinkedList<AbstractExpression>(); 
-		if (lsum instanceof ProductExpression || lsum instanceof CombinedProductExpression){
-			summands.add(lsum);
-		}
-		if (lsum instanceof SumExpression){
-			summands.addAll(((SumExpression) lsum).getSummands());
-		}
-		for (AbstractExpression s:summands){
-			if (s instanceof CombinedProductExpression){
-				coefficients.add(new DoubleExpression(1.0));
-				combinedProducts.add(((CombinedProductExpression) s).getProduct());
-			}
-			if (s instanceof ProductExpression){
-				List<AbstractExpression> terms = ((ProductExpression) s).getTerms();
-				if (terms.size()>2||!(terms.get(1) instanceof CombinedProductExpression)){
-					throw new AssertionError("Expression " + e + " is not a linear combination of moments!");
-				}
-				AbstractExpression coefficient = terms.get(0); 
-				CombinedPopulationProduct product = ((CombinedProductExpression)terms.get(1)).getProduct();
-				IsConstantVisitor visitor = new IsConstantVisitor(); 
-				coefficient.accept(visitor);
-				if (!visitor.isConstant()){
-					throw new AssertionError("Expression " + e + " is not a linear combination of moments!"); 
-				}
-				coefficients.add(coefficient); 
-				combinedProducts.add(product); 
-			}
-		}
-		internalExpression = e; 
 	}
-	
-	
-
 
 }
