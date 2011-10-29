@@ -15,43 +15,50 @@ import uk.ac.imperial.doc.pctmc.matlaboutput.utils.MatlabOutputUtils;
 import com.google.common.collect.BiMap;
 
 /**
- * Java printer for expressions with combined population products as leaves. 
+ * Java printer for expressions with combined population products as leaves.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
-public class MatlabPrinterCombinedProductBased extends MatlabPrinterWithConstants implements
-		  ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor {
+public class MatlabPrinterCombinedProductBased extends
+		MatlabPrinterWithConstants implements
+		ICombinedProductExpressionVisitor, IGeneralExpectationExpressionVisitor {
 
+	protected BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	protected Map<AbstractExpression, Integer> generalExpectationIndex;
+	private String f;
+
+	public MatlabPrinterCombinedProductBased(Constants parameters,
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex, String f) {
+		super(parameters);
+		this.combinedMomentsIndex = combinedMomentsIndex;
+		this.generalExpectationIndex = generalExpectationIndex;
+		this.f = f;
+	}
 
 	@Override
 	public void visit(GeneralExpectationExpression e) {
-		Integer i;		
+		Integer i;
 		i = generalExpectationIndex.get(e.getExpression());
-		if (i==null){
-			throw new AssertionError("Unknown general expectation " + e.getExpression() + "!");
+		if (i == null) {
+			throw new AssertionError("Unknown general expectation "
+					+ e.getExpression() + "!");
 		}
-		output.append(f + "(" + MatlabOutputUtils.getMatlabIndex(i+combinedMomentsIndex.size()) + ")");				
+		output.append(f
+				+ "("
+				+ MatlabOutputUtils.getMatlabIndex(i
+						+ combinedMomentsIndex.size()) + ")");
 	}
 
 	@Override
 	public void visit(CombinedProductExpression e) {
-		Integer i;		
+		Integer i;
 		i = combinedMomentsIndex.get(e.getProduct());
-		if (i==null){
-			throw new AssertionError("Unknown combined moment " + e.getProduct() + "!");
+		if (i == null) {
+			throw new AssertionError("Unknown combined moment "
+					+ e.getProduct() + "!");
 		}
-		output.append(f + "(" + MatlabOutputUtils.getMatlabIndex(i) + ")");		
-	}
-
-	protected BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex;
-	protected Map<AbstractExpression,Integer> generalExpectationIndex;	 
-	
-	String f;
-
-	public MatlabPrinterCombinedProductBased(Constants parameters,BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex,String f) {
-		super(parameters);	
-		this.combinedMomentsIndex = combinedMomentsIndex; 
-		this.generalExpectationIndex = generalExpectationIndex;
-		this.f = f;
+		output.append(f + "(" + MatlabOutputUtils.getMatlabIndex(i) + ")");
 	}
 }

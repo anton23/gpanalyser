@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis;
 
-
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -10,56 +9,52 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
-public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis{
-
+public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 
 	@Override
 	public String toString() {
-		return "ODEs"; 
+		return "ODEs";
 	}
- 
-	private int order; 
-	
+
+	private int order;
+
 	@Override
-	public void setUsedMoments(Collection<CombinedPopulationProduct> combinedProducts){
-		usedCombinedProducts = new HashSet<CombinedPopulationProduct>(combinedProducts);
-		for (CombinedPopulationProduct product:combinedProducts){
+	public void setUsedMoments(
+			Collection<CombinedPopulationProduct> combinedProducts) {
+		usedCombinedProducts = new HashSet<CombinedPopulationProduct>(
+				combinedProducts);
+		for (CombinedPopulationProduct product : combinedProducts) {
 			int o = product.getOrder();
-			if (o>order) order = o;
-		}		
+			if (o > order)
+				order = o;
+		}
 	}
-	
+
 	public PCTMCODEAnalysis(PCTMC pctmc) {
 		super(pctmc);
 		order = 1;
 	}
-	
+
 	public PCTMCODEAnalysis(PCTMC pctmc, int order) {
-		this(pctmc); 
-		this.order = order; 
+		this(pctmc);
+		this.order = order;
 	}
 
-	private ODEGenerator odeGenerator; 
-	
- 
+	private ODEGenerator odeGenerator;
 
-	
 	@Override
 	public void prepare(Constants variables) {
 		this.odeGenerator = new ODEGenerator(pctmc);
-	
-		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(order, usedCombinedProducts);		
+
+		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(order,
+				usedCombinedProducts);
 		momentIndex = odeGenerator.getMomentIndex();
 	}
-	
-	private ODEMethod odeMethod;
-	
 
+	private ODEMethod odeMethod;
 
 	public ODEMethod getOdeMethod() {
 		return odeMethod;
 	}
-	
-	
-	
+
 }

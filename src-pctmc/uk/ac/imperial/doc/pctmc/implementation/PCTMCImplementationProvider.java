@@ -12,14 +12,20 @@ import com.google.common.collect.BiMap;
 
 public interface PCTMCImplementationProvider {
 
-	public AbstractExpressionEvaluator getEvaluatorImplementation(EvaluatorMethod method,String className,Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex, BiMap<AbstractExpression, Integer> generalExpectationIndex);
-	
-	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method, String className,Constants constants,
+	public AbstractExpressionEvaluator getEvaluatorImplementation(
+			EvaluatorMethod method, String className, Constants constants,
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			BiMap<AbstractExpression, Integer> generalExpectationIndex);
+
+	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method,
+			String className, Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex);
-	
-	public abstract double[][] runODEAnalysis(PCTMCImplementationPreprocessed preprocessed,double[] initial,double stopTime, double stepSize, int density,Constants constants);
-	
-	public PCTMCImplementationPreprocessed getPreprocessedODEImplementation(ODEMethod method,Constants constants,
+
+	public abstract double[][] runODEAnalysis(
+			PCTMCImplementationPreprocessed preprocessed, double[] initial,
+			double stopTime, double stepSize, int density, Constants constants);
+
+	public PCTMCImplementationPreprocessed getPreprocessedODEImplementation(
+			ODEMethod method, Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex);
 }

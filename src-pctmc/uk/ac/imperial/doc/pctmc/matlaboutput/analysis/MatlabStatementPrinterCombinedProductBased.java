@@ -17,20 +17,25 @@ import com.google.common.collect.BiMap;
 
 /**
  * Java statement printer.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
-public class MatlabStatementPrinterCombinedProductBased extends MatlabStatementPrinter
-		implements IIncrementVisitor,IAssignmentVisitor {
+public class MatlabStatementPrinterCombinedProductBased extends
+		MatlabStatementPrinter implements IIncrementVisitor, IAssignmentVisitor {
 
 	protected IExpressionPrinterFactory lhsFactory;
-	
+
 	public MatlabStatementPrinterCombinedProductBased(Constants parameters,
-	BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex,String oldY, String newY) {
-		super(new MatlabCombinedProductBasedExpressionPrinterFactory(parameters,
-				combinedMomentsIndex,generalExpectationIndex, oldY));
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex,
+			String oldY, String newY) {
+		super(
+				new MatlabCombinedProductBasedExpressionPrinterFactory(
+						parameters, combinedMomentsIndex,
+						generalExpectationIndex, oldY));
 		lhsFactory = new MatlabCombinedProductBasedExpressionPrinterFactory(
-				parameters, combinedMomentsIndex,generalExpectationIndex,newY);
+				parameters, combinedMomentsIndex, generalExpectationIndex, newY);
 	}
 
 	@Override
@@ -45,11 +50,11 @@ public class MatlabStatementPrinterCombinedProductBased extends MatlabStatementP
 		String rhsString = rhsPrinter.toString();
 		output.append(lhsString);
 		output.append("=");
-		output.append(lhsString+"+");		
+		output.append(lhsString + "+");
 		output.append(rhsString);
 		output.append(";");
 	}
-	
+
 	@Override
 	public void visit(Assignment s) {
 		IExpressionVisitor lhsPrinter = lhsFactory.createPrinter();
@@ -61,7 +66,7 @@ public class MatlabStatementPrinterCombinedProductBased extends MatlabStatementP
 		s.getRhs().accept(rhsPrinter);
 		String rhsString = rhsPrinter.toString();
 		output.append(lhsString);
-		output.append("=");		
+		output.append("=");
 		output.append(rhsString);
 		output.append(";");
 	}

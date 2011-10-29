@@ -6,8 +6,9 @@ import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IPopulationVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 
-public class MomentCountTransformerWithParameters extends ExpressionTransformerWithConstants
-		implements ICombinedProductExpressionVisitor, IPopulationVisitor {
+public class MomentCountTransformerWithParameters extends
+		ExpressionTransformerWithConstants implements
+		ICombinedProductExpressionVisitor, IPopulationVisitor {
 
 	@Override
 	public void visit(PopulationExpression e) {
@@ -18,5 +19,4 @@ public class MomentCountTransformerWithParameters extends ExpressionTransformerW
 	public void visit(CombinedProductExpression e) {
 		result = e;
 	}
-
 }

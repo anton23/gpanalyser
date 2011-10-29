@@ -9,19 +9,14 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 public class PatternPopulationExpression extends ExpressionVariable{
 	
 	private State state;
-	
-
-	public void setUnfolded(AbstractExpression unfolded){
-		this.unfolded = unfolded; 
-	}
-
-	public State getState() {
-		return state;
-	}
 
 	public PatternPopulationExpression(State state) {
 		super(state.toString());
 		this.state = state;
+	}
+
+	public void setUnfolded(AbstractExpression unfolded){
+		this.unfolded = unfolded; 
 	}
 
 	@Override
@@ -31,7 +26,6 @@ public class PatternPopulationExpression extends ExpressionVariable{
 		} else {
 			super.accept(v); 
 		}
-		
 	}
 
 	@Override
@@ -50,7 +44,6 @@ public class PatternPopulationExpression extends ExpressionVariable{
 		return true;
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -62,6 +55,10 @@ public class PatternPopulationExpression extends ExpressionVariable{
 	@Override
 	public String toString() {
 		return "%" + state.toString(); 
+	}
+	
+	public State getState() {
+		return state;
 	}
 
 }
