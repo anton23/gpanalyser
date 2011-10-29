@@ -6,12 +6,10 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariableSettter;
 
+public class ExpressionVariableSetterPCTMC extends ExpressionVariableSettter
+		implements ICombinedProductExpressionVisitor,
+		IGeneralExpectationExpressionVisitor {
 
-public class ExpressionVariableSetterPCTMC extends ExpressionVariableSettter implements 
-    ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor{
-	
-	
-	
 	@Override
 	public void visit(GeneralExpectationExpression e) {
 		e.getExpression().accept(this);
@@ -29,7 +27,7 @@ public class ExpressionVariableSetterPCTMC extends ExpressionVariableSettter imp
 	@Override
 	public void visit(ExpressionVariable e) {
 		AbstractExpression unfolded = variables.get(e);
-		if (unfolded!=null) e.setUnfolded(unfolded);  
+		if (unfolded != null)
+			e.setUnfolded(unfolded);
 	}
-
 }

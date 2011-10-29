@@ -23,51 +23,47 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 
-public class IntegralInsterterVisitor implements IExpressionVisitor, ICombinedProductExpressionVisitor{
-	
-	
-	
-	@Override
-	public void visit(IntegerExpression e) {
-		if (insert){
-			result = ProductExpression.create(e,CombinedProductExpression.create(toInsert));
-		} 		
-	}
+public class IntegralInsterterVisitor implements IExpressionVisitor,
+		ICombinedProductExpressionVisitor {
 
-
-	@Override
-	public void visit(CombinedProductExpression e) {
-		//assumes the combined product has no accumulated products
-		foundMoment = true; 
-		if (insert){
-			result = CombinedProductExpression.create(new CombinedPopulationProduct(e.getProduct().getNakedProduct(),toInsert.getAccumulatedProducts()));
-		}		
-	}
+	private AbstractExpression result;
+	private CombinedPopulationProduct toInsert; // always without a naked moment
+	private boolean insert;
+	private boolean foundMinimum;
+	private boolean foundMoment;
 
 	public IntegralInsterterVisitor(CombinedPopulationProduct toInsert) {
 		super();
 		this.toInsert = toInsert;
-		foundMinimum = false; 
-		foundMoment = false; 
-		insert = true; 
+		foundMinimum = false;
+		foundMoment = false;
+		insert = true;
 	}
 
+	@Override
+	public void visit(IntegerExpression e) {
+		if (insert) {
+			result = ProductExpression.create(e, CombinedProductExpression
+					.create(toInsert));
+		}
+	}
 
-
-	AbstractExpression result; 
-	
-	CombinedPopulationProduct toInsert; //always without a naked moment
-	boolean insert;
-	
-	boolean foundMinimum; 
-	boolean foundMoment; 
-	
+	@Override
+	public void visit(CombinedProductExpression e) {
+		// assumes the combined product has no accumulated products
+		foundMoment = true;
+		if (insert) {
+			result = CombinedProductExpression
+					.create(new CombinedPopulationProduct(e.getProduct()
+							.getNakedProduct(), toInsert
+							.getAccumulatedProducts()));
+		}
+	}
 
 	@Override
 	public void visit(AbstractExpression e) {
 		// TODO Auto-generated method stub
 	}
-
 
 	public AbstractExpression getResult() {
 		return result;
@@ -75,36 +71,38 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, ICombinedPr
 
 	@Override
 	public void visit(DoubleExpression e) {
-		if (insert){
-			result = ProductExpression.create(e,CombinedProductExpression.create(toInsert));
-		} 
+		if (insert) {
+			result = ProductExpression.create(e, CombinedProductExpression
+					.create(toInsert));
+		}
 	}
 
 	@Override
 	public void visit(DivDivMinExpression e) {
-		foundMinimum = true; 
-		if (insert){
-			e.getA().accept(this); 
-			AbstractExpression newA = result; 
-			e.getB().accept(this); 
-			AbstractExpression newB = result; 
-			e.getC().accept(this); 
-			AbstractExpression newC = result; 
-			e.getD().accept(this); 
-			AbstractExpression newD = result; 
+		foundMinimum = true;
+		if (insert) {
+			e.getA().accept(this);
+			AbstractExpression newA = result;
+			e.getB().accept(this);
+			AbstractExpression newB = result;
+			e.getC().accept(this);
+			AbstractExpression newC = result;
+			e.getD().accept(this);
+			AbstractExpression newD = result;
 
-			result = ProductExpression.create(PEPADivExpression.create(ProductExpression.create(newA,newB), 
-                    ProductExpression.create(newC,newD)),
-                    	MinExpression.create(newC, newD));
+			result = ProductExpression.create(PEPADivExpression.create(
+					ProductExpression.create(newA, newB), ProductExpression
+							.create(newC, newD)), MinExpression.create(newC,
+					newD));
 		}
-		
+
 	}
 
 	@Override
 	public void visit(DivExpression e) {
-		if (insert){
-			e.getNumerator().accept(this); 
-			AbstractExpression newNumerator = result;  
+		if (insert) {
+			e.getNumerator().accept(this);
+			AbstractExpression newNumerator = result;
 			result = DivExpression.create(newNumerator, e.getDenominator());
 		} else {
 			e.getNumerator().accept(this);
@@ -113,50 +111,54 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, ICombinedPr
 
 	@Override
 	public void visit(DivMinExpression e) {
-		foundMinimum = true; 
-		if (insert){
-			e.getA().accept(this); 
-			AbstractExpression newA = result; 
-			e.getB().accept(this); 
-			AbstractExpression newB = result; 
-			e.getC().accept(this); 
-			AbstractExpression newC = result; 
+		foundMinimum = true;
+		if (insert) {
+			e.getA().accept(this);
+			AbstractExpression newA = result;
+			e.getB().accept(this);
+			AbstractExpression newB = result;
+			e.getC().accept(this);
+			AbstractExpression newC = result;
 
-			result = ProductExpression.create(PEPADivExpression.create(newA, newB),MinExpression.create(newC, newB));
+			result = ProductExpression.create(PEPADivExpression.create(newA,
+					newB), MinExpression.create(newC, newB));
 		}
 	}
 
 	@Override
 	public void visit(FunctionCallExpression e) {
-		result = e; 
+		result = e;
 	}
 
 	@Override
 	public void visit(MinExpression e) {
-		foundMinimum = true; 
-		if (insert){
-			e.getA().accept(this); 
-			AbstractExpression newA = result; 
-			e.getB().accept(this); 
-			AbstractExpression newB = result; 
-			result = MinExpression.create(newA, newB); 
+		foundMinimum = true;
+		if (insert) {
+			e.getA().accept(this);
+			AbstractExpression newA = result;
+			e.getB().accept(this);
+			AbstractExpression newB = result;
+			result = MinExpression.create(newA, newB);
 		}
 	}
 
 	@Override
 	public void visit(MinusExpression e) {
-		AbstractExpression a; 
-		e.getA().accept(this); a = result; 
-		AbstractExpression b; 
-		e.getB().accept(this); b = result; 
-		if (insert) result = SumExpression.create(a, b);
+		AbstractExpression a;
+		e.getA().accept(this);
+		a = result;
+		AbstractExpression b;
+		e.getB().accept(this);
+		b = result;
+		if (insert)
+			result = SumExpression.create(a, b);
 	}
 
 	@Override
 	public void visit(PEPADivExpression e) {
-		if (insert){
-			e.getNumerator().accept(this); 
-			AbstractExpression newNumerator = result;  
+		if (insert) {
+			e.getNumerator().accept(this);
+			AbstractExpression newNumerator = result;
 			result = DivExpression.create(newNumerator, e.getDenominator());
 		} else {
 			e.getNumerator().accept(this);
@@ -166,59 +168,60 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, ICombinedPr
 	@Override
 	public void visit(PowerExpression e) {
 		// TODO Auto-generated method stub
-		throw new AssertionError("Powers not supported in right hand sides of ODEs");
+		throw new AssertionError(
+				"Powers not supported in right hand sides of ODEs");
 	}
 
 	@Override
 	public void visit(ProductExpression e) {
 		// TODO Auto-generated method stub
-		//this is the most crucial - will 
-		//have to go through the terms and find one with a min
-		//if not then find one with a moment
-		//if not then just append the combined moment to the product
-		
-		if (!insert){
-			for (AbstractExpression term:e.getTerms()){
-				term.accept(this); 
+		// this is the most crucial - will
+		// have to go through the terms and find one with a min
+		// if not then find one with a moment
+		// if not then just append the combined moment to the product
+
+		if (!insert) {
+			for (AbstractExpression term : e.getTerms()) {
+				term.accept(this);
 			}
 		} else {
-			foundMinimum = false; 
+			foundMinimum = false;
 			AbstractExpression termToInsert = null;
-			insert = false; 
-			for (AbstractExpression term:e.getTerms()){
+			insert = false;
+			for (AbstractExpression term : e.getTerms()) {
 				term.accept(this);
-				if (foundMinimum){
-					termToInsert = term; 
-					break; 
+				if (foundMinimum) {
+					termToInsert = term;
+					break;
 				}
 			}
-			if (!foundMinimum){
-				for (AbstractExpression term:e.getTerms()){
-					foundMoment = false; 
-					term.accept(this); 
-					if (foundMoment){
+			if (!foundMinimum) {
+				for (AbstractExpression term : e.getTerms()) {
+					foundMoment = false;
+					term.accept(this);
+					if (foundMoment) {
 						termToInsert = term;
 						break;
-					} 
+					}
 				}
 			}
-			
-			insert = true; 
-			List<AbstractExpression> newTerms = new LinkedList<AbstractExpression>(); 
-			for (AbstractExpression term:e.getTerms()){
-				if (term==termToInsert){
+
+			insert = true;
+			List<AbstractExpression> newTerms = new LinkedList<AbstractExpression>();
+			for (AbstractExpression term : e.getTerms()) {
+				if (term == termToInsert) {
 					term.accept(this);
-					newTerms.add(result); 
-				}  else {
-					newTerms.add(term); 
+					newTerms.add(result);
+				} else {
+					newTerms.add(term);
 				}
 			}
-			if (termToInsert==null){
+			if (termToInsert == null) {
 				newTerms.add(CombinedProductExpression.create(toInsert));
 			}
-			result = ProductExpression.create(newTerms); 
+			result = ProductExpression.create(newTerms);
 		}
-		
+
 	}
 
 	@Override
@@ -229,24 +232,26 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, ICombinedPr
 			t.accept(this);
 			ts[i++] = result;
 		}
-		if (insert) result = SumExpression.create(ts);
+		if (insert)
+			result = SumExpression.create(ts);
 	}
 
 	@Override
 	public void visit(TimeExpression e) {
-		if (insert){
-			result = ProductExpression.create(e,CombinedProductExpression.create(toInsert));
+		if (insert) {
+			result = ProductExpression.create(e, CombinedProductExpression
+					.create(toInsert));
 		}
-		
+
 	}
 
 	@Override
 	public void visit(UMinusExpression e) {
 		e.getE().accept(this);
-		if (insert){
+		if (insert) {
 			result = new UMinusExpression(result);
 		}
-		
+
 	}
 
 }

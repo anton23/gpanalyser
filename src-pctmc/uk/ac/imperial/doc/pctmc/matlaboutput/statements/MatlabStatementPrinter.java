@@ -12,35 +12,13 @@ import uk.ac.imperial.doc.jexpressions.statements.VariableDeclaration;
 
 /**
  * A statement visitor printing a Java implementation of the statements.
+ * 
  * @author as1005
  */
 public class MatlabStatementPrinter implements IStatementVisitor {
-	@Override
-	public void visit(ArrayDeclaration s) {
-		IExpressionVisitor sizePrinter = expressionPrinterFactory
-		.createPrinter();
-		s.getSize().accept(sizePrinter);
-		output.append(s.getArray() + " = zeros(" + sizePrinter+",1);");
-	}
-
-	@Override
-	public void visit(ArrayElementAssignment s) {
-		IExpressionVisitor rhsPrinter = expressionPrinterFactory
-		.createPrinter();
-		s.getRhs().accept(rhsPrinter);
-		String rhsString = rhsPrinter.toString();
-		IExpressionVisitor indexPrinter = expressionPrinterFactory
-			.createPrinter();
-		s.getIndex().accept(indexPrinter);
-		output.append(s.getArray()+"("+indexPrinter.toString() +"+1) = " + rhsString  +";");
-	}
 
 	protected StringBuilder output;
 	protected IExpressionPrinterFactory expressionPrinterFactory;
-
-	public String toString() {
-		return output.toString();
-	}
 
 	public MatlabStatementPrinter(
 			IExpressionPrinterFactory expressionPrinterFactory) {
@@ -49,7 +27,36 @@ public class MatlabStatementPrinter implements IStatementVisitor {
 	}
 
 	@Override
-	public void visit(AbstractStatement s) {throw new AssertionError("Unsupported visit to statement " + s.toString() + "!");}
+	public void visit(ArrayDeclaration s) {
+		IExpressionVisitor sizePrinter = expressionPrinterFactory
+				.createPrinter();
+		s.getSize().accept(sizePrinter);
+		output.append(s.getArray() + " = zeros(" + sizePrinter + ",1);");
+	}
+
+	@Override
+	public void visit(ArrayElementAssignment s) {
+		IExpressionVisitor rhsPrinter = expressionPrinterFactory
+				.createPrinter();
+		s.getRhs().accept(rhsPrinter);
+		String rhsString = rhsPrinter.toString();
+		IExpressionVisitor indexPrinter = expressionPrinterFactory
+				.createPrinter();
+		s.getIndex().accept(indexPrinter);
+		output.append(s.getArray() + "(" + indexPrinter.toString() + "+1) = "
+				+ rhsString + ";");
+	}
+
+	@Override
+	public String toString() {
+		return output.toString();
+	}
+
+	@Override
+	public void visit(AbstractStatement s) {
+		throw new AssertionError("Unsupported visit to statement "
+				+ s.toString() + "!");
+	}
 
 	@Override
 	public void visit(Comment c) {
@@ -62,7 +69,6 @@ public class MatlabStatementPrinter implements IStatementVisitor {
 
 	@Override
 	public void visit(VariableDeclaration s) {
-		output.append(s.getName() + " = zeros("	+ s.getN() + ",1);");
+		output.append(s.getName() + " = zeros(" + s.getN() + ",1);");
 	}
-
 }

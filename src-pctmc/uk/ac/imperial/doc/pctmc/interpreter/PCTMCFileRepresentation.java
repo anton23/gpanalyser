@@ -26,45 +26,27 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import com.google.common.collect.Multimap;
 
 public class PCTMCFileRepresentation {
-	private Constants constants; 
+	private Constants constants;
 	private PCTMC pctmc;
 	private Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
 	private Multimap<AbstractPCTMCAnalysis, PlotDescription> plots;
 	private List<PCTMCIterate> experiments;
-	
-	public Constants getConstants() {
-		return constants;
-	}
-	public PCTMC getPctmc() {
-		return pctmc;
-	}
-	public Map<ExpressionVariable, AbstractExpression> getUnfoldedVariables() {
-		return unfoldedVariables;
-	}
-	public Multimap<AbstractPCTMCAnalysis, PlotDescription> getPlots() {
-		return plots;
-	}
-	public List<PCTMCIterate> getExperiments() {
-		return experiments;
-	}
-	
-	
+
 	@SuppressWarnings("unchecked")
-	public PCTMCFileRepresentation(Object compilerReturn) throws Exception{
-		constants = (Constants) compilerReturn.getClass()
-					.getField("constants").get(compilerReturn);
+	public PCTMCFileRepresentation(Object compilerReturn) throws Exception {
+		constants = (Constants) compilerReturn.getClass().getField("constants")
+				.get(compilerReturn);
 
 		plots = (Multimap<AbstractPCTMCAnalysis, PlotDescription>) compilerReturn
 				.getClass().getField("plots").get(compilerReturn);
-		experiments = (List<PCTMCIterate>) compilerReturn
-				.getClass().getField("experiments").get(compilerReturn);
+		experiments = (List<PCTMCIterate>) compilerReturn.getClass().getField(
+				"experiments").get(compilerReturn);
 		unfoldedVariables = (Map<ExpressionVariable, AbstractExpression>) compilerReturn
-				.getClass().getField("unfoldedVariables")
-				.get(compilerReturn);
-		pctmc = (PCTMC) compilerReturn.getClass().getField("pctmc")
-				.get(compilerReturn);
+				.getClass().getField("unfoldedVariables").get(compilerReturn);
+		pctmc = (PCTMC) compilerReturn.getClass().getField("pctmc").get(
+				compilerReturn);
 	}
-	
+
 	public void unfoldPatterns(PatternMatcher patternMatcher) {
 		PatternSetterVisitor.unfoldPatterns(unfoldedVariables, patternMatcher);
 		for (EvolutionEvent e : pctmc.getEvolutionEvents()) {
@@ -87,9 +69,10 @@ public class PCTMCFileRepresentation {
 			}
 		}
 	}
-	
-	
-	public void unfoldVariablesAndSetUsedProducts(AbstractPCTMCAnalysis analysis, Collection<PlotDescription> plotDescriptions){
+
+	public void unfoldVariablesAndSetUsedProducts(
+			AbstractPCTMCAnalysis analysis,
+			Collection<PlotDescription> plotDescriptions) {
 		List<AbstractExpression> usedExpressions = new LinkedList<AbstractExpression>();
 		for (PlotDescription pexp : plotDescriptions) {
 			for (AbstractExpression e : pexp.getExpressions()) {
@@ -113,10 +96,31 @@ public class PCTMCFileRepresentation {
 		analysis.setUsedGeneralExpectations(usedGeneralExpectations);
 
 	}
-	
+
 	public void unfoldVariablesAndSetUsedProducts() {
-		for (AbstractPCTMCAnalysis analysis:plots.keySet()){
+		for (AbstractPCTMCAnalysis analysis : plots.keySet()) {
 			unfoldVariablesAndSetUsedProducts(analysis, plots.get(analysis));
 		}
 	}
+	
+	public Constants getConstants() {
+		return constants;
+	}
+
+	public PCTMC getPctmc() {
+		return pctmc;
+	}
+
+	public Map<ExpressionVariable, AbstractExpression> getUnfoldedVariables() {
+		return unfoldedVariables;
+	}
+
+	public Multimap<AbstractPCTMCAnalysis, PlotDescription> getPlots() {
+		return plots;
+	}
+
+	public List<PCTMCIterate> getExperiments() {
+		return experiments;
+	}
+
 }

@@ -23,7 +23,20 @@ import com.google.common.collect.Multiset;
  */
 public class JavaPrinterPopulationBased extends JavaPrinterWithConstants implements
 		IPopulationVisitor, IPopulationProductVisitor,ICombinedProductExpressionVisitor {
+	
+	private BiMap<State, Integer> stateIndex;
+	private BiMap<PopulationProduct,Integer> accumulatedProductsIndex;
+	private String f;
+	
+	public JavaPrinterPopulationBased(Constants constants,
+			BiMap<State, Integer> stateIndex,BiMap<PopulationProduct,Integer> accumulatedProductsIndex, String f) {
+		super(constants);
+		this.stateIndex = stateIndex;
+		this.accumulatedProductsIndex = accumulatedProductsIndex;
+		this.f = f;
+	}
 
+	
 	@Override
 	public void visit(CombinedProductExpression e) {
 		if (e.getProduct().getNakedProduct().getOrder()>0){
@@ -44,7 +57,6 @@ public class JavaPrinterPopulationBased extends JavaPrinterWithConstants impleme
 				output.append(f+"[" + (stateIndex.size()+accumulatedProductsIndex.get(entry.getElement())) + "]"); 
 			}
 		}
-		
 	}
 
 	@Override
@@ -66,27 +78,10 @@ public class JavaPrinterPopulationBased extends JavaPrinterWithConstants impleme
 		
 	}
 
-	private BiMap<State, Integer> stateIndex;
-	private BiMap<PopulationProduct,Integer> accumulatedProductsIndex;
-	
-	
-	
-	private String f;
-	
-	
-	public JavaPrinterPopulationBased(Constants constants,
-			BiMap<State, Integer> stateIndex,BiMap<PopulationProduct,Integer> accumulatedProductsIndex, String f) {
-		super(constants);
-		this.stateIndex = stateIndex;
-		this.accumulatedProductsIndex = accumulatedProductsIndex;
-		this.f = f;
-	}
-
 	@Override
 	public void visit(PopulationExpression e) {
 		Integer i = stateIndex.get(e.getState());
 		if (i==null) throw new AssertionError("Unknown component " + e.getState() + "!");
 		output.append(f + "[" + i + "]");
 	}
-
 }

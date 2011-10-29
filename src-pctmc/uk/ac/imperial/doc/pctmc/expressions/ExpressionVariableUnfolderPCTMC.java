@@ -6,8 +6,8 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariableUnfolder;
 
-
-public class ExpressionVariableUnfolderPCTMC extends ExpressionVariableUnfolder implements IPopulationVisitor,ICombinedProductExpressionVisitor{
+public class ExpressionVariableUnfolderPCTMC extends ExpressionVariableUnfolder
+		implements IPopulationVisitor, ICombinedProductExpressionVisitor {
 
 	public ExpressionVariableUnfolderPCTMC(
 			Map<ExpressionVariable, AbstractExpression> variables) {
@@ -17,19 +17,20 @@ public class ExpressionVariableUnfolderPCTMC extends ExpressionVariableUnfolder 
 	@Override
 	public void visit(ExpressionVariable e) {
 		AbstractExpression rhs = variables.get(e);
-		if (rhs!=null) rhs.accept(this);
+		if (rhs != null)
+			rhs.accept(this);
 		else {
-			result = e; 
+			result = e;
 		}
 	}
 
 	@Override
 	public void visit(PopulationExpression e) {
-		result = e; 
+		result = e;
 	}
 
 	@Override
 	public void visit(CombinedProductExpression e) {
-		result = e; 
+		result = e;
 	}
 }

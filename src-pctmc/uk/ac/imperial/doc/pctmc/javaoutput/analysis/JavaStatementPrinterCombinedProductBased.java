@@ -17,20 +17,23 @@ import com.google.common.collect.BiMap;
 
 /**
  * Java statement printer.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
-public class JavaStatementPrinterCombinedProductBased extends JavaStatementPrinter
-		implements IIncrementVisitor, IAssignmentVisitor {
+public class JavaStatementPrinterCombinedProductBased extends
+		JavaStatementPrinter implements IIncrementVisitor, IAssignmentVisitor {
 
 	protected IExpressionPrinterFactory lhsFactory;
-	
+
 	public JavaStatementPrinterCombinedProductBased(Constants parameters,
-	BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex,String oldY, String newY) {
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex,
+			String oldY, String newY) {
 		super(new JavaCombinedProductBasedExpressionPrinterFactory(parameters,
-				combinedMomentsIndex,generalExpectationIndex, oldY));
+				combinedMomentsIndex, generalExpectationIndex, oldY));
 		lhsFactory = new JavaCombinedProductBasedExpressionPrinterFactory(
-				parameters, combinedMomentsIndex,generalExpectationIndex,newY);
+				parameters, combinedMomentsIndex, generalExpectationIndex, newY);
 	}
 
 	@Override
@@ -48,7 +51,7 @@ public class JavaStatementPrinterCombinedProductBased extends JavaStatementPrint
 		output.append(rhsString);
 		output.append(";");
 	}
-	
+
 	@Override
 	public void visit(Assignment s) {
 		IExpressionVisitor lhsPrinter = lhsFactory.createPrinter();

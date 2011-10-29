@@ -3,7 +3,7 @@ package uk.ac.imperial.doc.pctmc.javaoutput;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 
-public class JavaODEsPreprocessed extends PCTMCImplementationPreprocessed{
+public class JavaODEsPreprocessed extends PCTMCImplementationPreprocessed {
 	private SystemOfODEs odes;
 
 	public JavaODEsPreprocessed(SystemOfODEs odes) {
@@ -13,5 +13,5 @@ public class JavaODEsPreprocessed extends PCTMCImplementationPreprocessed{
 
 	public SystemOfODEs getOdes() {
 		return odes;
-	} 
+	}
 }

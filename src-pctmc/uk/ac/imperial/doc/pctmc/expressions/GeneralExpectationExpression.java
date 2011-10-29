@@ -5,18 +5,10 @@ import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 
 public class GeneralExpectationExpression extends AbstractExpression {
 	private AbstractExpression expression;
-	
-	
 
-	
-	
 	public GeneralExpectationExpression(AbstractExpression expression) {
 		super();
 		this.expression = expression;
-	}
-
-	public AbstractExpression getExpression() {
-		return expression;
 	}
 
 	@Override
@@ -47,18 +39,20 @@ public class GeneralExpectationExpression extends AbstractExpression {
 
 	@Override
 	public String toString() {
-		return "Eg["+expression.toString()+"]";
+		return "Eg[" + expression.toString() + "]";
 	}
 
 	@Override
 	public void accept(IExpressionVisitor v) {
-		if (v instanceof IGeneralExpectationExpressionVisitor){
-			((IGeneralExpectationExpressionVisitor)v).visit(this);
+		if (v instanceof IGeneralExpectationExpressionVisitor) {
+			((IGeneralExpectationExpressionVisitor) v).visit(this);
 		} else {
-			throw new AssertionError("Not supported visit for a general expectation expression!");
-		}		
+			throw new AssertionError(
+					"Not supported visit for a general expectation expression!");
+		}
 	}
-	
-	
 
+	public AbstractExpression getExpression() {
+		return expression;
+	}
 }

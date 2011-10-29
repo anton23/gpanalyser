@@ -28,14 +28,14 @@ import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.RefineryUtilities;
 
 public class PCTMCChartUtilities {
-	
-	private static boolean gui = true;	
+
+	private static boolean gui = true;
 	public static boolean jogl = false;
 	private static double lastx = 0, lasty = 0;
-	
-	private static Map<String,JFrame> windows = new HashMap<String, JFrame>(); 
-	private static Map<String,JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
-	
+
+	private static Map<String, JFrame> windows = new HashMap<String, JFrame>();
+	private static Map<String, JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
+
 	public static boolean isGui() {
 		return gui;
 	}
@@ -48,9 +48,10 @@ public class PCTMCChartUtilities {
 		lasty = 0;
 		lastx += 0.1;
 	}
-	
+
 	public static void drawBlockChart(XYZDataset dataset, String xlabel,
-			String ylabel, String zlabel, double dx, double dy, double minz, double maxz,String chartTitle, String windowTitle) {
+			String ylabel, String zlabel, double dx, double dy, double minz,
+			double maxz, String chartTitle, String windowTitle) {
 		if (!gui)
 			return;
 		NumberAxis xAxis = new NumberAxis(xlabel);
@@ -59,40 +60,40 @@ public class PCTMCChartUtilities {
 
 		yAxis.setAutoRangeIncludesZero(false);
 		XYBlockRenderer renderer = new XYBlockRenderer();
-		if (minz==maxz) return; 
+		if (minz == maxz)
+			return;
 		GrayPaintScale scale = new GrayPaintScale(minz, maxz);
 		renderer.setPaintScale(scale);
 		renderer.setBlockWidth(dx);
 		renderer.setBlockHeight(dy);
-		
+
 		XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 		plot.setBackgroundPaint(Color.DARK_GRAY);
 
 		JFreeChart chart = new JFreeChart(chartTitle, plot);
 		chart.removeLegend();
 
-		NumberAxis scaleAxis = new NumberAxis("");//zlabel);
-		scaleAxis.setRange(minz,maxz);
-		
+		NumberAxis scaleAxis = new NumberAxis("");// zlabel);
+		scaleAxis.setRange(minz, maxz);
+
 		PaintScaleLegend legend = new PaintScaleLegend(scale, scaleAxis);
-		
-	      legend.setFrame(new BlockBorder(Color.GRAY));
-	        legend.setPadding(new RectangleInsets(5, 5, 5, 5));
-	        legend.setMargin(new RectangleInsets(4, 6, 40, 6));
-	        legend.setPosition(RectangleEdge.RIGHT);
+
+		legend.setFrame(new BlockBorder(Color.GRAY));
+		legend.setPadding(new RectangleInsets(5, 5, 5, 5));
+		legend.setMargin(new RectangleInsets(4, 6, 40, 6));
+		legend.setPosition(RectangleEdge.RIGHT);
 
 		chart.addSubtitle(legend);
-		
-		
+
 		chart.setBackgroundPaint(Color.white);
-		
+
 		ChartPanel chartPanel = new ChartPanel(chart);
 
 		chartPanel.setMouseZoomable(true, false);
 		chartPanel.setDoubleBuffered(true);
-		
+
 		final JFrame frame = new JFrame(windowTitle);
-		
+
 		frame.setPreferredSize(new java.awt.Dimension(600, 500));
 		frame.setContentPane(chartPanel);
 		frame.pack();
@@ -104,52 +105,56 @@ public class PCTMCChartUtilities {
 		lastx += 0.05;
 		lasty += 0.05;
 	}
-	
-	public static void setWindow(String windowTitle){
-		if (!gui) return; 
+
+	public static void setWindow(String windowTitle) {
+		if (!gui)
+			return;
 		String mainClass = "";// System.getenv("JAVA_MAIN_CLASS");
 		JFrame frame;
-		frame = new JFrame(mainClass+" " + windowTitle);
-		JTabbedPane tab = new JTabbedPane();		
+		frame = new JFrame(mainClass + " " + windowTitle);
+		JTabbedPane tab = new JTabbedPane();
 		frame.setPreferredSize(new java.awt.Dimension(600, 480));
- 
+
 		frame.setContentPane(tab);
 		frame.pack();
 		frame.setVisible(true);
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		windows.put(windowTitle,frame);
-		tabs.put(windowTitle,tab); 
-	}
-	
 
-	public static JFrame getWindow(String title){
-		return windows.get(title); 
+		windows.put(windowTitle, frame);
+		tabs.put(windowTitle, tab);
 	}
-	
-	public static void addChart(Component component,String windowTitle){
-		if (!gui) return;
+
+	public static JFrame getWindow(String title) {
+		return windows.get(title);
+	}
+
+	public static void addChart(Component component, String windowTitle) {
+		if (!gui)
+			return;
 		JTabbedPane tab;
-		if (!windows.containsKey(windowTitle)) setWindow(windowTitle);
+		if (!windows.containsKey(windowTitle))
+			setWindow(windowTitle);
 		tab = tabs.get(windowTitle);
 		tab.addTab("", component);
-		windows.get(windowTitle).setSize(new java.awt.Dimension(600, 500)); 
-		
+		windows.get(windowTitle).setSize(new java.awt.Dimension(600, 500));
+
 	}
 
 	public static void drawChart(XYDataset dataset, String xlabel,
 			String ylabel, String chartTitle, String windowTitle) {
-		if (!gui) return;
+		if (!gui)
+			return;
 
-		JFrame frame;	
+		JFrame frame;
 		JTabbedPane tab;
-		if (!windows.containsKey(windowTitle)) setWindow(windowTitle);
+		if (!windows.containsKey(windowTitle))
+			setWindow(windowTitle);
 		tab = tabs.get(windowTitle);
 		frame = windows.get(windowTitle);
-		
+
 		JFreeChart chart = ChartFactory.createXYLineChart(null, // chart //
-																// title
+				// title
 				xlabel, // x axis label
 				ylabel, // y axis label
 				dataset, // data
@@ -158,26 +163,23 @@ public class PCTMCChartUtilities {
 				false // urls
 				);
 
-		
-		 
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setMouseZoomable(true, false);
-		chartPanel.setDoubleBuffered(true);		
+		chartPanel.setDoubleBuffered(true);
 		tab.addTab("", chartPanel);
 
-		//RefineryUtilities.positionFrameOnScreen(frame, lastx, lasty);
-		//lastx += 0.05;
-		//lasty += 0.05;
+		// RefineryUtilities.positionFrameOnScreen(frame, lastx, lasty);
+		// lastx += 0.05;
+		// lasty += 0.05;
 	}
-	
-	
+
 	public static void drawChartPairs(XYDataset dataset, String xlabel,
 			String ylabel, String chartTitle, String windowTitle) {
 		if (!gui)
 			return;
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null, // chart //
-																// title
+				// title
 				xlabel, // x axis label
 				ylabel, // y axis label
 				dataset, // data
@@ -186,23 +188,22 @@ public class PCTMCChartUtilities {
 				false // urls
 				);
 
-		
-		
 		Paint[] colors = DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE;
-		Paint[] newColors = new Paint[colors.length*2];
-		
-		for (int i = 0; i<colors.length; i++){
-			newColors[2*i] = colors[i]; 
-			newColors[2*i+1] = colors[i]; 
-		}
-		
+		Paint[] newColors = new Paint[colors.length * 2];
 
-		DrawingSupplier newSupplier = new DefaultDrawingSupplier(
-		newColors,
-		DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE, DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE, DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE, DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE );
-		
+		for (int i = 0; i < colors.length; i++) {
+			newColors[2 * i] = colors[i];
+			newColors[2 * i + 1] = colors[i];
+		}
+
+		DrawingSupplier newSupplier = new DefaultDrawingSupplier(newColors,
+				DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
+				DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
+				DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
+				DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE);
+
 		chart.getPlot().setDrawingSupplier(newSupplier);
-		
+
 		final JFrame frame = new JFrame(windowTitle);
 		ChartPanel chartPanel = new ChartPanel(chart);
 

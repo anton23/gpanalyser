@@ -11,36 +11,33 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import com.google.common.collect.BiMap;
 
 /**
- * Factory for printers of expressions based on counts. 
+ * Factory for printers of expressions based on counts.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class MatlabCombinedProductBasedExpressionPrinterFactory implements
 		IExpressionPrinterFactory {
 
 	private Constants parameters;
-
-	
-	private BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex; 
-	private Map<AbstractExpression,Integer> generalExpectationIndex;
+	private BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	private Map<AbstractExpression, Integer> generalExpectationIndex;
 	private String f;
 
 	public MatlabCombinedProductBasedExpressionPrinterFactory(
-			Constants constants, BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression,Integer> generalExpectationIndex,
-			String f) {
+			Constants constants,
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex, String f) {
 		super();
-
 		this.parameters = constants;
-
 		this.combinedMomentsIndex = combinedMomentsIndex;
-		this.generalExpectationIndex = generalExpectationIndex; 
+		this.generalExpectationIndex = generalExpectationIndex;
 		this.f = f;
 	}
 
 	@Override
 	public IExpressionVisitor createPrinter() {
-		return new MatlabPrinterCombinedProductBased(parameters,combinedMomentsIndex,generalExpectationIndex,f);
+		return new MatlabPrinterCombinedProductBased(parameters,
+				combinedMomentsIndex, generalExpectationIndex, f);
 	}
-
 }

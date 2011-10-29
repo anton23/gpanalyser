@@ -22,39 +22,32 @@ import com.google.common.collect.BiMap;
 
 /**
  * Java ODE method printer.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class JavaODEMethodPrinter implements IODEMethodVisitor {
 
 	private Constants constants;
-	
-	
-	private BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex; 
-	private Map<AbstractExpression,Integer> generalExpectationIndex;
-
-	@Override
-	public String toString() {
-
-		return output.toString();
-	}
-
-	public JavaODEMethodPrinter(Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex) {
-
-		this.constants = constants;
-		this.combinedMomentsIndex = combinedMomentsIndex;
-		this.generalExpectationIndex = generalExpectationIndex; 
-		output = new StringBuilder();
-	}
+	private BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	private Map<AbstractExpression, Integer> generalExpectationIndex;
 
 	private int methodCharacters = 6000;
-
 	public static final String GENERATEDCLASSNAME = "GeneratedODEs";
 	private static final String OLDY = "y";
 	private static final String NEWY = "newy";
 
-	StringBuilder output;
+	private StringBuilder output;
+
+	public JavaODEMethodPrinter(Constants constants,
+			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex) {
+
+		this.constants = constants;
+		this.combinedMomentsIndex = combinedMomentsIndex;
+		this.generalExpectationIndex = generalExpectationIndex;
+		output = new StringBuilder();
+	}
 
 	@Override
 	public void visit(ODEMethod s) {
@@ -62,12 +55,14 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 		String[] javaMomentODEs = new String[s.getBody().length + 1];
 		for (int i = 0; i < s.getBody().length; i++) {
 			JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
-					constants,  combinedMomentsIndex,generalExpectationIndex, OLDY, NEWY);
+					constants, combinedMomentsIndex, generalExpectationIndex,
+					OLDY, NEWY);
 			s.getBody()[i].accept(tmp);
 			javaMomentODEs[i] = tmp.toString() + "\n";
 		}
 		JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
-				constants, combinedMomentsIndex, generalExpectationIndex,OLDY, NEWY);
+				constants, combinedMomentsIndex, generalExpectationIndex, OLDY,
+				NEWY);
 		javaMomentODEs[s.getBody().length] = tmp.toString();
 
 		StringBuilder header = new StringBuilder();
@@ -96,8 +91,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 				header
 						.append("public double[] derivn(double x, double[] y) {\n");
 				int nOdes = combinedMomentsIndex.size();
-				header.append("double[] newy = new double["
-						+ nOdes + "];\n");
+				header.append("double[] newy = new double[" + nOdes + "];\n");
 			} else {
 				code.append("private void derivn" + method
 						+ "(double[] newy,double x, double[] y) {\n");
@@ -154,5 +148,10 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return output.toString();
 	}
 }

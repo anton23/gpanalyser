@@ -20,33 +20,25 @@ import com.google.common.collect.BiMap;
 public class MatlabODEMethodPrinter implements IODEMethodVisitor {
 
 	private Constants parameters;
-	
-	
 	private BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex; 
 	private Map<AbstractExpression,Integer> generalExpectationIndex;
-
-	@Override
-	public String toString() {
-
-		return output.toString();
-	}
+	public static final String ODESNAME = "odes";
+	private static final String OLDY = "y";
+	private static final String NEWY = "dydt";
+	private StringBuilder output;
 
 	public MatlabODEMethodPrinter(Constants parameters,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex) {
-
 		this.parameters = parameters;
 		this.combinedMomentsIndex = combinedMomentsIndex;
 		this.generalExpectationIndex = generalExpectationIndex; 
 		output = new StringBuilder();
 	}
-
-
-
-	public static final String ODESNAME = "odes";
-	private static final String OLDY = "y";
-	private static final String NEWY = "dydt";
-
-	StringBuilder output;
+	
+	@Override
+	public String toString() {
+		return output.toString();
+	}
 
 	@Override
 	public void visit(ODEMethod s) {

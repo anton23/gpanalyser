@@ -17,16 +17,8 @@ public class PatternSetterVisitor extends ExpressionWalkerWithConstants
  implements IPatternVisitor,IExpressionVariableVisitor,
  IPopulationVisitor,ICombinedProductExpressionVisitor,IGeneralExpectationExpressionVisitor {
 	
-	protected PatternMatcher patternMatcher; 
+	protected PatternMatcher patternMatcher;
 	
-	
-	
-	
-	@Override
-	public void visit(GeneralExpectationExpression e) {
-		e.getExpression().accept(this);
-	}
-
 	public PatternSetterVisitor(PatternMatcher patternMatcher) {
 		super();
 		this.patternMatcher = patternMatcher;
@@ -37,12 +29,16 @@ public class PatternSetterVisitor extends ExpressionWalkerWithConstants
 		e.accept(visitor);		
 	}
 	
-	
 	public static void unfoldPatterns(Map<ExpressionVariable,AbstractExpression> map,PatternMatcher patternMatcher){
 		PatternSetterVisitor visitor = new PatternSetterVisitor(patternMatcher);
 		for (AbstractExpression e:map.values()){
 			if (e!=null) e.accept(visitor);
 		}
+	}
+	
+	@Override
+	public void visit(GeneralExpectationExpression e) {
+		e.getExpression().accept(this);
 	}
 
 	@Override
@@ -51,7 +47,7 @@ public class PatternSetterVisitor extends ExpressionWalkerWithConstants
 	}
 
 	@Override
-	public void visit(CombinedProductExpression e) {	}
+	public void visit(CombinedProductExpression e) {}
 
 	@Override
 	public void visit(ExpressionVariable e) { 

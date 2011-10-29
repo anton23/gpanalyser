@@ -3,18 +3,16 @@ package uk.ac.imperial.doc.pctmc.interpreter;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class ParseException  extends Exception {
-		protected List<String> errors;
+public class ParseException extends Exception {
 
-		public ParseException(List<String> errors) {
-			super();
-			this.errors = errors;
-		}
+	protected List<String> errors;
 
-		public List<String> getErrors() {
-			return errors;
-		} 
-		
-		
+	public ParseException(List<String> errors) {
+		super();
+		this.errors = errors;
+	}
 
+	public List<String> getErrors() {
+		return errors;
+	}
 }

@@ -5,25 +5,11 @@ import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 
 /**
  * AbstractExpression wrapper for a PopulationProduct.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class PopulationProductExpression extends AbstractExpression {
-
-	@Override
-	public void accept(IExpressionVisitor v) {
-		if (v instanceof IPopulationProductVisitor) {
-			((IPopulationProductVisitor) v).visit(this);
-		} else {
-			throw new AssertionError("Unsupported visit to a PopulationProductExpression!"); 
-		}
-	}
-
-	@Override
-	public String toString() {
-		return "E[" + product.toString() + "]";
-	}
-
 	protected PopulationProduct product;
 
 	public PopulationProductExpression(PopulationProduct product) {
@@ -31,8 +17,19 @@ public class PopulationProductExpression extends AbstractExpression {
 		this.product = product;
 	}
 
-	public PopulationProduct getProduct() {
-		return product;
+	@Override
+	public void accept(IExpressionVisitor v) {
+		if (v instanceof IPopulationProductVisitor) {
+			((IPopulationProductVisitor) v).visit(this);
+		} else {
+			throw new AssertionError(
+					"Unsupported visit to a PopulationProductExpression!");
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "E[" + product.toString() + "]";
 	}
 
 	@Override
@@ -48,5 +45,9 @@ public class PopulationProductExpression extends AbstractExpression {
 			return false;
 		PopulationProductExpression asProductCount = (PopulationProductExpression) o;
 		return this.product.equals(asProductCount.getProduct());
+	}
+
+	public PopulationProduct getProduct() {
+		return product;
 	}
 }
