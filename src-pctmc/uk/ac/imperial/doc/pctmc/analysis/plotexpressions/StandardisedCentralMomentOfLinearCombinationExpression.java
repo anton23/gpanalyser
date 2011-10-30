@@ -6,6 +6,7 @@ import java.util.Map;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.ExpressionWrapper;
 import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;

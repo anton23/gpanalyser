@@ -20,6 +20,12 @@ import com.google.common.collect.Multiset;
 public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 
 	protected boolean insert = true;
+	
+	public GetVVersionVisitorMomentClosure(PopulationProduct moment,
+			int maxOrder) {
+		super(moment);
+		this.maxOrder = maxOrder;
+	}
 
 	@Override
 	public void visit(PEPADivExpression e) {
@@ -32,12 +38,6 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			e.getDenominator().accept(this);
 			result = PEPADivExpression.create(newNumerator, result);
 		}
-	}
-
-	public GetVVersionVisitorMomentClosure(PopulationProduct moment,
-			int maxOrder) {
-		super(moment);
-		this.maxOrder = maxOrder;
 	}
 
 	@Override

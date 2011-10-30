@@ -56,14 +56,6 @@ public class ODEGenerator {
 		this.pctmc = pctmc;
 	}
 
-	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
-		return momentIndex;
-	}
-
-	public AbstractExpression getRHS(CombinedPopulationProduct p) {
-		return rhs.get(p);
-	}
-
 	private AbstractExpression getDerivative(
 			CombinedPopulationProduct combinedProduct) {
 
@@ -204,8 +196,6 @@ public class ODEGenerator {
 		return ret;
 	}
 
-	protected int maxCounter;
-
 	protected List<AbstractStatement> getODEMethodBody(int order) {
 		List<AbstractStatement> lines = new LinkedList<AbstractStatement>();
 		rhs = new HashMap<CombinedPopulationProduct, AbstractExpression>();
@@ -236,7 +226,6 @@ public class ODEGenerator {
 			possibleKs.add(newK);
 		}
 
-		maxCounter = 0;
 		int products = 0;
 
 		Collection<EvolutionEvent> evolutionEvents = pctmc.getEvolutionEvents();
@@ -289,13 +278,6 @@ public class ODEGenerator {
 							(double) binom);
 					AbstractExpression term = ProductExpression.create(
 							binomExpression, jointRate);
-					/*
-					 * Increment statement = new Increment(
-					 * CombinedProductExpression.create(new
-					 * CombinedPopulationProduct(moment)),term);
-					 * lines.add(statement);
-					 */
-
 					incrementMap.put(moment, term);
 
 					products++;
@@ -409,5 +391,12 @@ public class ODEGenerator {
 			return moments;
 		}
 	}
+	
+	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
+		return momentIndex;
+	}
 
+	public AbstractExpression getRHS(CombinedPopulationProduct p) {
+		return rhs.get(p);
+	}
 }

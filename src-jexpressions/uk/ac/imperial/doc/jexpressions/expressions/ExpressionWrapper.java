@@ -1,7 +1,5 @@
-package uk.ac.imperial.doc.pctmc.analysis.plotexpressions;
+package uk.ac.imperial.doc.jexpressions.expressions;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 
 public class ExpressionWrapper extends AbstractExpression {
 

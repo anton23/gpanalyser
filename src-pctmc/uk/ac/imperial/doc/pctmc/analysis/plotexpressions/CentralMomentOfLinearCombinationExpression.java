@@ -4,11 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Multiset;
-
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.ExpressionWrapper;
 import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
@@ -17,6 +15,8 @@ import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.utils.Multinomial;
+
+import com.google.common.collect.Multiset;
 
 public class CentralMomentOfLinearCombinationExpression extends
 		ExpressionWrapper {
