@@ -9,10 +9,10 @@ import org.jfree.data.xy.XYDataset;
 
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluator;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKutta;

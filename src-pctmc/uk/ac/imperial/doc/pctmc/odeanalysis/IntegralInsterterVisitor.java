@@ -61,9 +61,7 @@ public class IntegralInsterterVisitor implements IExpressionVisitor,
 	}
 
 	@Override
-	public void visit(AbstractExpression e) {
-		// TODO Auto-generated method stub
-	}
+	public void visit(AbstractExpression e) {}
 
 	public AbstractExpression getResult() {
 		return result;
@@ -167,14 +165,12 @@ public class IntegralInsterterVisitor implements IExpressionVisitor,
 
 	@Override
 	public void visit(PowerExpression e) {
-		// TODO Auto-generated method stub
 		throw new AssertionError(
 				"Powers not supported in right hand sides of ODEs");
 	}
 
 	@Override
 	public void visit(ProductExpression e) {
-		// TODO Auto-generated method stub
 		// this is the most crucial - will
 		// have to go through the terms and find one with a min
 		// if not then find one with a moment
@@ -242,7 +238,6 @@ public class IntegralInsterterVisitor implements IExpressionVisitor,
 			result = ProductExpression.create(e, CombinedProductExpression
 					.create(toInsert));
 		}
-
 	}
 
 	@Override
@@ -251,7 +246,5 @@ public class IntegralInsterterVisitor implements IExpressionVisitor,
 		if (insert) {
 			result = new UMinusExpression(result);
 		}
-
 	}
-
 }
