@@ -1,18 +1,33 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
-import java.util.HashSet;
-
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-
-import com.google.common.collect.Multiset;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
 public class UnexpandableExpression extends ExpandedExpression {
 	
-	private AbstractExpression expression;
+	protected AbstractExpression expression;
 	
-	public UnexpandableExpression(AbstractExpression expression) {
-		super(new HashSet<Multiset<ExpandedExpression>>());
+	protected UnexpandableExpression(AbstractExpression expression) {
+		super(null, null);
 		this.expression = expression;
+	}
+	
+	@Override
+	public boolean isNumber() {
+		return (expression instanceof DoubleExpression);
+	}
+	
+	@Override
+	public Double numericalValue() {
+		if (expression instanceof DoubleExpression){
+			return ((DoubleExpression)expression).getValue();
+		}
+		return null;
+	}
+	
+	@Override
+	public int hashCode() {
+		return expression.hashCode();
 	}
 	
 	@Override
@@ -24,10 +39,6 @@ public class UnexpandableExpression extends ExpandedExpression {
 			return false;
 		}
 		UnexpandableExpression asUE = (UnexpandableExpression) obj;
-		return expression.equals(asUE.getExpression());
-	}
-
-	public AbstractExpression getExpression() {
-		return expression;
+		return expression.equals(asUE.expression);
 	}
 }
