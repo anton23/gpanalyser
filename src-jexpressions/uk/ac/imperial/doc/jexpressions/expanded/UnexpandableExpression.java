@@ -7,8 +7,8 @@ public class UnexpandableExpression extends ExpandedExpression {
 	
 	protected AbstractExpression expression;
 	
-	protected UnexpandableExpression(AbstractExpression expression) {
-		super(null, null);
+	public UnexpandableExpression(AbstractExpression expression) {
+		super(Polynomial.getEmptyPolynomial(), Polynomial.getEmptyPolynomial());
 		this.expression = expression;
 	}
 	
@@ -23,6 +23,11 @@ public class UnexpandableExpression extends ExpandedExpression {
 			return ((DoubleExpression)expression).getValue();
 		}
 		return null;
+	}
+	
+	@Override
+	public String toString() {
+		return expression.toString();
 	}
 	
 	@Override
