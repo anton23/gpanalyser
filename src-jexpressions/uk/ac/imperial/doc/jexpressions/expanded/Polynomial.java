@@ -2,7 +2,6 @@ package uk.ac.imperial.doc.jexpressions.expanded;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -14,10 +13,25 @@ import com.google.common.collect.Multisets;
 public class Polynomial {
 	
 	private final Map<Multiset<ExpandedExpression>, Double> representation;
-	
 
 	public Polynomial(Map<Multiset<ExpandedExpression>, Double> representation) {
 		this.representation = normalise(representation);
+	}
+	
+	public Polynomial(Multiset<ExpandedExpression> ...terms){
+		this(getRepresentation(terms));
+	}
+	
+	protected static Map<Multiset<ExpandedExpression>, Double> getRepresentation(Multiset<ExpandedExpression> ...terms){
+		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();
+		for (Multiset<ExpandedExpression> t:terms){
+			if (ret.containsKey(t)){
+				ret.put(t, ret.get(t)+1.0);
+			} else {
+				ret.put(t, 1.0);
+			}
+		}
+		return ret;
 	}
 	
 	public static Multiset<ExpandedExpression> getCommonFactor(Polynomial p){
@@ -89,7 +103,7 @@ public class Polynomial {
 		double numericalSummands = 0.0;
 		for (Map.Entry<Multiset<ExpandedExpression>, Double> e:terms.entrySet()){
 			Multiset<ExpandedExpression> term = HashMultiset.<ExpandedExpression>create();
-			double numericalCoefficient = 1.0;
+			double numericalCoefficient = e.getValue();
 			for (Multiset.Entry<ExpandedExpression> f:e.getKey().entrySet()){
 				if (f.getElement().isNumber()){
 					numericalCoefficient*=Math.pow(f.getElement().numericalValue(),f.getCount());
@@ -112,13 +126,74 @@ public class Polynomial {
 	}
 	
 	
-	protected static Multiset<ExpandedExpression> getOne(){
+	public static Multiset<ExpandedExpression> getOne(){
 		Multiset<ExpandedExpression> ret = HashMultiset.<ExpandedExpression>create();
 		ret.add(new UnexpandableExpression(new DoubleExpression(1.0)));
 		return ret;
 	}
+	
+	public static Polynomial getEmptyPolynomial(){
+		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();		
+		return new Polynomial(ret);
+	}
+	
+	public boolean isNumber(){
+		return 
+		    representation.size()==1 && 
+			representation.keySet().iterator().next().size()==1 &&
+			representation.keySet().iterator().next().iterator().next().isNumber();
+	}
+	
+	public Double numericalValue(){
+		if (isNumber()){
+			return representation.keySet().iterator().next().iterator().next().numericalValue();
+		} else {
+			return null;
+		}
+	}
 
 	public Map<Multiset<ExpandedExpression>, Double> getRepresentation() {
 		return representation;
+	}
+	
+	@Override
+	public String toString() {
+		String ret = "";
+		boolean first = true;
+		for (Map.Entry<Multiset<ExpandedExpression>, Double> e:representation.entrySet()){
+			if (first){
+				first = false;
+			} else {
+				ret += " + ";
+			}
+			ret += e.getValue() + "*" + e.getKey();
+		}		
+		return ret;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((representation == null) ? 0 : representation.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Polynomial other = (Polynomial) obj;
+		if (representation == null) {
+			if (other.representation != null)
+				return false;
+		} else if (!representation.equals(other.representation))
+			return false;
+		return true;
 	}
 }

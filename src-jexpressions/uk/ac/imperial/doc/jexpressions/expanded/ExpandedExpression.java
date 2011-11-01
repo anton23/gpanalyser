@@ -22,12 +22,17 @@ public class ExpandedExpression extends AbstractExpression{
 	
 	// Always have the smallest coefficient in numerator equal to 1
 	private void normalise(){
+		if (numerator.getRepresentation().isEmpty()) return;
 		Multiset<ExpandedExpression> commonFactorNumerator = Polynomial.getCommonFactor(numerator);
 		Multiset<ExpandedExpression> commonFactorDenomiator = Polynomial.getCommonFactor(denominator);
 		Multiset<ExpandedExpression> commonFactor = Multisets.intersection(commonFactorNumerator, commonFactorDenomiator);
 		Double minCoefficient = Collections.min(numerator.getRepresentation().values());
 		numerator = Polynomial.divide(numerator, commonFactor, minCoefficient);
 		denominator = Polynomial.divide(denominator, commonFactor, 1.0/minCoefficient);
+		if (denominator.isNumber()){
+			numerator = Polynomial.divide(denominator, Polynomial.getOne(), denominator.numericalValue());
+			denominator = Polynomial.getEmptyPolynomial();
+		}
 	}
 	
 	public boolean isNumber(){
@@ -44,20 +49,42 @@ public class ExpandedExpression extends AbstractExpression{
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+	public String toString() {
+		String ret = "[" + numerator.toString() +"]";
+		if (!denominator.equals(Polynomial.getEmptyPolynomial())){
+			ret += "/[" + denominator.toString() + "]";
+		}
+		return ret;
 	}
 
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
-		return 0;
+		final int prime = 31;
+		int result = ((denominator == null) ? 0 : denominator.hashCode());
+		result = prime * result
+				+ ((numerator == null) ? 0 : numerator.hashCode());
+		return result;
 	}
 
 	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (getClass() != obj.getClass())
+			return false;
+		ExpandedExpression other = (ExpandedExpression) obj;
+		if (denominator == null) {
+			if (other.denominator != null)
+				return false;
+		} else if (!denominator.equals(other.denominator))
+			return false;
+		if (numerator == null) {
+			if (other.numerator != null)
+				return false;
+		} else if (!numerator.equals(other.numerator))
+			return false;
+		return true;
 	}
+	
+	
 }
