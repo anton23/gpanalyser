@@ -20,6 +20,18 @@ public class Polynomial {
 		this.representation = normalise(representation);
 	}
 	
+	public static Multiset<ExpandedExpression> getCommonFactor(Polynomial p){
+		Multiset<ExpandedExpression> factor = HashMultiset.<ExpandedExpression>create();
+		for (Multiset<ExpandedExpression> term:p.getRepresentation().keySet()){
+			if (factor.isEmpty()){
+				factor = term;
+			} else {
+				factor = Multisets.intersection(factor, term);
+			}
+		}
+		return factor;
+	}
+	
 	public static Polynomial product(Polynomial a, Polynomial b){
 		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();
 		for (Map.Entry<Multiset<ExpandedExpression>, Double> eA:a.getRepresentation().entrySet()){
@@ -33,6 +45,14 @@ public class Polynomial {
 				}
 				ret.put(newTerm, coefficient);
 			}
+		}
+		return new Polynomial(ret);
+	}
+	
+	public static Polynomial times(Polynomial p, Double coefficient){
+		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();
+		for (Entry<Multiset<ExpandedExpression>, Double> e:p.getRepresentation().entrySet()){
+			ret.put(e.getKey(), e.getValue()*coefficient);
 		}
 		return new Polynomial(ret);
 	}
