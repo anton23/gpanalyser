@@ -20,9 +20,49 @@ public class ExpandedExpression extends AbstractExpression{
 		normalise();
 	}
 	
+	public ExpandedExpression(Polynomial numerator) {
+		this(numerator, Polynomial.getEmptyPolynomial());	
+	}
+	
+	public static ExpandedExpression plus(ExpandedExpression a, ExpandedExpression b){
+		Polynomial newNumerator = Polynomial.plus(Polynomial.product(a.getNumerator(),b.getDenominator()),
+				        Polynomial.product(b.getNumerator(), a.getDenominator()));
+		Polynomial newDenominator = Polynomial.product(a.getDenominator(), b.getDenominator());
+		return new ExpandedExpression(
+				newNumerator,
+				newDenominator
+				);
+	}
+	
+	public static ExpandedExpression product(ExpandedExpression a,
+			ExpandedExpression b) {
+		Polynomial newNumerator = Polynomial.product(
+				b.getNumerator(), a.getNumerator());
+		Polynomial newDenominator = Polynomial.product(
+				a.getDenominator(), b.getDenominator());
+		return new ExpandedExpression(newNumerator, newDenominator);
+	}
+	
+	public static ExpandedExpression divide(ExpandedExpression a, ExpandedExpression b){
+		Polynomial newNumerator = Polynomial.product(
+				a.getNumerator(), b.getDenominator());
+		Polynomial newDenominator = Polynomial.product(
+				a.getDenominator(), b.getNumerator());
+		return new ExpandedExpression(newNumerator, newDenominator);
+	}
+	
+	public static ExpandedExpression getOne(){
+		return new ExpandedExpression(new Polynomial(Polynomial.getOne()));
+	}
+
 	// Always have the smallest coefficient in numerator equal to 1
 	private void normalise(){
 		if (numerator.getRepresentation().isEmpty()) return;
+		// Small hack before proper polynomial division is implemneted:
+		if (numerator.equals(denominator)){
+			numerator = new Polynomial(Polynomial.getOne());
+			denominator = Polynomial.getEmptyPolynomial();
+		}
 		Multiset<ExpandedExpression> commonFactorNumerator = Polynomial.getCommonFactor(numerator);
 		Multiset<ExpandedExpression> commonFactorDenomiator = Polynomial.getCommonFactor(denominator);
 		Multiset<ExpandedExpression> commonFactor = Multisets.intersection(commonFactorNumerator, commonFactorDenomiator);
@@ -30,7 +70,7 @@ public class ExpandedExpression extends AbstractExpression{
 		numerator = Polynomial.divide(numerator, commonFactor, minCoefficient);
 		denominator = Polynomial.divide(denominator, commonFactor, 1.0/minCoefficient);
 		if (denominator.isNumber()){
-			numerator = Polynomial.divide(denominator, Polynomial.getOne(), denominator.numericalValue());
+			numerator = Polynomial.divide(numerator, Polynomial.getOne(), denominator.numericalValue());
 			denominator = Polynomial.getEmptyPolynomial();
 		}
 	}
@@ -84,6 +124,14 @@ public class ExpandedExpression extends AbstractExpression{
 		} else if (!numerator.equals(other.numerator))
 			return false;
 		return true;
+	}
+
+	public Polynomial getNumerator() {
+		return numerator;
+	}
+
+	public Polynomial getDenominator() {
+		return denominator;
 	}
 	
 	

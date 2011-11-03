@@ -28,10 +28,11 @@ import com.google.common.collect.Multiset;
 
 public class ExpandingExpressionTransformer implements IExpressionVisitor, IConstantExpressionVisitor{
 	private ExpandedExpression result;
-	
-	public static Set<Multiset<ExpandedExpression>> getCommonFactor(ExpandedExpression ...es){
-		
-		return null;
+
+	public static ExpandedExpression expandExpression(AbstractExpression e){	
+		ExpandingExpressionTransformer t = new ExpandingExpressionTransformer();
+		e.accept(t);
+		return t.getResult();
 	}
 	
 	@Override
@@ -43,19 +44,44 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 	public void visit(DoubleExpression e) {
 		result = new UnexpandableExpression(e);
 	}
+	
+	@Override
+	public void visit(SumExpression e) {
+		ExpandedExpression ret = null;
+		for (AbstractExpression s:e.getSummands()){
+			s.accept(this);
+			if (ret==null){
+				ret = result;
+			} else {
+				ret = ExpandedExpression.plus(ret, result);
+			}
+		}
+		result = ret;
+	}
+
+	
+	@Override
+	public void visit(ProductExpression e) {
+		ExpandedExpression ret = ExpandedExpression.getOne();
+		for (AbstractExpression t:e.getTerms()){
+			t.accept(this);
+			ret = ExpandedExpression.product(result, ret);
+		}		
+		result = ret;
+	}
+	
+	@Override
+	public void visit(MinExpression e) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void visit(AbstractExpression e) {}
 
 	@Override
 	public void visit(DivDivMinExpression e) {
-		e.getA().accept(this);
-		ExpandedExpression a = result;  
-		e.getB().accept(this);
-		ExpandedExpression b = result;
-		e.getC().accept(this);
-		ExpandedExpression c = result;
-		
+		// TODO Auto-generated method stub		
 	}
 
 	@Override
@@ -83,12 +109,6 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 	}
 
 	@Override
-	public void visit(MinExpression e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void visit(MinusExpression e) {
 		// TODO Auto-generated method stub
 		
@@ -105,19 +125,7 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public void visit(ProductExpression e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(SumExpression e) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	
 	@Override
 	public void visit(TimeExpression e) {
 		// TODO Auto-generated method stub
@@ -129,6 +137,11 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 		// TODO Auto-generated method stub
 		
 	}
+
+	public ExpandedExpression getResult() {
+		return result;
+	}
+	
 	
 	
 }

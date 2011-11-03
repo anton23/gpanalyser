@@ -3,14 +3,26 @@ package uk.ac.imperial.doc.jexpressions.expanded;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+
 public class UnexpandableExpression extends ExpandedExpression {
 	
 	protected AbstractExpression expression;
-	
 	public UnexpandableExpression(AbstractExpression expression) {
 		super(Polynomial.getEmptyPolynomial(), Polynomial.getEmptyPolynomial());
 		this.expression = expression;
+		Multiset<ExpandedExpression> tmp = HashMultiset.<ExpandedExpression>create();
+		tmp.add(this);
 	}
+	
+	@Override
+	public Polynomial getNumerator() {
+		Multiset<ExpandedExpression> tmp = HashMultiset.<ExpandedExpression>create();
+		tmp.add(this);
+		return new Polynomial(tmp);
+	}
+	
 	
 	@Override
 	public boolean isNumber() {
