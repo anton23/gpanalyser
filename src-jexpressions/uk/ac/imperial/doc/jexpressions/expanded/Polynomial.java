@@ -47,6 +47,8 @@ public class Polynomial {
 	}
 	
 	public static Polynomial product(Polynomial a, Polynomial b){
+		if (a.equals(getEmptyPolynomial())) return b;
+		if (b.equals(getEmptyPolynomial())) return a;
 		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();
 		for (Map.Entry<Multiset<ExpandedExpression>, Double> eA:a.getRepresentation().entrySet()){
 			for (Map.Entry<Multiset<ExpandedExpression>, Double> eB:b.getRepresentation().entrySet()){
@@ -72,7 +74,12 @@ public class Polynomial {
 	}
 	
 	// Divides a by b if there is no remainder, otherwise returns null
+	// TODO Implement proper polynomial division
 	public static Polynomial divide(Polynomial p, Multiset<ExpandedExpression> dividingTerm, Double dividingCoefficient){
+		// First, moves all the numerical coefficients from the dividingTerm to the dividingCoefficients
+		CoefficientTerm tmp = separateNumericalValuesFromTerm(dividingTerm);
+		dividingCoefficient *= tmp.coefficient;
+		dividingTerm = tmp.term;
 		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();
 		for (Entry<Multiset<ExpandedExpression>, Double> e:p.getRepresentation().entrySet()){
 			if (!Multisets.containsOccurrences(e.getKey(), dividingTerm)){
@@ -92,9 +99,35 @@ public class Polynomial {
 		for (Entry<Multiset<ExpandedExpression>, Double> e:b.getRepresentation().entrySet()){
 			if (ret.containsKey(e.getKey())){
 				ret.put(e.getKey(), e.getValue()+ret.get(e.getKey()));
+			} else {
+				ret.put(e.getKey(), e.getValue());
 			}
 		}
 		return new Polynomial(ret);
+	}
+	
+	private static class CoefficientTerm{
+		Double coefficient;
+		Multiset<ExpandedExpression> term;
+		public CoefficientTerm(Double coefficient,
+				Multiset<ExpandedExpression> term) {
+			super();
+			this.coefficient = coefficient;
+			this.term = term;
+		}
+	}
+	
+	protected static CoefficientTerm separateNumericalValuesFromTerm(Multiset<ExpandedExpression> term){
+		Multiset<ExpandedExpression> ret = HashMultiset.<ExpandedExpression>create();
+		double numericalCoefficient = 1.0;
+		for (Multiset.Entry<ExpandedExpression> f:term.entrySet()){
+			if (f.getElement().isNumber()){
+				numericalCoefficient*=Math.pow(f.getElement().numericalValue(),f.getCount());
+			} else {
+				ret.add(f.getElement(), f.getCount());
+			}
+		}
+		return new CoefficientTerm(numericalCoefficient, ret); 
 	}
 
 	// Makes sure that the terms cannot be simplified further
@@ -102,15 +135,9 @@ public class Polynomial {
 		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();
 		double numericalSummands = 0.0;
 		for (Map.Entry<Multiset<ExpandedExpression>, Double> e:terms.entrySet()){
-			Multiset<ExpandedExpression> term = HashMultiset.<ExpandedExpression>create();
-			double numericalCoefficient = e.getValue();
-			for (Multiset.Entry<ExpandedExpression> f:e.getKey().entrySet()){
-				if (f.getElement().isNumber()){
-					numericalCoefficient*=Math.pow(f.getElement().numericalValue(),f.getCount());
-				} else {
-					term.add(f.getElement(), f.getCount());
-				}
-			}
+			CoefficientTerm tmp = separateNumericalValuesFromTerm(e.getKey());
+			Multiset<ExpandedExpression> term = tmp.term;
+			double numericalCoefficient = tmp.coefficient*e.getValue();
 			if (!term.isEmpty()){ 
 				if (numericalCoefficient!=0.0){
 					ret.put(term, numericalCoefficient);
