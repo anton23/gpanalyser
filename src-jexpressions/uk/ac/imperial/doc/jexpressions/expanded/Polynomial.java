@@ -35,20 +35,23 @@ public class Polynomial {
 	}
 	
 	public static Multiset<ExpandedExpression> getCommonFactor(Polynomial p){
-		Multiset<ExpandedExpression> factor = HashMultiset.<ExpandedExpression>create();
+		Multiset<ExpandedExpression> factor = null;
 		for (Multiset<ExpandedExpression> term:p.getRepresentation().keySet()){
-			if (factor.isEmpty()){
+			if (factor == null){
 				factor = term;
 			} else {
 				factor = Multisets.intersection(factor, term);
 			}
 		}
+		if (factor == null){
+			factor = getOneTerm();
+		}
 		return factor;
 	}
 	
 	public static Polynomial product(Polynomial a, Polynomial b){
-		if (a.equals(getEmptyPolynomial())) return b;
-		if (b.equals(getEmptyPolynomial())) return a;
+		if (a.equals(getEmptyPolynomial())) return getEmptyPolynomial();
+		if (b.equals(getEmptyPolynomial())) return getEmptyPolynomial();
 		Map<Multiset<ExpandedExpression>, Double> ret = new HashMap<Multiset<ExpandedExpression>, Double>();
 		for (Map.Entry<Multiset<ExpandedExpression>, Double> eA:a.getRepresentation().entrySet()){
 			for (Map.Entry<Multiset<ExpandedExpression>, Double> eB:b.getRepresentation().entrySet()){
@@ -147,16 +150,30 @@ public class Polynomial {
 			}
 		}
 		if (numericalSummands!=0.0){
-			ret.put(getOne(), numericalSummands);
+			ret.put(getOneTerm(), numericalSummands);
 		}
 		return ret;
 	}
 	
 	
-	public static Multiset<ExpandedExpression> getOne(){
+	public static Multiset<ExpandedExpression> getOneTerm(){
 		Multiset<ExpandedExpression> ret = HashMultiset.<ExpandedExpression>create();
 		ret.add(new UnexpandableExpression(new DoubleExpression(1.0)));
 		return ret;
+	}
+	
+	public static Multiset<ExpandedExpression> getMinusOneTerm(){
+		Multiset<ExpandedExpression> ret = HashMultiset.<ExpandedExpression>create();
+		ret.add(new UnexpandableExpression(new DoubleExpression(-1.0)));
+		return ret;
+	}
+	
+	public static Polynomial getUnitPolynomial(){
+		return new Polynomial(getOneTerm());		
+	}
+	
+	public static Polynomial getMinusUnitPolynomial(){
+		return new Polynomial(getMinusOneTerm());		
 	}
 	
 	public static Polynomial getEmptyPolynomial(){
@@ -173,7 +190,8 @@ public class Polynomial {
 	
 	public Double numericalValue(){
 		if (isNumber()){
-			return representation.keySet().iterator().next().iterator().next().numericalValue();
+			Entry<Multiset<ExpandedExpression>, Double> entry = representation.entrySet().iterator().next();
+			return entry.getKey().iterator().next().numericalValue()*entry.getValue();
 		} else {
 			return null;
 		}

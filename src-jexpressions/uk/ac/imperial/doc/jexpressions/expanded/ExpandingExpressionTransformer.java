@@ -47,14 +47,10 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 	
 	@Override
 	public void visit(SumExpression e) {
-		ExpandedExpression ret = null;
+		ExpandedExpression ret = new UnexpandableExpression(new DoubleExpression(0.0));
 		for (AbstractExpression s:e.getSummands()){
 			s.accept(this);
-			if (ret==null){
-				ret = result;
-			} else {
-				ret = ExpandedExpression.plus(ret, result);
-			}
+			ret = ExpandedExpression.plus(ret, result);			
 		}
 		result = ret;
 	}
@@ -92,6 +88,34 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 		ExpandedExpression eD = result;
 		result = ExpandedExpression.divide(eN, eD);
 	}
+	
+	@Override
+	public void visit(PEPADivExpression e) {
+		e.getNumerator().accept(this);
+		ExpandedExpression eN = result;
+		e.getDenominator().accept(this);
+		ExpandedExpression eD = result;
+		result = ExpandedExpression.divide(eN, eD);		
+	}
+	
+	@Override
+	public void visit(MinusExpression e) {
+		e.getA().accept(this);
+		ExpandedExpression eA = result;
+		e.getB().accept(this);
+		ExpandedExpression eB = result;
+		result = ExpandedExpression.plus(
+				eA,
+				ExpandedExpression.product(ExpandedExpression.getMinusOne(), eB));
+	}
+	
+	@Override
+	public void visit(UMinusExpression e) {
+		e.getE().accept(this);
+		ExpandedExpression eE = result;
+		result = ExpandedExpression.product(ExpandedExpression.getMinusOne(), eE);
+		
+	}
 
 	@Override
 	public void visit(AbstractExpression e) {}
@@ -122,18 +146,6 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 	}
 
 	@Override
-	public void visit(MinusExpression e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(PEPADivExpression e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void visit(PowerExpression e) {
 		// TODO Auto-generated method stub
 		
@@ -141,12 +153,6 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 	
 	@Override
 	public void visit(TimeExpression e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void visit(UMinusExpression e) {
 		// TODO Auto-generated method stub
 		
 	}

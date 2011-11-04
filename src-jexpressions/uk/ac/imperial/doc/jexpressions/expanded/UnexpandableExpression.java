@@ -23,6 +23,11 @@ public class UnexpandableExpression extends ExpandedExpression {
 		return new Polynomial(tmp);
 	}
 	
+	@Override
+	public Polynomial getDenominator() {
+		return Polynomial.getUnitPolynomial();
+	}
+	
 	
 	@Override
 	public boolean isNumber() {
