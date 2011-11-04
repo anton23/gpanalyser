@@ -72,8 +72,25 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 	
 	@Override
 	public void visit(MinExpression e) {
-		// TODO Auto-generated method stub
-		
+		e.getA().accept(this);
+		ExpandedExpression eA = result;
+		e.getB().accept(this);
+		ExpandedExpression eB = result;
+		if (eA.equals(eB)){
+			result = eA;
+		} else {
+			result = new UnexpandableExpression(MinExpression.create(eA, eB));
+		}
+	}
+	
+	// We treat Div as PEPADiv
+	@Override
+	public void visit(DivExpression e) {
+		e.getNumerator().accept(this);
+		ExpandedExpression eN = result;
+		e.getDenominator().accept(this);
+		ExpandedExpression eD = result;
+		result = ExpandedExpression.divide(eN, eD);
 	}
 
 	@Override
@@ -84,11 +101,7 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 		// TODO Auto-generated method stub		
 	}
 
-	@Override
-	public void visit(DivExpression e) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 
 	@Override
 	public void visit(DivMinExpression e) {

@@ -67,11 +67,14 @@ public class ExpandedExpression extends AbstractExpression{
 		Multiset<ExpandedExpression> commonFactorDenomiator = Polynomial.getCommonFactor(denominator);
 		Multiset<ExpandedExpression> commonFactor = Multisets.intersection(commonFactorNumerator, commonFactorDenomiator);
 		Double minCoefficient = Collections.min(numerator.getRepresentation().values());
-		numerator = Polynomial.divide(numerator, commonFactor, minCoefficient);
-		denominator = Polynomial.divide(denominator, commonFactor, 1.0/minCoefficient);
+		numerator = Polynomial.divide(numerator, commonFactor, 1.0);
+		denominator = Polynomial.divide(denominator, commonFactor, 1.0);
 		if (denominator.isNumber()){
 			numerator = Polynomial.divide(numerator, Polynomial.getOne(), denominator.numericalValue());
 			denominator = Polynomial.getEmptyPolynomial();
+		} else if (!denominator.equals(Polynomial.getEmptyPolynomial())){
+			numerator = Polynomial.divide(numerator, Polynomial.getOne(), minCoefficient);
+			denominator = Polynomial.divide(denominator, Polynomial.getOne(), minCoefficient);
 		}
 	}
 	
