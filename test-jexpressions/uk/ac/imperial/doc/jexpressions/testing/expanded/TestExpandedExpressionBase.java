@@ -20,13 +20,13 @@ public class TestExpandedExpressionBase extends TestPolynomialsBase{
 	@BeforeClass
 	public static void createObjects(){
 		createPolynomialObjects();
-		eAoB = new ExpandedExpression(new Polynomial(a), new Polynomial(b));
-		eCoD = new ExpandedExpression(new Polynomial(c), new Polynomial(d));
-		eCoB = new ExpandedExpression(new Polynomial(c), new Polynomial(b));
-		eADpBCoBD = new ExpandedExpression(new Polynomial(ad, bc), new Polynomial(bd));
-		eADoBD = new ExpandedExpression(new Polynomial(ad), new Polynomial(bd));
-		eADpBDoD = new ExpandedExpression(new Polynomial(ad, bd), new Polynomial(d));
-		eApCoB = new ExpandedExpression(new Polynomial(a, c), new Polynomial(b));
+		eAoB = ExpandedExpression.create(new Polynomial(a), new Polynomial(b));
+		eCoD = ExpandedExpression.create(new Polynomial(c), new Polynomial(d));
+		eCoB = ExpandedExpression.create(new Polynomial(c), new Polynomial(b));
+		eADpBCoBD = ExpandedExpression.create(new Polynomial(ad, bc), new Polynomial(bd));
+		eADoBD = ExpandedExpression.create(new Polynomial(ad), new Polynomial(bd));
+		eADpBDoD = ExpandedExpression.create(new Polynomial(ad, bd), new Polynomial(d));
+		eApCoB = ExpandedExpression.create(new Polynomial(a, c), new Polynomial(b));
 	}
 
 }
