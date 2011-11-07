@@ -75,15 +75,20 @@ public class ProductExpression extends AbstractExpression {
 				return DoubleExpression.ZERO;
 			}
 		}
+		double numericalTerms = 1.0;
 		List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
 		for (AbstractExpression e : t) {
 			if (e instanceof ProductExpression){
 				terms.addAll(((ProductExpression)e).getTerms()); 
 			} else
-			if (!((e instanceof DoubleExpression) && ((DoubleExpression) e)
-					.getValue() == 1.0)) {
+			if (e instanceof DoubleExpression){
+				numericalTerms *= ((DoubleExpression)e).getValue();
+			} else {
 				terms.add(e);
 			}
+		}
+		if (numericalTerms != 1.0){
+			terms.add(new DoubleExpression(numericalTerms));
 		}
 		if (terms.isEmpty()) {
 			return new DoubleExpression(1.0);

@@ -1,50 +1,67 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
+import java.util.Set;
+
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Sets;
 
 public class UnexpandableExpression extends ExpandedExpression {
 	
-	protected AbstractExpression expression;
-	public UnexpandableExpression(AbstractExpression expression) {
-		super(Polynomial.getEmptyPolynomial(), Polynomial.getEmptyPolynomial());
-		this.expression = expression;
-		Multiset<ExpandedExpression> tmp = HashMultiset.<ExpandedExpression>create();
-		tmp.add(this);
+	private ICoefficientSpecification normaliser;
+	
+	protected final AbstractExpression expression;
+	
+
+
+	
+	public UnexpandableExpression(AbstractExpression expression, ICoefficientSpecification normaliser) {
+		super(Polynomial.getEmptyPolynomial(normaliser), Polynomial.getEmptyPolynomial(normaliser));
+		this.normaliser = normaliser;
+		if (expression instanceof UnexpandableExpression) {
+			this.expression = ((UnexpandableExpression)expression).getExpression();
+		} else {
+			this.expression = expression;
+		}
 	}
 	
+	@Override
+	public AbstractExpression toAbstractExpression() {
+		return expression;
+	}	
 	@Override
 	public Polynomial getNumerator() {
 		Multiset<ExpandedExpression> tmp = HashMultiset.<ExpandedExpression>create();
 		tmp.add(this);
-		return new Polynomial(tmp);
+		return new Polynomial(normaliser, tmp);
 	}
 	
 	@Override
 	public Polynomial getDenominator() {
-		return Polynomial.getUnitPolynomial();
+		return Polynomial.getUnitPolynomial(normaliser);
 	}
 	
 	
 	@Override
 	public boolean isNumber() {
-		return (expression instanceof DoubleExpression);
+		return normaliser.isCoefficient(expression);
+		//return scalarClasses.contains(expression.getClass());
 	}
 	
 	@Override
-	public Double numericalValue() {
-		if (expression instanceof DoubleExpression){
-			return ((DoubleExpression)expression).getValue();
+	public AbstractExpression numericalValue() {
+		if (isNumber()){
+			return expression;
 		}
 		return null;
 	}
 	
 	@Override
 	public String toString() {
-		return expression.toString();
+		return "{"+expression.toString()+"}";
 	}
 	
 	@Override
@@ -63,4 +80,10 @@ public class UnexpandableExpression extends ExpandedExpression {
 		UnexpandableExpression asUE = (UnexpandableExpression) obj;
 		return expression.equals(asUE.expression);
 	}
+
+	public AbstractExpression getExpression() {
+		return expression;
+	}
+	
+	
 }

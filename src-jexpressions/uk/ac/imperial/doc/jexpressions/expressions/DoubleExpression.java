@@ -9,6 +9,7 @@ package uk.ac.imperial.doc.jexpressions.expressions;
 public class DoubleExpression extends AbstractExpression {
 
 	public static AbstractExpression ZERO = new DoubleExpression(0.0);
+	public static AbstractExpression ONE = new DoubleExpression(1.0);
 	
 	private Double value;
 	

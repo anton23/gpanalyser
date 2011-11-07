@@ -7,6 +7,11 @@ package uk.ac.imperial.doc.jexpressions.expressions;
  */
 
 public class DivDivMinExpression extends AbstractExpression {
+	
+	public AbstractExpression getFullExpression(){
+		return ProductExpression.create(PEPADivExpression.create(ProductExpression.create(a,b),ProductExpression.create(c,d)),
+				MinExpression.create(c, d));
+	}
 
 	private AbstractExpression a, b, c, d;
 	

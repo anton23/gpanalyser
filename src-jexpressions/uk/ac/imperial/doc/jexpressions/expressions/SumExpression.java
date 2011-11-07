@@ -53,14 +53,21 @@ public class SumExpression extends AbstractExpression {
 		if (s.length == 1)
 			return s[0];
 		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
+		double numericalSummands = 0.0;
 		for (AbstractExpression e : s) {
 			if (!e.equals(new DoubleExpression(0.0))) {
+				if (e instanceof DoubleExpression){
+					numericalSummands += ((DoubleExpression)e).getValue();
+				} else 
 				if (e instanceof SumExpression){
 					summands.addAll(((SumExpression)e).getSummands());
 				} else {
 					summands.add(e);
 				}
 			}
+		}
+		if (numericalSummands != 0.0){
+			summands.add(new DoubleExpression(numericalSummands));
 		}
 		if (summands.isEmpty()) {
 			return new DoubleExpression(0.0);
