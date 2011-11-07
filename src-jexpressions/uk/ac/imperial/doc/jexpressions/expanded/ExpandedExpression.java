@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.jexpressions.expanded;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
@@ -14,10 +15,9 @@ import com.google.common.collect.Sets;
 
 public class ExpandedExpression extends AbstractExpression {
 
-	
 	private Polynomial numerator;
 	private Polynomial denominator;
-	
+
 	protected ExpandedExpression(Polynomial numerator, Polynomial denominator) {
 		super();
 		this.numerator = numerator;
@@ -59,62 +59,85 @@ public class ExpandedExpression extends AbstractExpression {
 	public static ExpandedExpression getOne(ICoefficientSpecification normaliser) {
 		return new ExpandedExpression(Polynomial.getUnitPolynomial(normaliser));
 	}
-	
-	public static ExpandedExpression getMinusOne(ICoefficientSpecification normaliser) {
-		return new ExpandedExpression(Polynomial.getMinusUnitPolynomial(normaliser));
+
+	public static ExpandedExpression getMinusOne(
+			ICoefficientSpecification normaliser) {
+		return new ExpandedExpression(Polynomial
+				.getMinusUnitPolynomial(normaliser));
 	}
 
 	public static ExpandedExpression create(Polynomial numerator) {
-		return create(numerator, Polynomial.getUnitPolynomial(numerator.getNormaliser()));
+		return create(numerator, Polynomial.getUnitPolynomial(numerator
+				.getNormaliser()));
 	}
 
 	// Always have the smallest coefficient in numerator equal to 1
 	public static ExpandedExpression create(Polynomial numerator,
 			Polynomial denominator) {
-		if (numerator.equals(Polynomial.getEmptyPolynomial(numerator.getNormaliser()))){			
-			return new UnexpandableExpression(new DoubleExpression(0.0), numerator.getNormaliser());
+		if (numerator.equals(Polynomial.getEmptyPolynomial(numerator
+				.getNormaliser()))) {
+			return new UnexpandableExpression(new DoubleExpression(0.0),
+					numerator.getNormaliser());
 		}
-		if (denominator.equals(Polynomial.getEmptyPolynomial(denominator.getNormaliser()))) {
+		if (denominator.equals(Polynomial.getEmptyPolynomial(denominator
+				.getNormaliser()))) {
 			throw new AssertionError("Division by zero!");
 		}
-		
+
 		// Small hack before proper polynomial division is implemneted:
 		if (numerator.equals(denominator)) {
-			return new UnexpandableExpression(DoubleExpression.ONE, numerator.getNormaliser());
+			return new UnexpandableExpression(DoubleExpression.ONE, numerator
+					.getNormaliser());
 		}
-		Multiset<ExpandedExpression> commonFactor = Polynomial.getGreatestCommonFactor(numerator, denominator); 
-		numerator = Polynomial.divide(numerator, commonFactor, DoubleExpression.ONE);
-		denominator = Polynomial.divide(denominator, commonFactor, DoubleExpression.ONE);
+		Multiset<ExpandedExpression> commonFactor = Polynomial
+				.getGreatestCommonFactor(numerator, denominator);
+		numerator = Polynomial.divide(numerator, commonFactor,
+				DoubleExpression.ONE);
+		denominator = Polynomial.divide(denominator, commonFactor,
+				DoubleExpression.ONE);
+
+		DivisionResult divide = Polynomial.divide(numerator, denominator);
+		if (divide.getRemainder().equals(
+				Polynomial.getEmptyPolynomial(numerator.getNormaliser()))) {
+			numerator = divide.getResult();
+			denominator = Polynomial.getUnitPolynomial(denominator
+					.getNormaliser());
+		}
 
 		if (denominator.isNumber()) {
-			numerator = Polynomial.divide(numerator, Polynomial.getOneTerm(numerator.getNormaliser()),
-					denominator.numericalValue());
+			numerator = Polynomial.divide(numerator, Polynomial
+					.getOneTerm(numerator.getNormaliser()), denominator
+					.numericalValue());
 			if (numerator.isNumber()) {
-				return new UnexpandableExpression(
-						numerator.numericalValue(), numerator.getNormaliser());
-			} else if ((numerator.getRepresentation().size() == 1
-					&& numerator.getRepresentation().entrySet().iterator()
-							.next().getValue().equals(DoubleExpression.ONE))
-				    && numerator.getRepresentation().entrySet().iterator().next().getKey().size()==1){
-				return numerator.getRepresentation().keySet().iterator().next().iterator().next();
+				return new UnexpandableExpression(numerator.numericalValue(),
+						numerator.getNormaliser());
 			} else {
-				return new ExpandedExpression(numerator);
+				Entry<Multiset<ExpandedExpression>, AbstractExpression> next = numerator.getRepresentation().entrySet().iterator().next();
+				if ((numerator.getRepresentation().size() == 1
+				&& numerator.getNormaliser().isOne(next.getValue()))
+						&& next.getKey().size() == 1) {
+					return numerator.getRepresentation().keySet().iterator()
+							.next().iterator().next();
+				} else {
+					return new ExpandedExpression(numerator);
+				}
 			}
 		} else
-		/* TODO sort out normal form for fractions
-		 * if (!numerator.equals(Polynomial.getEmptyPolynomial())){
-			AbstractExpression minCoefficient = Collections.min(numerator.getRepresentation()
-					.values());
-			numerator = Polynomial.divide(numerator, Polynomial.getOneTerm(),
-					minCoefficient);
-			denominator = Polynomial.divide(denominator, Polynomial
-					.getOneTerm(), minCoefficient);
-		} */
-		return new ExpandedExpression(numerator, denominator);
+			/*
+			 * TODO sort out normal form for fractions if
+			 * (!numerator.equals(Polynomial.getEmptyPolynomial())){
+			 * AbstractExpression minCoefficient =
+			 * Collections.min(numerator.getRepresentation() .values());
+			 * numerator = Polynomial.divide(numerator, Polynomial.getOneTerm(),
+			 * minCoefficient); denominator = Polynomial.divide(denominator,
+			 * Polynomial .getOneTerm(), minCoefficient); }
+			 */
+			return new ExpandedExpression(numerator, denominator);
 	}
-	
+
 	public AbstractExpression toAbstractExpression() {
-		return DivExpression.create(numerator.toAbstractExpression(), denominator.toAbstractExpression());
+		return DivExpression.create(numerator.toAbstractExpression(),
+				denominator.toAbstractExpression());
 	}
 
 	public boolean isNumber() {
@@ -128,14 +151,15 @@ public class ExpandedExpression extends AbstractExpression {
 	@Override
 	public void accept(IExpressionVisitor v) {
 		if (v instanceof IExpandedExpressionVisitor) {
-			((IExpandedExpressionVisitor)v).visit(this);
+			((IExpandedExpressionVisitor) v).visit(this);
 		}
 	}
 
 	@Override
 	public String toString() {
 		String ret = "[" + numerator.toString() + "]";
-		if (!denominator.equals(Polynomial.getUnitPolynomial(denominator.getNormaliser()))) {
+		if (!denominator.equals(Polynomial.getUnitPolynomial(denominator
+				.getNormaliser()))) {
 			ret += "/[" + denominator.toString() + "]";
 		}
 		return ret;

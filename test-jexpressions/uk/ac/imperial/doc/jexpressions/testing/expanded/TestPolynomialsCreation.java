@@ -41,7 +41,7 @@ public class TestPolynomialsCreation extends TestPolynomialsBase {
 		Polynomial tmp1 = new Polynomial(new DoubleNormaliser(), t1, t1);
 		assertEquals(p2, tmp1);
 		Polynomial tmp2 = Polynomial.plus(pApB, pApB);
-		Polynomial tmp3 = Polynomial.times(pApB, new DoubleExpression(2.0));
+		Polynomial tmp3 = Polynomial.scalarProduct(pApB, new DoubleExpression(2.0));
 		assertEquals(tmp3, tmp2);
 	}
 	
@@ -99,5 +99,17 @@ public class TestPolynomialsCreation extends TestPolynomialsBase {
 		assertEquals(new Polynomial(new DoubleNormaliser(), t4), Polynomial.plus(new Polynomial(new DoubleNormaliser(), t2), p2t1));
 		assertEquals(new Polynomial(new DoubleNormaliser(), ad,bc), Polynomial.plus(new Polynomial(new DoubleNormaliser(), ad), new Polynomial(new DoubleNormaliser(), bc)));
 		assertEquals(Polynomial.getEmptyPolynomial(new DoubleNormaliser()), Polynomial.plus(Polynomial.getUnitPolynomial(new DoubleNormaliser()), Polynomial.getMinusUnitPolynomial(new DoubleNormaliser())));
+	}
+	
+	@Test
+	public void testCommonDivisor() {
+		Polynomial pB = new Polynomial(new DoubleNormaliser(), b);
+		Polynomial pA = new Polynomial(new DoubleNormaliser(), a);
+		Polynomial pAmB = Polynomial.minus(pA, pB);
+		Polynomial product = Polynomial.product(pAmB, pApB);
+		
+		assertEquals(pApB, Polynomial.greatestCommonDivisor(pA2p2ABpB2, pApB));
+		assertEquals(pApB, Polynomial.greatestCommonDivisor(pA2p2ABpB2, product));
+//		assertEquals(p1, Polynomial.greatestCommonDivisor(pA2p2Ap3AB, pA2p2ABpB2));
 	}
 }
