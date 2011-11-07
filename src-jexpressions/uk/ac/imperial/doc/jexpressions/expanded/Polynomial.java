@@ -18,19 +18,20 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 
 public class Polynomial {
-	
+
 	private ICoefficientSpecification normaliser;
 
 	private final Map<Multiset<ExpandedExpression>, AbstractExpression> representation;
-	
-	
+
 	public Polynomial(
-			Map<Multiset<ExpandedExpression>, AbstractExpression> representation, ICoefficientSpecification normaliser) {
+			Map<Multiset<ExpandedExpression>, AbstractExpression> representation,
+			ICoefficientSpecification normaliser) {
 		this.normaliser = normaliser;
 		this.representation = normalise(representation);
 	}
 
-	public Polynomial(ICoefficientSpecification normaliser, Multiset<ExpandedExpression>... terms) {
+	public Polynomial(ICoefficientSpecification normaliser,
+			Multiset<ExpandedExpression>... terms) {
 		this(getRepresentation(terms), normaliser);
 	}
 
@@ -47,18 +48,19 @@ public class Polynomial {
 		}
 		return ret;
 	}
-	
+
 	public AbstractExpression toAbstractExpression() {
 		AbstractExpression ret = new DoubleExpression(0.0);
-		for (Entry<Multiset<ExpandedExpression>, AbstractExpression> e:representation.entrySet()) {
+		for (Entry<Multiset<ExpandedExpression>, AbstractExpression> e : representation
+				.entrySet()) {
 			AbstractExpression term = e.getValue();
 			if (term instanceof ExpandedExpression) {
-				term = ((ExpandedExpression)term).toAbstractExpression();
+				term = ((ExpandedExpression) term).toAbstractExpression();
 			}
-			for (Multiset.Entry<ExpandedExpression> f:e.getKey().entrySet()) {
+			for (Multiset.Entry<ExpandedExpression> f : e.getKey().entrySet()) {
 				List<AbstractExpression> power = new LinkedList<AbstractExpression>();
 				AbstractExpression tmp = f.getElement().toAbstractExpression();
-				for (int i = 0; i<f.getCount(); i++) {
+				for (int i = 0; i < f.getCount(); i++) {
 					power.add(tmp);
 				}
 				power.add(term);
@@ -67,7 +69,76 @@ public class Polynomial {
 			ret = SumExpression.create(ret, term);
 		}
 		return ret;
-		
+
+	}
+
+	public List<CoefficientTerm> getHighestTerms() {
+		if (this.equals(Polynomial.getEmptyPolynomial(this.getNormaliser()))) {
+			return new LinkedList<CoefficientTerm>();
+		}
+		int highestOrder = 0;
+		for (Entry<Multiset<ExpandedExpression>, AbstractExpression> e : this
+				.getRepresentation().entrySet()) {
+			if (e.getKey().size() >= highestOrder) {
+				highestOrder = e.getKey().size();
+			}
+		}
+		List<CoefficientTerm> ret = new LinkedList<CoefficientTerm>();
+		for (Entry<Multiset<ExpandedExpression>, AbstractExpression> e : this
+				.getRepresentation().entrySet()) {
+			if (e.getKey().size() == highestOrder) {
+				ret.add(new CoefficientTerm(e.getValue(), e.getKey()));
+			}
+		}
+		return ret;
+	}
+
+	private static void insertIntoMap(Multiset<ExpandedExpression> term,
+			AbstractExpression coefficient,
+			Map<Multiset<ExpandedExpression>, AbstractExpression> map) {
+		if (map.containsKey(term)) {
+			map.put(term, SumExpression.create(map.get(term), coefficient));
+		} else {
+			map.put(term, coefficient);
+		}
+	}
+
+	public static DivisionResult divide(Polynomial a, Polynomial b) {
+		// Divide a by the highest term
+		if (a.equals(Polynomial.getEmptyPolynomial(a.getNormaliser()))) {
+			return new DivisionResult(Polynomial.getEmptyPolynomial(a
+					.getNormaliser()), Polynomial.getEmptyPolynomial(a
+					.getNormaliser()));
+		}
+		List<CoefficientTerm> highestBterms = b.getHighestTerms();
+		List<CoefficientTerm> highestAterms = a.getHighestTerms();
+		// Finds any highest A term that is divisible by a highest B term
+		for (CoefficientTerm hA:highestAterms) {
+			for (CoefficientTerm hB:highestBterms) {
+				if (Multisets.containsOccurrences(hA.term, hB.term)) {
+					Multiset<ExpandedExpression> factorTerm = HashMultiset
+							.<ExpandedExpression> create(hA.term);
+					Multisets.removeOccurrences(factorTerm, hB.term);
+					Polynomial factorPolynomial = new Polynomial(b.getNormaliser(), factorTerm);
+					factorPolynomial = Polynomial.scalarProduct(factorPolynomial, DivExpression.create(hA.coefficient, hB.coefficient));
+					Polynomial newA = Polynomial.minus(a, Polynomial.product(b,
+							factorPolynomial));
+					// To avoid cycling, pick this new A only if it reduces the highest terms
+					// This won't work in general...
+					List<CoefficientTerm> newAhighestTerms = newA.getHighestTerms();				
+					if (newAhighestTerms.isEmpty() 
+							|| newAhighestTerms.iterator().next().term.size() < hA.term.size() 
+							|| newAhighestTerms.size() <= highestAterms.size()) {
+						DivisionResult tmp = divide(newA, b);
+						return new DivisionResult(Polynomial.plus(factorPolynomial, tmp.getResult()), tmp
+								.getRemainder());
+					}
+				}
+			}
+		}
+		// If none were found than a is definitely not divisible by b
+		return new DivisionResult(Polynomial.getEmptyPolynomial(a
+					.getNormaliser()), a);
 	}
 
 	public static Multiset<ExpandedExpression> getGreatestCommonFactor(
@@ -123,6 +194,20 @@ public class Polynomial {
 		}
 		return new Polynomial(ret, a.getNormaliser());
 	}
+	
+	public static Polynomial scalarProduct(Polynomial p, AbstractExpression scalar) {
+		if (p.getNormaliser().isCoefficient(scalar)) {
+			Map<Multiset<ExpandedExpression>, AbstractExpression> ret = new HashMap<Multiset<ExpandedExpression>, AbstractExpression>();
+			for (Map.Entry<Multiset<ExpandedExpression>, AbstractExpression> e : p
+					.getRepresentation().entrySet()) {
+				ret.put(e.getKey(), ProductExpression.create(e.getValue(), scalar));
+			}			
+			return new Polynomial(ret, p.getNormaliser());
+		} else {
+			throw new AssertionError("The expression " + scalar + " is not a scalar for the polynomial " + p);
+		}
+	}
+	
 
 	public static Polynomial times(Polynomial p, AbstractExpression coefficient) {
 		Map<Multiset<ExpandedExpression>, AbstractExpression> ret = new HashMap<Multiset<ExpandedExpression>, AbstractExpression>();
@@ -161,6 +246,11 @@ public class Polynomial {
 		return new Polynomial(ret, p.getNormaliser());
 	}
 
+	public static Polynomial minus(Polynomial a, Polynomial b) {
+		return Polynomial.plus(a, Polynomial.product(Polynomial
+				.getMinusUnitPolynomial(b.getNormaliser()), b));
+	}
+
 	// Adds one polynomial to another
 	public static Polynomial plus(Polynomial a, Polynomial b) {
 		Map<Multiset<ExpandedExpression>, AbstractExpression> ret = new HashMap<Multiset<ExpandedExpression>, AbstractExpression>(
@@ -187,9 +277,14 @@ public class Polynomial {
 			this.coefficient = coefficient;
 			this.term = term;
 		}
+		
+		@Override
+		public String toString() {
+			return coefficient.toString() + "*" + term.toString();
+		}
 	}
 
-	protected  CoefficientTerm separateNumericalValuesFromTerm(
+	protected CoefficientTerm separateNumericalValuesFromTerm(
 			Multiset<ExpandedExpression> term) {
 		Multiset<ExpandedExpression> ret = HashMultiset
 				.<ExpandedExpression> create();
@@ -218,51 +313,65 @@ public class Polynomial {
 			Multiset<ExpandedExpression> term = tmp.term;
 			AbstractExpression value = e.getValue();
 
-			AbstractExpression numericalCoefficient = ProductExpression.create(tmp.coefficient, value);
-			numericalCoefficient = ContractingExpressionTransformer.contractExpression(numericalCoefficient);
+			AbstractExpression numericalCoefficient = ProductExpression.create(
+					tmp.coefficient, value);
+			numericalCoefficient = ContractingExpressionTransformer
+					.contractExpression(numericalCoefficient);
 			if (!term.isEmpty()) {
 				if (!numericalCoefficient.equals(DoubleExpression.ZERO)) {
 					ret.put(term, normaliseCoefficient(numericalCoefficient));
 				}
 			} else {
-				numericalSummands = SumExpression.create(numericalSummands, normaliseCoefficient(numericalCoefficient));
+				numericalSummands = SumExpression.create(numericalSummands,
+						normaliseCoefficient(numericalCoefficient));
 			}
 		}
-		numericalSummands = ContractingExpressionTransformer.contractExpression(numericalSummands);
+		numericalSummands = ContractingExpressionTransformer
+				.contractExpression(numericalSummands);
 		if (!numericalSummands.equals(DoubleExpression.ZERO)) {
-			ret.put(getOneTerm(normaliser), normaliseCoefficient(numericalSummands));
+			ret.put(getOneTerm(normaliser),
+					normaliseCoefficient(numericalSummands));
 		}
 		return ret;
 	}
-	
-	private AbstractExpression normaliseCoefficient(AbstractExpression coefficient) {
-		coefficient = ContractingExpressionTransformer.contractExpression(coefficient);
+
+	private AbstractExpression normaliseCoefficient(
+			AbstractExpression coefficient) {
+		coefficient = ContractingExpressionTransformer
+				.contractExpression(coefficient);
 		return normaliser.normaliseCoefficient(coefficient);
 	}
 
-	public static Multiset<ExpandedExpression> getOneTerm(ICoefficientSpecification normaliser) {
+	public static Multiset<ExpandedExpression> getOneTerm(
+			ICoefficientSpecification normaliser) {
 		Multiset<ExpandedExpression> ret = HashMultiset
 				.<ExpandedExpression> create();
-		ret.add(new UnexpandableExpression(new DoubleExpression(1.0), normaliser));
+		ret.add(new UnexpandableExpression(new DoubleExpression(1.0),
+				normaliser));
 		return ret;
 	}
 
-	public static Multiset<ExpandedExpression> getMinusOneTerm(ICoefficientSpecification normaliser) {
+	public static Multiset<ExpandedExpression> getMinusOneTerm(
+			ICoefficientSpecification normaliser) {
 		Multiset<ExpandedExpression> ret = HashMultiset
 				.<ExpandedExpression> create();
-		ret.add(new UnexpandableExpression(new DoubleExpression(-1.0), normaliser));
+		ret.add(new UnexpandableExpression(new DoubleExpression(-1.0),
+				normaliser));
 		return ret;
 	}
 
-	public static Polynomial getUnitPolynomial(ICoefficientSpecification normaliser) {
+	public static Polynomial getUnitPolynomial(
+			ICoefficientSpecification normaliser) {
 		return new Polynomial(normaliser, getOneTerm(normaliser));
 	}
 
-	public static Polynomial getMinusUnitPolynomial(ICoefficientSpecification normaliser) {
+	public static Polynomial getMinusUnitPolynomial(
+			ICoefficientSpecification normaliser) {
 		return new Polynomial(normaliser, getMinusOneTerm(normaliser));
 	}
 
-	public static Polynomial getEmptyPolynomial(ICoefficientSpecification normaliser) {
+	public static Polynomial getEmptyPolynomial(
+			ICoefficientSpecification normaliser) {
 		Map<Multiset<ExpandedExpression>, AbstractExpression> ret = new HashMap<Multiset<ExpandedExpression>, AbstractExpression>();
 		return new Polynomial(ret, normaliser);
 	}
@@ -278,8 +387,8 @@ public class Polynomial {
 		if (isNumber()) {
 			Entry<Multiset<ExpandedExpression>, AbstractExpression> entry = representation
 					.entrySet().iterator().next();
-			return ProductExpression.create(entry.getKey().iterator().next().numericalValue()
-					, entry.getValue());
+			return ProductExpression.create(entry.getKey().iterator().next()
+					.numericalValue(), entry.getValue());
 		} else {
 			return null;
 		}
@@ -334,6 +443,5 @@ public class Polynomial {
 	public ICoefficientSpecification getNormaliser() {
 		return normaliser;
 	}
-	
-	
+
 }
