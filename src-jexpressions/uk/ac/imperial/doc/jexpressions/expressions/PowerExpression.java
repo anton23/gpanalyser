@@ -2,8 +2,9 @@ package uk.ac.imperial.doc.jexpressions.expressions;
 
 /**
  * An expression for a^b.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class PowerExpression extends AbstractExpression {
 
@@ -13,20 +14,26 @@ public class PowerExpression extends AbstractExpression {
 		this.exponent = exponent;
 		this.expression = expression;
 	}
-	
+
 	/**
 	 * Creates and possibly simplifies a PowerExpression.
+	 * 
 	 * @param expression
 	 * @param exponent
 	 * @return
 	 */
 	public static AbstractExpression create(AbstractExpression expression,
-			AbstractExpression exponent){
-		if (exponent.equals(new DoubleExpression(1.0))){
+			AbstractExpression exponent) {
+		if (exponent.equals(new DoubleExpression(1.0))) {
 			return expression;
 		}
-		if (exponent.equals(DoubleExpression.ZERO)){
+		if (exponent.equals(DoubleExpression.ZERO)) {
 			return new DoubleExpression(1.0);
+		}
+		if (exponent instanceof DoubleExpression
+				&& expression instanceof DoubleExpression) {
+			double value = Math.pow(((DoubleExpression)expression).getValue(), ((DoubleExpression)exponent).getValue());
+			return new DoubleExpression(value);
 		}
 		return new PowerExpression(expression, exponent);
 	}

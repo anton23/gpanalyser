@@ -30,7 +30,7 @@ public class TestConstructors extends TestExpressionsBase {
 	public void testCreateSumExpression(){
 		assertEquals(d1, SumExpression.create(d1));
 		String sumString = SumExpression.create(d1, d2).toString();
-		assertEquals(sumString,"(1.0+2.0)");
+		assertEquals("3.0", sumString);
 		assertEquals(SumExpression.create(d1,SumExpression.create(d2,d3)),s123);
 		assertEquals(SumExpression.create(d1,d0,d2,d0,d3),s123);
 		assertEquals(SumExpression.create(), DoubleExpression.ZERO);

@@ -17,11 +17,18 @@ public class DivExpression extends AbstractExpression {
 	 */
 	public static AbstractExpression create(AbstractExpression numerator,
 			AbstractExpression denominator) {
-		if (numerator.equals(denominator)) {
-			return new DoubleExpression(1.0);
+		if (denominator.equals(DoubleExpression.ONE)) {
+			return numerator;
 		}
-		if (numerator.equals(new DoubleExpression(0.0))) {
-			return new DoubleExpression(0.0);
+		if (numerator.equals(denominator)) {
+			return DoubleExpression.ONE;
+		}
+		if (numerator.equals(DoubleExpression.ZERO)) {
+			return DoubleExpression.ZERO;
+		}
+		if (numerator instanceof DoubleExpression && denominator instanceof DoubleExpression){
+			double value = ((DoubleExpression)numerator).getValue()/((DoubleExpression)denominator).getValue();
+			return new DoubleExpression(value);
 		}
 		return new DivExpression(numerator, denominator);
 	}

@@ -1,19 +1,23 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
 import java.util.Collections;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
+import com.google.common.collect.Sets;
 
 public class ExpandedExpression extends AbstractExpression {
 
+	
 	private Polynomial numerator;
 	private Polynomial denominator;
-
+	
 	protected ExpandedExpression(Polynomial numerator, Polynomial denominator) {
 		super();
 		this.numerator = numerator;
@@ -21,7 +25,7 @@ public class ExpandedExpression extends AbstractExpression {
 	}
 
 	protected ExpandedExpression(Polynomial numerator) {
-		this(numerator, Polynomial.getUnitPolynomial());
+		this(numerator, Polynomial.getUnitPolynomial(numerator.getNormaliser()));
 	}
 
 	public static ExpandedExpression plus(ExpandedExpression a,
@@ -52,86 +56,86 @@ public class ExpandedExpression extends AbstractExpression {
 		return ExpandedExpression.create(newNumerator, newDenominator);
 	}
 
-	public static ExpandedExpression getOne() {
-		return new ExpandedExpression(Polynomial.getUnitPolynomial());
+	public static ExpandedExpression getOne(ICoefficientSpecification normaliser) {
+		return new ExpandedExpression(Polynomial.getUnitPolynomial(normaliser));
 	}
 	
-	public static ExpandedExpression getMinusOne() {
-		return new ExpandedExpression(Polynomial.getMinusUnitPolynomial());
+	public static ExpandedExpression getMinusOne(ICoefficientSpecification normaliser) {
+		return new ExpandedExpression(Polynomial.getMinusUnitPolynomial(normaliser));
 	}
 
 	public static ExpandedExpression create(Polynomial numerator) {
-		return create(numerator, Polynomial.getUnitPolynomial());
+		return create(numerator, Polynomial.getUnitPolynomial(numerator.getNormaliser()));
 	}
 
 	// Always have the smallest coefficient in numerator equal to 1
 	public static ExpandedExpression create(Polynomial numerator,
 			Polynomial denominator) {
-		if (numerator.equals(Polynomial.getEmptyPolynomial())){			
-			return new UnexpandableExpression(new DoubleExpression(0.0));
+		if (numerator.equals(Polynomial.getEmptyPolynomial(numerator.getNormaliser()))){			
+			return new UnexpandableExpression(new DoubleExpression(0.0), numerator.getNormaliser());
 		}
-		if (denominator.equals(Polynomial.getEmptyPolynomial())) {
+		if (denominator.equals(Polynomial.getEmptyPolynomial(denominator.getNormaliser()))) {
 			throw new AssertionError("Division by zero!");
 		}
 		
 		// Small hack before proper polynomial division is implemneted:
 		if (numerator.equals(denominator)) {
-			return new UnexpandableExpression(new DoubleExpression(1.0));
+			return new UnexpandableExpression(DoubleExpression.ONE, numerator.getNormaliser());
 		}
-		Multiset<ExpandedExpression> commonFactorNumerator = Polynomial
-				.getCommonFactor(numerator);
-		Multiset<ExpandedExpression> commonFactorDenomiator = Polynomial
-				.getCommonFactor(denominator);
-		Multiset<ExpandedExpression> commonFactor = Multisets.intersection(
-				commonFactorNumerator, commonFactorDenomiator);
-
-
-		numerator = Polynomial.divide(numerator, commonFactor, 1.0);
-		denominator = Polynomial.divide(denominator, commonFactor, 1.0);
+		Multiset<ExpandedExpression> commonFactor = Polynomial.getGreatestCommonFactor(numerator, denominator); 
+		numerator = Polynomial.divide(numerator, commonFactor, DoubleExpression.ONE);
+		denominator = Polynomial.divide(denominator, commonFactor, DoubleExpression.ONE);
 
 		if (denominator.isNumber()) {
-			numerator = Polynomial.divide(numerator, Polynomial.getOneTerm(),
+			numerator = Polynomial.divide(numerator, Polynomial.getOneTerm(numerator.getNormaliser()),
 					denominator.numericalValue());
 			if (numerator.isNumber()) {
-				return new UnexpandableExpression(new DoubleExpression(
-						numerator.numericalValue()));
+				return new UnexpandableExpression(
+						numerator.numericalValue(), numerator.getNormaliser());
 			} else if ((numerator.getRepresentation().size() == 1
 					&& numerator.getRepresentation().entrySet().iterator()
-							.next().getValue() == 1.0)
+							.next().getValue().equals(DoubleExpression.ONE))
 				    && numerator.getRepresentation().entrySet().iterator().next().getKey().size()==1){
 				return numerator.getRepresentation().keySet().iterator().next().iterator().next();
 			} else {
 				return new ExpandedExpression(numerator);
 			}
 		} else
-		if (!numerator.equals(Polynomial.getEmptyPolynomial())){
-			Double minCoefficient = Collections.min(numerator.getRepresentation()
+		/* TODO sort out normal form for fractions
+		 * if (!numerator.equals(Polynomial.getEmptyPolynomial())){
+			AbstractExpression minCoefficient = Collections.min(numerator.getRepresentation()
 					.values());
 			numerator = Polynomial.divide(numerator, Polynomial.getOneTerm(),
 					minCoefficient);
 			denominator = Polynomial.divide(denominator, Polynomial
 					.getOneTerm(), minCoefficient);
-		} 
+		} */
 		return new ExpandedExpression(numerator, denominator);
+	}
+	
+	public AbstractExpression toAbstractExpression() {
+		return DivExpression.create(numerator.toAbstractExpression(), denominator.toAbstractExpression());
 	}
 
 	public boolean isNumber() {
 		return false;
 	}
 
-	public Double numericalValue() {
+	public AbstractExpression numericalValue() {
 		return null;
 	}
 
 	@Override
 	public void accept(IExpressionVisitor v) {
-		// TODO Auto-generated method stub
+		if (v instanceof IExpandedExpressionVisitor) {
+			((IExpandedExpressionVisitor)v).visit(this);
+		}
 	}
 
 	@Override
 	public String toString() {
 		String ret = "[" + numerator.toString() + "]";
-		if (!denominator.equals(Polynomial.getUnitPolynomial())) {
+		if (!denominator.equals(Polynomial.getUnitPolynomial(denominator.getNormaliser()))) {
 			ret += "/[" + denominator.toString() + "]";
 		}
 		return ret;

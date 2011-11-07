@@ -18,6 +18,10 @@ public class MinExpression extends AbstractExpression {
 			AbstractExpression b) {
 		if (a.equals(b))
 			return a;
+		if (a instanceof DoubleExpression && b instanceof DoubleExpression) {
+			double value = Math.min(((DoubleExpression)a).getValue(), ((DoubleExpression)b).getValue());
+			return new DoubleExpression(value);
+		}
 		return new MinExpression(a, b);
 	}
 

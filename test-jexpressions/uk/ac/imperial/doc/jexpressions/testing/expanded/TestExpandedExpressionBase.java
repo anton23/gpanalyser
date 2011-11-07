@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.jexpressions.testing.expanded;
 import org.junit.BeforeClass;
 
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandedExpression;
+import uk.ac.imperial.doc.jexpressions.expanded.DoubleNormaliser;
 import uk.ac.imperial.doc.jexpressions.expanded.Polynomial;
 
 public class TestExpandedExpressionBase extends TestPolynomialsBase{
@@ -20,13 +21,13 @@ public class TestExpandedExpressionBase extends TestPolynomialsBase{
 	@BeforeClass
 	public static void createObjects(){
 		createPolynomialObjects();
-		eAoB = ExpandedExpression.create(new Polynomial(a), new Polynomial(b));
-		eCoD = ExpandedExpression.create(new Polynomial(c), new Polynomial(d));
-		eCoB = ExpandedExpression.create(new Polynomial(c), new Polynomial(b));
-		eADpBCoBD = ExpandedExpression.create(new Polynomial(ad, bc), new Polynomial(bd));
-		eADoBD = ExpandedExpression.create(new Polynomial(ad), new Polynomial(bd));
-		eADpBDoD = ExpandedExpression.create(new Polynomial(ad, bd), new Polynomial(d));
-		eApCoB = ExpandedExpression.create(new Polynomial(a, c), new Polynomial(b));
+		eAoB = ExpandedExpression.create(new Polynomial(new DoubleNormaliser(), a), new Polynomial(new DoubleNormaliser(), b));
+		eCoD = ExpandedExpression.create(new Polynomial(new DoubleNormaliser(), c), new Polynomial(new DoubleNormaliser(), d));
+		eCoB = ExpandedExpression.create(new Polynomial(new DoubleNormaliser(), c), new Polynomial(new DoubleNormaliser(), b));
+		eADpBCoBD = ExpandedExpression.create(new Polynomial(new DoubleNormaliser(), ad, bc), new Polynomial(new DoubleNormaliser(), bd));
+		eADoBD = ExpandedExpression.create(new Polynomial(new DoubleNormaliser(), ad), new Polynomial(new DoubleNormaliser(), bd));
+		eADpBDoD = ExpandedExpression.create(new Polynomial(new DoubleNormaliser(), ad, bd), new Polynomial(new DoubleNormaliser(), d));
+		eApCoB = ExpandedExpression.create(new Polynomial(new DoubleNormaliser(), a, c), new Polynomial(new DoubleNormaliser(), b));
 	}
 
 }

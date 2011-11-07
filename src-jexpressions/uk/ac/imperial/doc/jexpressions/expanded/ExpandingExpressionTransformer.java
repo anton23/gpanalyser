@@ -4,8 +4,6 @@ import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
-import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionTransformerWithConstants;
-import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionWalkerWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
@@ -22,63 +20,111 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionWalker;
 
-import com.google.common.collect.Multiset;
+import com.google.common.collect.Sets;
 
-public class ExpandingExpressionTransformer implements IExpressionVisitor, IConstantExpressionVisitor{
-	private ExpandedExpression result;
+public class ExpandingExpressionTransformer implements IExpressionVisitor,
+		IConstantExpressionVisitor {
+	
 
-	public static ExpandedExpression expandExpression(AbstractExpression e){	
-		ExpandingExpressionTransformer t = new ExpandingExpressionTransformer();
+	protected ExpandedExpression result;
+	
+	protected ICoefficientSpecification normaliser;
+
+	public ExpandingExpressionTransformer(ICoefficientSpecification normaliser) {
+		super();	
+		this.normaliser = normaliser;
+	}
+
+	public static ExpandedExpression expandExpressionWithDoubles(AbstractExpression e) {
+		ExpandingExpressionTransformer t = new ExpandingExpressionTransformer(new DoubleNormaliser());
 		e.accept(t);
 		return t.getResult();
 	}
-	
+
 	@Override
 	public void visit(ConstantExpression e) {
-		result = new UnexpandableExpression(e);
+		result = new UnexpandableExpression(e, normaliser);
 	}
-	
+
 	@Override
 	public void visit(DoubleExpression e) {
-		result = new UnexpandableExpression(e);
+		result = new UnexpandableExpression(e, normaliser);
 	}
-	
+
 	@Override
 	public void visit(SumExpression e) {
-		ExpandedExpression ret = new UnexpandableExpression(new DoubleExpression(0.0));
-		for (AbstractExpression s:e.getSummands()){
+		ExpandedExpression ret = new UnexpandableExpression(
+				new DoubleExpression(0.0), normaliser);
+		for (AbstractExpression s : e.getSummands()) {
 			s.accept(this);
-			ret = ExpandedExpression.plus(ret, result);			
+			ret = ExpandedExpression.plus(ret, result);
 		}
 		result = ret;
 	}
 
-	
 	@Override
 	public void visit(ProductExpression e) {
-		ExpandedExpression ret = ExpandedExpression.getOne();
-		for (AbstractExpression t:e.getTerms()){
+		ExpandedExpression ret = ExpandedExpression.getOne(normaliser);
+		for (AbstractExpression t : e.getTerms()) {
 			t.accept(this);
 			ret = ExpandedExpression.product(result, ret);
-		}		
+		}
 		result = ret;
 	}
-	
+
 	@Override
 	public void visit(MinExpression e) {
 		e.getA().accept(this);
 		ExpandedExpression eA = result;
 		e.getB().accept(this);
 		ExpandedExpression eB = result;
-		if (eA.equals(eB)){
+		if (eA.equals(eB)) {
 			result = eA;
 		} else {
-			result = new UnexpandableExpression(MinExpression.create(eA, eB));
+			if (eA.isNumber() && eB.isNumber()) {
+				result = new UnexpandableExpression(MinExpression.create(eA.numericalValue(), eB
+										.numericalValue()), normaliser);
+			}
+			else {
+				result = new UnexpandableExpression(MinExpression.create(eA,eB), normaliser);
+			}
 		}
+
+		/*
+		// This would only work if the common factors were positive
+
+		Multiset<ExpandedExpression> numeratorCommonFactor = Polynomial
+				.getGreatestCommonFactor(eA.getNumerator(), eA.getNumerator());
+		Multiset<ExpandedExpression> denominatorCommonFactor = Polynomial
+				.getGreatestCommonFactor(eA.getDenominator(), eA
+						.getDenominator());
+
+		
+		ExpandedExpression commonFactor = ExpandedExpression.create(
+				new Polynomial(numeratorCommonFactor), new Polynomial(
+						denominatorCommonFactor));
+
+		if (eA.equals(eB)) {
+			result = eA;
+		} else {
+			ExpandedExpression newA = ExpandedExpression.divide(eA,
+					commonFactor);
+			ExpandedExpression newB = ExpandedExpression.divide(eB,
+					commonFactor);
+			if (newA.isNumber() && newB.isNumber()) {
+				result = ExpandedExpression.product(commonFactor,
+						new UnexpandableExpression(new DoubleExpression(Math
+								.min(newA.numericalValue(), newB
+										.numericalValue()))));
+			} else {
+				result = ExpandedExpression.product(commonFactor,
+						new UnexpandableExpression(MinExpression.create(newA,
+								newB)));
+			}
+		}*/
 	}
-	
+
 	// We treat Div as PEPADiv
 	@Override
 	public void visit(DivExpression e) {
@@ -88,79 +134,75 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor, ICons
 		ExpandedExpression eD = result;
 		result = ExpandedExpression.divide(eN, eD);
 	}
-	
+
 	@Override
 	public void visit(PEPADivExpression e) {
 		e.getNumerator().accept(this);
 		ExpandedExpression eN = result;
 		e.getDenominator().accept(this);
 		ExpandedExpression eD = result;
-		result = ExpandedExpression.divide(eN, eD);		
+		result = ExpandedExpression.divide(eN, eD);
 	}
-	
+
 	@Override
 	public void visit(MinusExpression e) {
 		e.getA().accept(this);
 		ExpandedExpression eA = result;
 		e.getB().accept(this);
 		ExpandedExpression eB = result;
-		result = ExpandedExpression.plus(
-				eA,
-				ExpandedExpression.product(ExpandedExpression.getMinusOne(), eB));
+		result = ExpandedExpression.plus(eA, ExpandedExpression.product(
+				ExpandedExpression.getMinusOne(normaliser), eB));
 	}
-	
+
 	@Override
 	public void visit(UMinusExpression e) {
 		e.getE().accept(this);
 		ExpandedExpression eE = result;
-		result = ExpandedExpression.product(ExpandedExpression.getMinusOne(), eE);
-		
-	}
+		result = ExpandedExpression.product(ExpandedExpression.getMinusOne(normaliser),
+				eE);
 
-	@Override
-	public void visit(AbstractExpression e) {}
+	}
 
 	@Override
 	public void visit(DivDivMinExpression e) {
-		// TODO Auto-generated method stub		
+		e.getFullExpression().accept(this);
 	}
 
-	
+	@Override
+	public void visit(AbstractExpression e) {
+	}
 
 	@Override
 	public void visit(DivMinExpression e) {
-		// TODO Auto-generated method stub
-		
+		e.getFullExpression().accept(this);
+
 	}
 
 	@Override
 	public void visit(FunctionCallExpression e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void visit(IntegerExpression e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void visit(PowerExpression e) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void visit(TimeExpression e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public ExpandedExpression getResult() {
 		return result;
 	}
-	
-	
-	
 }
