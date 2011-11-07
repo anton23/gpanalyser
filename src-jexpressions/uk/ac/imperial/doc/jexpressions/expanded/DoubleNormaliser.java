@@ -14,6 +14,19 @@ public class DoubleNormaliser implements ICoefficientSpecification {
 	public boolean isCoefficient(AbstractExpression e) {
 		return (e instanceof DoubleExpression);
 	}
+
+	@Override
+	public boolean isOne(AbstractExpression e) {
+		return e.equals(DoubleExpression.ONE);
+	}
+	
+	@Override
+	public boolean isZero(AbstractExpression e) {
+		return e.equals(DoubleExpression.ZERO);
+	}
+
+	
+	
 	
 	
 

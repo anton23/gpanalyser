@@ -1,9 +1,11 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -71,11 +73,9 @@ public class Polynomial {
 		return ret;
 
 	}
-
-	public List<CoefficientTerm> getHighestTerms() {
-		if (this.equals(Polynomial.getEmptyPolynomial(this.getNormaliser()))) {
-			return new LinkedList<CoefficientTerm>();
-		}
+	
+	
+	public int getHighestOrder() {
 		int highestOrder = 0;
 		for (Entry<Multiset<ExpandedExpression>, AbstractExpression> e : this
 				.getRepresentation().entrySet()) {
@@ -83,6 +83,14 @@ public class Polynomial {
 				highestOrder = e.getKey().size();
 			}
 		}
+		return highestOrder;
+	}
+
+	public List<CoefficientTerm> getHighestTerms() {
+		if (this.equals(Polynomial.getEmptyPolynomial(this.getNormaliser()))) {
+			return new LinkedList<CoefficientTerm>();
+		}
+		int highestOrder = getHighestOrder();
 		List<CoefficientTerm> ret = new LinkedList<CoefficientTerm>();
 		for (Entry<Multiset<ExpandedExpression>, AbstractExpression> e : this
 				.getRepresentation().entrySet()) {
@@ -102,14 +110,20 @@ public class Polynomial {
 			map.put(term, coefficient);
 		}
 	}
-
+	
 	public static DivisionResult divide(Polynomial a, Polynomial b) {
+		return divide(a, b, new HashSet<Polynomial>());
+	}
+
+	public static DivisionResult divide(Polynomial a, Polynomial b, Set<Polynomial> seenA) {
 		// Divide a by the highest term
 		if (a.equals(Polynomial.getEmptyPolynomial(a.getNormaliser()))) {
 			return new DivisionResult(Polynomial.getEmptyPolynomial(a
 					.getNormaliser()), Polynomial.getEmptyPolynomial(a
 					.getNormaliser()));
 		}
+		seenA = new HashSet<Polynomial>(seenA);
+		seenA.add(a);
 		List<CoefficientTerm> highestBterms = b.getHighestTerms();
 		List<CoefficientTerm> highestAterms = a.getHighestTerms();
 		// Finds any highest A term that is divisible by a highest B term
@@ -123,13 +137,9 @@ public class Polynomial {
 					factorPolynomial = Polynomial.scalarProduct(factorPolynomial, DivExpression.create(hA.coefficient, hB.coefficient));
 					Polynomial newA = Polynomial.minus(a, Polynomial.product(b,
 							factorPolynomial));
-					// To avoid cycling, pick this new A only if it reduces the highest terms
-					// This won't work in general...
-					List<CoefficientTerm> newAhighestTerms = newA.getHighestTerms();				
-					if (newAhighestTerms.isEmpty() 
-							|| newAhighestTerms.iterator().next().term.size() < hA.term.size() 
-							|| newAhighestTerms.size() <= highestAterms.size()) {
-						DivisionResult tmp = divide(newA, b);
+					// To avoid cycling, don't repeat the same division
+					if (!seenA.contains(newA)) {
+						DivisionResult tmp = divide(newA, b, seenA);
 						return new DivisionResult(Polynomial.plus(factorPolynomial, tmp.getResult()), tmp
 								.getRemainder());
 					}
@@ -167,6 +177,26 @@ public class Polynomial {
 			factor = getOneTerm(p.getNormaliser());
 		}
 		return factor;
+	}
+	
+	public static Polynomial greatestCommonDivisor(Polynomial a, Polynomial b) {
+		if (a.getHighestOrder() < b.getHighestOrder()) {
+			return greatestCommonDivisor(b, a);
+		}
+		if (b.equals(Polynomial.getEmptyPolynomial(b.getNormaliser()))) {
+			return a;
+		}
+		DivisionResult tmp = Polynomial.divide(a, b);
+		Polynomial newDivisor = tmp.getRemainder();
+		Multiset<ExpandedExpression> commonFactor = Polynomial.getCommonFactor(newDivisor);
+		newDivisor = Polynomial.divide(newDivisor, commonFactor, DoubleExpression.ONE);
+		Polynomial greatestCommonDivisor = greatestCommonDivisor(b, newDivisor);		
+		if (Polynomial.divide(b, commonFactor, DoubleExpression.ONE) != null) {
+			greatestCommonDivisor = Polynomial.product(greatestCommonDivisor, new Polynomial(a.getNormaliser(), commonFactor));
+		}
+		List<CoefficientTerm> gcdHighestTerms = greatestCommonDivisor.getHighestTerms();
+		greatestCommonDivisor = Polynomial.scalarProduct(greatestCommonDivisor, DivExpression.create(DoubleExpression.ONE, gcdHighestTerms.iterator().next().coefficient));
+		return greatestCommonDivisor;
 	}
 
 	public static Polynomial product(Polynomial a, Polynomial b) {
@@ -209,16 +239,7 @@ public class Polynomial {
 	}
 	
 
-	public static Polynomial times(Polynomial p, AbstractExpression coefficient) {
-		Map<Multiset<ExpandedExpression>, AbstractExpression> ret = new HashMap<Multiset<ExpandedExpression>, AbstractExpression>();
-		for (Entry<Multiset<ExpandedExpression>, AbstractExpression> e : p
-				.getRepresentation().entrySet()) {
-			ret.put(e.getKey(), ProductExpression.create(e.getValue(),
-					coefficient));
-		}
-		return new Polynomial(ret, p.getNormaliser());
-	}
-
+	
 	// Divides a by b if there is no remainder, otherwise returns null
 	// TODO Implement proper polynomial division
 	public static Polynomial divide(Polynomial p,
@@ -318,7 +339,7 @@ public class Polynomial {
 			numericalCoefficient = ContractingExpressionTransformer
 					.contractExpression(numericalCoefficient);
 			if (!term.isEmpty()) {
-				if (!numericalCoefficient.equals(DoubleExpression.ZERO)) {
+				if (!normaliser.isZero(numericalCoefficient)) {
 					ret.put(term, normaliseCoefficient(numericalCoefficient));
 				}
 			} else {
@@ -328,7 +349,7 @@ public class Polynomial {
 		}
 		numericalSummands = ContractingExpressionTransformer
 				.contractExpression(numericalSummands);
-		if (!numericalSummands.equals(DoubleExpression.ZERO)) {
+		if (!normaliser.isZero(numericalSummands)) {
 			ret.put(getOneTerm(normaliser),
 					normaliseCoefficient(numericalSummands));
 		}
