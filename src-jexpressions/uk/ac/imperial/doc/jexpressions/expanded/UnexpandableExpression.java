@@ -10,71 +10,72 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 
 public class UnexpandableExpression extends ExpandedExpression {
-	
+
 	private ICoefficientSpecification normaliser;
-	
+
 	protected final AbstractExpression expression;
-	
 
-
-	
-	public UnexpandableExpression(AbstractExpression expression, ICoefficientSpecification normaliser) {
-		super(Polynomial.getEmptyPolynomial(normaliser), Polynomial.getEmptyPolynomial(normaliser));
+	public UnexpandableExpression(AbstractExpression expression,
+			ICoefficientSpecification normaliser) {
+		super(Polynomial.getEmptyPolynomial(normaliser), Polynomial
+				.getEmptyPolynomial(normaliser));
 		this.normaliser = normaliser;
 		if (expression instanceof UnexpandableExpression) {
-			this.expression = ((UnexpandableExpression)expression).getExpression();
+			this.expression = ((UnexpandableExpression) expression)
+					.getExpression();
 		} else {
 			this.expression = expression;
 		}
 	}
-	
+
 	@Override
 	public AbstractExpression toAbstractExpression() {
 		return expression;
-	}	
+	}
+
 	@Override
 	public Polynomial getNumerator() {
-		Multiset<ExpandedExpression> tmp = HashMultiset.<ExpandedExpression>create();
+		Multiset<UnexpandableExpression> tmp = HashMultiset
+				.<UnexpandableExpression> create();
 		tmp.add(this);
 		return new Polynomial(normaliser, tmp);
 	}
-	
+
 	@Override
 	public Polynomial getDenominator() {
 		return Polynomial.getUnitPolynomial(normaliser);
 	}
-	
-	
+
 	@Override
 	public boolean isNumber() {
 		return normaliser.isCoefficient(expression);
-		//return scalarClasses.contains(expression.getClass());
+		// return scalarClasses.contains(expression.getClass());
 	}
-	
+
 	@Override
 	public AbstractExpression numericalValue() {
-		if (isNumber()){
+		if (isNumber()) {
 			return expression;
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "{"+expression.toString()+"}";
+		return "{" + expression.toString() + "}";
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return expression.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj){
+		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof UnexpandableExpression)){
+		if (!(obj instanceof UnexpandableExpression)) {
 			return false;
 		}
 		UnexpandableExpression asUE = (UnexpandableExpression) obj;
@@ -84,6 +85,5 @@ public class UnexpandableExpression extends ExpandedExpression {
 	public AbstractExpression getExpression() {
 		return expression;
 	}
-	
-	
+
 }

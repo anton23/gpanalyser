@@ -1,15 +1,15 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * An expression for a product of a number of terms a1*a2*...*an. 
+ * An expression for a product of a number of terms a1*a2*...*an.
+ * 
  * @author as1005
- *
+ * 
  */
 public class ProductExpression extends AbstractExpression {
 
@@ -17,7 +17,6 @@ public class ProductExpression extends AbstractExpression {
 	public void accept(IExpressionVisitor v) {
 		v.visit(this);
 	}
-
 
 	@Override
 	public String toString() {
@@ -29,7 +28,7 @@ public class ProductExpression extends AbstractExpression {
 			} else {
 				ret += "*";
 			}
-			ret += "("+e.toString()+")";
+			ret += "(" + e.toString() + ")";
 		}
 		return ret;
 	}
@@ -65,8 +64,10 @@ public class ProductExpression extends AbstractExpression {
 	}
 
 	/**
-	 * Creates and possibly simplifies a ProductExpression. 
-	 * @param t - a list of terms in the product.
+	 * Creates and possibly simplifies a ProductExpression.
+	 * 
+	 * @param t
+	 *            - a list of terms in the product.
 	 * @return
 	 */
 	public static AbstractExpression create(AbstractExpression... t) {
@@ -78,16 +79,15 @@ public class ProductExpression extends AbstractExpression {
 		double numericalTerms = 1.0;
 		List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
 		for (AbstractExpression e : t) {
-			if (e instanceof ProductExpression){
-				terms.addAll(((ProductExpression)e).getTerms()); 
-			} else
-			if (e instanceof DoubleExpression){
-				numericalTerms *= ((DoubleExpression)e).getValue();
+			if (e instanceof ProductExpression) {
+				terms.addAll(((ProductExpression) e).getTerms());
+			} else if (e instanceof DoubleExpression) {
+				numericalTerms *= ((DoubleExpression) e).getValue();
 			} else {
 				terms.add(e);
 			}
 		}
-		if (numericalTerms != 1.0){
+		if (numericalTerms != 1.0) {
 			terms.add(new DoubleExpression(numericalTerms));
 		}
 		if (terms.isEmpty()) {

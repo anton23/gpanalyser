@@ -1,10 +1,10 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-
 /**
  * The PEPA div(a,b) expression. This is equal to 0 if b=0 and a/b otherwise.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class PEPADivExpression extends AbstractExpression {
 
@@ -24,7 +24,7 @@ public class PEPADivExpression extends AbstractExpression {
 
 	private AbstractExpression denominator;
 	private AbstractExpression numerator;
-	
+
 	protected PEPADivExpression(AbstractExpression numerator,
 			AbstractExpression denominator) {
 		super();

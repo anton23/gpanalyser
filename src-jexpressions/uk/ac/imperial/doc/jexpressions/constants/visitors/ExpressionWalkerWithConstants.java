@@ -6,13 +6,15 @@ import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionWalker;
 
 /**
  * An extension of ExpressionWalker supporting constants.
+ * 
  * @author as1005
- *
+ * 
  */
 public class ExpressionWalkerWithConstants extends ExpressionWalker implements
 		IConstantExpressionVisitor {
 
 	@Override
-	public void visit(ConstantExpression e) {}
+	public void visit(ConstantExpression e) {
+	}
 
 }

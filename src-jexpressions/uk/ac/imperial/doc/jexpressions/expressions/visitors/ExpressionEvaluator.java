@@ -19,66 +19,65 @@ import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 
-
 /**
- * Numerical evaluator of basic expressions. 
+ * Numerical evaluator of basic expressions.
+ * 
  * @author as1005
- *
+ * 
  */
-public class ExpressionEvaluator 
-	implements IExpressionVisitor{
-	
+public class ExpressionEvaluator implements IExpressionVisitor {
+
 	protected double result;
 
-
-	private double div(double a, double b){
-		if (b==0.0) return 0.0; 
-		else return a/b; 
+	private double div(double a, double b) {
+		if (b == 0.0)
+			return 0.0;
+		else
+			return a / b;
 	}
-
 
 	public double getResult() {
 		return result;
 	}
 
-
 	@Override
 	public void visit(AbstractExpression e) {
-		throw new AssertionError("Unsuported visit by " + this.getClass().getName());}
+		throw new AssertionError("Unsuported visit by "
+				+ this.getClass().getName());
+	}
 
 	@Override
 	public void visit(DivDivMinExpression e) {
-		e.getA().accept(this); 
-		double a = result; 
-		e.getB().accept(this); 
-		double b = result; 
-		e.getC().accept(this); 
-		double c = result; 
-		e.getD().accept(this); 
-		double d = result; 
-		result = div(a*b,c*d)*Math.min(c, d);
-	} 
-	
-	@Override
-	public void visit(DivExpression e) {
-		e.getNumerator().accept(this); 
-		double a = result; 
-		e.getDenominator().accept(this); 
-		double b = result; 
-		result = a/b; 
+		e.getA().accept(this);
+		double a = result;
+		e.getB().accept(this);
+		double b = result;
+		e.getC().accept(this);
+		double c = result;
+		e.getD().accept(this);
+		double d = result;
+		result = div(a * b, c * d) * Math.min(c, d);
 	}
 
-	
+	@Override
+	public void visit(DivExpression e) {
+		e.getNumerator().accept(this);
+		double a = result;
+		e.getDenominator().accept(this);
+		double b = result;
+		result = a / b;
+	}
+
 	@Override
 	public void visit(DivMinExpression e) {
-		e.getA().accept(this); 
-		double a = result; 
-		e.getB().accept(this); 
-		double b = result; 
-		e.getC().accept(this); 
-		double c = result; 
-		result = div(a,b)*Math.min(b,c); 
-		
+		e.getA().accept(this);
+		double a = result;
+		e.getB().accept(this);
+		double b = result;
+		e.getC().accept(this);
+		double c = result;
+		result = div(a, b) * Math.min(b, c);
+
 	}
 
 	@Override
@@ -91,99 +90,101 @@ public class ExpressionEvaluator
 	public void visit(FunctionCallExpression e) {
 		Class<?>[] argTypes = new Class[e.getArguments().size()];
 		Object[] args = new Double[e.getArguments().size()];
-		int i=0; 
-		for (AbstractExpression arg:e.getArguments()){
+		int i = 0;
+		for (AbstractExpression arg : e.getArguments()) {
 			argTypes[i] = Double.class;
-			arg.accept(this); 
-			args[i] = result; 
-			i++; 
+			arg.accept(this);
+			args[i] = result;
+			i++;
 		}
-		
-		
+
 		try {
-			result = (Double)Math.class.getMethod(e.getName(), argTypes).invoke(null, args);
+			result = (Double) Math.class.getMethod(e.getName(), argTypes)
+					.invoke(null, args);
 		} catch (SecurityException e1) {
 			e1.printStackTrace();
 		} catch (NoSuchMethodException e1) {
-			throw new AssertionError("Function with the name " + e.getName() + " unknown!"); 
+			throw new AssertionError("Function with the name " + e.getName()
+					+ " unknown!");
 		} catch (IllegalArgumentException e1) {
-			throw new AssertionError("Function " + e.getName() + " cannot be called as " + e.toString() + "!");
+			throw new AssertionError("Function " + e.getName()
+					+ " cannot be called as " + e.toString() + "!");
 		} catch (IllegalAccessException e1) {
 			e1.printStackTrace();
 		} catch (InvocationTargetException e1) {
 			e1.printStackTrace();
-		} 
+		}
 	}
-	
+
 	@Override
 	public void visit(IntegerExpression e) {
-		result = e.getValue(); 	
+		result = e.getValue();
 	}
 
 	@Override
 	public void visit(MinExpression e) {
-		e.getA().accept(this); 
+		e.getA().accept(this);
 		double a = result;
-		e.getB().accept(this); 
-		double b = result; 
+		e.getB().accept(this);
+		double b = result;
 		result = Math.min(a, b);
 	}
 
 	@Override
 	public void visit(MinusExpression e) {
-		e.getA().accept(this); 
-		double a = result; 
-		e.getB().accept(this); 
+		e.getA().accept(this);
+		double a = result;
+		e.getB().accept(this);
 		double b = result;
-		result = a-b; 
+		result = a - b;
 	}
 
 	@Override
 	public void visit(PEPADivExpression e) {
-		e.getNumerator().accept(this); 
-		double a = result; 
-		e.getDenominator().accept(this); 
-		double b = result; 
-		result =  div(a,b); 
+		e.getNumerator().accept(this);
+		double a = result;
+		e.getDenominator().accept(this);
+		double b = result;
+		result = div(a, b);
 	}
 
 	@Override
 	public void visit(PowerExpression e) {
-		e.getExpression().accept(this); 
-		double expr = result; 
-		e.getExponent().accept(this); 
-		double expo = result; 
+		e.getExpression().accept(this);
+		double expr = result;
+		e.getExponent().accept(this);
+		double expo = result;
 		result = Math.pow(expr, expo);
 	}
 
 	@Override
 	public void visit(ProductExpression e) {
-		double res = 1.0; 
-		for (AbstractExpression t:e.getTerms()){
-			t.accept(this); 
-			res *= result; 
+		double res = 1.0;
+		for (AbstractExpression t : e.getTerms()) {
+			t.accept(this);
+			res *= result;
 		}
-		result = res; 
+		result = res;
 	}
 
 	@Override
 	public void visit(SumExpression e) {
-		double res = 0.0; 
-		for (AbstractExpression t:e.getSummands()){
-			t.accept(this); 
-			res += result; 
+		double res = 0.0;
+		for (AbstractExpression t : e.getSummands()) {
+			t.accept(this);
+			res += result;
 		}
-		result = res; 
+		result = res;
 	}
 
 	@Override
 	public void visit(TimeExpression e) {
-		throw new AssertionError("Time cannot be evaluated!"); 
+		throw new AssertionError("Time cannot be evaluated!");
 	}
 
 	@Override
 	public void visit(UMinusExpression e) {
-		e.getE().accept(this); 
+		e.getE().accept(this);
 		result = -result;
 	}
 

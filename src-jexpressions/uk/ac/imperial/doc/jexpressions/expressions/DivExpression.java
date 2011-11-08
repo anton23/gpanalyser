@@ -1,16 +1,18 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
 /**
- * An expression for a ratio of two expressions. 
+ * An expression for a ratio of two expressions.
  * 
  * @author Anton Stefanek
- *
+ * 
  */
 
 public class DivExpression extends AbstractExpression {
-	
+
 	/**
-	 * Creates and possibly simplifies a DivExpression with the given numerator and denominators.
+	 * Creates and possibly simplifies a DivExpression with the given numerator
+	 * and denominators.
+	 * 
 	 * @param numerator
 	 * @param denominator
 	 * @return
@@ -26,8 +28,10 @@ public class DivExpression extends AbstractExpression {
 		if (numerator.equals(DoubleExpression.ZERO)) {
 			return DoubleExpression.ZERO;
 		}
-		if (numerator instanceof DoubleExpression && denominator instanceof DoubleExpression){
-			double value = ((DoubleExpression)numerator).getValue()/((DoubleExpression)denominator).getValue();
+		if (numerator instanceof DoubleExpression
+				&& denominator instanceof DoubleExpression) {
+			double value = ((DoubleExpression) numerator).getValue()
+					/ ((DoubleExpression) denominator).getValue();
 			return new DoubleExpression(value);
 		}
 		return new DivExpression(numerator, denominator);
@@ -36,6 +40,7 @@ public class DivExpression extends AbstractExpression {
 	private AbstractExpression denominator;
 
 	private AbstractExpression numerator;
+
 	protected DivExpression(AbstractExpression numerator,
 			AbstractExpression denominator) {
 		super();

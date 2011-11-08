@@ -2,8 +2,9 @@ package uk.ac.imperial.doc.jexpressions.expressions;
 
 /**
  * An expression for a difference between two expressions.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class MinusExpression extends AbstractExpression {
 

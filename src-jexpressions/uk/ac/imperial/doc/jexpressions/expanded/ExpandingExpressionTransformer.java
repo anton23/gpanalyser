@@ -25,19 +25,20 @@ import com.google.common.collect.Sets;
 
 public class ExpandingExpressionTransformer implements IExpressionVisitor,
 		IConstantExpressionVisitor {
-	
 
 	protected ExpandedExpression result;
-	
+
 	protected ICoefficientSpecification normaliser;
 
 	public ExpandingExpressionTransformer(ICoefficientSpecification normaliser) {
-		super();	
+		super();
 		this.normaliser = normaliser;
 	}
 
-	public static ExpandedExpression expandExpressionWithDoubles(AbstractExpression e) {
-		ExpandingExpressionTransformer t = new ExpandingExpressionTransformer(new DoubleNormaliser());
+	public static ExpandedExpression expandExpressionWithDoubles(
+			AbstractExpression e) {
+		ExpandingExpressionTransformer t = new ExpandingExpressionTransformer(
+				new DoubleCoefficients());
 		e.accept(t);
 		return t.getResult();
 	}
@@ -83,46 +84,36 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor,
 			result = eA;
 		} else {
 			if (eA.isNumber() && eB.isNumber()) {
-				result = new UnexpandableExpression(MinExpression.create(eA.numericalValue(), eB
-										.numericalValue()), normaliser);
-			}
-			else {
-				result = new UnexpandableExpression(MinExpression.create(eA,eB), normaliser);
+				result = new UnexpandableExpression(MinExpression.create(eA
+						.numericalValue(), eB.numericalValue()), normaliser);
+			} else {
+				result = new UnexpandableExpression(MinExpression
+						.create(eA, eB), normaliser);
 			}
 		}
 
 		/*
-		// This would only work if the common factors were positive
-
-		Multiset<ExpandedExpression> numeratorCommonFactor = Polynomial
-				.getGreatestCommonFactor(eA.getNumerator(), eA.getNumerator());
-		Multiset<ExpandedExpression> denominatorCommonFactor = Polynomial
-				.getGreatestCommonFactor(eA.getDenominator(), eA
-						.getDenominator());
-
-		
-		ExpandedExpression commonFactor = ExpandedExpression.create(
-				new Polynomial(numeratorCommonFactor), new Polynomial(
-						denominatorCommonFactor));
-
-		if (eA.equals(eB)) {
-			result = eA;
-		} else {
-			ExpandedExpression newA = ExpandedExpression.divide(eA,
-					commonFactor);
-			ExpandedExpression newB = ExpandedExpression.divide(eB,
-					commonFactor);
-			if (newA.isNumber() && newB.isNumber()) {
-				result = ExpandedExpression.product(commonFactor,
-						new UnexpandableExpression(new DoubleExpression(Math
-								.min(newA.numericalValue(), newB
-										.numericalValue()))));
-			} else {
-				result = ExpandedExpression.product(commonFactor,
-						new UnexpandableExpression(MinExpression.create(newA,
-								newB)));
-			}
-		}*/
+		 * // This would only work if the common factors were positive
+		 * 
+		 * Multiset<ExpandedExpression> numeratorCommonFactor = Polynomial
+		 * .getGreatestCommonFactor(eA.getNumerator(), eA.getNumerator());
+		 * Multiset<ExpandedExpression> denominatorCommonFactor = Polynomial
+		 * .getGreatestCommonFactor(eA.getDenominator(), eA .getDenominator());
+		 * 
+		 * 
+		 * ExpandedExpression commonFactor = ExpandedExpression.create( new
+		 * Polynomial(numeratorCommonFactor), new Polynomial(
+		 * denominatorCommonFactor));
+		 * 
+		 * if (eA.equals(eB)) { result = eA; } else { ExpandedExpression newA =
+		 * ExpandedExpression.divide(eA, commonFactor); ExpandedExpression newB
+		 * = ExpandedExpression.divide(eB, commonFactor); if (newA.isNumber() &&
+		 * newB.isNumber()) { result = ExpandedExpression.product(commonFactor,
+		 * new UnexpandableExpression(new DoubleExpression(Math
+		 * .min(newA.numericalValue(), newB .numericalValue())))); } else {
+		 * result = ExpandedExpression.product(commonFactor, new
+		 * UnexpandableExpression(MinExpression.create(newA, newB))); } }
+		 */
 	}
 
 	// We treat Div as PEPADiv
@@ -158,8 +149,8 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor,
 	public void visit(UMinusExpression e) {
 		e.getE().accept(this);
 		ExpandedExpression eE = result;
-		result = ExpandedExpression.product(ExpandedExpression.getMinusOne(normaliser),
-				eE);
+		result = ExpandedExpression.product(ExpandedExpression
+				.getMinusOne(normaliser), eE);
 
 	}
 

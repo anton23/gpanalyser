@@ -21,8 +21,7 @@ public class Increment extends AbstractStatement {
 	AbstractExpression lhs;
 	AbstractExpression rhs;
 
-	public Increment(AbstractExpression lhs,
-			AbstractExpression rhs) {
+	public Increment(AbstractExpression lhs, AbstractExpression rhs) {
 		super();
 		this.lhs = lhs;
 		this.rhs = rhs;

@@ -5,12 +5,12 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
-
 /**
- * This class provides mapping from constants to their (double) values. 
- * It also maintains an integer valued index of the constants names. 
+ * This class provides mapping from constants to their (double) values. It also
+ * maintains an integer valued index of the constants names.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class Constants {
 
@@ -19,8 +19,9 @@ public class Constants {
 	private Map<String, Double> constants;
 
 	/**
-	 * Creates a Constants objects with the given underlying value map. 
-	 * Also creates an index from constant names to integers. 	
+	 * Creates a Constants objects with the given underlying value map. Also
+	 * creates an index from constant names to integers.
+	 * 
 	 * @param constants
 	 */
 	public Constants(Map<String, Double> constants) {
@@ -44,10 +45,12 @@ public class Constants {
 			constantIndex.put(par, i++);
 		}
 	}
-	
+
 	/**
-	 * Returns the index of the constant with the given name. 
-	 * @param name of the constant
+	 * Returns the index of the constant with the given name.
+	 * 
+	 * @param name
+	 *            of the constant
 	 * @return index of the constant
 	 */
 	public int getConstantsIndex(String name) {
@@ -58,9 +61,10 @@ public class Constants {
 	}
 
 	/**
-	 * Returns the underlying map of name -> value. 
-	 * @return Map from constant names to their values. 
-	 */	
+	 * Returns the underlying map of name -> value.
+	 * 
+	 * @return Map from constant names to their values.
+	 */
 	public Map<String, Double> getConstantsMap() {
 		return constants;
 	}
@@ -69,22 +73,27 @@ public class Constants {
 	 * Returns the current value of the given constant.
 	 * 
 	 * @param name
-	 * @return value of the constant with the given name 
+	 * @return value of the constant with the given name
 	 */
 	public Double getConstantValue(String name) {
 		return constants.get(name);
 	}
 
 	/**
-	 * Creates a copy of the constants, using the same index as the current instance.
-	 * @return A copy of the current Constants instance with the same index. 
+	 * Creates a copy of the constants, using the same index as the current
+	 * instance.
+	 * 
+	 * @return A copy of the current Constants instance with the same index.
 	 */
 	public Constants getCopyOf() {
-		return new Constants(new HashMap<String,Double>(constants), new HashMap<String,Integer>(constantIndex));
+		return new Constants(new HashMap<String, Double>(constants),
+				new HashMap<String, Integer>(constantIndex));
 	}
 
 	/**
-	 * Returns the value of the constants flattened in an array according to the index.
+	 * Returns the value of the constants flattened in an array according to the
+	 * index.
+	 * 
 	 * @return An array with the values of the constants according to the index.
 	 */
 	public double[] getFlatConstants() {

@@ -32,7 +32,8 @@ public class PowerExpression extends AbstractExpression {
 		}
 		if (exponent instanceof DoubleExpression
 				&& expression instanceof DoubleExpression) {
-			double value = Math.pow(((DoubleExpression)expression).getValue(), ((DoubleExpression)exponent).getValue());
+			double value = Math.pow(((DoubleExpression) expression).getValue(),
+					((DoubleExpression) exponent).getValue());
 			return new DoubleExpression(value);
 		}
 		return new PowerExpression(expression, exponent);
