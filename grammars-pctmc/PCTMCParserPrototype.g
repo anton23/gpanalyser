@@ -22,41 +22,59 @@ tokens{
 }
 
 @members{
-protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException{   
-    throw new MissingTokenException(ttype, input, null);
-}   
 
-public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
-    throw e;
-}
+    Stack<String> hint = new Stack<String>();
+    
+    protected List<String> errors = new LinkedList<String>();
 
-protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
-    throw new MismatchedTokenException(ttype, input);
-} 
+		protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException{   
+		    throw new MissingTokenException(ttype, input, null);
+		}   
+		
+		public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
+		    throw e;
+		}
+				
+		protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
+		    throw new MismatchedTokenException(ttype, input);
+		} 
 
-protected List<String> errors = new LinkedList<String>();
-
-public void displayRecognitionError(String[] tokenNames,
+    public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
         String hdr = getErrorHeader(e);
         String msg = getErrorMessage(e, tokenNames);
         errors.add(hdr + " " + msg);
     }
+    
+    
+    
+  public String getErrorMessage(RecognitionException e,
+                              String[] tokenNames)
+    {
+        String ret = super.getErrorMessage(e, tokenNames);
+        if (!hint.isEmpty()) {
+          ret += hint.peek();
+        }
+        return ret;
+      }
+    
     public List<String> getErrors() {
         return errors;
     }
 }
 
-
+ 
 //stops the parser on errors instead of recovering
 @rulecatch {
   catch (RecognitionException re) {
-    reportError(re);
-    //throw re;
+   reportError(re);  
+   throw re;
   }
 }
 
-system:constantDefinition* varDefinition* modelDefinition analysis* experiment*;
+system:constantDefinition* varDefinition* 
+{hint.push("incomplete model definition");} modelDefinition {hint.pop();}
+analysis* experiment*;
 
 modelDefinition:
   eventDefinition*

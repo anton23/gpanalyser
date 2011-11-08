@@ -124,24 +124,20 @@ public class PCTMCInterpreter {
 	@SuppressWarnings("unchecked")
 	protected PCTMCFileRepresentation parseStream(ANTLRStringStream stream)
 			throws ParseException {
+		Parser parser = null;
 		try {
 			Lexer lexer = lexerClass.getConstructor(CharStream.class)
 					.newInstance(stream);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-			Parser parser = parserClass.getConstructor(TokenStream.class)
+			parser = parserClass.getConstructor(TokenStream.class)
 					.newInstance(tokens);
+			Object systemReturn = null;
 
-			Object systemReturn = parserClass.getMethod("system",
-					(Class<?>[]) null).invoke(parser, (Object[]) null);
+			systemReturn = parserClass.getMethod("system",
+						(Class<?>[]) null).invoke(parser, (Object[]) null);
 
-			List<String> errors = (List<String>) parser.getClass().getMethod(
-					"getErrors", (Class<?>[]) null).invoke(parser,
-					(Object[]) null);
-			if (!errors.isEmpty()) {
-				throw new ParseException(errors);
-			}
-
+		
 			CommonTree systemTree = (CommonTree) systemReturn.getClass()
 					.getMethod("getTree", (Class<?>[]) null).invoke(
 							systemReturn, (Object[]) null);
@@ -160,16 +156,26 @@ public class PCTMCInterpreter {
 				} catch (Exception e) {
 					PCTMCLogging.error("Unexpected internal error!\n" + e);
 				}
-
 			}
 			return pctmcFileRepresentation;
 		} catch (Exception e) {
-			if (e instanceof ParseException)
-				throw (ParseException) e;
-			// e.printStackTrace();
-			throw new ParseException(Lists
-					.newArrayList("Unexpected internal error: " + e));
+			List<String> errors;
+			try {
+				errors = (List<String>) parser.getClass().getMethod(
+						"getErrors", (Class<?>[]) null).invoke(parser,
+						(Object[]) null);
+				if (!errors.isEmpty()) {
+					throw new ParseException(errors);
+			}			
+			} catch (Exception e1) {
+				if (e1 instanceof ParseException) {
+					throw (ParseException)e1;
+				}
+				throw new ParseException(Lists
+						.newArrayList("Unexpected internal error: " + e1));
+			}
 		}
+		return null;
 	}
 
 	/**

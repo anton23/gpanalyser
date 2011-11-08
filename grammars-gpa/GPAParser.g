@@ -29,6 +29,8 @@ tokens{
 //This is a hack until the composite grammars are implemented in a better way
 @members{
   protected List<String> errors = new LinkedList<String>();
+  
+  Stack<String> hint = new Stack<String>();
 
 public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
@@ -36,16 +38,39 @@ public void displayRecognitionError(String[] tokenNames,
         String msg = getErrorMessage(e, tokenNames);
         errors.add(hdr + " " + msg);
     }
+    
     public List<String> getErrors() {
     	LinkedList<String> allErrors = new LinkedList<String>(errors); 
     	allErrors.addAll(gPCTMCParserPrototype.getErrors());
-        return errors;
+      return allErrors;
     }
+        
+      public String getErrorMessage(RecognitionException e,
+                              String[] tokenNames) {
+        String ret = super.getErrorMessage(e, tokenNames);
+        if (!gPCTMCParserPrototype.hint.isEmpty()) {
+          ret += ":"; 
+          ret += gPCTMCParserPrototype.hint.peek();
+        }
+        if (!hint.isEmpty()) {
+          ret += ":";
+          ret += hint.peek();
+        }
+        return ret;
+      }
+}
+
+//stops the parser on errors instead of recovering
+@rulecatch {
+  catch (RecognitionException re) {
+   reportError(re);  
+   throw re;
+  }
 }
 
 start:;
 
-modelDefinition: componentDefinition+ model countActions? ;
+modelDefinition: componentDefinition+ {hint.push("missing system equation");} model {hint.pop();} countActions? ;
 
 
 countActions:
