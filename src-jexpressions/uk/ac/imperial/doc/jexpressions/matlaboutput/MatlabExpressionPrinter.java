@@ -19,9 +19,11 @@ import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.utils.JExpressionMatlabUtils;
 
 /**
- * Expression visitor that prints the Java implementation of the given expression.
+ * Expression visitor that prints the Java implementation of the given
+ * expression.
+ * 
  * @author as1005
- *
+ * 
  */
 public class MatlabExpressionPrinter implements IExpressionVisitor {
 	@Override
@@ -32,36 +34,35 @@ public class MatlabExpressionPrinter implements IExpressionVisitor {
 	@Override
 	public void visit(UMinusExpression e) {
 		output.append("-(");
-		e.getE().accept(this); 
+		e.getE().accept(this);
 		output.append(")");
-		
+
 	}
 
 	@Override
-	public void visit(FunctionCallExpression e) {	
-		if (e.getName().equals("ifpos")){
-			output.append(JExpressionMatlabUtils.ifposName+"(");
-		} 	
-		else {
-			output.append(e.getName()+"(");
+	public void visit(FunctionCallExpression e) {
+		if (e.getName().equals("ifpos")) {
+			output.append(JExpressionMatlabUtils.ifposName + "(");
+		} else {
+			output.append(e.getName() + "(");
 		}
-		boolean first = true; 
-		for (AbstractExpression arg:e.getArguments()){
-			if (first){
-				first = false; 
+		boolean first = true;
+		for (AbstractExpression arg : e.getArguments()) {
+			if (first) {
+				first = false;
 			} else {
-				output.append(","); 				
+				output.append(",");
 			}
-			arg.accept(this); 
+			arg.accept(this);
 		}
 		output.append(")");
-		
+
 	}
 
 	@Override
 	public void visit(TimeExpression e) {
-		output.append("t"); 
-		
+		output.append("t");
+
 	}
 
 	@Override
@@ -112,7 +113,7 @@ public class MatlabExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(PEPADivExpression e) {
-		output.append(JExpressionMatlabUtils.divName+"(");
+		output.append(JExpressionMatlabUtils.divName + "(");
 		e.getNumerator().accept(this);
 		output.append(",");
 		e.getDenominator().accept(this);
@@ -130,7 +131,7 @@ public class MatlabExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivMinExpression e) {
-		output.append(JExpressionMatlabUtils.divMinName+"(");
+		output.append(JExpressionMatlabUtils.divMinName + "(");
 		e.getA().accept(this);
 		output.append(",");
 		e.getB().accept(this);
@@ -141,7 +142,7 @@ public class MatlabExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivDivMinExpression e) {
-		output.append(JExpressionMatlabUtils.divDivMinName+"(");
+		output.append(JExpressionMatlabUtils.divDivMinName + "(");
 		e.getA().accept(this);
 		output.append(",");
 		e.getB().accept(this);

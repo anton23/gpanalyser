@@ -20,29 +20,29 @@ import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 
-
 /**
- * A generic transformer of basic expressions. 
+ * A generic transformer of basic expressions.
+ * 
  * @author as1005
- *
+ * 
  */
 public class ExpressionTransformer implements IExpressionVisitor {
-	
+
 	@Override
 	public void visit(IntegerExpression e) {
-		result = new IntegerExpression(e.getValue()); 
+		result = new IntegerExpression(e.getValue());
 	}
 
 	@Override
 	public void visit(UMinusExpression e) {
-		e.getE().accept(this); 
-		result = new UMinusExpression(result); 
-		
+		e.getE().accept(this);
+		result = new UMinusExpression(result);
+
 	}
 
 	@Override
 	public void visit(TimeExpression e) {
-		result = e; 	
+		result = e;
 	}
 
 	@Override
@@ -70,13 +70,12 @@ public class ExpressionTransformer implements IExpressionVisitor {
 		result = new PowerExpression(newExpression, result);
 	}
 
-
-
 	protected AbstractExpression result;
 
 	@Override
 	public void visit(AbstractExpression e) {
-		throw new AssertionError("Unsupported visit to expression " + e.toString());
+		throw new AssertionError("Unsupported visit to expression "
+				+ e.toString());
 	}
 
 	@Override
@@ -146,19 +145,18 @@ public class ExpressionTransformer implements IExpressionVisitor {
 		result = SumExpression.create(ts);
 	}
 
-
 	public AbstractExpression getResult() {
 		return result;
 	}
 
 	@Override
 	public void visit(FunctionCallExpression e) {
-		List<AbstractExpression> newArguments = new LinkedList<AbstractExpression>(); 
-		for (AbstractExpression arg:e.getArguments()){
-			arg.accept(this); 
-			newArguments.add(result); 
+		List<AbstractExpression> newArguments = new LinkedList<AbstractExpression>();
+		for (AbstractExpression arg : e.getArguments()) {
+			arg.accept(this);
+			newArguments.add(result);
 		}
 		result = FunctionCallExpression.create(e.getName(), newArguments);
-		
+
 	}
 }

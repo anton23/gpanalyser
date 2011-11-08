@@ -1,15 +1,16 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-
 /**
  * An expression for the terms min(a,b).
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class MinExpression extends AbstractExpression {
 
 	/**
 	 * Creates and possibly simplifies a MinExpression.
+	 * 
 	 * @param a
 	 * @param b
 	 * @return
@@ -19,12 +20,12 @@ public class MinExpression extends AbstractExpression {
 		if (a.equals(b))
 			return a;
 		if (a instanceof DoubleExpression && b instanceof DoubleExpression) {
-			double value = Math.min(((DoubleExpression)a).getValue(), ((DoubleExpression)b).getValue());
+			double value = Math.min(((DoubleExpression) a).getValue(),
+					((DoubleExpression) b).getValue());
 			return new DoubleExpression(value);
 		}
 		return new MinExpression(a, b);
 	}
-
 
 	private AbstractExpression a, b;
 

@@ -21,8 +21,7 @@ public class Assignment extends AbstractStatement {
 	AbstractExpression lhs;
 	AbstractExpression rhs;
 
-	public Assignment(AbstractExpression lhs,
-			AbstractExpression rhs) {
+	public Assignment(AbstractExpression lhs, AbstractExpression rhs) {
 		super();
 		this.lhs = lhs;
 		this.rhs = rhs;

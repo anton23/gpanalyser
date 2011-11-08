@@ -1,21 +1,23 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-
 /**
- * An expression for a (double) numerical constant. 
+ * An expression for a (double) numerical constant.
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class DoubleExpression extends AbstractExpression {
 
 	public static AbstractExpression ZERO = new DoubleExpression(0.0);
 	public static AbstractExpression ONE = new DoubleExpression(1.0);
-	
+
 	private Double value;
-	
+
 	/**
-	 * Creates a new DoubleExpression with the given Double value. 
-	 * @param value of the expression
+	 * Creates a new DoubleExpression with the given Double value.
+	 * 
+	 * @param value
+	 *            of the expression
 	 */
 	public DoubleExpression(Double value) {
 		super();

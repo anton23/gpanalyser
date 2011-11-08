@@ -13,7 +13,6 @@ public class ToStringUtils {
 		return ret;
 	}
 
-
 	@SuppressWarnings("all")
 	public static String iterableToSSV(Iterable list, String sep) {
 		String ret = "";

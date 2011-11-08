@@ -25,7 +25,8 @@ public class ExpandedExpression extends AbstractExpression {
 	}
 
 	protected ExpandedExpression(Polynomial numerator) {
-		this(numerator, Polynomial.getUnitPolynomial(numerator.getNormaliser()));
+		this(numerator, Polynomial.getUnitPolynomial(numerator
+				.getCoefficientSpecification()));
 	}
 
 	public static ExpandedExpression plus(ExpandedExpression a,
@@ -68,53 +69,56 @@ public class ExpandedExpression extends AbstractExpression {
 
 	public static ExpandedExpression create(Polynomial numerator) {
 		return create(numerator, Polynomial.getUnitPolynomial(numerator
-				.getNormaliser()));
+				.getCoefficientSpecification()));
 	}
 
 	// Always have the smallest coefficient in numerator equal to 1
 	public static ExpandedExpression create(Polynomial numerator,
 			Polynomial denominator) {
 		if (numerator.equals(Polynomial.getEmptyPolynomial(numerator
-				.getNormaliser()))) {
+				.getCoefficientSpecification()))) {
 			return new UnexpandableExpression(new DoubleExpression(0.0),
-					numerator.getNormaliser());
+					numerator.getCoefficientSpecification());
 		}
 		if (denominator.equals(Polynomial.getEmptyPolynomial(denominator
-				.getNormaliser()))) {
+				.getCoefficientSpecification()))) {
 			throw new AssertionError("Division by zero!");
 		}
 
 		// Small hack before proper polynomial division is implemneted:
 		if (numerator.equals(denominator)) {
 			return new UnexpandableExpression(DoubleExpression.ONE, numerator
-					.getNormaliser());
+					.getCoefficientSpecification());
 		}
-		Multiset<ExpandedExpression> commonFactor = Polynomial
+/*		Multiset<UnexpandableExpression> commonFactor = Polynomial
 				.getGreatestCommonFactor(numerator, denominator);
-		numerator = Polynomial.divide(numerator, commonFactor,
-				DoubleExpression.ONE);
-		denominator = Polynomial.divide(denominator, commonFactor,
-				DoubleExpression.ONE);
+		numerator = Polynomial.divide(numerator, commonFactor);
+		denominator = Polynomial.divide(denominator, commonFactor);*/
+		
+		Polynomial gcd = Polynomial.greatestCommonDivisor(numerator, denominator);
+		DivisionResult tmpN = Polynomial.divide(numerator, gcd);
+		numerator = tmpN.getResult();			
+		denominator = Polynomial.divide(denominator, gcd).getResult();
 
-		DivisionResult divide = Polynomial.divide(numerator, denominator);
+		/*DivisionResult divide = Polynomial.divide(numerator, denominator);
 		if (divide.getRemainder().equals(
-				Polynomial.getEmptyPolynomial(numerator.getNormaliser()))) {
+				Polynomial.getEmptyPolynomial(numerator
+						.getCoefficientSpecification()))) {
 			numerator = divide.getResult();
 			denominator = Polynomial.getUnitPolynomial(denominator
-					.getNormaliser());
-		}
+					.getCoefficientSpecification());
+		}*/
 
 		if (denominator.isNumber()) {
-			numerator = Polynomial.divide(numerator, Polynomial
-					.getOneTerm(numerator.getNormaliser()), denominator
-					.numericalValue());
+			numerator = Polynomial.scalarProduct(numerator, DivExpression.create(DoubleExpression.ONE, denominator.numericalValue()));
 			if (numerator.isNumber()) {
 				return new UnexpandableExpression(numerator.numericalValue(),
-						numerator.getNormaliser());
+						numerator.getCoefficientSpecification());
 			} else {
-				Entry<Multiset<ExpandedExpression>, AbstractExpression> next = numerator.getRepresentation().entrySet().iterator().next();
-				if ((numerator.getRepresentation().size() == 1
-				&& numerator.getNormaliser().isOne(next.getValue()))
+				Entry<Multiset<UnexpandableExpression>, AbstractExpression> next = numerator
+						.getRepresentation().entrySet().iterator().next();
+				if ((numerator.getRepresentation().size() == 1 && numerator
+						.getCoefficientSpecification().isOne(next.getValue()))
 						&& next.getKey().size() == 1) {
 					return numerator.getRepresentation().keySet().iterator()
 							.next().iterator().next();
@@ -159,7 +163,7 @@ public class ExpandedExpression extends AbstractExpression {
 	public String toString() {
 		String ret = "[" + numerator.toString() + "]";
 		if (!denominator.equals(Polynomial.getUnitPolynomial(denominator
-				.getNormaliser()))) {
+				.getCoefficientSpecification()))) {
 			ret += "/[" + denominator.toString() + "]";
 		}
 		return ret;

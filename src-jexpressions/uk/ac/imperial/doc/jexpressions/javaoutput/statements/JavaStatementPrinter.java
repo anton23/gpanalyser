@@ -12,29 +12,31 @@ import uk.ac.imperial.doc.jexpressions.statements.VariableDeclaration;
 
 /**
  * A statement visitor printing a Java implementation of the statements.
+ * 
  * @author as1005
  */
 public class JavaStatementPrinter implements IStatementVisitor {
-	
-	
+
 	@Override
 	public void visit(ArrayDeclaration s) {
 		IExpressionVisitor sizePrinter = expressionPrinterFactory
-		.createPrinter();
+				.createPrinter();
 		s.getSize().accept(sizePrinter);
-		output.append(s.getType() + "[] " + s.getArray() + " = new " + s.getType() + "["+sizePrinter+"];");
+		output.append(s.getType() + "[] " + s.getArray() + " = new "
+				+ s.getType() + "[" + sizePrinter + "];");
 	}
 
 	@Override
 	public void visit(ArrayElementAssignment s) {
 		IExpressionVisitor rhsPrinter = expressionPrinterFactory
-		.createPrinter();
+				.createPrinter();
 		s.getRhs().accept(rhsPrinter);
 		String rhsString = rhsPrinter.toString();
 		IExpressionVisitor indexPrinter = expressionPrinterFactory
-			.createPrinter();
+				.createPrinter();
 		s.getIndex().accept(indexPrinter);
-		output.append(s.getArray()+"["+indexPrinter.toString() +"] = " + rhsString  +";");
+		output.append(s.getArray() + "[" + indexPrinter.toString() + "] = "
+				+ rhsString + ";");
 	}
 
 	protected StringBuilder output;
@@ -51,7 +53,10 @@ public class JavaStatementPrinter implements IStatementVisitor {
 	}
 
 	@Override
-	public void visit(AbstractStatement s) {throw new AssertionError("Unsupported visit to statement " + s.toString() + "!");}
+	public void visit(AbstractStatement s) {
+		throw new AssertionError("Unsupported visit to statement "
+				+ s.toString() + "!");
+	}
 
 	@Override
 	public void visit(Comment c) {

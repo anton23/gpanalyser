@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-
 public class ExpressionWrapper extends AbstractExpression {
 
 	protected final AbstractExpression internalExpression;

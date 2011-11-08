@@ -13,7 +13,9 @@ public class ConstantExpression extends AbstractExpression {
 	private String constant;
 
 	/**
-	 * Creates a constant expression representing the constant with the given name.
+	 * Creates a constant expression representing the constant with the given
+	 * name.
+	 * 
 	 * @param constant
 	 */
 	public ConstantExpression(String constant) {
@@ -34,9 +36,10 @@ public class ConstantExpression extends AbstractExpression {
 		ConstantExpression asRate = (ConstantExpression) o;
 		return this.constant.equals(asRate.getConstant());
 	}
-	
+
 	/**
 	 * Returns the name of this constant.
+	 * 
 	 * @return
 	 */
 	public String getConstant() {

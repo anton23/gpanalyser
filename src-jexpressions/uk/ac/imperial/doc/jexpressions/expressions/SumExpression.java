@@ -7,11 +7,11 @@ import java.util.List;
 
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
-
 /**
- * An expression for a sum of a number of expressions a1+a2+...+an. 
+ * An expression for a sum of a number of expressions a1+a2+...+an.
+ * 
  * @author as1005
- *
+ * 
  */
 public class SumExpression extends AbstractExpression {
 
@@ -56,17 +56,16 @@ public class SumExpression extends AbstractExpression {
 		double numericalSummands = 0.0;
 		for (AbstractExpression e : s) {
 			if (!e.equals(new DoubleExpression(0.0))) {
-				if (e instanceof DoubleExpression){
-					numericalSummands += ((DoubleExpression)e).getValue();
-				} else 
-				if (e instanceof SumExpression){
-					summands.addAll(((SumExpression)e).getSummands());
+				if (e instanceof DoubleExpression) {
+					numericalSummands += ((DoubleExpression) e).getValue();
+				} else if (e instanceof SumExpression) {
+					summands.addAll(((SumExpression) e).getSummands());
 				} else {
 					summands.add(e);
 				}
 			}
 		}
-		if (numericalSummands != 0.0){
+		if (numericalSummands != 0.0) {
 			summands.add(new DoubleExpression(numericalSummands));
 		}
 		if (summands.isEmpty()) {

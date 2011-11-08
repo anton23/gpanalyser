@@ -1,19 +1,21 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-
 /**
  * A PEPA specific expression of the form div(a,b)*min(b,c).
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 public class DivMinExpression extends AbstractExpression {
-	
-	public AbstractExpression getFullExpression(){
-		return ProductExpression.create(DivExpression.create(a, b), MinExpression.create(b, c));
+
+	public AbstractExpression getFullExpression() {
+		return ProductExpression.create(DivExpression.create(a, b),
+				MinExpression.create(b, c));
 	}
 
 	/**
 	 * Creates and possibly simplifies a DivMinExpression.
+	 * 
 	 * @param a
 	 * @param b
 	 * @param c
@@ -67,7 +69,6 @@ public class DivMinExpression extends AbstractExpression {
 	public AbstractExpression getC() {
 		return c;
 	}
-
 
 	@Override
 	public int hashCode() {

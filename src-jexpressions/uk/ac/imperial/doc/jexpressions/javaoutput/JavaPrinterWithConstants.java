@@ -6,15 +6,16 @@ import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 
 /**
  * An extension of JavaExpressionPrinter supporting constants.
+ * 
  * @author as1005
- *
+ * 
  */
 public class JavaPrinterWithConstants extends JavaExpressionPrinter implements
 		IConstantExpressionVisitor {
 
 	protected Constants constants;
-	
-	private static String BASENAME="r";
+
+	private static String BASENAME = "r";
 
 	public JavaPrinterWithConstants(Constants constants) {
 		super();

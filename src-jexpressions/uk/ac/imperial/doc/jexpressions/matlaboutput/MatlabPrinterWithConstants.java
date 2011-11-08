@@ -6,15 +6,16 @@ import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 
 /**
  * An extension of JavaExpressionPrinter supporting constants.
+ * 
  * @author as1005
- *
+ * 
  */
-public class MatlabPrinterWithConstants extends MatlabExpressionPrinter implements
-		IConstantExpressionVisitor {
+public class MatlabPrinterWithConstants extends MatlabExpressionPrinter
+		implements IConstantExpressionVisitor {
 
 	protected Constants constants;
-	
-	public static String param="p";
+
+	public static String param = "p";
 
 	public MatlabPrinterWithConstants(Constants constants) {
 		super();
@@ -23,7 +24,6 @@ public class MatlabPrinterWithConstants extends MatlabExpressionPrinter implemen
 	}
 
 	public void visit(ConstantExpression e) {
-		output.append(param + "."
-				+ (e.getConstant()));
+		output.append(param + "." + (e.getConstant()));
 	}
 }

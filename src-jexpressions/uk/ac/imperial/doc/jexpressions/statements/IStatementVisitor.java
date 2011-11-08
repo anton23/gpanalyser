@@ -8,9 +8,9 @@ public interface IStatementVisitor {
 	public void visit(SkipStatement s);
 
 	public void visit(VariableDeclaration s);
-	
+
 	public void visit(ArrayElementAssignment s);
-	
+
 	public void visit(ArrayDeclaration s);
 
 }

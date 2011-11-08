@@ -18,21 +18,25 @@ import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 
 /**
- * An general expression visitor that traverses the syntax tree of the given expression.
+ * An general expression visitor that traverses the syntax tree of the given
+ * expression.
+ * 
  * @author as1005
- *
+ * 
  */
 public class ExpressionWalker implements IExpressionVisitor {
 	@Override
-	public void visit(IntegerExpression e) {}
-
-	@Override
-	public void visit(UMinusExpression e) {
-		e.getE().accept(this); 
+	public void visit(IntegerExpression e) {
 	}
 
 	@Override
-	public void visit(TimeExpression e) {}
+	public void visit(UMinusExpression e) {
+		e.getE().accept(this);
+	}
+
+	@Override
+	public void visit(TimeExpression e) {
+	}
 
 	@Override
 	public void visit(DivExpression e) {
@@ -52,14 +56,15 @@ public class ExpressionWalker implements IExpressionVisitor {
 		e.getExponent().accept(this);
 	}
 
-
 	@Override
 	public void visit(AbstractExpression e) {
-		throw new AssertionError("Unsupported visit to expression " + e.toString());
+		throw new AssertionError("Unsupported visit to expression "
+				+ e.toString());
 	}
 
 	@Override
-	public void visit(DoubleExpression e) {}
+	public void visit(DoubleExpression e) {
+	}
 
 	@Override
 	public void visit(PEPADivExpression e) {
@@ -100,12 +105,10 @@ public class ExpressionWalker implements IExpressionVisitor {
 		}
 	}
 
-
-
 	@Override
-	public void visit(FunctionCallExpression e) { 
-		for (AbstractExpression arg:e.getArguments()){
-			arg.accept(this);  
+	public void visit(FunctionCallExpression e) {
+		for (AbstractExpression arg : e.getArguments()) {
+			arg.accept(this);
 		}
 	}
 

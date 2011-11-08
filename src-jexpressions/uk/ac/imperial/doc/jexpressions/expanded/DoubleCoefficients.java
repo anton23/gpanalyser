@@ -3,7 +3,7 @@ package uk.ac.imperial.doc.jexpressions.expanded;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
-public class DoubleNormaliser implements ICoefficientSpecification {
+public class DoubleCoefficients implements ICoefficientSpecification {
 
 	@Override
 	public AbstractExpression normaliseCoefficient(AbstractExpression e) {
@@ -19,15 +19,9 @@ public class DoubleNormaliser implements ICoefficientSpecification {
 	public boolean isOne(AbstractExpression e) {
 		return e.equals(DoubleExpression.ONE);
 	}
-	
+
 	@Override
 	public boolean isZero(AbstractExpression e) {
 		return e.equals(DoubleExpression.ZERO);
 	}
-
-	
-	
-	
-	
-
 }

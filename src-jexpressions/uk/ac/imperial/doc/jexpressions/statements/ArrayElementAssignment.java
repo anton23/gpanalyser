@@ -4,10 +4,9 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
 public class ArrayElementAssignment extends AbstractStatement {
 	private String array;
-	private AbstractExpression index; 	
+	private AbstractExpression index;
 	private AbstractExpression rhs;
-	
-	
+
 	public ArrayElementAssignment(String array, AbstractExpression index,
 			AbstractExpression rhs) {
 		super();
@@ -30,13 +29,13 @@ public class ArrayElementAssignment extends AbstractStatement {
 
 	@Override
 	public void accept(IStatementVisitor v) {
-		v.visit(this); 
+		v.visit(this);
 
 	}
 
 	@Override
 	public String toString() {
-		return array+"[" + index.toString() + "] = " + rhs + ";";
+		return array + "[" + index.toString() + "] = " + rhs + ";";
 	}
 
 }

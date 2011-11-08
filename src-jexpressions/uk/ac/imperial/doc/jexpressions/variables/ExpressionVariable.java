@@ -3,22 +3,18 @@ package uk.ac.imperial.doc.jexpressions.variables;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 
-public class ExpressionVariable extends AbstractExpression{
+public class ExpressionVariable extends AbstractExpression {
 	protected String name;
-	
-	protected AbstractExpression unfolded; 
-	
-	public void setUnfolded(AbstractExpression unfolded){
-		this.unfolded = unfolded; 
+
+	protected AbstractExpression unfolded;
+
+	public void setUnfolded(AbstractExpression unfolded) {
+		this.unfolded = unfolded;
 	}
-	
-	
 
 	public AbstractExpression getUnfolded() {
 		return unfolded;
 	}
-
-
 
 	@Override
 	public int hashCode() {
@@ -45,20 +41,20 @@ public class ExpressionVariable extends AbstractExpression{
 
 	@Override
 	public void accept(IExpressionVisitor v) {
-		if (v instanceof IExpressionVariableVisitor){
-			((IExpressionVariableVisitor)v).visit(this);
+		if (v instanceof IExpressionVariableVisitor) {
+			((IExpressionVariableVisitor) v).visit(this);
 		} else {
 			unfolded.accept(v);
-		}	
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "$"+name; 
+		return "$" + name;
 	}
 
 	public ExpressionVariable(String name) {
 		super();
 		this.name = name;
-	} 	
+	}
 }

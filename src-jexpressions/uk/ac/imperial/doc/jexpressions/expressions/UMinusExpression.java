@@ -1,10 +1,10 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-
 /**
- * An expression for the unary minus -a. 
+ * An expression for the unary minus -a.
+ * 
  * @author as1005
- *
+ * 
  */
 public class UMinusExpression extends AbstractExpression {
 
@@ -33,7 +33,6 @@ public class UMinusExpression extends AbstractExpression {
 		UMinusExpression asUMinus = (UMinusExpression) o;
 		return e.equals(asUMinus.getE());
 	}
-
 
 	@Override
 	public int hashCode() {

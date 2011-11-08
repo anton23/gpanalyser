@@ -1,20 +1,24 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
 /**
- * An expression for a PEPA specific expression of the form div(a*b,c*d)*min(c,d)
+ * An expression for a PEPA specific expression of the form
+ * div(a*b,c*d)*min(c,d)
+ * 
  * @author Anton Stefanek
- *
+ * 
  */
 
 public class DivDivMinExpression extends AbstractExpression {
-	
-	public AbstractExpression getFullExpression(){
-		return ProductExpression.create(PEPADivExpression.create(ProductExpression.create(a,b),ProductExpression.create(c,d)),
-				MinExpression.create(c, d));
+
+	public AbstractExpression getFullExpression() {
+		return ProductExpression.create(
+				PEPADivExpression.create(ProductExpression.create(a, b),
+						ProductExpression.create(c, d)), MinExpression.create(
+						c, d));
 	}
 
 	private AbstractExpression a, b, c, d;
-	
+
 	protected DivDivMinExpression(AbstractExpression a, AbstractExpression b,
 			AbstractExpression c, AbstractExpression d) {
 		super();
@@ -25,7 +29,8 @@ public class DivDivMinExpression extends AbstractExpression {
 	}
 
 	/**
-	 * Creates and possibly simplifies an DivDivMin expression. 
+	 * Creates and possibly simplifies an DivDivMin expression.
+	 * 
 	 * @param rateJointLeft
 	 * @param rateJointRight
 	 * @param rateLeft
@@ -93,8 +98,8 @@ public class DivDivMinExpression extends AbstractExpression {
 
 	@Override
 	public String toString() {
-		return ("(div((" + a + ")*(" + b + "),(" + c + ")*(" + d + ")))*(min(" + c + ","
-				+ d + "))");
+		return ("(div((" + a + ")*(" + b + "),(" + c + ")*(" + d + ")))*(min("
+				+ c + "," + d + "))");
 	}
 
 }

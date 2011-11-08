@@ -5,8 +5,8 @@ import java.util.Map;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionWalkerWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
-
-public class ExpressionVariableSettter extends ExpressionWalkerWithConstants implements IExpressionVariableVisitor{
+public class ExpressionVariableSettter extends ExpressionWalkerWithConstants
+		implements IExpressionVariableVisitor {
 	protected Map<ExpressionVariable, AbstractExpression> variables;
 
 	public ExpressionVariableSettter(
@@ -17,7 +17,7 @@ public class ExpressionVariableSettter extends ExpressionWalkerWithConstants imp
 
 	@Override
 	public void visit(ExpressionVariable e) {
-		e.setUnfolded(variables.get(e));  
+		e.setUnfolded(variables.get(e));
 	}
 
 }
