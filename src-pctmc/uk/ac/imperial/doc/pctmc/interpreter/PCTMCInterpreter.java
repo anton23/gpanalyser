@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.interpreter;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +28,8 @@ import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
+import uk.ac.imperial.doc.pctmc.syntax.ParsingData;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
@@ -111,7 +114,7 @@ public class PCTMCInterpreter {
 
 		} catch (Exception e) {
 			if (e instanceof ParseException)
-				throw (ParseException) e;
+				throw (ParseException) e;			
 			throw new ParseException(Lists
 					.newArrayList("Unexpected internal error: " + e));
 		}
@@ -121,22 +124,64 @@ public class PCTMCInterpreter {
 		globalPostprocessors.add(postprocessor);
 	}
 
+	
+	boolean twoPass = true;
+	
 	@SuppressWarnings("unchecked")
 	protected PCTMCFileRepresentation parseStream(ANTLRStringStream stream)
 			throws ParseException {
 		Parser parser = null;
-		try {
+		ErrorReporter parserReporter = new ErrorReporter();
+		try {			
+			// First pass 			
 			Lexer lexer = lexerClass.getConstructor(CharStream.class)
 					.newInstance(stream);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 
 			parser = parserClass.getConstructor(TokenStream.class)
-					.newInstance(tokens);
-			Object systemReturn = null;
+				.newInstance(tokens);
+			
+			if (twoPass) {
+				try {
+					parserClass.getMethod("system",
+						(Class<?>[]) null).invoke(parser, (Object[]) null);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				ParsingData data = (ParsingData)parserClass.getMethod("getParsingData", (Class<?>[]) null).invoke(parser, (Object[]) null);
+				
 
+			
+				// Second proper pass
+				stream.reset();
+				
+				lexer = lexerClass.getConstructor(CharStream.class)
+				.newInstance(stream);
+				
+				tokens = new CommonTokenStream(lexer);
+				
+				parser = parserClass.getConstructor(TokenStream.class)
+				.newInstance(tokens);
+				
+				parserClass.getMethod("setParsingData", new Class<?>[]{ParsingData.class}).invoke(parser, new Object[]{data});
+			}
+		
+			Object[] tmp = new Object[]{parserReporter};
+
+			Class<?>[] pTypes = new Class<?>[]{ErrorReporter.class};
+			parser.getClass().getMethod(
+					"setErrorReporter", pTypes).invoke(parser,
+					tmp);
+			
+			Object systemReturn = null;
+			
+							
 			systemReturn = parserClass.getMethod("system",
 						(Class<?>[]) null).invoke(parser, (Object[]) null);
 
+			if (!parserReporter.errors.isEmpty()) {
+				throw new ParseException(parserReporter.errors);
+			}
 		
 			CommonTree systemTree = (CommonTree) systemReturn.getClass()
 					.getMethod("getTree", (Class<?>[]) null).invoke(
@@ -144,6 +189,11 @@ public class PCTMCInterpreter {
 			CommonTreeNodeStream nodes = new CommonTreeNodeStream(systemTree);
 			TreeParser compiler = compilerClass.getConstructor(
 					TreeNodeStream.class).newInstance(nodes);
+			
+			compiler.getClass().getMethod(
+					"setErrorReporter", pTypes).invoke(compiler,
+					tmp);
+			
 			PCTMCFileRepresentation pctmcFileRepresentation = new PCTMCFileRepresentation(
 					compiler.getClass().getMethod("system", (Class<?>[]) null)
 							.invoke(compiler, (Object[]) null));
@@ -158,24 +208,20 @@ public class PCTMCInterpreter {
 				}
 			}
 			return pctmcFileRepresentation;
-		} catch (Exception e) {
-			List<String> errors;
-			try {
-				errors = (List<String>) parser.getClass().getMethod(
-						"getErrors", (Class<?>[]) null).invoke(parser,
-						(Object[]) null);
-				if (!errors.isEmpty()) {
-					throw new ParseException(errors);
-			}			
-			} catch (Exception e1) {
-				if (e1 instanceof ParseException) {
-					throw (ParseException)e1;
-				}
-				throw new ParseException(Lists
-						.newArrayList("Unexpected internal error: " + e1));
+		} catch (Exception e) {			
+			if (e instanceof ParseException) {
+				throw (ParseException)e;
 			}
+			if (!parserReporter.errors.isEmpty()) {
+				throw new ParseException(parserReporter.errors);
+			}
+			if (e instanceof InvocationTargetException) {
+				throw new ParseException(Lists
+						.newArrayList("Unexpected internal error: " + ((InvocationTargetException)e).getTargetException()));
+			}
+			throw new ParseException(Lists
+					.newArrayList("Unexpected internal error: " + e));		
 		}
-		return null;
 	}
 
 	/**
@@ -242,8 +288,8 @@ public class PCTMCInterpreter {
 
 		} catch (ParseException e) {
 			PCTMCLogging.error("Error when parsing the input file!\nFound "
-					+ e.errors.size() + " errors:\n"
-					+ ToStringUtils.iterableToSSV(e.errors, "\n"));
+					+ e.errors.size() + " errors:\n  -  "
+					+ ToStringUtils.iterableToSSV(e.errors, "\n  -  "));
 		}
 		PCTMCLogging.decreaseIndent();
 

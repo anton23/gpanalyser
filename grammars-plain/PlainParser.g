@@ -27,6 +27,8 @@ tokens{
 @header{
    package uk.ac.imperial.doc.gpa.plain.syntax;
    
+   import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
+   import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;  
    import java.util.LinkedList;
 
 }

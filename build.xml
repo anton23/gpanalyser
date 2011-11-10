@@ -36,7 +36,7 @@
     <property name="plain.compiler" value="PlainCompiler.g"/>	
 	
     <!-- ANTLR and grammars -->
-    <property name="antlr" value="antlr-3.3.jar"/>
+    <property name="antlr" value="antlr-3.4.jar"/>
     <property name="grammars" value="grammars-gpa"/>
     <property name="lexer" value="GPALexer.g"/>
 	<property name="lexer.prototype" value="PCTMCLexerPrototype.g"/>
