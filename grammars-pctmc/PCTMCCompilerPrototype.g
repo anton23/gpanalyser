@@ -233,8 +233,11 @@ expressionList returns [List<AbstractExpression> e]
 ;
 
 constantDefinition[Map<String,Double> map]:
-^(CONSTANT id=LOWERCASENAME value=realnumber
-{$map.put($id.text,$value.value);}
+^(CONSTANT id=LOWERCASENAME (value=realnumber
+                              {$map.put($id.text,$value.value);}
+                            |valueI=integer
+                              {$map.put($id.text,new Double($valueI.value));}
+                              )
 );
 
 varDefinition:

@@ -21,12 +21,12 @@ tokens{
   RANGE;
 }
 
+
+
 @members{
 
-    Stack<String> hint = new Stack<String>();
-    
-    protected List<String> errors = new LinkedList<String>();
-
+    protected Stack<String> hint = new Stack<String>();
+    /*
 		protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException{   
 		    throw new MissingTokenException(ttype, input, null);
 		}   
@@ -37,44 +37,178 @@ tokens{
 				
 		protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
 		    throw new MismatchedTokenException(ttype, input);
-		} 
+		} */
 
     public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
         String hdr = getErrorHeader(e);
         String msg = getErrorMessage(e, tokenNames);
-        errors.add(hdr + " " + msg);
-    }
-    
-    
-    
-  public String getErrorMessage(RecognitionException e,
-                              String[] tokenNames)
-    {
-        String ret = super.getErrorMessage(e, tokenNames);
-        if (!hint.isEmpty()) {
-          ret += hint.peek();
+        if (errorReporter != null) {
+          errorReporter.addError("["+hdr + "] " + msg);
         }
-        return ret;
-      }
-    
-    public List<String> getErrors() {
-        return errors;
     }
+    
+    protected ErrorReporter errorReporter;
+    
+    public void setErrorReporter(ErrorReporter errorReporter) {
+       this.errorReporter = errorReporter;
+    }
+    
+    
+     
+  public String getErrorHeader(RecognitionException e) {
+    return "line "+e.line+":"+e.charPositionInLine;
+  }
+    
+	  public String getErrorMessage(RecognitionException e,
+	                              String[] tokenNames) {
+	                              
+	     String ret = ""; 
+	     if (!hint.isEmpty()) {
+	        ret = hint.peek();
+	     } else {
+	        ret = getModifiedErrorMessage(e, tokenNames);
+	     }
+	     return ret;
+	  }
+	  
+	   public String getTokenErrorDisplay(Token t) {
+    String s = t.getText();
+    if (s.equals("<EOF>")) {
+       return "the end of file";
+    }
+    if ( s==null ) {
+      if ( t.getType()==Token.EOF ) {
+        return "the end of file";
+      }
+      else {
+        s = "<"+t.getType()+">";
+      }
+    }
+    s = s.replaceAll("\n","\\\\n");
+    s = s.replaceAll("\r","\\\\r");
+    s = s.replaceAll("\t","\\\\t");
+    return "'"+s+"'";
+  }
+	  
+	  
+	  private String[] customTokenNames(String[] tokenNames) {
+	     String[] ret = new String[tokenNames.length];
+	     Map<String, String> map = new HashMap<String, String>();
+	     map.put("SEMI", "';'");
+	     map.put("LBRACE", "'{'");
+	     map.put("EOF", "the end of file");
+	     for (int i = 0; i<tokenNames.length; i++) {
+	         ret[i] = tokenNames[i]; 
+	         if (map.containsKey(ret[i])) {
+	           ret[i] = map.get(ret[i]);
+	         }
+	     }
+	     return ret;
+	  }
+	  
+	  public String getModifiedErrorMessage(RecognitionException e, String[] tokenNames) {
+	  tokenNames = customTokenNames(tokenNames);
+    String msg = e.getMessage();
+    if ( e instanceof UnwantedTokenException ) {
+      UnwantedTokenException ute = (UnwantedTokenException)e;
+      String tokenName="<unknown>";
+      if ( ute.expecting== Token.EOF ) {
+        tokenName = "EOF";
+      }
+      else {
+        tokenName = tokenNames[ute.expecting];
+      }
+      msg = "extraneous input "+getTokenErrorDisplay(ute.getUnexpectedToken())+
+        " expecting "+tokenName;
+    }
+    else if ( e instanceof MissingTokenException ) {
+      MissingTokenException mte = (MissingTokenException)e;
+      String tokenName="<unknown>";
+      if ( mte.expecting== Token.EOF ) {
+        tokenName = "EOF";
+        msg = "invalid command " + getTokenErrorDisplay(e.token);
+      }
+      else {
+        tokenName = tokenNames[mte.expecting];
+        msg = "missing "+tokenName+" at "+getTokenErrorDisplay(e.token);
+      }
+    }
+    else if ( e instanceof MismatchedTokenException ) {
+      MismatchedTokenException mte = (MismatchedTokenException)e;
+      String tokenName="<unknown>";
+      if ( mte.expecting== Token.EOF ) {
+        tokenName = "EOF";
+      }
+      else {
+        tokenName = tokenNames[mte.expecting];
+      }
+      msg = "mismatched input "+getTokenErrorDisplay(e.token)+
+        " expecting "+tokenName;
+    }
+    else if ( e instanceof MismatchedTreeNodeException ) {
+      MismatchedTreeNodeException mtne = (MismatchedTreeNodeException)e;
+      String tokenName="<unknown>";
+      if ( mtne.expecting==Token.EOF ) {
+        tokenName = "EOF";
+      }
+      else {
+        tokenName = tokenNames[mtne.expecting];
+      }
+      msg = "mismatched tree node: "+mtne.node+
+        " expecting "+tokenName;
+    }
+    else if ( e instanceof NoViableAltException ) {
+      //NoViableAltException nvae = (NoViableAltException)e;
+      // for development, can add "decision=<<"+nvae.grammarDecisionDescription+">>"
+      // and "(decision="+nvae.decisionNumber+") and
+      // "state "+nvae.stateNumber
+      msg = "no viable alternative at "+getTokenErrorDisplay(e.token);
+    }
+    else if ( e instanceof EarlyExitException ) {
+      //EarlyExitException eee = (EarlyExitException)e;
+      // for development, can add "(decision="+eee.decisionNumber+")"
+      msg = "required list did not match anything at input "+
+        getTokenErrorDisplay(e.token);
+    }
+    else if ( e instanceof MismatchedSetException ) {
+      MismatchedSetException mse = (MismatchedSetException)e;
+      msg = "mismatched input "+getTokenErrorDisplay(e.token)+
+        " expecting set "+mse.expecting;
+    }
+    else if ( e instanceof MismatchedNotSetException ) {
+      MismatchedNotSetException mse = (MismatchedNotSetException)e;
+      msg = "mismatched input "+getTokenErrorDisplay(e.token)+
+        " expecting set "+mse.expecting;
+    }
+    else if ( e instanceof FailedPredicateException ) {
+      FailedPredicateException fpe = (FailedPredicateException)e;
+      msg = "rule "+fpe.ruleName+" failed predicate: {"+
+        fpe.predicateText+"}?";
+    } else if ( e instanceof CustomRecognitionException ) {
+      CustomRecognitionException mse = (CustomRecognitionException)e;
+      msg = mse.getMessage();
+    }
+    return msg;
+  }
+  
+  boolean requiresExpectation = false;
+  boolean insideExpectation = false;
 }
 
  
 //stops the parser on errors instead of recovering
+/*
 @rulecatch {
   catch (RecognitionException re) {
    reportError(re);  
-   throw re;
+   recover(input, re);
   }
-}
+}*/
 
 system:constantDefinition* varDefinition* 
 {hint.push("incomplete model definition");} modelDefinition {hint.pop();}
-analysis* experiment*;
+analysis* experiment* EOF;
 
 modelDefinition:
   eventDefinition*
@@ -187,7 +321,9 @@ simulation:
 ;
 
 plotDescription:
+ {requiresExpectation = true;}
   (expressionList (TO FILENAME)? SEMI)
+ {requiresExpectation = false;}
 ;
 
 analysesSpec:
@@ -205,7 +341,8 @@ state: UPPERCASENAME;
 //-----Rules for definitions----- 
 
 constantDefinition:
-  id=LOWERCASENAME DEF (rate=REALNUMBER) SEMI -> ^(CONSTANT $id $rate);
+  id=LOWERCASENAME {hint.push("constant definition has to be of the form <constant> = <number> ;");} DEF  
+    (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();}  -> ^(CONSTANT $id $rate);
   
 varDefinition:
   var DEF expression SEMI -> ^(VARIABLE var expression);
@@ -246,7 +383,7 @@ signExpression
 
 
 primaryExpression:    
-      combinedPowerProduct
+      p=combinedPowerProduct {if (requiresExpectation && !insideExpectation) throw new CustomRecognitionException(input, "population " + $p.text + " has to be inside an expectation");}
      | var 
      |REALNUMBER
      |INTEGER
@@ -263,27 +400,46 @@ primaryExpression:
 
 
 generalExpectation:
-  GENEXPECTATION LBRACK expression RBRACK -> ^(GENEXPECTATION expression)
+  GENEXPECTATION LBRACK {insideExpectation = true;}
+     expression 
+   RBRACK 
+   {insideExpectation = false;}
+   -> ^(GENEXPECTATION expression)
 ;
 
-mean:
-  MEAN LBRACK expression RBRACK -> ^(MEAN expression)
+mean
+:
+  MEAN LBRACK {insideExpectation = true;}
+    e=expression 
+       RBRACK 
+       {insideExpectation = false;} -> ^(MEAN expression)
 ;
 
 central:
-   CENTRAL LBRACK expression COMMA INTEGER RBRACK -> ^(CENTRAL expression INTEGER)
-  |VARIANCE LBRACK expression RBRACK -> ^(CENTRAL expression INTEGER["2"])
+   CENTRAL LBRACK {insideExpectation = true;}
+      expression COMMA INTEGER 
+     RBRACK
+     {insideExpectation = false;}
+      -> ^(CENTRAL expression INTEGER)
+  |VARIANCE LBRACK {insideExpectation = true;}
+  expression 
+  RBRACK 
+  {insideExpectation = false;}
+  -> ^(CENTRAL expression INTEGER["2"])
 ;
 
 scentral:
-   SCENTRAL LBRACK expression COMMA INTEGER RBRACK -> ^(SCENTRAL expression INTEGER)
+   SCENTRAL LBRACK {insideExpectation = true;}
+      expression COMMA INTEGER RBRACK
+   {insideExpectation = false;} -> ^(SCENTRAL expression INTEGER)
 ;
 
 
-
 combinedPowerProduct:
-   powerProduct? accPower*  ->
-    ^(COMBINEDPRODUCT powerProduct? accPower*);
+   powerProduct accPower*  ->
+    ^(COMBINEDPRODUCT powerProduct accPower*)
+ |accPower+  ->
+    ^(COMBINEDPRODUCT accPower+);  
 
 powerProduct:
   power+ -> ^(PRODUCT power+);

@@ -23,54 +23,83 @@ tokens{
 @header{
   package uk.ac.imperial.doc.gpa.syntax; 
   
+  import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;  
+  import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
+  import uk.ac.imperial.doc.pctmc.syntax.ParsingData;
+  import uk.ac.imperial.doc.pctmc.syntax.GPAParsingData;
+  
   import java.util.LinkedList;
+  import java.util.Set;
+  import java.util.HashSet;
+
 }
 
 //This is a hack until the composite grammars are implemented in a better way
 @members{
-  protected List<String> errors = new LinkedList<String>();
-  
-  Stack<String> hint = new Stack<String>();
 
-public void displayRecognitionError(String[] tokenNames,
+  protected Set<String> groupNames = new HashSet<String>();
+  protected Set<String> tmpComponentNames = new HashSet<String>();
+  protected Set<String> componentNames = new HashSet<String>();
+    
+  protected Stack<String> hint = new Stack<String>();
+  
+  protected ErrorReporter errorReporter;
+  
+  public void setErrorReporter(ErrorReporter errorReporter) {
+    this.errorReporter = errorReporter;
+    gPCTMCParserPrototype.setErrorReporter(errorReporter);
+  }
+  
+  public ParsingData getParsingData() {
+       return new GPAParsingData(tmpComponentNames);
+  } 
+  
+  public void setParsingData(ParsingData parsingData) {
+       if (parsingData instanceof GPAParsingData) {
+            componentNames = ((GPAParsingData)parsingData).getComponentNames();
+       }
+  }
+  
+  public String getErrorHeader(RecognitionException e) {
+    return "line "+e.line+":"+e.charPositionInLine;
+  }
+
+  public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
         String hdr = getErrorHeader(e);
         String msg = getErrorMessage(e, tokenNames);
-        errors.add(hdr + " " + msg);
+       
+        if (errorReporter != null) {
+           errorReporter.addError("["+hdr + "] " + msg);
+        }
     }
     
-    public List<String> getErrors() {
-    	LinkedList<String> allErrors = new LinkedList<String>(errors); 
-    	allErrors.addAll(gPCTMCParserPrototype.getErrors());
-      return allErrors;
-    }
         
       public String getErrorMessage(RecognitionException e,
                               String[] tokenNames) {
-        String ret = super.getErrorMessage(e, tokenNames);
-        if (!gPCTMCParserPrototype.hint.isEmpty()) {
-          ret += ":"; 
-          ret += gPCTMCParserPrototype.hint.peek();
-        }
+        String ret = "";
+        
+          ret += gPCTMCParserPrototype.getModifiedErrorMessage(e, tokenNames);
+                
         if (!hint.isEmpty()) {
-          ret += ":";
-          ret += hint.peek();
-        }
+          ret += " (" + hint.peek() + ")";
+        } else 
+        if (!gPCTMCParserPrototype.hint.isEmpty()) { 
+          ret += " (" + gPCTMCParserPrototype.hint.peek() + ")";
+        } 
+        
         return ret;
       }
 }
 
-//stops the parser on errors instead of recovering
-@rulecatch {
-  catch (RecognitionException re) {
-   reportError(re);  
-   throw re;
-  }
-}
+
 
 start:;
 
-modelDefinition: componentDefinition+ {hint.push("missing system equation");} model {hint.pop();} countActions? ;
+modelDefinition: 
+  {hint.push("at least one PEPA component definition required");} componentDefinition+ {hint.pop();}
+  {hint.push("missing system equation");} model {hint.pop();}
+  countActions? ;
 
 
 countActions:
@@ -78,47 +107,56 @@ countActions:
 ;
 
 componentDefinition:
-  id=UPPERCASENAME DEF s=component SEMI-> ^(COMPONENT $id $s);
+  id=UPPERCASENAME DEF {hint.push("invalid definition of component '" + $id.text+"'");} s=component {hint.pop();}
+      {hint.push("definition of '" + $id.text + "' must end with a semicolon");} SEMI {hint.pop();}
+  {tmpComponentNames.add($id.text);} 
+  -> ^(COMPONENT $id $s);
 
 component:   
-    l=choice a=cooperationSet r=choice -> ^(COOPCOMP $l $a $r)
-    |choice;
+    choice cooperationSet choice -> ^(COOPCOMP choice cooperationSet choice)
+   |choice;
 
 
 //allows only choice between prefixes (not constants)
 choice:
-  prefix (PLUS prefix)* -> prefix+
+  prefix (PLUS {hint.push("summation operator must be followed by a proper prefix, e.g. (a, ra).C");} properPrefix {hint.pop();})* -> prefix properPrefix*
    ;
       
 prefix: 
-  LPAR a=LOWERCASENAME COMMA r=expression RPAR DOT s=prefix -> ^(PREFIX $a $r $s)
+    properPrefix
   | primaryComponent;
   
+properPrefix:
+  LPAR LOWERCASENAME COMMA expression RPAR DOT prefix -> ^(PREFIX LOWERCASENAME expression prefix) ;  
+  
 primaryComponent:
-   UPPERCASENAME
+   n = UPPERCASENAME {if (!componentNames.contains($n.text)){displayRecognitionError(getTokenNames(), new CustomRecognitionException(input, "unknown component '" + $n.text+"'"));}}
  | STOP
  | ANY
- | LPAR c=component RPAR -> $c;
-
+ | LPAR component RPAR -> component;
+ 
 model: 
-   l=labelledGroup actions=cooperationSet r=labelledGroup -> ^(COOP $l $actions $r)
+   labelledGroup cooperationSet labelledGroup -> ^(COOP labelledGroup cooperationSet labelledGroup)
   |  labelledGroup 
 ;
    
 labelledGroup:
-   label=UPPERCASENAME LBRACE g=group RBRACE -> ^(LABELLEDGROUP $label $g)
+  l=UPPERCASENAME {groupNames.add($l.text);}
+   {hint.push("group components must be enclosed inside '{' and '}'");} LBRACE {hint.pop();}
+     group RBRACE -> ^(LABELLEDGROUP UPPERCASENAME group)
   | LPAR model RPAR -> model;
  
 cooperationSet:
-   LANGLE LOWERCASENAME (COMMA LOWERCASENAME)* RANGLE -> LOWERCASENAME+
+   LANGLE {hint.push("expecting a (possibly empty) list of action names");} LOWERCASENAME (COMMA LOWERCASENAME)* {hint.pop();}
+        {hint.push("closing bracket '>' missing");}RANGLE {hint.pop();} -> LOWERCASENAME+
   |LANGLE RANGLE -> LOWERCASENAME[""]; 
    
 group:
   groupComponent (PAR groupComponent)* -> groupComponent+;
  
 groupComponent:
-  s=component (LBRACK n=expression RBRACK) -> ^(MULT $s $n)
- |s=component -> ^(MULT $s REALNUMBER["1.0"]);
+  component (LBRACK expression RBRACK) -> ^(MULT component expression)
+ |component -> ^(MULT component REALNUMBER["1.0"]);
  
 
 //states:
@@ -132,8 +170,9 @@ ACOUNT LOWERCASENAME -> ^(ACOUNT LOWERCASENAME)
 ;
 
 groupComponentPair:
-     UPPERCASENAME INGROUP component   -> ^(PAIR UPPERCASENAME component)
+     n=UPPERCASENAME 
+     
+     INGROUP {if (!groupNames.contains($n.text)) {
+          reportError(new CustomRecognitionException(input, "invalid group label " + $n.text));
+     }} component   -> ^(PAIR UPPERCASENAME component)
 ;
- 
- 
-
