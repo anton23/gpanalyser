@@ -27,6 +27,11 @@ tokens{
 @header{
    package uk.ac.imperial.doc.gpa.plain.syntax;
    
+     import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;  
+  import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
+  import uk.ac.imperial.doc.pctmc.syntax.ParsingData;
+  import uk.ac.imperial.doc.pctmc.syntax.GPAParsingData;
+   
    import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
    import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;  
    import java.util.LinkedList;
@@ -35,36 +40,50 @@ tokens{
 
 //This is a hack until the composite grammars are implemented in a better way
 @members{
-  protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException{   
-    throw new MissingTokenException(ttype, input, null);
-}   
+  protected Stack<String> hint = new Stack<String>();
+  
+  protected ErrorReporter errorReporter;
 
-public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
-    throw e;
-}
+  public void setErrorReporter(ErrorReporter errorReporter) {
+    this.errorReporter = errorReporter;
+    gPCTMCParserPrototype.setErrorReporter(errorReporter);
+  }
+  
+  public ParsingData getParsingData() { return null; } 
+  
+  public void setParsingData(ParsingData parsingData) { }
 
-protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
-    throw new MismatchedTokenException(ttype, input);
-} 
 
-protected List<String> errors = new LinkedList<String>();
+  public String getErrorHeader(RecognitionException e) {
+    return "line "+e.line+":"+e.charPositionInLine;
+  }
 
-public void displayRecognitionError(String[] tokenNames,
+  public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
         String hdr = getErrorHeader(e);
         String msg = getErrorMessage(e, tokenNames);
-        errors.add(hdr + " " + msg);
+       
+        if (errorReporter != null) {
+           errorReporter.addError("["+hdr + "] " + msg);
+        }
     }
-    public List<String> getErrors() {
-        return errors;
-    }
-}
-
-@rulecatch {
-  catch (RecognitionException re) {
-    reportError(re);
-    //throw re;
-  }
+    
+        
+      public String getErrorMessage(RecognitionException e,
+                              String[] tokenNames) {
+        String ret = "";
+        
+          ret += gPCTMCParserPrototype.getModifiedErrorMessage(e, tokenNames);
+                
+        if (!hint.isEmpty()) {
+          ret += " (" + hint.peek() + ")";
+        } else 
+        if (!gPCTMCParserPrototype.hint.isEmpty()) { 
+          ret += " (" + gPCTMCParserPrototype.hint.peek() + ")";
+        } 
+        
+        return ret;
+      }
 }
 
 

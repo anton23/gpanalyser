@@ -50,6 +50,49 @@ import PCTMCCompilerPrototype;
   import com.google.common.collect.Multiset;
   
   
+    import uk.ac.imperial.doc.gpa.syntax.CompilerError;
+  import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
+  import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
+  
+}
+
+
+
+@members {
+
+     protected Stack<String> hint = new Stack<String>();
+     
+     protected ErrorReporter errorReporter;
+     
+     public void setErrorReporter(ErrorReporter errorReporter) {
+          this.errorReporter = errorReporter;
+     }
+     
+     public String getErrorHeader(RecognitionException e) {
+    return "line "+e.line+":"+e.charPositionInLine;
+  }
+     
+       public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+       
+        if (errorReporter != null) {
+           errorReporter.addError("["+hdr + "] " + msg);
+        }
+    }
+    
+        
+      public String getErrorMessage(RecognitionException e,
+                              String[] tokenNames) {
+        String ret;
+        if (!hint.isEmpty()) {
+          ret = hint.peek();
+        } else{
+          ret =  super.getErrorMessage(e, tokenNames);
+        }
+        return ret;
+      }
 }
 
 start:;

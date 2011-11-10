@@ -37,6 +37,7 @@ tokens{
 //This is a hack until the composite grammars are implemented in a better way
 @members{
 
+  protected Set<String> tmpGroupNames = new HashSet<String>();
   protected Set<String> groupNames = new HashSet<String>();
   protected Set<String> tmpComponentNames = new HashSet<String>();
   protected Set<String> componentNames = new HashSet<String>();
@@ -51,12 +52,13 @@ tokens{
   }
   
   public ParsingData getParsingData() {
-       return new GPAParsingData(tmpComponentNames);
+       return new GPAParsingData(tmpComponentNames, tmpGroupNames);
   } 
   
   public void setParsingData(ParsingData parsingData) {
        if (parsingData instanceof GPAParsingData) {
             componentNames = ((GPAParsingData)parsingData).getComponentNames();
+            groupNames = ((GPAParsingData)parsingData).getGroupNames();
        }
   }
   
@@ -141,7 +143,7 @@ model:
 ;
    
 labelledGroup:
-  l=UPPERCASENAME {groupNames.add($l.text);}
+  l=UPPERCASENAME {tmpGroupNames.add($l.text);}
    {hint.push("group components must be enclosed inside '{' and '}'");} LBRACE {hint.pop();}
      group RBRACE -> ^(LABELLEDGROUP UPPERCASENAME group)
   | LPAR model RPAR -> model;
