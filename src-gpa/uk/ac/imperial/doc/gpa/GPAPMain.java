@@ -129,5 +129,4 @@ public class GPAPMain {
 		return new PCTMCInterpreter(PlainLexer.class, PlainParser.class,
 				PlainCompiler.class, TransactionPatternMatcher.class);
 	}
-
 }

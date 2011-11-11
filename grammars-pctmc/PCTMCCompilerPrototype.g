@@ -273,11 +273,9 @@ primary_expression returns[AbstractExpression e]:
  | LPAR ne = expression RPAR {$e = $ne.e;}
  |r = realnumber {$e = new DoubleExpression($r.value);}
  |i = integer {$e = new DoubleExpression((double)$i.value);}
- |c = LOWERCASENAME {if ($c.text.equals("t")){
-                       $e = new TimeExpression(); 
-                     } else {
-                       $e = new ConstantExpression($c.text);
-                     }}
+ | TIME {$e = new TimeExpression();}
+ |c = LOWERCASENAME {$e = new ConstantExpression($c.text);
+                     }
  | cp=combinedProduct {$e = CombinedProductExpression.create($cp.c);}
  | m=mean {$e = $m.m;} 
  | eg = generalExpectation {$e = $eg.e;}

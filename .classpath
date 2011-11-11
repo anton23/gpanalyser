@@ -16,6 +16,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src-plain"/>
+	<classpathentry kind="src" path="test-pctmc"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/jcommon-1.0.16.jar"/>
