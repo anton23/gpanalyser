@@ -177,8 +177,10 @@ ACOUNT LOWERCASENAME -> ^(ACOUNT LOWERCASENAME)
 ;
 
 groupComponentPair:
+     {hint.push("populations have to be of the form 'Group:Component'");}
      n=UPPERCASENAME      
      INGROUP {if (!groupNames.contains($n.text)) {
           reportError(new CustomRecognitionException(input, "invalid group label " + $n.text));
-     }} component   -> ^(PAIR UPPERCASENAME component)
+     }} component  
+     {hint.pop();} -> ^(PAIR UPPERCASENAME component)
 ;
