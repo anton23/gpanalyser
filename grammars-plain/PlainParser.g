@@ -35,6 +35,8 @@ tokens{
    import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
    import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;  
    import java.util.LinkedList;
+   import java.util.HashSet;
+   import java.util.Set;
 
 }
 

@@ -42,7 +42,7 @@ tokens{
   protected Set<String> tmpComponentNames = new HashSet<String>();
   protected Set<String> componentNames = new HashSet<String>();
     
-  protected Stack<String> hint = new Stack<String>();
+  protected Stack<String> hint;
   
   protected ErrorReporter errorReporter;
   
@@ -98,7 +98,8 @@ tokens{
 
 start:;
 
-modelDefinition: 
+modelDefinition
+  @init{hint = gPCTMCParserPrototype.hint;}: 
   {hint.push("at least one PEPA component definition required");} componentDefinition+ {hint.pop();}
   {hint.push("missing system equation");} model {hint.pop();}
   countActions? ;
@@ -149,17 +150,21 @@ labelledGroup:
   | LPAR model RPAR -> model;
  
 cooperationSet:
-   LANGLE {hint.push("expecting a (possibly empty) list of action names");} LOWERCASENAME (COMMA LOWERCASENAME)* {hint.pop();}
-        {hint.push("closing bracket '>' missing");}RANGLE {hint.pop();} -> LOWERCASENAME+
+   LANGLE {hint.push("expecting a (possibly empty) list of action names");} 
+      LOWERCASENAME 
+       (COMMA {hint.push("cooperation set has to be of the form <a1, a2, ..., >");} LOWERCASENAME {hint.pop();})* 
+       {hint.pop();}
+      {hint.push("closing bracket '>' missing");}RANGLE {hint.pop();} -> LOWERCASENAME+
   |LANGLE RANGLE -> LOWERCASENAME[""]; 
    
 group:
-  groupComponent (PAR groupComponent)* -> groupComponent+;
+  groupComponent (PAR {hint.push("group definition has to be of the form G{A[n]|B[m]|...|Z[k]}");} groupComponent {hint.pop();})* -> groupComponent+;
  
 groupComponent:
   component (LBRACK expression RBRACK) -> ^(MULT component expression)
  |component -> ^(MULT component REALNUMBER["1.0"]);
  
+
 
 //states:
 
@@ -172,8 +177,7 @@ ACOUNT LOWERCASENAME -> ^(ACOUNT LOWERCASENAME)
 ;
 
 groupComponentPair:
-     n=UPPERCASENAME 
-     
+     n=UPPERCASENAME      
      INGROUP {if (!groupNames.contains($n.text)) {
           reportError(new CustomRecognitionException(input, "invalid group label " + $n.text));
      }} component   -> ^(PAIR UPPERCASENAME component)

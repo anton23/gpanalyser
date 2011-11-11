@@ -19,3 +19,4 @@ STOP: 'stop';
 ACOUNT:'#';
 COUNTACTIONS:'Count';
 ANY:'_';
+TIME:'t';

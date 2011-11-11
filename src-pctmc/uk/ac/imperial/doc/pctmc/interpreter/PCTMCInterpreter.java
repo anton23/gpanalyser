@@ -288,8 +288,8 @@ public class PCTMCInterpreter {
 
 		} catch (ParseException e) {
 			PCTMCLogging.error("Error when parsing the input file!\nFound "
-					+ e.errors.size() + " errors:\n  -  "
-					+ ToStringUtils.iterableToSSV(e.errors, "\n  -  "));
+					+ e.errors.size() + " errors:\n  "
+					+ ToStringUtils.iterableToSSV(e.errors, "\n  "));
 		}
 		PCTMCLogging.decreaseIndent();
 

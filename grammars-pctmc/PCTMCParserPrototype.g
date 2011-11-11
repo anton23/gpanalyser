@@ -26,18 +26,6 @@ tokens{
 @members{
 
     protected Stack<String> hint = new Stack<String>();
-    /*
-		protected Object recoverFromMismatchedToken(IntStream input, int ttype, BitSet follow) throws RecognitionException{   
-		    throw new MissingTokenException(ttype, input, null);
-		}   
-		
-		public Object recoverFromMismatchedSet(IntStream input, RecognitionException e, BitSet follow) throws RecognitionException {
-		    throw e;
-		}
-				
-		protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
-		    throw new MismatchedTokenException(ttype, input);
-		} */
 
     public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
@@ -60,17 +48,18 @@ tokens{
     return "line "+e.line+":"+e.charPositionInLine;
   }
     
-	  public String getErrorMessage(RecognitionException e,
-	                              String[] tokenNames) {
-	                              
-	     String ret = ""; 
-	     if (!hint.isEmpty()) {
-	        ret = hint.peek();
-	     } else {
-	        ret = getModifiedErrorMessage(e, tokenNames);
-	     }
-	     return ret;
-	  }
+	   public String getErrorMessage(RecognitionException e,
+                              String[] tokenNames) {
+        String ret = "";
+        
+          ret += getModifiedErrorMessage(e, tokenNames);
+                
+        if (!hint.isEmpty()) {
+          ret += " (" + hint.peek() + ")";
+        } 
+        
+        return ret;
+      }
 	  
 	   public String getTokenErrorDisplay(Token t) {
     String s = t.getText();
@@ -98,6 +87,11 @@ tokens{
 	     map.put("SEMI", "';'");
 	     map.put("LBRACE", "'{'");
 	     map.put("EOF", "the end of file");
+	     map.put("STOPTIME","'stopTime'");
+	     map.put("STEPSIZE","'stepSize'");
+	     map.put("DENSITY","'density'");
+	     map.put("REPLICATIONS","'replications'");
+	     map.put("INTEGER","an integer");
 	     for (int i = 0; i<tokenNames.length; i++) {
 	         ret[i] = tokenNames[i]; 
 	         if (map.containsKey(ret[i])) {
@@ -194,6 +188,8 @@ tokens{
   
   boolean requiresExpectation = false;
   boolean insideExpectation = false;
+  
+  Set<String> constants = new HashSet<String>();
 }
 
  
@@ -232,14 +228,22 @@ compare:
 ;
 
 experiment:
-    ir = iterateSpec?
+    ir = iterateSpec
         min = minimiseSpec?
     (WHERE
       constantReEvaluation+)?
     analysis PLOT LBRACE
       plots=plotAtSpecifications
     RBRACE
-  -> ^(ITERATE $ir? $min? (WHERE constantReEvaluation+)? analysis $plots)
+  -> ^(ITERATE $ir $min? (WHERE constantReEvaluation+)? analysis $plots)
+ | min = minimiseSpec
+    (WHERE
+      constantReEvaluation+)?
+    analysis PLOT LBRACE
+      plots=plotAtSpecifications
+    RBRACE
+  -> ^(ITERATE $min (WHERE constantReEvaluation+)? analysis $plots)
+ 
 ;
 
 iterateSpec:
@@ -299,11 +303,12 @@ plotAt:
 
 
 odeAnalysis:
-  ODES LPAR
+  ODES {hint.push("ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
+      LPAR
   STOPTIME DEF stopTime = REALNUMBER COMMA
   STEPSIZE DEF stepSize = REALNUMBER COMMA
   DENSITY DEF density=INTEGER   
-  RPAR LBRACE
+  RPAR {hint.pop();}LBRACE
     plotDescription*
   RBRACE
   -> ^(ODES $stopTime $stepSize $density LBRACE plotDescription* RBRACE )
@@ -321,8 +326,10 @@ simulation:
 ;
 
 plotDescription:
+ {hint.push("each plot description has to be of the 'e1,...,en (optional ->\"filename\");" +
+            " where e1,...,en are expectation based expressions");}
  {requiresExpectation = true;}
-  (expressionList (TO FILENAME)? SEMI)
+  (expressionList (TO FILENAME)? SEMI) {hint.pop();}
  {requiresExpectation = false;}
 ;
 
@@ -341,8 +348,11 @@ state: UPPERCASENAME;
 //-----Rules for definitions----- 
 
 constantDefinition:
-  id=LOWERCASENAME {hint.push("constant definition has to be of the form <constant> = <number> ;");} DEF  
-    (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();}  -> ^(CONSTANT $id $rate);
+  id=LOWERCASENAME {hint.push("constant definition has to be of the form <constant> = <number> ;");}  
+   DEF  
+    (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();} 
+     {constants.add($id.text);}
+     -> ^(CONSTANT $id $rate);
   
 varDefinition:
   var DEF expression SEMI -> ^(VARIABLE var expression);
@@ -383,14 +393,16 @@ signExpression
 
 
 primaryExpression:    
-      p=combinedPowerProduct {if (requiresExpectation && !insideExpectation) throw new CustomRecognitionException(input, "population " + $p.text + " has to be inside an expectation");}
+      p=combinedPowerProduct {if (requiresExpectation && !insideExpectation) reportError(new CustomRecognitionException(input, "population " + $p.text + " has to be inside an expectation"));}
      | var 
      |REALNUMBER
      |INTEGER
      | LPAR expression RPAR 
      | MIN LPAR expression COMMA expression RPAR -> ^(MIN expression COMMA expression)
-     | LOWERCASENAME LPAR expressionList RPAR -> ^(FUN LOWERCASENAME expressionList) 
-     | LOWERCASENAME     
+     | LOWERCASENAME LPAR expressionList RPAR -> ^(FUN LOWERCASENAME expressionList)
+     | TIME 
+     | c = LOWERCASENAME {if (!constants.contains($c.text)) 
+          reportError(new CustomRecognitionException(input, "constant '" + $c.text + "' unknown"));}
      | mean 
      | generalExpectation
      | central
