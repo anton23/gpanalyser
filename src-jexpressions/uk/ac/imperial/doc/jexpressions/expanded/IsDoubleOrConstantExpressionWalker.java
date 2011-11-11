@@ -1,9 +1,6 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
-import java.util.Set;
-
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionWalkerWithConstants;
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 

@@ -1,14 +1,11 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
-import java.util.Set;
-
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import com.google.common.collect.Sets;
 
+@SuppressWarnings("unchecked")
 public class UnexpandableExpression extends ExpandedExpression {
 
 	private ICoefficientSpecification normaliser;

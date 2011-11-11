@@ -18,6 +18,7 @@ public class TestExpandedExpressionBase extends TestPolynomialsBase{
     protected static ExpandedExpression eCoB; // c/b
     protected static ExpandedExpression eApCoB; //(a+c)/b
 	
+	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void createObjects(){
 		createPolynomialObjects();

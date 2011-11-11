@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-import java.io.Serializable;
 
 /**
  * An abstract class for expressions.
@@ -8,7 +7,7 @@ import java.io.Serializable;
  * @author Anton Stefanek
  * 
  */
-public abstract class AbstractExpression implements Serializable {
+public abstract class AbstractExpression {
 	@Override
 	public abstract int hashCode();
 

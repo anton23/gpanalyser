@@ -10,7 +10,9 @@ import uk.ac.imperial.doc.jexpressions.expanded.DoubleCoefficients;
 import uk.ac.imperial.doc.jexpressions.expanded.Polynomial;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
+@SuppressWarnings("unchecked")
 public class TestPolynomialsCreation extends TestPolynomialsBase {
+	
 	@Test
 	public void testEqualsSimple(){
 		assertNotSame(new Polynomial(new DoubleCoefficients(), t1), new Polynomial(new DoubleCoefficients(), t2));

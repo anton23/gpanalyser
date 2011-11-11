@@ -146,12 +146,12 @@ public class PCTMCChartUtilities {
 		if (!gui)
 			return;
 
-		JFrame frame;
+		
 		JTabbedPane tab;
 		if (!windows.containsKey(windowTitle))
 			setWindow(windowTitle);
 		tab = tabs.get(windowTitle);
-		frame = windows.get(windowTitle);
+		
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null, // chart //
 				// title

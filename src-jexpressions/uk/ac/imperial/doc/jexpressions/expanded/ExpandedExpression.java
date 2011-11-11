@@ -1,7 +1,5 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -10,8 +8,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 
 import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
-import com.google.common.collect.Sets;
 
 public class ExpandedExpression extends AbstractExpression {
 

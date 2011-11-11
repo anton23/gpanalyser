@@ -1,15 +1,11 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.languageoutput;
 
-import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
-import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotConstraint;
-import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
-import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 public class MatlabIteratePostprocessor {
 	
-	private String globalOptimName = "gobal_optim";
+//	private String globalOptimName = "gobal_optim";
 	
-	private String getConstantsName = "getConstants"; 
+//	private String getConstantsName = "getConstants"; 
 	/* 
     public void writePCTMCIterateFile(PCTMCIterate iterate, Constants constants){
         iterateIndex++;
@@ -36,7 +32,7 @@ public class MatlabIteratePostprocessor {
         }
 }*/
 	
-	private void writeIterateMainFile(PCTMCIterate iterate,String folder, double stopTime, double stepSize){
+/*	private void writeIterateMainFile(PCTMCIterate iterate,String folder, double stopTime, double stepSize){
 		StringBuilder out = new StringBuilder(); 
 		out.append("function [x,exitflag,output,solutions]="+globalOptimName+"()\n");
 		out.append("   param = "+getConstantsName+"();\n");
@@ -99,11 +95,10 @@ public class MatlabIteratePostprocessor {
 		out.append("      [t,y] = solve_odes(x);\n");
 	
 		out.append("      c = zeros("+iterate.getMinSpecification().getConstraints().size()+",1);\n");
-		i = 0; 
-		for (PlotConstraint pc:iterate.getMinSpecification().getConstraints()){
+ 
+		for (i = 0; i< iterate.getMinSpecification().getConstraints().size(); i++){
 			out.append("     tmp = reward_evaluator(y(timeIndex"+i+",:),timeIndex"+i+"*stepSize,param);\n");
 			out.append("     c("+(i+1)+") = threshold"+i+" - tmp(" + (i+2) + ");\n");
-			i++;
 		}
 		out.append("   end\n\n");
 
@@ -124,6 +119,5 @@ public class MatlabIteratePostprocessor {
 		out.append("end\n");
 		
 		FileUtils.writeGeneralFile(out.toString(), folder+"/global_optim.m");
-	}
-
+	}*/
 }
