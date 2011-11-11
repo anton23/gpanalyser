@@ -92,6 +92,9 @@ tokens{
 	     map.put("DENSITY","'density'");
 	     map.put("REPLICATIONS","'replications'");
 	     map.put("INTEGER","an integer");
+	     map.put("LPAR","(");
+	     map.put("RPAR",")");
+	     map.put("FILENAME","filename of the form \"filename\"");
 	     for (int i = 0; i<tokenNames.length; i++) {
 	         ret[i] = tokenNames[i]; 
 	         if (map.containsKey(ret[i])) {
@@ -121,7 +124,7 @@ tokens{
       String tokenName="<unknown>";
       if ( mte.expecting== Token.EOF ) {
         tokenName = "EOF";
-        msg = "invalid command " + getTokenErrorDisplay(e.token);
+        msg = "unknown command " + getTokenErrorDisplay(e.token);
       }
       else {
         tokenName = tokenNames[mte.expecting];
@@ -204,7 +207,9 @@ tokens{
 
 system:constantDefinition* varDefinition* 
 {hint.push("incomplete model definition");} modelDefinition {hint.pop();}
-analysis* experiment* EOF;
+{hint.push("allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise'");}
+analysis* experiment*
+EOF {hint.pop();};
 
 modelDefinition:
   eventDefinition*
@@ -227,7 +232,8 @@ compare:
   RBRACE -> ^(COMPARE analysis analysis plotDescription*)
 ;
 
-experiment:
+experiment
+:
     ir = iterateSpec
         min = minimiseSpec?
     (WHERE
@@ -329,7 +335,7 @@ plotDescription:
  {hint.push("each plot description has to be of the 'e1,...,en (optional ->\"filename\");" +
             " where e1,...,en are expectation based expressions");}
  {requiresExpectation = true;}
-  (expressionList (TO FILENAME)? SEMI) {hint.pop();}
+  (expressionList (TO {hint.push("filename description has to be of the form '-> \"filename\"'");} FILENAME {hint.pop();})? SEMI) {hint.pop();}
  {requiresExpectation = false;}
 ;
 

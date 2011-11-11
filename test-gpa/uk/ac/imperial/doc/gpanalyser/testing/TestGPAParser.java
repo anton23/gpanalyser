@@ -226,7 +226,7 @@ public class TestGPAParser extends TestPCTMCParserBase {
 				"E[As:A]}"
 				, 
 				Lists.newArrayList(
-				  "[line 9:7] missing ';' at '}' (each plot description has to be of the form 'e1,..., en ;' or optionally 'e1,...,en ->\"filename\" where e1,...,en are expectation based expressions)"));
+				  "[line 9:7] missing ';' at '}' (each plot description has to be of the 'e1,...,en (optional ->\"filename\"); where e1,...,en are expectation based expressions)"));
 	}
 	
 	@Test
@@ -243,7 +243,60 @@ public class TestGPAParser extends TestPCTMCParserBase {
 				"As:A;}"
 				, 
 				Lists.newArrayList(
-				  "[line 9:4] population As:A has to be inside an expectation (each plot description has to be of the form 'e1,..., en ;' or optionally 'e1,...,en ->\"filename\" where e1,...,en are expectation based expressions)"));
+				   "[line 9:4] population As:A has to be inside an expectation (each plot description has to be of the 'e1,...,en (optional ->\"filename\"); where e1,...,en are expectation based expressions)"));
 	}
+	
+
+	@Test
+	public void testPopulationBadGroupComponentPair() throws ParseException {				
+		testReportsMoreParseErrors(
+				"ra = 1.0;\n" +
+				"rb = 0.1;\n" +
+				"n = 10;\n" +
+				"\n" +
+				"A = (a, ra).B + (c,rb).A;\n" +
+				"B = (b, rb).A;\n" +
+				"As{A[n]}\n" + 
+				"ODEs(stopTime=10.0, stepSize=0.1, density=10){\n"+
+				"E[As:];}"
+				, 
+				Lists.newArrayList(
+				   "[line 9:5] no viable alternative at ']' (populations have to be of the form 'Group:Component')"));
+	}
+	
+	@Test
+	public void testUnknownAnalysis() throws ParseException {				
+		testReportsMoreParseErrors(
+				"ra = 1.0;\n" +
+				"rb = 0.1;\n" +
+				"n = 10;\n" +
+				"\n" +
+				"A = (a, ra).B + (c,rb).A;\n" +
+				"B = (b, rb).A;\n" +
+				"As{A[n]}\n" + 
+				"odes(stopTime=10.0, stepSize=0.1, density=10){\n"+
+				"E[As:A];}"
+				, 
+				Lists.newArrayList(
+				   "[line 8:0] unknown command 'odes' (allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise')"));
+	}
+	
+	@Test
+	public void testWrongFilename() throws ParseException {				
+		testReportsMoreParseErrors(
+				"ra = 1.0;\n" +
+				"rb = 0.1;\n" +
+				"n = 10;\n" +
+				"\n" +
+				"A = (a, ra).B + (c,rb).A;\n" +
+				"B = (b, rb).A;\n" +
+				"As{A[n]}\n" + 
+				"ODEs(stopTime=10.0, stepSize=0.1, density=10){\n"+
+				"E[As:A] -> bla.out;}"
+				, 
+				Lists.newArrayList(
+				   "[line 9:11] mismatched input 'bla' expecting filename of the form \"filename\" (filename description has to be of the form '-> \"filename\"')"));
+	}
+	
 	
 }
