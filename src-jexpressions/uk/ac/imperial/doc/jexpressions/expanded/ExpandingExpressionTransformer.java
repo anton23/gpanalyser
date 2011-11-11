@@ -1,7 +1,5 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
-import java.util.Set;
-
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -20,8 +18,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
-
-import com.google.common.collect.Sets;
 
 public class ExpandingExpressionTransformer implements IExpressionVisitor,
 		IConstantExpressionVisitor {

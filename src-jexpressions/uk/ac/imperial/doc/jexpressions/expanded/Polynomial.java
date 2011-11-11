@@ -19,6 +19,7 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 
+@SuppressWarnings("unchecked")
 public class Polynomial {
 
 	private final ICoefficientSpecification coefficientSpecification;

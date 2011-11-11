@@ -20,6 +20,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 
+@SuppressWarnings("unchecked")
 public class TestExpandExpression extends TestExpandedExpressionBase {
 
 	@Test

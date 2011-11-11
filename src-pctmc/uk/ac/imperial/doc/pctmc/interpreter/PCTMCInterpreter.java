@@ -127,7 +127,6 @@ public class PCTMCInterpreter {
 	
 	boolean twoPass = true;
 	
-	@SuppressWarnings("unchecked")
 	protected PCTMCFileRepresentation parseStream(ANTLRStringStream stream)
 			throws ParseException {
 		Parser parser = null;
