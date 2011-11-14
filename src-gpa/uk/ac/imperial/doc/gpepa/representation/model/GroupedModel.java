@@ -22,8 +22,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
  * 
  */
 public abstract class GroupedModel {
-
-
 	// keeps a map of all leaf labelled component groups
 	protected Map<String, LabelledComponentGroup> componentGroups;
 
@@ -88,5 +86,9 @@ public abstract class GroupedModel {
 		}
 		return observableEvents;
 	}
+	
+	@Override
+	public abstract boolean equals(Object obj);
+	
 
 }
