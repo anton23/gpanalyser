@@ -10,7 +10,7 @@ import java.util.Set;
  * @author Anton Stefanek
  * 
  */
-public class Constant extends PEPAComponent {
+public class ComponentId extends PEPAComponent {
 	@Override
 	public boolean matchPattern(PEPAComponent pattern) {
 		if (pattern instanceof AnyComponent)
@@ -22,9 +22,9 @@ public class Constant extends PEPAComponent {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Constant))
+		if (!(o instanceof ComponentId))
 			return false;
-		Constant asConstant = (Constant) o;
+		ComponentId asConstant = (ComponentId) o;
 		return name.equals(asConstant.getName());
 	}
 
@@ -67,7 +67,7 @@ public class Constant extends PEPAComponent {
 		return ret;
 	}
 
-	public Constant(String id) {
+	public ComponentId(String id) {
 		super();
 		this.name = id;
 	}

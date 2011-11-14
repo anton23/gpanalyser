@@ -20,7 +20,7 @@ public class PEPAComponentDefinitions {
 
 	public PEPAComponent getShorthand(PEPAComponent c) {
 		if (inverseDefinitions.containsKey(c)) {
-			return new Constant(inverseDefinitions.get(c));
+			return new ComponentId(inverseDefinitions.get(c));
 		}
 		return c;
 	}
@@ -79,4 +79,9 @@ public class PEPAComponentDefinitions {
 		return actions;
 	}
 
+	public Map<String, PEPAComponent> getDefinitions() {
+		return definitions;
+	}
+	
+	
 }

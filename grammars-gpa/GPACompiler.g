@@ -216,7 +216,7 @@ prefix returns [Prefix c]:
 
 primaryComponent returns [PEPAComponent c]:
   n=UPPERCASENAME{
-    $c=new Constant($n.text);
+    $c=new ComponentId($n.text);
   }
   | ANY {$c=new AnyComponent();}
   |STOP {

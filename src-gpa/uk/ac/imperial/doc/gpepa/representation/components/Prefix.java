@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
-import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
 /**
@@ -44,13 +43,6 @@ public class Prefix {
 		return continuation;
 	}
 
-	public Prefix(String action, String rate, PEPAComponent continuation) {
-		super();
-		this.action = action;
-		this.rate = new ConstantExpression(rate);
-		this.continuation = continuation;
-	}
-
 	public Prefix(String action, AbstractExpression rate,
 			PEPAComponent continuation) {
 		super();
@@ -63,7 +55,7 @@ public class Prefix {
 		String continuationString = continuation.toString();
 		if (continuation instanceof Choice
 				&& ((Choice) continuation).getChoices().size() == 1
-				|| continuation instanceof Constant
+				|| continuation instanceof ComponentId
 				|| continuation instanceof Stop) {
 		} else {
 			continuationString = "(" + continuationString + ")";

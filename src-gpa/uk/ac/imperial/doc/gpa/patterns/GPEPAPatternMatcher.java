@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAPCTMC;
-import uk.ac.imperial.doc.gpepa.representation.components.Constant;
+import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -30,9 +30,9 @@ public class GPEPAPatternMatcher extends PatternMatcher{
 
 			if (c.matchPattern(pattern.getComponent())) {
 				pairs.add(new GroupComponentPair(pattern.getGroup(), c));
-			} else if (c instanceof Constant) {
+			} else if (c instanceof ComponentId) {
 				PEPAComponent d = componentDefinitions
-						.getComponentDefinition(((Constant) c).getName());
+						.getComponentDefinition(((ComponentId) c).getName());
 				if (d.matchPattern(pattern.getComponent())) {
 					pairs.add(new GroupComponentPair(pattern.getGroup(), c));
 				}
