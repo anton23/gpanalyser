@@ -46,9 +46,10 @@ tokens{
   
   protected ErrorReporter errorReporter;
   
-  public void setErrorReporter(ErrorReporter errorReporter) {
+  public void setErrorReporter(ErrorReporter errorReporter) {    
     this.errorReporter = errorReporter;
     gPCTMCParserPrototype.setErrorReporter(errorReporter);
+    hint = gPCTMCParserPrototype.hint;
   }
   
   public ParsingData getParsingData() {
@@ -98,8 +99,7 @@ tokens{
 
 start:;
 
-modelDefinition
-  @init{hint = gPCTMCParserPrototype.hint;}: 
+modelDefinition: 
   {hint.push("at least one PEPA component definition required");} componentDefinition+ {hint.pop();}
   {hint.push("missing system equation");} model {hint.pop();}
   countActions? ;
@@ -133,7 +133,8 @@ properPrefix:
   LPAR LOWERCASENAME COMMA expression RPAR DOT prefix -> ^(PREFIX LOWERCASENAME expression prefix) ;  
   
 primaryComponent:
-   n = UPPERCASENAME {if (!componentNames.contains($n.text)){displayRecognitionError(getTokenNames(), new CustomRecognitionException(input, "unknown component '" + $n.text+"'"));}}
+   n = UPPERCASENAME {if (gPCTMCParserPrototype.requireDefinitions && !componentNames.contains($n.text)){
+      displayRecognitionError(getTokenNames(), new CustomRecognitionException(input, "unknown component '" + $n.text+"'"));}}
  | STOP
  | ANY
  | LPAR component RPAR -> component;
@@ -179,7 +180,7 @@ ACOUNT LOWERCASENAME -> ^(ACOUNT LOWERCASENAME)
 groupComponentPair:
      {hint.push("populations have to be of the form 'Group:Component'");}
      n=UPPERCASENAME      
-     INGROUP {if (!groupNames.contains($n.text)) {
+     INGROUP {if (gPCTMCParserPrototype.requireDefinitions && !groupNames.contains($n.text)) {
           reportError(new CustomRecognitionException(input, "invalid group label " + $n.text));
      }} component  
      {hint.pop();} -> ^(PAIR UPPERCASENAME component)

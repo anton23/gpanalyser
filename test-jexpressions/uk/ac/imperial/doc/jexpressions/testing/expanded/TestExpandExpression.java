@@ -24,7 +24,7 @@ import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 public class TestExpandExpression extends TestExpandedExpressionBase {
 
 	@Test
-	public void testExpandSimple() {
+	public void testExpandSimple() throws ParseException {
 		assertEquals(ExpandedExpression.create(new Polynomial(
 				new DoubleCoefficients(), a, b)),
 				ExpandingExpressionTransformer
@@ -88,7 +88,7 @@ public class TestExpandExpression extends TestExpandedExpressionBase {
 	}
 
 	@Test
-	public void testExpandWithMoments() {
+	public void testExpandWithMoments()  throws ParseException {
 		PCTMCInterpreter interpreter = GPAPMain.createGPEPAInterpreter();
 		assertEqualMomentExpressions("1.0*Cs:C", "Cs:C",
 				interpreter);
@@ -116,8 +116,7 @@ public class TestExpandExpression extends TestExpandedExpressionBase {
 	}
 
 	private void assertEqualMomentExpressions(String s1, String s2,
-			PCTMCInterpreter interpreter) {
-		try {
+			PCTMCInterpreter interpreter) throws ParseException  {
 			AbstractExpression e1 = interpreter.parseExpressionList(s1)
 					.iterator().next();
 			AbstractExpression e2 = interpreter.parseExpressionList(s2)
@@ -128,14 +127,11 @@ public class TestExpandExpression extends TestExpandedExpressionBase {
 			e2.accept(t);
 			e2 = t.getResult();
 			assertEquals(e1, e2);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
 	}
+	
 
 	private void assertEqualSimpleExpressions(String s1, String s2,
-			PCTMCInterpreter interpreter) {
-		try {
+			PCTMCInterpreter interpreter) throws ParseException  {
 			AbstractExpression e1 = interpreter.parseExpressionList(s1)
 					.iterator().next();
 			AbstractExpression e2 = interpreter.parseExpressionList(s2)
@@ -145,14 +141,10 @@ public class TestExpandExpression extends TestExpandedExpressionBase {
 			ExpandedExpression expE2 = ExpandingExpressionTransformer
 					.expandExpressionWithDoubles(e2);
 			assertEquals(expE1, expE2);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void assertNotEqualSimpleExpressions(String s1, String s2,
-			PCTMCInterpreter interpreter) {
-		try {
+			PCTMCInterpreter interpreter) throws ParseException  {
 			AbstractExpression e1 = interpreter.parseExpressionList(s1)
 					.iterator().next();
 			AbstractExpression e2 = interpreter.parseExpressionList(s2)
@@ -161,8 +153,5 @@ public class TestExpandExpression extends TestExpandedExpressionBase {
 					.expandExpressionWithDoubles(e1),
 					not(equalTo(ExpandingExpressionTransformer
 							.expandExpressionWithDoubles(e2))));
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
 	}
 }
