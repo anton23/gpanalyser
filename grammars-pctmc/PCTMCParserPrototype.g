@@ -38,6 +38,8 @@ tokens{
     
     protected ErrorReporter errorReporter;
     
+    public boolean requireDefinitions = false;
+    
     public void setErrorReporter(ErrorReporter errorReporter) {
        this.errorReporter = errorReporter;
     }
@@ -205,11 +207,13 @@ tokens{
   }
 }*/
 
-system:constantDefinition* varDefinition* 
-{hint.push("incomplete model definition");} modelDefinition {hint.pop();}
-{hint.push("allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise'");}
-analysis* experiment*
-EOF {hint.pop();};
+system:
+  {requireDefinitions = true;}
+  constantDefinition* varDefinition* 
+  {hint.push("incomplete model definition");} modelDefinition {hint.pop();}
+  {hint.push("allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise'");}
+  analysis* experiment*
+  EOF {hint.pop();};
 
 modelDefinition:
   eventDefinition*
@@ -407,7 +411,7 @@ primaryExpression:
      | MIN LPAR expression COMMA expression RPAR -> ^(MIN expression COMMA expression)
      | LOWERCASENAME LPAR expressionList RPAR -> ^(FUN LOWERCASENAME expressionList)
      | TIME 
-     | c = LOWERCASENAME {if (!constants.contains($c.text)) 
+     | c = LOWERCASENAME {if (requireDefinitions && !constants.contains($c.text)) 
           reportError(new CustomRecognitionException(input, "constant '" + $c.text + "' unknown"));}
      | mean 
      | generalExpectation

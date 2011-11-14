@@ -276,7 +276,7 @@ primary_expression returns[AbstractExpression e]:
  | TIME {$e = new TimeExpression();}
  |c = LOWERCASENAME {$e = new ConstantExpression($c.text);
                      }
- | cp=combinedProduct {$e = CombinedProductExpression.create($cp.c);}
+ | cp=combinedPowerProduct {$e = CombinedProductExpression.create($cp.c);}
  | m=mean {$e = $m.m;} 
  | eg = generalExpectation {$e = $eg.e;}
  | cm=central {$e = $cm.c;}
@@ -305,7 +305,7 @@ scentral returns [StandardisedCentralMomentOfLinearCombinationExpression c]:
 ;
 
 
-combinedProduct returns [CombinedPopulationProduct c]
+combinedPowerProduct returns [CombinedPopulationProduct c]
 @init{
   PopulationProduct nakedProduct = null; 
 }:

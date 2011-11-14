@@ -193,7 +193,8 @@ public class TestGPAParser extends TestPCTMCParserBase {
 				"ODEs(){}"
 				, 
 				Lists.newArrayList(
-				  "[line 8:5] mismatched input ')' expecting 'stopTime' (ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"));
+				  "[line 8:5] mismatched input ')' expecting 'stopTime' (ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"
+				  ));
 	}
 	
 	@Test
