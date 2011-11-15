@@ -35,15 +35,7 @@ import com.google.common.collect.Sets;
 public class TestCompilerSimpleInput extends TestCompilerBase {
 	
 	public TestCompilerSimpleInput() throws ParseException{
-		super(
-				"ra = 1.0;\n" +
-				"rb = 0.1;\n" +
-				"n = 10;\n" +
-				"\n" +
-				"A = (a, ra).B;\n" +
-				"B = (b, rb).A;\n" +
-				"As{A[n]}"		
-		);
+		super("test-gpa-inputs/simpleModel/model.gpepa");
 	}
 	
 	
