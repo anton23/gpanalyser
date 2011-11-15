@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.gpanalyser.testing;
+package uk.ac.imperial.doc.gpanalyser.testing.compiler;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import uk.ac.imperial.doc.gpa.GPAPMain;
-import uk.ac.imperial.doc.gpa.pctmc.GPEPAPCTMC;
 import uk.ac.imperial.doc.gpepa.representation.components.Choice;
 import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
@@ -26,8 +24,6 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
-import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
-import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -36,29 +32,18 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class TestCompilerSimpleInput {
-	
-	private static String input =
-			"ra = 1.0;\n" +
-			"rb = 0.1;\n" +
-			"n = 10;\n" +
-			"\n" +
-			"A = (a, ra).B;\n" +
-			"B = (b, rb).A;\n" +
-			"As{A[n]}";
-	
-	
-	private PCTMCFileRepresentation representation;
-	private GPEPAPCTMC pctmc;
+public class TestCompilerSimpleInput extends TestCompilerBase {
 	
 	public TestCompilerSimpleInput() throws ParseException{
-		this.representation = getRepresentation();
-		pctmc = (GPEPAPCTMC) representation.getPctmc();
-	}
-	
-	public static PCTMCFileRepresentation getRepresentation() throws ParseException{
-		PCTMCInterpreter interpreter = GPAPMain.createGPEPAInterpreter();
-		return interpreter.parsePCTMCFileInString(input);		
+		super(
+				"ra = 1.0;\n" +
+				"rb = 0.1;\n" +
+				"n = 10;\n" +
+				"\n" +
+				"A = (a, ra).B;\n" +
+				"B = (b, rb).A;\n" +
+				"As{A[n]}"		
+		);
 	}
 	
 	

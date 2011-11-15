@@ -445,14 +445,18 @@ public class Polynomial {
 	}
 
 	public boolean isNumber() {
-		return representation.size() == 1
+		return representation.size() == 0 || 
+		        (representation.size() == 1
 				&& representation.keySet().iterator().next().size() == 1
 				&& representation.keySet().iterator().next().iterator().next()
-						.isNumber();
+						.isNumber());
 	}
 
 	public AbstractExpression numericalValue() {
 		if (isNumber()) {
+			if (representation.size()==0) {
+				return DoubleExpression.ZERO;
+			}
 			Entry<Multiset<UnexpandableExpression>, AbstractExpression> entry = representation
 					.entrySet().iterator().next();
 			return ProductExpression.create(entry.getKey().iterator().next()

@@ -63,6 +63,8 @@ WHEN: 'when';
 AND:'and';
 GEQ:'>=';
 
+DER: 'dE[';
+DT: ']/dt';
 
 
 UPPERCASENAME : ('A'..'Z')('A'..'Z'|'a'..'z'|'0'..'9'|'_')*('\'')*;

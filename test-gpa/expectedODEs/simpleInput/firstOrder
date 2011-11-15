@@ -1,0 +1,4 @@
+As:A;
+
+dE[As:A]/dt = - As:A * ra + As:B * rb;
+dE[As:B]/dt = As:A * ra - As:B * rb;

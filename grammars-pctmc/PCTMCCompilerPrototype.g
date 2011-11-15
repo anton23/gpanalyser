@@ -376,7 +376,7 @@ power_expression returns [AbstractExpression e]:
 sign_expression returns [AbstractExpression e]
   : 
   (MINUS p1=primary_expression {$e = new UMinusExpression($p1.e); })
-  |p2=primary_expression {$e =$p2.e; };
+  |p2=primary_expression {$e = $p2.e; };
   
   
 realnumber returns [Double value]:
@@ -388,3 +388,12 @@ integer returns [Integer value]:
   r=INTEGER
   {$value = Integer.parseInt($r.text);}
 ;
+
+odeTest returns [List<CombinedPopulationProduct> moments, Map<CombinedPopulationProduct, AbstractExpression> odes]
+@init{
+  $moments = new LinkedList<CombinedPopulationProduct>();
+  $odes = new HashMap<CombinedPopulationProduct, AbstractExpression>();
+}:
+^(ODETEST (m=combinedPowerProduct {$moments.add($m.c);})+
+          (^(EXPODE lhs=combinedPowerProduct rhs=expression {$odes.put($lhs.c, $rhs.e);}))+
+);
