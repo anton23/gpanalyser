@@ -8,19 +8,19 @@ import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 
 public class TestCompilerBase {
 	
-	protected String input;
+	protected String inputFile;
 	protected PCTMCFileRepresentation representation;
 	protected GPEPAPCTMC pctmc;
 	
 	public TestCompilerBase(String input) throws ParseException{
-		this.input = input;
+		this.inputFile = input;
 		this.representation = getRepresentation();
 		pctmc = (GPEPAPCTMC) representation.getPctmc();
 	}
 	
 	public PCTMCFileRepresentation getRepresentation() throws ParseException{
 		PCTMCInterpreter interpreter = GPAPMain.createGPEPAInterpreter();
-		return interpreter.parsePCTMCFileInString(input);		
+		return interpreter.parsePCTMCFile(inputFile);		
 	}
 
 }

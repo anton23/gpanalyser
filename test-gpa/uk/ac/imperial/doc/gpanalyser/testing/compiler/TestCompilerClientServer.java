@@ -39,24 +39,7 @@ import com.google.common.collect.Sets;
 public class TestCompilerClientServer extends TestCompilerBase {
 
 	public TestCompilerClientServer() throws ParseException {
-		super("rr = 2.0;\n" + 
-			  "rt = 0.27;\n" + 
-			  "rb = 0.1;\n" +  
-			  "rd = 1.0;\n" + 
-			  "rrst = 1.0;\n" + 
-			  "n = 100;\n" + 
-			  "m = 60.0;\n" + 
-
-   			  "Client = (request,rr).Client_waiting;\n" + 
-			  "Client_waiting = (data,rd).Client_think;\n" +
-			  "Client_think = (think,rt).Client;\n" +  
-
-			  "Server = (request,rr).Server_get + (break,rb).Server_broken;\n"+
-			  "Server_get = (data,rd).Server;\n" + 
-			  "Server_broken = (reset,rrst).Server;\n" +
-			  
-			  "Clients{Client[n]}<request,data>Servers{Server[m]}\n"
-		);
+		super("test-gpa-inputs/clientServer/model.gpepa");
 	}
 	
 	@Test
