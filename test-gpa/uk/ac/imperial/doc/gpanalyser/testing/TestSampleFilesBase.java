@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import junit.framework.Assert;
-
-import org.junit.Test;
-
 import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
@@ -33,11 +30,9 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumer
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 
-
-
 public class TestSampleFilesBase {
 	
-	@Test
+
 	public void testSimpleClientServer(){
 		//PCTMCChartUtilities.setGui(false);
 		PCTMCInterpreter interpreter = GPAPMain.createGPEPAInterpreter();

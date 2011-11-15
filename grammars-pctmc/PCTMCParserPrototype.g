@@ -19,6 +19,8 @@ tokens{
   PRODUCT; 
   COMBINEDPRODUCT; 
   RANGE;
+  EXPODE;
+  ODETEST;
 }
 
 
@@ -477,4 +479,12 @@ accPower:
 
 expressionList:
     expression (COMMA expression)*; 
+    
+//-----Extra rules for tests
+
+odeTest:
+ combinedPowerProduct (COMMA combinedPowerProduct)* SEMI expectedODE+ -> ^(ODETEST combinedPowerProduct+ expectedODE+);
+
+expectedODE: 
+DER combinedPowerProduct DT DEF expression SEMI -> ^(EXPODE combinedPowerProduct expression);   
    

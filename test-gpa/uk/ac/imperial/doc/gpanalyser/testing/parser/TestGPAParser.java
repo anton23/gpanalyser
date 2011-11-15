@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.gpanalyser.testing;
+package uk.ac.imperial.doc.gpanalyser.testing.parser;
 
 import java.util.LinkedList;
 
