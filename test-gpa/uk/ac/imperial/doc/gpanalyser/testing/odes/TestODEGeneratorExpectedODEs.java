@@ -30,7 +30,7 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.ODEGenerator;
 
 
 @RunWith(Parameterized.class)
-public class TestODEGeneratorSimpleInput {
+public class TestODEGeneratorExpectedODEs {
 	
 
 	protected PCTMCInterpreter interpreter;
@@ -43,7 +43,7 @@ public class TestODEGeneratorSimpleInput {
 				{"simpleModel"}, {"clientServer"}});
 	}
 	
-	public TestODEGeneratorSimpleInput(String file) throws ParseException {
+	public TestODEGeneratorExpectedODEs(String file) throws ParseException {
 		this.interpreter = GPAPMain.createGPEPAInterpreter();
 		this.representation = interpreter.parsePCTMCFile("test-gpa-inputs/" + file + "/model.gpepa");		
 		this.file = file;
@@ -113,7 +113,7 @@ public class TestODEGeneratorSimpleInput {
 		return expandExpression(interpreter.parseExpressionList(s).get(0));		
 	}
 	
-	protected ExpandedExpression expandExpression(AbstractExpression e) {
+	public static ExpandedExpression expandExpression(AbstractExpression e) {
 		ExpandingExpressionTransformerWithMoments t = new ExpandingExpressionTransformerWithMoments(new DoubleConstantCoefficients());
 		e.accept(t);
 		return t.getResult();

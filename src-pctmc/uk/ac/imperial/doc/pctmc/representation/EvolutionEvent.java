@@ -1,6 +1,8 @@
 package uk.ac.imperial.doc.pctmc.representation;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
@@ -8,7 +10,9 @@ import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
 public class EvolutionEvent {
 	private List<State> decreasing;
-	private List<State> increasing; 
+	private List<State> increasing;
+	private Map<State, Integer> changeVector;
+	
 	AbstractExpression rate;
 	public List<State> getDecreasing() {
 		return decreasing;
@@ -16,6 +20,38 @@ public class EvolutionEvent {
 	public List<State> getIncreasing() {
 		return increasing;
 	}
+	
+
+	
+	public Map<State, Integer> getChangeVector() {
+		if (changeVector != null) {
+			return changeVector;
+		}
+		Map<State, Integer> tmp = new HashMap<State, Integer>();
+		for (State s:increasing) {
+			if (tmp.containsKey(s)) {
+				tmp.put(s, tmp.get(s) + 1);
+			} else {
+				tmp.put(s, 1);
+			}
+		}
+		for (State s:decreasing) {
+			if (tmp.containsKey(s)) {
+				tmp.put(s, tmp.get(s) - 1);
+			} else {
+				tmp.put(s, -1);
+			}
+		}
+		Map<State, Integer> ret = new HashMap<State, Integer>();
+		for (Map.Entry<State, Integer> e:tmp.entrySet()) {
+			if (e.getValue() != 0) {
+				ret.put(e.getKey(), e.getValue());
+			}
+		}
+		changeVector = ret;
+		return ret;
+	}
+	
 	public AbstractExpression getRate() {
 		return rate;
 	}
