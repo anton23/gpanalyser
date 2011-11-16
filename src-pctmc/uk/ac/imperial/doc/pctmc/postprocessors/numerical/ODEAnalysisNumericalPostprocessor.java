@@ -94,7 +94,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 				double tmp = 1.0;
 
 				for (Map.Entry<State, Integer> s : e.getKey().getNakedProduct()
-						.getProduct().entrySet()) {
+						.getRepresentation().entrySet()) {
 					for (int p = 0; p < s.getValue(); p++) {
 						if (!stateIndex.containsKey(s.getKey())) {
 							throw new AssertionError("State " + s.getKey()

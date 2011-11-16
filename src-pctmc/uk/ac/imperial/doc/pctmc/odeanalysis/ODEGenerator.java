@@ -147,7 +147,7 @@ public class ODEGenerator {
 	}
 
 	@SuppressWarnings("unchecked")
-	public BiMap<CombinedPopulationProduct, Integer> calculateProductIndex(
+	protected BiMap<CombinedPopulationProduct, Integer> calculateProductIndex(
 			int maxOrder) {
 		int n = states.length;
 		memMoments = (List<CombinedPopulationProduct>[][]) new List[maxOrder + 1][n];
@@ -185,7 +185,7 @@ public class ODEGenerator {
 						components - 1);
 				for (CombinedPopulationProduct p : tmp) {
 					Map<State, Integer> map = new HashMap<State, Integer>(p
-							.getNakedProduct().getProduct());
+							.getNakedProduct().getRepresentation());
 					map.put(states[components - 1], i);
 					ret.add(new CombinedPopulationProduct(
 							new PopulationProduct(map)));
@@ -313,7 +313,7 @@ public class ODEGenerator {
 		for (State p : jplus) {
 			jplusNum.add(stateIndex.get(p));
 		}
-		for (Map.Entry<State, Integer> e : k.getProduct().entrySet()) {
+		for (Map.Entry<State, Integer> e : k.getRepresentation().entrySet()) {
 			kNum[stateIndex.get(e.getKey())] = e.getValue();
 		}
 		List<int[]> flatMs = getM(jminusNum, jplusNum, kNum, maxOrder);

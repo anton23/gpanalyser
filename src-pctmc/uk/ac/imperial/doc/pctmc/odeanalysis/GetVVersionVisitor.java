@@ -29,7 +29,7 @@ public class GetVVersionVisitor extends MomentCountTransformerWithParameters
 				|| e.getProduct().getNakedProduct().getOrder() != 1) {
 			throw new AssertionError("Unsupported rate function!");
 		}
-		State state = e.getProduct().getNakedProduct().getProduct().keySet()
+		State state = e.getProduct().getNakedProduct().getRepresentation().keySet()
 				.iterator().next();
 		result = CombinedProductExpression
 				.create(new CombinedPopulationProduct(moment.getV(state)));

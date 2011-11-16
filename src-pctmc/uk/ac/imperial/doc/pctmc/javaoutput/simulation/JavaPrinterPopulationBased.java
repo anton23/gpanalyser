@@ -63,7 +63,7 @@ public class JavaPrinterPopulationBased extends JavaPrinterWithConstants impleme
 	public void visit(PopulationProductExpression e) {
 		PopulationProduct moment = e.getProduct();
 		boolean first = true; 
-		for (Map.Entry<State, Integer> entry:moment.getProduct().entrySet()){		
+		for (Map.Entry<State, Integer> entry:moment.getRepresentation().entrySet()){		
 			for (int i = 0; i<entry.getValue(); i++){
 				if (first){
 					first=false; 
