@@ -100,7 +100,7 @@ public class TestODEGeneratorExpectedODEs {
 		return (CombinedPopulationProduct) interpreter.parseGenericRule(string, "combinedPowerProduct", false);
 	}
 	
-	protected Set<CombinedPopulationProduct> parseCombinedProducts(String... string) throws ParseException{
+	protected static Set<CombinedPopulationProduct> parseCombinedProducts(PCTMCInterpreter interpreter, String... string) throws ParseException{
 		Set<CombinedPopulationProduct> ret = new HashSet<CombinedPopulationProduct>();
 		for  (String s:string) {
 			ret.add((CombinedPopulationProduct) interpreter.parseGenericRule(s, "combinedPowerProduct", false));

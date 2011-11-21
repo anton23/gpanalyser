@@ -141,6 +141,8 @@ public class ODEGenerator {
 
 		}
 		AbstractStatement[] ret = lines.toArray(new AbstractStatement[0]);
+		PCTMCLogging.info("Number of moments: "
+				+ nmoments);
 		PCTMCLogging.info("Number of combined moments: "
 				+ (momentIndex.size() - nmoments));
 		return new ODEMethod(ret);

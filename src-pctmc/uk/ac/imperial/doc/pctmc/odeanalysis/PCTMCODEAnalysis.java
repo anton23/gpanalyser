@@ -40,21 +40,22 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 		this.order = order;
 	}
 
-	private ODEGenerator odeGenerator;
+	// private ODEGenerator odeGenerator;
+	private NewODEGenerator odeGenerator;
 
 	@Override
 	public void prepare(Constants variables) {
-		this.odeGenerator = new ODEGenerator(pctmc);
+		//this.odeGenerator = new ODEGenerator(pctmc);
+		
+		this.odeGenerator = new NewODEGenerator(pctmc, new NormalMomentClosure(order));
 
-		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(order,
-				usedCombinedProducts);
+		odeMethod = odeGenerator.getODEMethodWithCombinedMoments(usedCombinedProducts);
 		momentIndex = odeGenerator.getMomentIndex();
 	}
-
+	
 	private ODEMethod odeMethod;
 
 	public ODEMethod getOdeMethod() {
 		return odeMethod;
 	}
-
 }
