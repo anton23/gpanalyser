@@ -3,6 +3,10 @@ package uk.ac.imperial.doc.gpanalyser.testing.odes;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.util.Map;
+
+import org.antlr.runtime.ANTLRFileStream;
 import org.junit.Test;
 
 import uk.ac.imperial.doc.gpa.GPAPMain;
@@ -12,16 +16,20 @@ import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandedExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
+import uk.ac.imperial.doc.pctmc.odeanalysis.NormalMomentClosure;
 public class TestODEGenerator extends NewODEGenerator{
 	
-	
+	protected PCTMCInterpreter interpreter;
 	
 	public TestODEGenerator() throws ParseException {
-		super(new TestCompilerClientServer().getRepresentation().getPctmc());
+		super(new TestCompilerClientServer().getRepresentation().getPctmc(), new NormalMomentClosure(2));
+		interpreter = GPAPMain.createGPEPAInterpreter();
 	}
 
 	@Test
@@ -34,11 +42,30 @@ public class TestODEGenerator extends NewODEGenerator{
 				.parseExpressionList(
 						"-2*min(Clients:Client^2 * rr, Clients:Client Servers:Server * rr) + min(Clients:Client * rr, Servers:Server * rr) + 2* Clients:Client Clients:Client_think*rt + Clients:Client_think*rt")
 				.get(0);
-		AbstractExpression rhs = generateODE(eClient2);
+		AbstractExpression rhs = getDerivativeOfMoment(eClient2);
 		
 		ExpandedExpression expandedExpected = TestODEGeneratorExpectedODEs.expandExpression(expected);
 		ExpandedExpression expandedRhs = TestODEGeneratorExpectedODEs.expandExpression(rhs);
 		assertEquals(expandedExpected, expandedRhs);
 	}
-
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGenerateSystem() throws ParseException, IOException, IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
+		generateODESystem(TestODEGeneratorExpectedODEs.parseCombinedProducts(interpreter, "acc(Clients:Client)"));
+		Object compilerReturn = interpreter.parseGenericRule(new ANTLRFileStream("test-gpa-inputs/clientServer/accFirstOrder"), "odeTest", false);
+		
+		Map<CombinedPopulationProduct, AbstractExpression> expectedODEs = (Map<CombinedPopulationProduct, AbstractExpression>) 
+			compilerReturn.getClass().getField("odes").get(compilerReturn);
+		System.out.println(rhs.keySet());
+		System.out.println(rhs.keySet().size());
+		
+		for (Map.Entry<CombinedPopulationProduct, AbstractExpression> e:expectedODEs.entrySet()) {
+			ExpandedExpression expectedExpanded = TestODEGeneratorExpectedODEs.expandExpression(e.getValue());
+			ExpandedExpression actualExpanded = TestODEGeneratorExpectedODEs.expandExpression((rhs.get(e.getKey())));
+			assertEquals("ODE for moment " + e.getKey() + ", difference:\n"
+					+ TestODEGeneratorExpectedODEs.expandExpression(new MinusExpression(e.getValue(), rhs.get(e.getKey()))).toAbstractExpression()+"\n",
+					expectedExpanded, actualExpanded);			
+		}
+	}
 }
