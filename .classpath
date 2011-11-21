@@ -25,8 +25,8 @@
 	<classpathentry kind="lib" path="lib/jogl.jar"/>
 	<classpathentry kind="lib" path="lib/jopt-simple-3.2.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.9b3.jar"/>
-	<classpathentry kind="lib" path="lib/org.jzy3d-0.8.3.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-3.4.jar"/>
 	<classpathentry kind="lib" path="lib/guava-10.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/org.jzy3d-0.8.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
