@@ -24,6 +24,7 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.Binomial;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -53,6 +54,7 @@ public class NewODEGenerator {
 	}
 	
 	protected void generateODESystem(Collection<CombinedPopulationProduct> usedMoments) {
+		PCTMCLogging.info("Generating the underlying ODE system.");
 		rhs = new HashMap<CombinedPopulationProduct, AbstractExpression>();
 		processing = new HashSet<CombinedPopulationProduct>();
 		for (CombinedPopulationProduct moment:usedMoments) {
@@ -64,6 +66,7 @@ public class NewODEGenerator {
 		for (CombinedPopulationProduct m:rhs.keySet()) {
 			momentIndex.put(m, i++);
 		}
+		PCTMCLogging.info("The total number od ODEs is " + i);
 	}
 	
 	
