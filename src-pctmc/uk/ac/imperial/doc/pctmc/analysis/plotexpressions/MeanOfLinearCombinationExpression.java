@@ -45,14 +45,25 @@ public class MeanOfLinearCombinationExpression extends ExpressionWrapper {
 			if (s instanceof ProductExpression) {
 				List<AbstractExpression> terms = ((ProductExpression) s)
 						.getTerms();
-				if (terms.size() > 2
-						|| !(terms.get(1) instanceof CombinedProductExpression)) {
+				AbstractExpression coefficient;			
+				if (terms.size() > 2) {
+					throw new AssertionError("Expression " + e
+							+ " is not a linear combination of moments! One of the terms ("+ s + ") is a product of more than two terms.");
+				}							
+				CombinedPopulationProduct product; 
+				if (terms.get(1) instanceof CombinedProductExpression) {
+					 product = ((CombinedProductExpression) terms		
+						.get(1)).getProduct();
+					 coefficient = terms.get(0);
+				} else 
+				if (terms.get(0) instanceof CombinedProductExpression) {
+					 product = ((CombinedProductExpression) terms		
+								.get(0)).getProduct();
+							 coefficient = terms.get(1);
+				} else {
 					throw new AssertionError("Expression " + e
 							+ " is not a linear combination of moments!");
 				}
-				AbstractExpression coefficient = terms.get(0);
-				CombinedPopulationProduct product = ((CombinedProductExpression) terms
-						.get(1)).getProduct();
 				IsConstantVisitor visitor = new IsConstantVisitor();
 				coefficient.accept(visitor);
 				if (!visitor.isConstant()) {
