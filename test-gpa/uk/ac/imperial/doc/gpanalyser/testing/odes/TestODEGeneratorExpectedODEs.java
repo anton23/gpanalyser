@@ -40,7 +40,7 @@ public class TestODEGeneratorExpectedODEs {
 	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
-				{"simpleModel"}, {"clientServer"}});
+				{"simpleModel"}, {"clientServer"}, {"clientServerProbed"}});
 	}
 	
 	public TestODEGeneratorExpectedODEs(String file) throws ParseException {
