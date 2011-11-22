@@ -50,7 +50,10 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 			preprocessedImplementation = javaImplementation
 					.getPreprocessedODEImplementation(
 							odeAnalysis.getOdeMethod(), constants, momentIndex);
+		} else {
+			throw new AssertionError("ODE postprocessor attached to an incompatible analysis " + analysis.toString());
 		}
+		
 	}
 
 	private JavaODEsPreprocessed preprocessedImplementation;

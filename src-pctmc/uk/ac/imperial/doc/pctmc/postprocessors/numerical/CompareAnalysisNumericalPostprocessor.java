@@ -7,12 +7,13 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.compare.CompareExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.compare.PCTMCCompareAnalysis;
 
 public class CompareAnalysisNumericalPostprocessor extends
 		NumericalPostprocessor {
 
-	NumericalPostprocessor postprocessor1; 
-	NumericalPostprocessor postprocessor2; 
+	protected NumericalPostprocessor postprocessor1; 
+	protected NumericalPostprocessor postprocessor2; 
 	
 	public CompareAnalysisNumericalPostprocessor(NumericalPostprocessor postprocessor1,
 			NumericalPostprocessor postprocessor2) {
@@ -24,14 +25,17 @@ public class CompareAnalysisNumericalPostprocessor extends
 
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
-
+		PCTMCCompareAnalysis asCompare = (PCTMCCompareAnalysis)analysis;
+		postprocessor1.prepare(asCompare.getAnalysis1(), constants);
+		postprocessor2.prepare(asCompare.getAnalysis2(), constants);
 	}
 
 
 	@Override
 	public void calculateDataPoints(Constants constants) {
-		dataPoints=new double[1][1];
-		
+		dataPoints=new double[1][1];	
+		postprocessor1.calculateDataPoints(constants);
+		postprocessor2.calculateDataPoints(constants);
 	}
 	
 	@Override
