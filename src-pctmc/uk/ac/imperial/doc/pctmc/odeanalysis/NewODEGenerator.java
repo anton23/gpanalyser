@@ -232,4 +232,8 @@ public class NewODEGenerator {
 	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
 		return momentIndex;
 	}
+	
+	public AbstractExpression getRHS(CombinedPopulationProduct moment) { 
+		return rhs.get(moment);
+	}
 }

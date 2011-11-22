@@ -9,4 +9,44 @@ dE[Clients:Client_waiting<think>NotFinished]/dt =
     -
   div(rd*Clients:Client_waiting<think>NotFinished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
     *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd);
+    
+dE[Clients:Client_think<think>NotFinished]/dt =
+  div(rd*Clients:Client_waiting<think>NotFinished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
+    *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd)
+    -
+  rt * Clients:Client_think<think>NotFinished    
+   ;  
+   
+dE[Clients:Client<think>Finished]/dt = -div(rr*Clients:Client<think>Finished, rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)))*
+	min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), rr*Servers:Server)
+  + Clients:Client_think<think>NotFinished * rt + Clients:Client_think<think>Finished * rt;
+
+
+
+dE[Clients:Client_waiting<think>Finished]/dt = 
+  div(rr*Clients:Client<think>Finished, rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)))
+    *min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), Servers:Server * rr) 
+    -
+  div(rd*Clients:Client_waiting<think>Finished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
+    *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd);
+
+   
+dE[Clients:Client_think<think>Finished]/dt =
+ div(rd*Clients:Client_waiting<think>Finished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
+    *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd) 
+  -  
+  rt * Clients:Client_think<think>Finished    
+   ;  
+   
+dE[Servers:Server]/dt = 
+  -min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), Servers:Server * rr)
+  +min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd)
+  + Servers:Server_broken * rrst - Servers:Server * rb ;
+  
+dE[Servers:Server_get]/dt = 
+	min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), Servers:Server * rr)
+    -min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd);
+
+dE[Servers:Server_broken]/dt =
+  - Servers:Server_broken * rrst + Servers:Server * rb ;    
 
