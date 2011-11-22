@@ -239,6 +239,14 @@ compare:
 ;
 
 experiment
+// Allows addition of new constants in range specifications
+@init{
+  Set<String> tmp = constants;
+  constants = new HashSet<String>(constants);
+}
+@after{
+  constants = tmp;
+}
 :
     ir = iterateSpec
         min = minimiseSpec?
@@ -280,6 +288,7 @@ constantReEvaluation:
 
 rangeSpecification:
   constant=LOWERCASENAME FROMVALUE from=REALNUMBER TOVALUE to=REALNUMBER steps=stepSpecification 
+ {constants.add($constant.text);}
   -> ^(RANGE $constant $from $to $steps)
 ;
 
