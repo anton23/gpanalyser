@@ -26,7 +26,8 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
-import uk.ac.imperial.doc.pctmc.odeanalysis.ODEGenerator;
+import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
+import uk.ac.imperial.doc.pctmc.odeanalysis.NormalMomentClosure;
 
 
 @RunWith(Parameterized.class)
@@ -40,7 +41,8 @@ public class TestODEGeneratorExpectedODEs {
 	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
-				{"simpleModel"}, {"clientServer"}, {"clientServerProbed"}});
+				{"simpleModel"}, {"clientServer"},
+				{"clientServerProbed"}});
 	}
 	
 	public TestODEGeneratorExpectedODEs(String file) throws ParseException {
@@ -83,8 +85,8 @@ public class TestODEGeneratorExpectedODEs {
 		for (CombinedPopulationProduct m:moments) {
 			order = Math.max(order, m.getOrder());
 		}
-		ODEGenerator generator = new ODEGenerator(representation.getPctmc());
-		generator.getODEMethodWithCombinedMoments(order, moments);		
+		NewODEGenerator generator = new NewODEGenerator(representation.getPctmc(), new NormalMomentClosure(order));
+		generator.getODEMethodWithCombinedMoments(moments);		
 		for (Map.Entry<CombinedPopulationProduct, AbstractExpression> e:expectedODEs.entrySet()) {
 			ExpandedExpression expectedExpanded = expandExpression(e.getValue());
 			ExpandedExpression actualExpanded = expandExpression((generator.getRHS(e.getKey())));
