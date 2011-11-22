@@ -209,11 +209,9 @@ public class NewODEGenerator {
 				// Multiplies each moment by the rate, according to a provided moment closure
 				for (CoefficientMoment c : summands) {
 					if (c.moment.getOrder() < moment.getOrder()) {
-						GetVVersionVisitorMomentClosure getVVersion = new GetVVersionVisitorMomentClosure(
-								c.moment, 2);
-						event.getRate().accept(getVVersion);
+						AbstractExpression closedRate = momentClosure.closeRate(event.getRate(), c.moment);
 						tmp.add(ProductExpression.create(c.coefficient,
-								getVVersion.getResult()));
+								closedRate));
 					}
 				}
 
