@@ -324,7 +324,9 @@ plotAt:
 
 
 odeAnalysis:
-  ODES {hint.push("ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
+  ODES 
+  odeParameters?
+  {hint.push("ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
       LPAR
   STOPTIME DEF stopTime = REALNUMBER COMMA
   STEPSIZE DEF stepSize = REALNUMBER COMMA
@@ -332,9 +334,18 @@ odeAnalysis:
   RPAR {hint.pop();}LBRACE
     plotDescription*
   RBRACE
-  -> ^(ODES $stopTime $stepSize $density LBRACE plotDescription* RBRACE )
+  -> ^(ODES odeParameters? $stopTime $stepSize $density LBRACE plotDescription* RBRACE )
 ;
 
+odeParameters:
+  LBRACK parameter (COMMA parameter)* RBRACK
+  ->
+  LBRACK parameter+ RBRACK
+;
+
+parameter:
+ LOWERCASENAME DEF (UPERCASENAME|REALNUMBER);
+ 
 simulation:
   SIMULATION LPAR
   STOPTIME DEF stopTime = REALNUMBER COMMA

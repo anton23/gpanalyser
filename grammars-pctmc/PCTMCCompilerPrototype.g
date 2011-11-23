@@ -188,12 +188,20 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
 }
 ;
 odeAnalysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
-returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]:
-  ^(ODES stop=realnumber step=realnumber den=integer LBRACE 
+returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
+@init{
+  Map<String, Object> parameters = new HashMap<String, Object>();
+}:
+  ^(ODES  
+         (LBRACK
+              (p=LOWERCASENAME DEF (n=UPERCASENAME{parameters.put($p.text, $n.text);}
+                                   |r=realnumber  {parameters.put($p.text, $r.value);}))+ 
+          RBRACK)?
+         stop=realnumber step=realnumber den=integer LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
-      $analysis = new PCTMCODEAnalysis($pctmc);
+      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
       $postprocessor = new ODEAnalysisNumericalPostprocessor($stop.value,$step.value,$den.value);
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
