@@ -33,7 +33,7 @@ import com.google.common.collect.Multiset;
 
 public class NewODEGenerator {
 	
-	protected IMomentClosure momentClosure;
+	protected MomentClosure momentClosure;
 	
 	protected PCTMC pctmc;
 	
@@ -71,7 +71,7 @@ public class NewODEGenerator {
 	
 	
 
-	public NewODEGenerator(PCTMC pctmc, IMomentClosure momentClosure) {
+	public NewODEGenerator(PCTMC pctmc, MomentClosure momentClosure) {
 		super();
 		this.pctmc = pctmc;
 		this.momentClosure = momentClosure;
