@@ -338,13 +338,16 @@ odeAnalysis:
 ;
 
 odeParameters:
-  LBRACK parameter (COMMA parameter)* RBRACK
-  ->
-  LBRACK parameter+ RBRACK
+  LBRACK
+     {hint.push("ODE analysis parameters have to be of the form [name1=value1, ..., nameK=valueK]");}
+   parameter (COMMA parameter)* 
+   {hint.pop();}
+  RBRACK
 ;
 
 parameter:
- LOWERCASENAME DEF (UPERCASENAME|REALNUMBER);
+   LOWERCASENAME DEF UPERCASENAME
+ | LOWERCASENAME DEF REALNUMBER ;
  
 simulation:
   SIMULATION LPAR
