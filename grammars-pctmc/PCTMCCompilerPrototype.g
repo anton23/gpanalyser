@@ -194,8 +194,9 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 }:
   ^(ODES  
          (LBRACK
-              (p=LOWERCASENAME DEF (n=UPERCASENAME{parameters.put($p.text, $n.text);}
-                                   |r=realnumber  {parameters.put($p.text, $r.value);}))+ 
+             p1=parameter {parameters.put($p1.name, $p1.value);} 
+             (COMMA p=parameter 
+                          {parameters.put($p.name, $p.value);})* 
           RBRACK)?
          stop=realnumber step=realnumber den=integer LBRACE 
          ps=plotDescriptions 
@@ -207,6 +208,11 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
   
+;
+
+parameter returns [String name, Object value]:
+  p=LOWERCASENAME DEF (n=UPERCASENAME{$name = $p.text; $value = $n.text;}
+                      |r=realnumber  {$name = $p.text; $value = $r.value;})
 ;
 
 simulation[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
