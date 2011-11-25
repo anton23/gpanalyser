@@ -25,17 +25,14 @@ public class CompareAnalysisNumericalPostprocessor extends
 
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
-		PCTMCCompareAnalysis asCompare = (PCTMCCompareAnalysis)analysis;
-		postprocessor1.prepare(asCompare.getAnalysis1(), constants);
-		postprocessor2.prepare(asCompare.getAnalysis2(), constants);
+		
 	}
 
 
 	@Override
 	public void calculateDataPoints(Constants constants) {
 		dataPoints=new double[1][1];	
-		postprocessor1.calculateDataPoints(constants);
-		postprocessor2.calculateDataPoints(constants);
+
 	}
 	
 	@Override

@@ -143,7 +143,8 @@ tokens{
       }
       else {
         tokenName = tokenNames[mte.expecting];
-      }
+      }  
+      
       msg = "mismatched input "+getTokenErrorDisplay(e.token)+
         " expecting "+tokenName;
     }
@@ -155,7 +156,8 @@ tokens{
       }
       else {
         tokenName = tokenNames[mtne.expecting];
-      }
+      } 
+
       msg = "mismatched tree node: "+mtne.node+
         " expecting "+tokenName;
     }
@@ -346,8 +348,7 @@ odeParameters:
 ;
 
 parameter:
-   LOWERCASENAME DEF UPERCASENAME
- | LOWERCASENAME DEF REALNUMBER ;
+   LOWERCASENAME DEF (UPPERCASENAME|REALNUMBER|INTEGER) ;
  
 simulation:
   SIMULATION LPAR
