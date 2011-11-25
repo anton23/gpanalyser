@@ -211,8 +211,9 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 ;
 
 parameter returns [String name, Object value]:
-  p=LOWERCASENAME DEF (n=UPERCASENAME{$name = $p.text; $value = $n.text;}
-                      |r=realnumber  {$name = $p.text; $value = $r.value;})
+  p=LOWERCASENAME DEF (n=UPPERCASENAME{$name = $p.text; $value = $n.text;}
+                      |r=realnumber  {$name = $p.text; $value = $r.value;}
+                      |i=integer  {$name = $p.text; $value = $i.value;})
 ;
 
 simulation[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
