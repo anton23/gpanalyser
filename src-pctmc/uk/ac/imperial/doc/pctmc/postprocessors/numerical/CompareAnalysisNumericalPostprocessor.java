@@ -7,7 +7,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.compare.CompareExpressionEvaluator;
-import uk.ac.imperial.doc.pctmc.compare.PCTMCCompareAnalysis;
 
 public class CompareAnalysisNumericalPostprocessor extends
 		NumericalPostprocessor {

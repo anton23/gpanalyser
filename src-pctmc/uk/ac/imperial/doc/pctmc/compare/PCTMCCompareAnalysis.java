@@ -19,8 +19,8 @@ public class PCTMCCompareAnalysis extends AbstractPCTMCAnalysis {
 
 	@Override
 	public void prepare(Constants constants) {
-		analysis1.prepare(constants);
-		analysis2.prepare(constants);
+		//analysis1.prepare(constants);
+		//analysis2.prepare(constants);
 	}
 
 	@Override
