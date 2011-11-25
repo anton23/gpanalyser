@@ -95,6 +95,19 @@ import PCTMCCompilerPrototype;
       }
 }
 
+
+@rulecatch {
+  catch (RecognitionException re) {
+   reportError(re);  
+   recover(input, re);
+  }
+  catch (AssertionError e) {
+   reportError(new CustomRecognitionException(input, e.getMessage()));
+   recover(input, new CustomRecognitionException(input, e.getMessage()));
+  }
+}
+
+
 start:;
 
 

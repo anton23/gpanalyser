@@ -44,6 +44,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 	public void visit(PopulationExpression e) {
 		CombinedPopulationProduct product;
 		if (insert) {
+			// TODO handle case if (moment.getOrder()>= maxOrder)
 			product = new CombinedPopulationProduct(moment.getV(e.getState()));
 			inserted = true;
 		} else {
@@ -77,7 +78,6 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 
 	@Override
 	public void visit(CombinedProductExpression e) {
-		// TODO investigate normal approximation, i.e.
 		if (e.getProduct().getAccumulatedProducts().size() > 0) {
 			throw new AssertionError("Accumulations not allowed in rates!");
 		}

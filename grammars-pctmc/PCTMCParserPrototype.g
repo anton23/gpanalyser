@@ -510,5 +510,5 @@ odeTest:
  combinedPowerProduct (COMMA combinedPowerProduct)* SEMI expectedODE+ -> ^(ODETEST combinedPowerProduct+ expectedODE+);
 
 expectedODE: 
-DER combinedPowerProduct DT DEF expression SEMI -> ^(EXPODE combinedPowerProduct expression);   
+DER MEAN LBRACK combinedPowerProduct RBRACK DIVIDE DT DEF expression SEMI -> ^(EXPODE combinedPowerProduct expression);   
    
