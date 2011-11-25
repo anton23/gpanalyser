@@ -42,21 +42,22 @@ tokens{
 
 //This is a hack until the composite grammars are implemented in a better way
 @members{
-  protected Stack<String> hint = new Stack<String>();
+   protected Stack<String> hint;
   
   protected ErrorReporter errorReporter;
-
-  public void setErrorReporter(ErrorReporter errorReporter) {
+  
+  public void setErrorReporter(ErrorReporter errorReporter) {    
     this.errorReporter = errorReporter;
     gPCTMCParserPrototype.setErrorReporter(errorReporter);
+    hint = gPCTMCParserPrototype.hint;
   }
+  
   
   public ParsingData getParsingData() { return null; } 
   
   public void setParsingData(ParsingData parsingData) { }
 
-
-  public String getErrorHeader(RecognitionException e) {
+ public String getErrorHeader(RecognitionException e) {
     return "line "+e.line+":"+e.charPositionInLine;
   }
 

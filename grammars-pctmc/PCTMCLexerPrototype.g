@@ -2,8 +2,8 @@ lexer grammar PCTMCLexerPrototype;
 
 options {
   language = Java;
+  backtrack = true;
 }
-
 
 
 AT: '@';
@@ -63,8 +63,8 @@ WHEN: 'when';
 AND:'and';
 GEQ:'>=';
 
-DER: 'dE[';
-DT: ']/dt';
+DER: 'd';
+DT: 'dt';
 
 
 UPPERCASENAME : ('A'..'Z')('A'..'Z'|'a'..'z'|'0'..'9'|'_')*('\'')*;
