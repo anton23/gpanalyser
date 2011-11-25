@@ -1,7 +1,11 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -87,7 +91,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			result = CombinedProductExpression
 					.create(new CombinedPopulationProduct(PopulationProduct
 							.getProduct(moment, nakedProduct)));
-		} else if (order % 2 == 1) {
+		} else  {
 			State[] x = new State[order];
 			int i = 0;
 			for (State s : PopulationProduct.getProduct(moment, nakedProduct)
@@ -95,9 +99,12 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 				if (s != null)
 					x[i++] = s;
 			}
-			result = getOddMomentInTermsOfCovariances(x);
-		} else {
-
+			if (order % 2 == 1) {
+				result = getOddMomentInTermsOfCovariances(x);
+			} else {
+				result = getEventMomentInTermsOfCovariances(x);
+			}
+		} /* else {
 			Multiset<State> momentMset = moment.asMultiset();
 			Multiset<State> nakedMset = nakedProduct.asMultiset();
 			Multiset<State> remains = HashMultiset.<State> create();
@@ -124,7 +131,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			}
 
 			result = ProductExpression.create(terms);
-		}
+		}*/
 	}
 
 	public AbstractExpression getOddMomentInTermsOfCovariances(State[] states) {
@@ -160,4 +167,72 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 		}
 		return SumExpression.create(summands);
 	}
+	
+	public AbstractExpression getEventMomentInTermsOfCovariances(State[] states) {
+		assert(states.length % 2 == 0);
+		
+		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
+		summands.add(getOddMomentInTermsOfCovariances(states));
+		for (Set<List<State>> partition:GetVVersionVisitorMomentClosure.<State>getAllPartitionsIntoPairs(Arrays.asList(states))) {
+			// Needs to evaluate the product E[(X1-u1)(X2-u2)]*E[(X3-u3)(X4-u4)]*...* + E[(X1-u1)(X3-u3)]*... + ...
+			List<List<State>> tmp = new ArrayList<List<State>>(partition);
+			for (long i = 0; i<Math.pow(2,partition.size()); i++){
+				long iBit = i;
+				int j = 0;
+				int sign = 1;
+				List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
+				while (j < partition.size()) {
+					CombinedPopulationProduct m1 = CombinedPopulationProduct.getMeanPopulation(tmp.get(j).get(0));
+					CombinedPopulationProduct m2 = CombinedPopulationProduct.getMeanPopulation(tmp.get(j).get(1));
+					CombinedPopulationProduct m1m2 = CombinedPopulationProduct.getProductOf(m1, m2);
+					if (iBit % 2 == 0) {
+						terms.add(CombinedProductExpression.create(m1m2));
+					} else {
+						sign *= -1;
+						terms.add(CombinedProductExpression.create(m1));
+						terms.add(CombinedProductExpression.create(m2));
+					}
+					iBit /= 2;
+					j++;
+				}
+				if (sign == -1) {
+					terms.add(new DoubleExpression(-1.0));
+				}
+				summands.add(ProductExpression.create(terms));
+			}
+		}
+		return SumExpression.create(summands);		
+	}
+	
+	// This is quite inefficient
+	public static <T> Set<Set<List<T>>> getAllPartitionsIntoPairs(List<T> l) {
+		assert(l.size() % 2 == 0);
+		Set<Set<List<T>>> ret = new HashSet<Set<List<T>>>();
+		if (l.size()==2) {
+			Set<List<T>> tmp = new HashSet<List<T>>();
+			tmp.add(l);
+			ret.add(tmp);
+			return ret;
+		}
+		for (int i = 0; i<l.size(); i++) {
+			for (int j = i+1; j<l.size(); j++) {
+					List<T> smaller = new ArrayList<T>(l.size()-2);
+					for (int k = 0; k<l.size(); k++) {
+						if (k!=j && k!=i) {
+							smaller.add(l.get(k));
+						}
+					}
+					List<T> pair = new LinkedList<T>();
+					pair.add(l.get(i));
+					pair.add(l.get(j));
+					Set<Set<List<T>>> smallerPartitions = getAllPartitionsIntoPairs(smaller);
+					for (Set<List<T>> partition:smallerPartitions) {
+						partition.add(pair);
+						ret.add(partition);
+					}
+			}
+		}
+		return ret;
+	}
+	
 }
