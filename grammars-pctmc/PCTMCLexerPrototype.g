@@ -63,7 +63,7 @@ WHEN: 'when';
 AND:'and';
 GEQ:'>=';
 
-DER: 'd';
+DERMEAN: 'dE';
 DT: 'dt';
 
 
