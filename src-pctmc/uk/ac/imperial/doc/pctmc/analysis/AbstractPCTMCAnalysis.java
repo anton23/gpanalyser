@@ -96,8 +96,14 @@ public abstract class AbstractPCTMCAnalysis {
 	 */
 	public void setUsedMoments(
 			Collection<CombinedPopulationProduct> combinedProducts) {
+		if (usedCombinedProducts == null) {
+			usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
+		} else {
+			usedCombinedProducts.addAll(combinedProducts);		
+		}
+		
 		momentIndex = HashBiMap.<CombinedPopulationProduct, Integer> create();
-		usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
+		
 		int i = 0;
 		for (CombinedPopulationProduct p : combinedProducts) {
 			usedCombinedProducts.add(p);

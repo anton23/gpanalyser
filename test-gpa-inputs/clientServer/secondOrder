@@ -12,7 +12,126 @@ dE[Clients:Client Clients:Client_waiting]/dt = - min(Clients:Client Clients:Clie
 dE[Clients:Client Clients:Client_think]/dt = - min(Clients:Client Clients:Client_think * rr, Servers:Server Clients:Client_think * rr)
 										    - Clients:Client Clients:Client_think*rt + Clients:Client_think^2*rt - Clients:Client_think*rt 
 										    + min(Clients:Client_waiting Clients:Client * rd, Servers:Server_get Clients:Client * rd);
+										    
+dE[Clients:Client Servers:Server]/dt = - min(Clients:Client Servers:Server * rr, Servers:Server^2 * rr) 										    
+ 									   - min(Clients:Client^2 * rr, Servers:Server Clients:Client * rr)
+ 									   + min(Clients:Client * rr, Servers:Server * rr)
+									   + Clients:Client_think Servers:Server*rt	
+									   + Servers:Server_broken Clients:Client * rrst
+									   - Servers:Server Clients:Client * rb 
+									   + min(Clients:Client_waiting Clients:Client * rd, Servers:Server_get Clients:Client * rd);
 
+dE[Clients:Client Servers:Server_get]/dt = - min(Clients:Client Servers:Server_get * rr, Servers:Server Servers:Server_get * rr)
+										  + min(Clients:Client^2 * rr, Servers:Server Clients:Client * rr)
+										  - min(Clients:Client * rr, Servers:Server * rr)
+										  + Clients:Client_think Servers:Server_get*rt
+										  - min(Clients:Client_waiting Clients:Client * rd, Servers:Server_get Clients:Client * rd)
+										  ;
+										  
+dE[Clients:Client Servers:Server_broken]/dt	= - min(Clients:Client Servers:Server_broken * rr, Servers:Server Servers:Server_broken * rr)
+									          + Clients:Client_think Servers:Server_broken*rt  
+									          - Clients:Client Servers:Server_broken * rrst + Clients:Client Servers:Server * rb ;
+
+dE[Clients:Client_waiting^2]/dt = 2*min(Clients:Client_waiting Clients:Client * rr, Clients:Client_waiting Servers:Server * rr)
+								  + min(Clients:Client * rr, Servers:Server * rr)
+								  - 2 * min(Clients:Client_waiting^2 * rd, Servers:Server_get Clients:Client_waiting * rd)
+								  + min(Clients:Client_waiting * rd, Servers:Server_get * rd);
+
+									          
+dE[Clients:Client_waiting Clients:Client_think]/dt =   min(Clients:Client Clients:Client_think * rr, Servers:Server Clients:Client_think * rr)
+												     - min(Clients:Client_think Clients:Client_waiting * rd, Clients:Client_think Servers:Server_get * rd)
+												     + min(Clients:Client_waiting^2 * rd, Clients:Client_waiting Servers:Server_get * rd)
+												     - min(Clients:Client_waiting * rd, Servers:Server_get * rd)
+												     - rt * Clients:Client_waiting Clients:Client_think
+												     ;
+												     									          
+dE[Clients:Client_waiting Servers:Server]/dt = 	 min(Clients:Client Servers:Server * rr, Servers:Server^2 * rr)
+											   - min(Clients:Client Clients:Client_waiting * rr, Servers:Server Clients:Client_waiting * rr)
+											   - min(Clients:Client * rr, Servers:Server * rr)											
+											   - min(Servers:Server Clients:Client_waiting * rd, Servers:Server Servers:Server_get * rd)
+											   + min(Clients:Client_waiting^2 * rd, Servers:Server_get Clients:Client_waiting * rd)
+											   - min(Clients:Client_waiting * rd, Servers:Server_get * rd)
+											   + Clients:Client_waiting Servers:Server_broken * rrst - Clients:Client_waiting Servers:Server * rb
+											   ;	     
+			  
+dE[Clients:Client_waiting Servers:Server_get]/dt = min(Clients:Client_waiting Clients:Client * rr, Clients:Client_waiting Servers:Server * rr)
+                                                   + min(Clients:Client Servers:Server_get* rr, Servers:Server Servers:Server_get* rr)
+                                                   + min(Clients:Client * rr, Servers:Server * rr) 			 
+                                                   - min(Clients:Client_waiting^2 * rd, Clients:Client_waiting Servers:Server_get * rd)
+                                                   - min(Clients:Client_waiting Servers:Server_get * rd, Servers:Server_get^2 * rd)
+                                                   + min(Clients:Client_waiting * rd, Servers:Server_get * rd) ;
+			  
+dE[Clients:Client_waiting Servers:Server_broken]/dt = min(Clients:Client Servers:Server_broken * rr, Servers:Server Servers:Server_broken* rr)
+                                                      - min(Clients:Client_waiting Servers:Server_broken* rd, Servers:Server_get Servers:Server_broken* rd)
+                                                      - Clients:Client_waiting Servers:Server_broken * rrst	
+                                                      + Clients:Client_waiting Servers:Server * rb;		  
+                                                      
+dE[Clients:Client_think Clients:Client_think]/dt = 2 * min(Clients:Client_think Clients:Client_waiting * rd, Clients:Client_think Servers:Server_get * rd)
+                                                    + min(Clients:Client_waiting * rd, Servers:Server_get * rd)
+                                                   - 2 * rt * Clients:Client_think^2
+                                                   + rt * Clients:Client_think;                                                
+                                                       
+dE[Clients:Client_think Servers:Server]/dt = - min(Clients:Client Clients:Client_think * rr, Servers:Server Clients:Client_think * rr)
+                                             + min(Clients:Client_waiting Clients:Client_think* rd, Servers:Server_get Clients:Client_think* rd)                                                         
+                                             + min(Servers:Server Clients:Client_waiting* rd, Servers:Server_get Servers:Server* rd)
+                                             + min(Clients:Client_waiting * rd, Servers:Server_get * rd)
+                                             + Servers:Server_broken Clients:Client_think * rrst
+                                             - Servers:Server Clients:Client_think * rb 
+                                             - rt * Servers:Server Clients:Client_think;
+                                             
+dE[Clients:Client_think Servers:Server_get]/dt = - min(Clients:Client_think Clients:Client_waiting * rd, Clients:Client_think Servers:Server_get * rd)
+                                                 + min(Clients:Client_waiting Servers:Server_get * rd, Servers:Server_get^2 * rd)
+                                                 - min(Clients:Client_waiting * rd, Servers:Server_get * rd)                                     
+                                                 - rt * Clients:Client_think Servers:Server_get
+                                                 + min(Clients:Client Clients:Client_think * rr, Servers:Server Clients:Client_think * rr);
+
+dE[Clients:Client_think Servers:Server_broken]/dt = min(Servers:Server_broken Clients:Client_waiting * rd, Servers:Server_broken Servers:Server_get * rd)
+													-  rt * Clients:Client_think Servers:Server_broken
+													-  Clients:Client_think Servers:Server_broken * rrst
+													+ Clients:Client_think Servers:Server * rb;
+													
+dE[Servers:Server^2]/dt = -2 * min(Clients:Client Servers:Server * rr, Servers:Server^2 * rr)
+                          + min(Clients:Client * rr, Servers:Server * rr)
+						  + 2 *  min(Clients:Client_waiting Servers:Server* rd, Servers:Server_get Servers:Server * rd)
+						  +  min(Clients:Client_waiting * rd, Servers:Server_get * rd)
+						  + 2 * Servers:Server_broken Servers:Server * rrst 
+						  + Servers:Server_broken * rrst 
+						  - 2 * Servers:Server^2 * rb
+						  + Servers:Server * rb;              
+						  
+dE[Servers:Server Servers:Server_get]/dt =  min(Clients:Client Servers:Server* rr, Servers:Server^2 * rr)
+											-  min(Clients:Client Servers:Server_get* rr, Servers:Server Servers:Server_get* rr)
+											-  min(Clients:Client * rr, Servers:Server * rr) 
+											- min(Clients:Client_waiting Servers:Server * rd, Servers:Server_get Servers:Server* rd)
+										  	+ min(Clients:Client_waiting Servers:Server_get * rd, Servers:Server_get^2 * rd)
+										  	- min(Clients:Client_waiting * rd, Servers:Server_get * rd)  	
+										  	+ Servers:Server_broken Servers:Server_get * rrst
+										  	- Servers:Server_get Servers:Server * rb;
+										  	
+dE[Servers:Server Servers:Server_broken]/dt = - min(Clients:Client Servers:Server_broken * rr, Servers:Server Servers:Server_broken* rr)
+                                              + min(Clients:Client_waiting Servers:Server_broken * rd, Servers:Server_get Servers:Server_broken * rd)
+                                              - Servers:Server Servers:Server_broken * rrst
+                                              + Servers:Server_broken^2 * rrst
+                                              - Servers:Server_broken * rrst  				
+                                              - Servers:Server_broken Servers:Server * rb
+                                              + Servers:Server^2 * rb
+                                              - Servers:Server * rb;			
+
+dE[Servers:Server_get^2]/dt = 2 * min(Clients:Client Servers:Server_get* rr, Servers:Server Servers:Server_get * rr)
+                              + min(Clients:Client * rr, Servers:Server * rr)   
+                              - 2 * min(Clients:Client_waiting Servers:Server_get* rd, Servers:Server_get^2 * rd)
+                              + min(Clients:Client_waiting * rd, Servers:Server_get * rd);   
+                              
+dE[Servers:Server_get Servers:Server_broken]/dt = min(Clients:Client Servers:Server_broken * rr, Servers:Server Servers:Server_broken * rr)  
+                                                  - min(Clients:Client_waiting Servers:Server_broken* rd, Servers:Server_get Servers:Server_broken* rd)     
+                                                  - Servers:Server_get Servers:Server_broken * rrst    
+												  + Servers:Server Servers:Server_get * rb;    
+												  
+dE[Servers:Server_broken^2]/dt = - 2 * Servers:Server_broken^2 * rrst
+                                 + Servers:Server_broken * rrst
+                                 + 2 * Servers:Server Servers:Server_broken * rb
+                                 + Servers:Server * rb;												                                                       																  					                  													
+													 
 
 dE[Clients:Client]/dt = - min(Clients:Client * rr, Servers:Server * rr) + Clients:Client_think*rt;
 dE[Clients:Client_waiting]/dt = min(Clients:Client * rr, Servers:Server * rr) - min(Clients:Client_waiting * rd, Servers:Server_get * rd);

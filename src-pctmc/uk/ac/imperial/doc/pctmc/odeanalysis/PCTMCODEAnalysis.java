@@ -17,6 +17,8 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 
 	protected static Map<String, Class<? extends MomentClosure>> momentClosures;
 	
+	protected boolean autoClosure;
+	
 	static {
 		momentClosures = new HashMap<String, Class<? extends MomentClosure>>();
 		momentClosures.put("NormalClosure", NormalMomentClosure.class);
@@ -30,9 +32,13 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 	@Override
 	public void setUsedMoments(
 			Collection<CombinedPopulationProduct> combinedProducts) {
-		usedCombinedProducts = new HashSet<CombinedPopulationProduct>(
-				combinedProducts);
-		if (momentClosure == null) {
+		if (usedCombinedProducts != null) {
+			usedCombinedProducts.addAll(combinedProducts);
+		} else {
+			usedCombinedProducts = new HashSet<CombinedPopulationProduct>(
+					combinedProducts);
+		}
+		if (autoClosure) {
 			int order = 1;
 			for (CombinedPopulationProduct product : combinedProducts) {
 				int o = product.getOrder();
@@ -40,16 +46,19 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 					order = o;
 			}
 			momentClosure = new NormalMomentClosure(order);
-		}
+		}		
 	}
 
 	public PCTMCODEAnalysis(PCTMC pctmc) {
 		super(pctmc);
+		autoClosure = true;
 	}
 	
 	public PCTMCODEAnalysis(PCTMC pctmc, Map<String, Object> parameters) {
 		super(pctmc);
+		autoClosure = true;
 		if (parameters.containsKey("momentClosure")) {
+			autoClosure = false;
 			Object nameO = parameters.get("momentClosure");
 			if (!(nameO instanceof String)) {
 				throw new AssertionError("Name of the moment closure has to be a string");
