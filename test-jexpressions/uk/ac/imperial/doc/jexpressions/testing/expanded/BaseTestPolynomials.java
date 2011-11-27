@@ -15,7 +15,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
-public class TestPolynomialsBase {
+public class BaseTestPolynomials {
 	
 	protected static Polynomial pApB; // a + b
 	protected static Polynomial pA2p2ABpB2; // a^2 + 2ab + b^2

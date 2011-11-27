@@ -10,7 +10,7 @@ import uk.ac.imperial.doc.jexpressions.expanded.ExpandedExpression;
 import uk.ac.imperial.doc.jexpressions.expanded.Polynomial;
 
 @SuppressWarnings("unchecked")
-public class TestExpandedExpressionCreation extends TestExpandedExpressionBase {
+public class TestExpandedExpressionCreation extends BaseTestExpandedExpression {
 
 	@Test
 	public void testNormalise() {

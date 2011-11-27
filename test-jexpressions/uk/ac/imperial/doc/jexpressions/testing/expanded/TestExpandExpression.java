@@ -21,7 +21,7 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 
 @SuppressWarnings("unchecked")
-public class TestExpandExpression extends TestExpandedExpressionBase {
+public class TestExpandExpression extends BaseTestExpandedExpression {
 
 	@Test
 	public void testExpandSimple() throws ParseException {

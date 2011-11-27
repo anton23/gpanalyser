@@ -6,7 +6,7 @@ import uk.ac.imperial.doc.jexpressions.expanded.DoubleCoefficients;
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandedExpression;
 import uk.ac.imperial.doc.jexpressions.expanded.Polynomial;
 
-public class TestExpandedExpressionBase extends TestPolynomialsBase{
+public class BaseTestExpandedExpression extends BaseTestPolynomials{
 	
 	protected static ExpandedExpression eAoB; // a/b
 	protected static ExpandedExpression eCoD; // c/d
