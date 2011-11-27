@@ -7,7 +7,7 @@ import org.junit.Test;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluator;
 
-public class TestExpressionEvaluator extends TestExpressionsBase{
+public class TestExpressionEvaluator extends BaseTestExpressions{
 	
 	protected double evaluate(AbstractExpression expression){
 		ExpressionEvaluator evaluator = new ExpressionEvaluator(); 

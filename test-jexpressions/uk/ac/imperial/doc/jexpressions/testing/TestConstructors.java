@@ -19,7 +19,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 
 import com.google.common.collect.Lists;
 
-public class TestConstructors extends TestExpressionsBase {
+public class TestConstructors extends BaseTestExpressions {
 	
 	@Test
 	public void testCreateZeroExpression(){

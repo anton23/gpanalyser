@@ -11,7 +11,7 @@ import uk.ac.imperial.doc.jexpressions.expanded.Polynomial;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
 @SuppressWarnings("unchecked")
-public class TestPolynomialsCreation extends TestPolynomialsBase {
+public class TestPolynomialsCreation extends BaseTestPolynomials {
 	
 	@Test
 	public void testEqualsSimple(){

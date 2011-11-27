@@ -10,7 +10,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 
-public class TestExpressionsBase {
+public class BaseTestExpressions {
 	@BeforeClass
 	public static void createObjects(){
 		d1 = new DoubleExpression(1.0);
@@ -30,8 +30,4 @@ public class TestExpressionsBase {
 	protected static AbstractExpression d1, d2, d3, d0;
 	
 	protected static AbstractExpression s123, p223, min23, div23, pdiv23, pdiv20;
-	
-
-
-
 }

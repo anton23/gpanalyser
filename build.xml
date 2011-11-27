@@ -51,6 +51,7 @@
     <property name="main.class" value="uk.ac.imperial.doc.gpa.GPAPMain"/>
     <property name="jar.name" value="gpa-${version}.jar"/>
     <property name="jar.name.link" value="gpa.jar"/>
+	
     <path id="CLASSPATH">
         <fileset dir="${lib}">
             <include name="**/*.jar"/>
@@ -163,6 +164,7 @@
     </target>
 
     <target name="clean">
+        <delete dir="${test.out}" includeemptydirs="true" includes="**"/>
         <delete dir="${build.out}" includeemptydirs="true" includes="**"/>
         <delete dir="${dist.out}" includeemptydirs="true" includes="**"/>
         <delete dir="${src.generated}"  includeemptydirs="true" includes="**"/>     
@@ -292,11 +294,12 @@
 		        <javac source="1.6" target="1.6" debug="true" destdir="${test.class}"
 		        deprecation="true">
 		        	<classpath>
-		        	  	<path location="${build.class}"/>		     
-		        		<fileset dir="${lib}">
-		        		      <include name="junit-4.9b3.jar"/>
-		        	    </fileset>
-		        	</classpath>
+		        		<path location="${build.class}"/>
+	        		        <fileset dir="${lib}">
+	        		            <include name="*.jar"/>
+	        		        </fileset>
+        		      </classpath>		        	
+		        	
 		            <src path="${build.class}"/>
 		        	<src path="${jexpressions.test}"/>
 		            <include name="**/*.java"/> 
@@ -307,13 +310,14 @@
 	
 	<target name="test" depends="build-test">
 	    <mkdir dir="reports/tests" />
-	    <junit fork="yes" printsummary="yes">
+	    <junit fork="yes" printsummary="true" showoutput="true" outputtoformatters="true">
 	      <formatter type="xml"/>
+	
 	      <classpath>
 	      	<path location="${build.class}"/>
 	        <path location="${test.class}"/>
 	        <fileset dir="${lib}">
-	            <include name="junit-4.9b3.jar"/>
+	            <include name="*.jar"/>
 	        </fileset>
 	      </classpath>
 	      <batchtest todir="reports/tests">
@@ -321,6 +325,8 @@
 	            <include name="**/Test*.class"/>
 	        </fileset>
 	      </batchtest>
+	      <formatter type="brief" usefile="false"/>
+
 	    </junit>
 	</target>
 
