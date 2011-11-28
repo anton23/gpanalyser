@@ -6,11 +6,11 @@ import org.junit.Test;
 
 import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
-import uk.ac.imperial.doc.pctmc.testing.TestPCTMCParserBase;
+import uk.ac.imperial.doc.pctmc.testing.BaseTestPCTMCParser;
 
 import com.google.common.collect.Lists;
 
-public class TestGPAParser extends TestPCTMCParserBase {
+public class TestGPAParser extends BaseTestPCTMCParser {
 	
 	
 	public TestGPAParser() {

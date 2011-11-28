@@ -36,7 +36,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 
-public class TestCompilerClientServer extends TestCompilerBase {
+public class TestCompilerClientServer extends BaseCompilerTest {
 
 	public TestCompilerClientServer() throws ParseException {
 		super("test-gpa-inputs/clientServer/model.gpepa");

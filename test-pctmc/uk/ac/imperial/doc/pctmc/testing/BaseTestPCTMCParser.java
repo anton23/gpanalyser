@@ -13,9 +13,9 @@ import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import com.google.common.collect.Lists;
 
 
-public class TestPCTMCParserBase {
+public class BaseTestPCTMCParser {
 	
-	protected TestPCTMCParserBase() {
+	protected BaseTestPCTMCParser() {
 		interpreter = GPAPMain.createGPEPAInterpreter();
 	}
 	

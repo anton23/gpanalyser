@@ -26,6 +26,8 @@
 	<property name="PCTMC.src" value="src-pctmc"/>
 	
 	<property name="jexpressions.test" value="test-jexpressions"/>
+	<property name="gpa.test" value="test-gpa"/>
+	<property name="pctmc.test" value="test-pctmc"/>
 	
 	<property name="plain" value="src-plain"/>
 	<property name="plain.grammars" value="grammars-plain"/>
@@ -302,6 +304,8 @@
 		        	
 		            <src path="${build.class}"/>
 		        	<src path="${jexpressions.test}"/>
+		        	<src path="${pctmc.test}"/>
+		        	<src path="${gpa.test}"/>
 		            <include name="**/*.java"/> 
 		        	<include name="**/*.class"/>
 		         	<exclude name="**/package-info.java"/> 
@@ -326,7 +330,6 @@
 	        </fileset>
 	      </batchtest>
 	      <formatter type="brief" usefile="false"/>
-
 	    </junit>
 	</target>
 

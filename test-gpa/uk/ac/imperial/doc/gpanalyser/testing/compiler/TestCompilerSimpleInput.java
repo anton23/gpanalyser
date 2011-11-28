@@ -32,7 +32,7 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class TestCompilerSimpleInput extends TestCompilerBase {
+public class TestCompilerSimpleInput extends BaseCompilerTest {
 	
 	public TestCompilerSimpleInput() throws ParseException{
 		super("test-gpa-inputs/simpleModel/model.gpepa");
