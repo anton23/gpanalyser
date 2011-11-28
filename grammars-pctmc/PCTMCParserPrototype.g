@@ -405,7 +405,7 @@ varDefinition:
 //-----Rules for events
 
 eventDefinition:
-  {define = true;} dec=stateSum? {define = false;}TO inc=stateSum? AT expression SEMI -> ^(EVENT $dec? TO $inc? AT expression)
+  {define = true;} dec=stateSum? TO inc=stateSum? {define = false;} AT expression SEMI -> ^(EVENT $dec? TO $inc? AT expression)
 ;
 
 stateSum:
