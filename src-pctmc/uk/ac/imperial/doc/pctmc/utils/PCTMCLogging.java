@@ -1,5 +1,7 @@
 package uk.ac.imperial.doc.pctmc.utils;
 
+import java.util.StringTokenizer;
+
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -25,12 +27,12 @@ public class PCTMCLogging {
 	}
 
 	public static void info(String message) {
-		message=message.replaceAll("\n", "\n"+getSpaces()+getOverhead());
+		message=formatMessage(message);
 		if (visible) LOGGER.info(message);
 	}
 
 	public static void error(String message) {
-		message=message.replaceAll("\n", "\n"+getSpaces()+getOverhead());
+		message=formatMessage(message);
 		LOGGER.error(message);
 	}
 	
@@ -39,8 +41,42 @@ public class PCTMCLogging {
 	}
 
 	public static void debug(String message) {
-			message=message.replaceAll("\n", "\n"+getSpaces()+getOverhead());
+			message=formatMessage(message);
 			if (visible) LOGGER.debug("[D] " + message);
+	}
+	
+	protected static int maxChars =  100;
+	
+	protected static String formatMessage(String message) {
+		StringBuilder ret = new StringBuilder();
+		StringTokenizer tok = new StringTokenizer(message, " ",true);
+		int lineLength = 0;
+		String padding = "\n"+getSpaces()+getOverhead();
+		while(tok.hasMoreTokens()) {
+			String word = tok.nextToken();
+			boolean first = true;
+			StringTokenizer tmp = new StringTokenizer(word, "\n", true);
+			while (tmp.hasMoreElements()){
+				String subWord = tmp.nextToken();
+				if (first) {
+					first = false;
+					if ((lineLength + subWord.length() > maxChars)) {
+						ret.append(padding);
+						lineLength = subWord.length();
+					} else {
+						lineLength += subWord.length();
+					}
+				} else {
+					if (subWord.equals("\n")) {
+						lineLength = 0;
+					} else {
+						lineLength = subWord.length();
+					}
+				}
+				ret.append(subWord.replace("\n", padding));
+			}
+		}
+		return ret.toString();
 	}
 
 	public static void increaseIndent() {

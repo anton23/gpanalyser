@@ -272,9 +272,16 @@ public class PCTMCInterpreter {
 			processFileRepresentation(fileRepresentation);
 
 		} catch (ParseException e) {
+			StringBuilder errors = new StringBuilder();
+			boolean first = true;
+			for (String error:e.errors) {
+				if (first) first = false; 
+				else errors.append("\n");
+				errors.append(error.replaceAll("\n", "\n   "));
+			}
 			PCTMCLogging.error("Error when parsing the input file!\nFound "
-					+ e.errors.size() + " errors:\n  "
-					+ ToStringUtils.iterableToSSV(e.errors, "\n  "));
+					+ e.errors.size() + " errors:\n"
+					+ errors);
 		}
 		PCTMCLogging.decreaseIndent();
 

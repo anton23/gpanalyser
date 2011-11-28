@@ -328,7 +328,7 @@ plotAt:
 odeAnalysis:
   ODES 
   odeParameters?
-  {hint.push("ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
+  {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
       LPAR
   STOPTIME DEF stopTime = REALNUMBER COMMA
   STEPSIZE DEF stepSize = REALNUMBER COMMA
@@ -341,7 +341,7 @@ odeAnalysis:
 
 odeParameters:
   LBRACK
-     {hint.push("ODE analysis parameters have to be of the form [name1=value1, ..., nameK=valueK]");}
+     {hint.push("ODE analysis parameters have to be of the form\n   [name1=value1, ..., nameK=valueK]");}
    parameter (COMMA parameter)* 
    {hint.pop();}
   RBRACK
@@ -362,10 +362,10 @@ simulation:
 ;
 
 plotDescription:
- {hint.push("each plot description has to be of the 'e1,...,en (optional ->\"filename\");" +
-            " where e1,...,en are expectation based expressions");}
+ {hint.push("each plot description has to be of the form\n   'e1,...,en (optional ->\"filename\");\n" +
+            "where e1,...,en are expectation based expressions");}
  {requiresExpectation = true;}
-  (expressionList (TO {hint.push("filename description has to be of the form '-> \"filename\"'");} FILENAME {hint.pop();})? SEMI) {hint.pop();}
+  (expressionList (TO {hint.push("filename description has to be of the form\n   '-> \"filename\"'");} FILENAME {hint.pop();})? SEMI) {hint.pop();}
  {requiresExpectation = false;}
 ;
 
@@ -384,7 +384,7 @@ state: UPPERCASENAME;
 //-----Rules for definitions----- 
 
 constantDefinition:
-  id=LOWERCASENAME {hint.push("constant definition has to be of the form <constant> = <number> ;");}  
+  id=LOWERCASENAME {hint.push("constant definition has to be of the form\n   <constant> = <number> ;");}  
    DEF  
     (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();} 
      {constants.add($id.text);}

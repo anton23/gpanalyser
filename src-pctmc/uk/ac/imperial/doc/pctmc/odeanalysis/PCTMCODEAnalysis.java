@@ -26,7 +26,11 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 	
 	@Override
 	public String toString() {
-		return "ODEs";
+		String ret = "ODEs";
+		if (!autoClosure) {
+			ret += "[" + momentClosure.toString() + "]"; 
+		}
+		return ret;
 	}
 
 	@Override
