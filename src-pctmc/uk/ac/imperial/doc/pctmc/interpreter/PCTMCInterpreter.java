@@ -20,7 +20,6 @@ import org.antlr.runtime.tree.TreeParser;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
@@ -126,6 +125,7 @@ public class PCTMCInterpreter {
 						(Class<?>[]) null).invoke(parser, (Object[]) null);
 				} catch (Exception e) {
 					// Ignores all errors during first parsing
+					
 				}
 				ParsingData data = (ParsingData)parserClass.getMethod("getParsingData", (Class<?>[]) null).invoke(parser, (Object[]) null);
 			

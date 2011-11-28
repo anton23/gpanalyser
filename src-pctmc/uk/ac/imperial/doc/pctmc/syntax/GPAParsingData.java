@@ -19,6 +19,4 @@ public class GPAParsingData extends ParsingData {
 	public Set<String> getGroupNames() {
 		return groupLabels;
 	}
-	
-	
 }

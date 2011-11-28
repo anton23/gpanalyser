@@ -46,6 +46,15 @@ tokens{
        this.errorReporter = errorReporter;
     }
     
+  public boolean define = false;
+  
+  public ParsingData getParsingData() { 
+    return null;  
+  } 
+  
+  public void setParsingData(ParsingData parsingData) {
+      
+  }
     
      
   public String getErrorHeader(RecognitionException e) {
@@ -379,7 +388,7 @@ analysesSpec:
 var: VAR LOWERCASENAME -> ^(VAR LOWERCASENAME); 
 
 
-state: UPPERCASENAME; 
+state: s=UPPERCASENAME; 
 
 //-----Rules for definitions----- 
 
@@ -396,7 +405,7 @@ varDefinition:
 //-----Rules for events
 
 eventDefinition:
-dec=stateSum? TO inc=stateSum? AT expression SEMI -> ^(EVENT $dec? TO $inc? AT expression)
+  {define = true;} dec=stateSum? {define = false;}TO inc=stateSum? AT expression SEMI -> ^(EVENT $dec? TO $inc? AT expression)
 ;
 
 stateSum:

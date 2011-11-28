@@ -27,6 +27,7 @@ tokens{
   import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
   import uk.ac.imperial.doc.pctmc.syntax.ParsingData;
   import uk.ac.imperial.doc.pctmc.syntax.GPAParsingData;
+  import uk.ac.imperial.doc.pctmc.syntax.PlainParsingData;
   
   import java.util.LinkedList;
   import java.util.Set;
