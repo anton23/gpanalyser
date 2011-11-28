@@ -117,7 +117,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"As{A[n]}"
 				,
 				Lists.newArrayList(
-				  "[line 2:9] mismatched input '+' expecting ';' (constant definition has to be of the form <constant> = <number> ;)",
+				  "[line 2:9] mismatched input '+' expecting ';' (constant definition has to be of the form\n   <constant> = <number> ;)",
 				  "[line 6:10] constant 'rb' unknown (invalid definition of component 'B')"));		
 	}
 	
@@ -193,7 +193,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"ODEs(){}"
 				, 
 				Lists.newArrayList(
-				  "[line 8:5] mismatched input ')' expecting 'stopTime' (ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"
+				  "[line 8:5] mismatched input ')' expecting 'stopTime' (ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"
 				  ));
 	}
 	
@@ -210,7 +210,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"ODEs(stopTime=10.0, stepSize=0.1, density=10.0){}"
 				, 
 				Lists.newArrayList(
-				  "[line 8:42] mismatched input '10.0' expecting an integer (ODE analysis has to be of the form ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"));
+				  "[line 8:42] mismatched input '10.0' expecting an integer (ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"));
 	}
 	
 	@Test
@@ -227,7 +227,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"E[As:A]}"
 				, 
 				Lists.newArrayList(
-				  "[line 9:7] missing ';' at '}' (each plot description has to be of the 'e1,...,en (optional ->\"filename\"); where e1,...,en are expectation based expressions)"));
+				  "[line 9:7] missing ';' at '}' (each plot description has to be of the form\n   'e1,...,en (optional ->\"filename\");\nwhere e1,...,en are expectation based expressions)"));
 	}
 	
 	@Test
@@ -244,7 +244,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"As:A;}"
 				, 
 				Lists.newArrayList(
-				   "[line 9:4] population As:A has to be inside an expectation (each plot description has to be of the 'e1,...,en (optional ->\"filename\"); where e1,...,en are expectation based expressions)"));
+				   "[line 9:4] population As:A has to be inside an expectation (each plot description has to be of the form\n   'e1,...,en (optional ->\"filename\");\nwhere e1,...,en are expectation based expressions)"));
 	}
 	
 
@@ -296,7 +296,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"E[As:A] -> bla.out;}"
 				, 
 				Lists.newArrayList(
-				   "[line 9:11] mismatched input 'bla' expecting filename of the form \"filename\" (filename description has to be of the form '-> \"filename\"')"));
+				   "[line 9:11] mismatched input 'bla' expecting filename of the form \"filename\" (filename description has to be of the form\n   '-> \"filename\"')"));
 	}
 	
 	
