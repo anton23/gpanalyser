@@ -30,7 +30,7 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumer
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 
-public class TestSampleFilesBase {
+public class BaseTestSampleFiles {
 	
 
 	public void testSimpleClientServer(){

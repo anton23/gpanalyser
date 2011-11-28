@@ -57,9 +57,7 @@ public class TestODEGenerator extends NewODEGenerator{
 		
 		Map<CombinedPopulationProduct, AbstractExpression> expectedODEs = (Map<CombinedPopulationProduct, AbstractExpression>) 
 			compilerReturn.getClass().getField("odes").get(compilerReturn);
-		System.out.println(rhs.keySet());
-		System.out.println(rhs.keySet().size());
-		
+
 		for (Map.Entry<CombinedPopulationProduct, AbstractExpression> e:expectedODEs.entrySet()) {
 			ExpandedExpression expectedExpanded = TestODEGeneratorExpectedODEs.expandExpression(e.getValue());
 			ExpandedExpression actualExpanded = TestODEGeneratorExpectedODEs.expandExpression((rhs.get(e.getKey())));

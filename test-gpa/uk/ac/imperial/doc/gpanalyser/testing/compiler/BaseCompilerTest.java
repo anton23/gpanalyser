@@ -6,13 +6,13 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 
-public class TestCompilerBase {
+public class BaseCompilerTest {
 	
 	protected String inputFile;
 	protected PCTMCFileRepresentation representation;
 	protected GPEPAPCTMC pctmc;
 	
-	public TestCompilerBase(String input) throws ParseException{
+	public BaseCompilerTest(String input) throws ParseException{
 		this.inputFile = input;
 		this.representation = getRepresentation();
 		pctmc = (GPEPAPCTMC) representation.getPctmc();
