@@ -42,4 +42,11 @@ public class NormalMomentClosure extends MomentClosure {
 		derivative.accept(visitor);
 		return visitor.getResult();
 	}
+
+	@Override
+	public String toString() {
+		return "momentClosure=NormalClosure" + ", maxOrder="+maxOrder;
+	}
+	
+	
 }

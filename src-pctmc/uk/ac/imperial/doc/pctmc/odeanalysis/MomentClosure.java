@@ -12,5 +12,6 @@ public abstract class MomentClosure {
 	
 	public abstract AbstractExpression closeRate(AbstractExpression rate, PopulationProduct moment);
 	public abstract AbstractExpression insertAccumulations(AbstractExpression derivative, CombinedPopulationProduct moment);
+	public abstract String toString();
 
 }
