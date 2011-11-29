@@ -44,6 +44,9 @@ public class ExpressionVariable extends AbstractExpression {
 		if (v instanceof IExpressionVariableVisitor) {
 			((IExpressionVariableVisitor) v).visit(this);
 		} else {
+			if (unfolded == null) {
+				throw new AssertionError("Unknown variable $"+name);
+			}
 			unfolded.accept(v);
 		}
 	}

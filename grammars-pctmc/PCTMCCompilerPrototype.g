@@ -109,7 +109,9 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
         if (!initCounts.containsKey(t)){
           initMap.put(t, DoubleExpression.ZERO); 
         } else {
-          initMap.put(t,initCounts.get(t)); 
+          ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC($unfoldedVariables);
+          initCounts.get(t).accept(setter); 
+          initMap.put(t, initCounts.get(t)); 
         }
       }
       
