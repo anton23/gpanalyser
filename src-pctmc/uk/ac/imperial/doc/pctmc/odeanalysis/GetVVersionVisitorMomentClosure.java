@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -91,6 +92,20 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			result = CombinedProductExpression
 					.create(new CombinedPopulationProduct(PopulationProduct
 							.getProduct(moment, nakedProduct)));
+		} else
+		if (maxOrder == 1) {
+			List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
+			for (Entry<State, Integer> entry: moment.getRepresentation().entrySet()) {
+				for (int i = 0; i<entry.getValue(); i++) {
+					terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
+				}
+			}
+			for (Entry<State, Integer> entry: nakedProduct.getRepresentation().entrySet()) {
+				for (int i = 0; i<entry.getValue(); i++) {
+					terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
+				}
+			}
+			result = ProductExpression.create(terms);
 		} else  {
 			State[] x = new State[order];
 			int i = 0;
@@ -104,34 +119,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			} else {
 				result = getEventMomentInTermsOfCovariances(x);
 			}
-		} /* else {
-			Multiset<State> momentMset = moment.asMultiset();
-			Multiset<State> nakedMset = nakedProduct.asMultiset();
-			Multiset<State> remains = HashMultiset.<State> create();
-
-			for (State s : nakedMset.elementSet()) {
-				int count = nakedMset.count(s);
-				int toAdd = Math.min(count, Math.max(maxOrder
-						- momentMset.size(), 0));
-				count -= toAdd;
-				momentMset.add(s, toAdd);
-				remains.add(s, count);
-			}
-			List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-			terms.add(CombinedProductExpression
-					.create(new CombinedPopulationProduct(
-							new PopulationProduct(momentMset))));
-			for (State s : remains.elementSet()) {
-				int count = remains.count(s);
-				for (int i = 0; i < count; i++) {
-					CombinedPopulationProduct product = new CombinedPopulationProduct(
-							PopulationProduct.getMeanProduct(s));
-					terms.add(CombinedProductExpression.create(product));
-				}
-			}
-
-			result = ProductExpression.create(terms);
-		}*/
+		} 
 	}
 
 	public AbstractExpression getOddMomentInTermsOfCovariances(State[] states) {
