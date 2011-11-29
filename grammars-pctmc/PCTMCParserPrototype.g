@@ -330,7 +330,7 @@ constraint:
 ;
 
 plotAt:
-  expression ATTIME REALNUMBER -> expression REALNUMBER
+  expression ATTIME expression -> expression ATTIME expression
 ;
 
 
@@ -339,13 +339,13 @@ odeAnalysis:
   odeParameters?
   {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
       LPAR
-  STOPTIME DEF stopTime = REALNUMBER COMMA
-  STEPSIZE DEF stepSize = REALNUMBER COMMA
+  STOPTIME DEF stopTime = expression COMMA
+  STEPSIZE DEF stepSize = expression COMMA
   DENSITY DEF density=INTEGER   
   RPAR {hint.pop();}LBRACE
     plotDescription*
   RBRACE
-  -> ^(ODES odeParameters? $stopTime $stepSize $density LBRACE plotDescription* RBRACE )
+  -> ^(ODES odeParameters? $stopTime COMMA $stepSize COMMA $density LBRACE plotDescription* RBRACE )
 ;
 
 odeParameters:
@@ -361,13 +361,13 @@ parameter:
  
 simulation:
   SIMULATION LPAR
-  STOPTIME DEF stopTime = REALNUMBER COMMA
-  STEPSIZE DEF stepSize = REALNUMBER COMMA
+  STOPTIME DEF stopTime = expression COMMA
+  STEPSIZE DEF stepSize = expression COMMA
   REPLICATIONS DEF replications=INTEGER   
   RPAR LBRACE
     plotDescription*
   RBRACE
-  -> ^(SIMULATION $stopTime $stepSize $replications LBRACE plotDescription* RBRACE )
+  -> ^(SIMULATION $stopTime COMMA $stepSize COMMA $replications LBRACE plotDescription* RBRACE )
 ;
 
 plotDescription:
@@ -379,8 +379,8 @@ plotDescription:
 ;
 
 analysesSpec:
-  STOPTIME DEF REALNUMBER SEMI
-  STEPSIZE DEF REALNUMBER SEMI
+  STOPTIME DEF expression SEMI
+  STEPSIZE DEF expression SEMI
   DENSITY DEF INTEGER SEMI
   REPLICATIONS DEF INTEGER SEMI
 ;

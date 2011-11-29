@@ -71,9 +71,9 @@ system returns[Constants constants,
                     vars = $unfoldedVariables; }
    m=modelDefinition[$unfoldedVariables,$constants] {$pctmc = $m.pctmc;}
    
-   analysis[$pctmc,$plots]*
+   analysis[$pctmc, $constants, $plots]*
    
-   (e=experiment[$pctmc,$unfoldedVariables] {$experiments.add($e.iterate);})* 
+   (e=experiment[$pctmc, $constants, $unfoldedVariables] {$experiments.add($e.iterate);})* 
 ;
 
 modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Constants constants] returns [PCTMC pctmc]
@@ -119,7 +119,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
 };
 
 
-experiment[PCTMC pctmc,Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCIterate iterate]
+experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCIterate iterate]
 @init{  
   List<RangeSpecification> ranges = new LinkedList<RangeSpecification>(); 
   List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>(); 
@@ -129,12 +129,12 @@ experiment[PCTMC pctmc,Map<ExpressionVariable,AbstractExpression> unfoldedVariab
 }
 :
   ^(ITERATE (r=rangeSpecification {ranges.add($r.range);})*
-    (MINIMISE m=plotAtSpecification  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
+    (MINIMISE m=plotAtSpecification[$constants]  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
    (WHERE 
        ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
   
-    a=analysis[$pctmc,null]   
-    (p=plotAtSpecification {plots.add($p.p);})*
+    a=analysis[$pctmc,$constants, null]   
+    (p=plotAtSpecification[$constants] {plots.add($p.p);})*
    )
   {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,$a.postprocessor,plots,$unfoldedVariables);}
 ;
@@ -147,14 +147,14 @@ rangeSpecification returns[RangeSpecification range]:
   
 ;
 
-plotAtSpecification returns [PlotAtDescription p]
+plotAtSpecification[Constants constants] returns [PlotAtDescription p]
 @init{
   String f=""; 
   List<PlotConstraint> constraints = new LinkedList<PlotConstraint>(); 
 }: 
-  ^(PLOT pl=plotAt
+  ^(PLOT pl=plotAt[$constants]
       ( WHEN 
-        (pa=plotAt GEQ prob=realnumber {
+        (pa=plotAt[$constants] GEQ prob=realnumber {
              constraints.add(new PlotConstraint($pa.e,$pa.t,$prob.value));})+
       )?      
        (file=FILENAME {f=$file.text.replace("\"","");})?)
@@ -163,25 +163,27 @@ plotAtSpecification returns [PlotAtDescription p]
   }
 ;
 
-plotAt returns [AbstractExpression e, double t]:
-   exp=expression 
-        time=realnumber 
+plotAt[Constants constants] returns [AbstractExpression e, double t]:
+   exp=expression ATTIME
+   time=expression 
   
-   {$e = $exp.e; $t = $time.value;} 
+   {$e = $exp.e;
+    ExpressionEvaluatorWithConstants timeEval = new ExpressionEvaluatorWithConstants($constants);
+    $time.e.accept(timeEval);
+    $t = timeEval.getResult();} 
 ;
 
-analysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
 :
-   o=odeAnalysis[pctmc,plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
- | s=simulation[pctmc,plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
- | c=compare[pctmc,plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
+   o=odeAnalysis[pctmc,constants, plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
+ | s=simulation[pctmc,constants, plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 ;
 
-compare[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+compare[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
-//{Multimap<AbstractPCTMCAnalysis,PlotDescription> tmp = HashMultimap.<AbstractPCTMCAnalysis,PlotDescription>create();}
-^(COMPARE a1=analysis[pctmc,plots] a2=analysis[pctmc,plots] ps=plotDescriptions)
+^(COMPARE a1=analysis[pctmc, constants, plots] a2=analysis[pctmc, constants, plots] ps=plotDescriptions)
 {
   $analysis = new PCTMCCompareAnalysis($a1.analysis,$a2.analysis); 
   $postprocessor = new CompareAnalysisNumericalPostprocessor($a1.postprocessor,$a2.postprocessor);
@@ -189,7 +191,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
   if ($plots!=null) $plots.putAll($analysis,$ps.p);   
 }
 ;
-odeAnalysis[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+odeAnalysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
 returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
@@ -200,12 +202,17 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
              (COMMA p=parameter 
                           {parameters.put($p.name, $p.value);})* 
           RBRACK)?
-         stop=realnumber step=realnumber den=integer LBRACE 
+         stop=expression COMMA step=expression COMMA den=integer LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
       $analysis = new PCTMCODEAnalysis($pctmc, parameters);
-      $postprocessor = new ODEAnalysisNumericalPostprocessor($stop.value,$step.value,$den.value);
+      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+      $stop.e.accept(stopEval);
+      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+      $step.e.accept(stepEval);
+      $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+          stepEval.getResult(),$den.value);
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
@@ -218,14 +225,20 @@ parameter returns [String name, Object value]:
                       |i=integer  {$name = $p.text; $value = $i.value;})
 ;
 
-simulation[PCTMC pctmc,Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
 returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]:
-  ^(SIMULATION stop=realnumber step=realnumber replications=integer LBRACE 
+  ^(SIMULATION stop=expression COMMA step=expression COMMA replications=integer LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
       $analysis = new PCTMCSimulation($pctmc);
-      $postprocessor = new SimulationAnalysisNumericalPostprocessor($stop.value,$step.value,$replications.value);
+      
+      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+      $stop.e.accept(stopEval);
+      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+      $step.e.accept(stepEval);
+      
+      $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$replications.value);
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }

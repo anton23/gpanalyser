@@ -32,7 +32,6 @@ tokens{
   import java.util.LinkedList;
   import java.util.Set;
   import java.util.HashSet;
-
 }
 
 //This is a hack until the composite grammars are implemented in a better way
