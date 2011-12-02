@@ -209,7 +209,7 @@ public class NewODEGenerator {
 				// Multiplies each moment by the rate, according to a provided moment closure
 				for (CoefficientMoment c : summands) {
 					if (c.moment.getOrder() < moment.getOrder()) {
-						AbstractExpression closedRate = momentClosure.closeRate(event.getRate(), c.moment);
+						AbstractExpression closedRate = momentClosure.insertProductIntoRate(event.getRate(), c.moment);
 						tmp.add(ProductExpression.create(c.coefficient,
 								closedRate));
 					}

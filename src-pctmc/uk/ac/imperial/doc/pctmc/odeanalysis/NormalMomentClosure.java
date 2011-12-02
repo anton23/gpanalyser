@@ -24,7 +24,7 @@ public class NormalMomentClosure extends MomentClosure {
 	}
 
 	@Override
-	public AbstractExpression closeRate(AbstractExpression rate,
+	public AbstractExpression insertProductIntoRate(AbstractExpression rate,
 			PopulationProduct moment) {
 		GetVVersionVisitorMomentClosure visitor = new GetVVersionVisitorMomentClosure(moment, maxOrder);
 		rate.accept(visitor);
