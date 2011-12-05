@@ -21,7 +21,8 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 	
 	static {
 		momentClosures = new HashMap<String, Class<? extends MomentClosure>>();
-		momentClosures.put("NormalClosure", NormalMomentClosure.class);
+		momentClosures.put(NormalMomentClosure.NAME, NormalMomentClosure.class);
+		momentClosures.put(LognormalMomentClosure.NAME, LognormalMomentClosure.class);
 	}
 	
 	@Override
