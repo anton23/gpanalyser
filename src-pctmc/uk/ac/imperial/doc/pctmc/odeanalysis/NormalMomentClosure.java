@@ -8,6 +8,8 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 
 public class NormalMomentClosure extends MomentClosure {
+
+	public final static String NAME = "NormalClosure";
 	
 	protected int maxOrder;
 	
@@ -18,8 +20,8 @@ public class NormalMomentClosure extends MomentClosure {
 		
 	public NormalMomentClosure(Map<String, Object> parameters) {
 		super(parameters);
-		if (parameters.containsKey("maxOrder")) {
-			this.maxOrder = (Integer) parameters.get("maxOrder");
+		if (parameters.containsKey(MomentClosure.MAX_ORDER)) {
+			this.maxOrder = (Integer) parameters.get(MomentClosure.MAX_ORDER);
 		}
 	}
 
@@ -45,7 +47,7 @@ public class NormalMomentClosure extends MomentClosure {
 
 	@Override
 	public String toString() {
-		return "momentClosure=NormalClosure" + ", maxOrder="+maxOrder;
+		return MomentClosure.MOMENT_CLOSURE + "=" + NAME + ", " + MomentClosure.MAX_ORDER + "=" + maxOrder;
 	}
 	
 	
