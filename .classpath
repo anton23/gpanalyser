@@ -28,5 +28,6 @@
 	<classpathentry kind="lib" path="lib/antlr-3.4.jar"/>
 	<classpathentry kind="lib" path="lib/guava-10.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/org.jzy3d-0.8.4.jar"/>
+	<classpathentry kind="lib" path="lib/ejml-0.17-nogui.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
