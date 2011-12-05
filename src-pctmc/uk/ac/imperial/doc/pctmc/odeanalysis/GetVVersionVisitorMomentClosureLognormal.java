@@ -115,9 +115,11 @@ public class GetVVersionVisitorMomentClosureLognormal extends GetVVersionVisitor
 		Set<AbstractExpression> possibleMoments = new HashSet<AbstractExpression>();
 		State[] x = new State[order];
 		int i = 0;
+		AbstractExpression meanfield=new DoubleExpression(m_mfStabiliser);
 		for (State s:PopulationProduct.getProduct(moment, nakedProduct).asMultiset())
 		{
 			if (s!=null) x[i++] = s;
+			meanfield=ProductExpression.create(meanfield, CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(s)));
 		}
 		int[] indices = new int[order];
 		
@@ -196,7 +198,7 @@ public class GetVVersionVisitorMomentClosureLognormal extends GetVVersionVisitor
 			if (closedFormNum.size()==0){closedFormNum.add(new IntegerExpression(1));}
 			if (closedFormDen.size()==0){closedFormDen.add(new IntegerExpression(1));}
 			result=PEPADivExpression.create(ProductExpression.create(closedFormNum),ProductExpression.create(closedFormDen));
-			result=(m_mfStabiliser > 0) ? MinExpression.create(result,new DoubleExpression(m_mfStabiliser)) : result;
+			result=(m_mfStabiliser > 0) ? MinExpression.create(result,meanfield) : result;
 		}
 		catch(SingularMatrixException exception)
 		{
