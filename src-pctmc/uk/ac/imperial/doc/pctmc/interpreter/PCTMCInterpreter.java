@@ -24,7 +24,7 @@ import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
-import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
+import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
@@ -236,7 +236,7 @@ public class PCTMCInterpreter {
 		Constants constants = fileRepresentation.getConstants();
 		Multimap<AbstractPCTMCAnalysis, PlotDescription> plots = fileRepresentation
 				.getPlots();
-		List<PCTMCIterate> experiments = fileRepresentation.getExperiments();
+		List<PCTMCExperiment> experiments = fileRepresentation.getExperiments();
 		PCTMC pctmc = fileRepresentation.getPctmc();
 
 		fileRepresentation.unfoldVariablesAndSetUsedProducts();
@@ -250,7 +250,7 @@ public class PCTMCInterpreter {
 			processPlots(analysis, aplots, constants);
 			PCTMCChartUtilities.nextBatch();
 		}
-		for (PCTMCIterate iterate : experiments) {
+		for (PCTMCExperiment iterate : experiments) {
 			iterate.prepare(constants);
 			if (PCTMCOptions.matlab) {
 				/*
@@ -259,7 +259,7 @@ public class PCTMCInterpreter {
 				 * matlabImplementer.writePCTMCIterateFile(iterate, constants);
 				 */
 			}
-			iterate.iterate(constants);
+			iterate.run(constants);
 		}
 	}
 

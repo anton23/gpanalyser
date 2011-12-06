@@ -4,11 +4,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
@@ -119,6 +124,33 @@ public abstract class AbstractPCTMCAnalysis {
 	public void setUsedGeneralExpectations(
 			Collection<AbstractExpression> usedGeneralExpectations) {
 		this.usedGeneralExpectations = usedGeneralExpectations;
+	}
+	
+	public static void unfoldVariablesAndSetUsedProducts(
+			AbstractPCTMCAnalysis analysis,
+			Collection<PlotDescription> plotDescriptions,
+			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
+		List<AbstractExpression> usedExpressions = new LinkedList<AbstractExpression>();
+		for (PlotDescription pexp : plotDescriptions) {
+			for (AbstractExpression e : pexp.getExpressions()) {
+				ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(
+						unfoldedVariables);
+				e.accept(setter);
+				usedExpressions.add(e);
+			}
+		}
+
+		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
+		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
+		for (AbstractExpression exp : usedExpressions) {
+			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
+			exp.accept(visitor);
+			usedProducts.addAll(visitor.getUsedCombinedMoments());
+			usedGeneralExpectations
+					.addAll(visitor.getUsedGeneralExpectations());
+		}
+		analysis.setUsedMoments(usedProducts);
+		analysis.setUsedGeneralExpectations(usedGeneralExpectations);
 	}
 
 }

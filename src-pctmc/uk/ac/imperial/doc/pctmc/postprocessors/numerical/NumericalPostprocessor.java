@@ -51,6 +51,9 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		return stepSize;
 	}
 	
+	public int getNumberOfSteps() {
+		return (int)Math.floor(stopTime/stepSize);
+	}
 	
 
 	public void setStopTime(double stopTime) {

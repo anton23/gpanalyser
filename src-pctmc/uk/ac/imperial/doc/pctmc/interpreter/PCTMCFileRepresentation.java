@@ -1,23 +1,16 @@
 package uk.ac.imperial.doc.pctmc.interpreter;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
+import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotConstraint;
-import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternSetterVisitor;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
@@ -30,7 +23,7 @@ public class PCTMCFileRepresentation {
 	private PCTMC pctmc;
 	private Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
 	private Multimap<AbstractPCTMCAnalysis, PlotDescription> plots;
-	private List<PCTMCIterate> experiments;
+	private List<PCTMCExperiment> experiments;
 
 	@SuppressWarnings("unchecked")
 	public PCTMCFileRepresentation(Object compilerReturn) throws Exception {
@@ -39,7 +32,7 @@ public class PCTMCFileRepresentation {
 
 		plots = (Multimap<AbstractPCTMCAnalysis, PlotDescription>) compilerReturn
 				.getClass().getField("plots").get(compilerReturn);
-		experiments = (List<PCTMCIterate>) compilerReturn.getClass().getField(
+		experiments = (List<PCTMCExperiment>) compilerReturn.getClass().getField(
 				"experiments").get(compilerReturn);
 		unfoldedVariables = (Map<ExpressionVariable, AbstractExpression>) compilerReturn
 				.getClass().getField("unfoldedVariables").get(compilerReturn);
@@ -58,7 +51,7 @@ public class PCTMCFileRepresentation {
 				PatternSetterVisitor.unfoldPatterns(e, patternMatcher);
 			}
 		}
-		for (PCTMCIterate iterate : experiments) {
+		for (PCTMCExperiment iterate : experiments) {
 			for (PlotAtDescription pd : iterate.getPlots()) {
 				PatternSetterVisitor.unfoldPatterns(pd.getExpression(),
 						patternMatcher);
@@ -70,36 +63,10 @@ public class PCTMCFileRepresentation {
 		}
 	}
 
-	public void unfoldVariablesAndSetUsedProducts(
-			AbstractPCTMCAnalysis analysis,
-			Collection<PlotDescription> plotDescriptions) {
-		List<AbstractExpression> usedExpressions = new LinkedList<AbstractExpression>();
-		for (PlotDescription pexp : plotDescriptions) {
-			for (AbstractExpression e : pexp.getExpressions()) {
-				ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(
-						unfoldedVariables);
-				e.accept(setter);
-				usedExpressions.add(e);
-			}
-		}
-
-		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
-		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
-		for (AbstractExpression exp : usedExpressions) {
-			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
-			exp.accept(visitor);
-			usedProducts.addAll(visitor.getUsedCombinedMoments());
-			usedGeneralExpectations
-					.addAll(visitor.getUsedGeneralExpectations());
-		}
-		analysis.setUsedMoments(usedProducts);
-		analysis.setUsedGeneralExpectations(usedGeneralExpectations);
-
-	}
 
 	public void unfoldVariablesAndSetUsedProducts() {
 		for (AbstractPCTMCAnalysis analysis : plots.keySet()) {
-			unfoldVariablesAndSetUsedProducts(analysis, plots.get(analysis));
+			AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts(analysis, plots.get(analysis), unfoldedVariables);
 		}
 	}
 	
@@ -119,7 +86,7 @@ public class PCTMCFileRepresentation {
 		return plots;
 	}
 
-	public List<PCTMCIterate> getExperiments() {
+	public List<PCTMCExperiment> getExperiments() {
 		return experiments;
 	}
 

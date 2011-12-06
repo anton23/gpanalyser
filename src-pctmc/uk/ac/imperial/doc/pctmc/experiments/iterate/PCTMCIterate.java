@@ -28,7 +28,7 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import com.google.common.collect.Lists;
 
-public class PCTMCIterate {
+public class PCTMCIterate extends PCTMCExperiment {
 	private List<RangeSpecification> ranges;
 	private AbstractPCTMCAnalysis analysis;
 	private List<PlotAtDescription> plots;
@@ -77,7 +77,7 @@ public class PCTMCIterate {
 		this.minRanges = minRanges;
 	}
 
-	public void iterate(Constants constants) {
+	public void run(Constants constants) {
 		Constants tmpConstants = constants.getCopyOf();
 
 		if (ranges.size() == 2 || ranges.size() == 1 || ranges.size() == 0) {
@@ -85,7 +85,7 @@ public class PCTMCIterate {
 		}
 	}
 
-	private void reEvaluate(Constants constants) {
+	public static void reEvaluate(Constants constants, Map<String, AbstractExpression> reEvaluations) {
 		for (Map.Entry<String, AbstractExpression> e : reEvaluations.entrySet()) {
 			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(
 					constants);
@@ -186,7 +186,7 @@ public class PCTMCIterate {
 				 * } else { iterations++; }
 				 */
 
-				reEvaluate(constants);
+				reEvaluate(constants, reEvaluations);
 				postprocessor.calculateDataPoints(constants);
 
 				for (int i = 0; i < plots.size(); i++) {
@@ -256,7 +256,7 @@ public class PCTMCIterate {
 				constants.setConstantValue(minRangesArray[s].getConstant(),
 						minRangesArray[s].getStep(step[s]));
 			}
-			reEvaluate(constants);
+			reEvaluate(constants, reEvaluations);
 			postprocessor.calculateDataPoints(constants);
 			iterations++;
 			if ((iterations) % show == 0) {
@@ -308,7 +308,7 @@ public class PCTMCIterate {
 
 	}
 
-	private boolean next(int[] is, int[] steps) {
+	public static boolean next(int[] is, int[] steps) {
 		int i = 0;
 
 		while (i < steps.length && ++is[i] == steps[i]) {

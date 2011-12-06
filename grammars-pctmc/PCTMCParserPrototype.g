@@ -267,6 +267,7 @@ experiment
       plots=plotAtSpecifications
     RBRACE
   -> ^(ITERATE $ir $min? (WHERE constantReEvaluation+)? analysis $plots)
+ | transientIterate
  | min = minimiseSpec
     (WHERE
       constantReEvaluation+)?
@@ -276,6 +277,18 @@ experiment
   -> ^(ITERATE $min (WHERE constantReEvaluation+)? analysis $plots)
  
 ;
+
+transientIterate:
+  TRANSIENT_ITERATE
+   rangeSpecifications 
+   (WHERE
+      constantReEvaluation+)?
+   analysis
+   PLOT
+   LBRACE
+    plotDescription*
+   RBRACE
+   -> ^(TRANSIENT_ITERATE rangeSpecifications (WHERE constantReEvaluation+)? analysis plotDescription*);
 
 iterateSpec:
  (ITERATE 

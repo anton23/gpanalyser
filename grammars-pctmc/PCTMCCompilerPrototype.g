@@ -57,13 +57,13 @@ system returns[Constants constants,
                Map<ExpressionVariable,AbstractExpression> unfoldedVariables,
                PCTMC pctmc,                
                Multimap<AbstractPCTMCAnalysis,PlotDescription> plots,
-               List<PCTMCIterate> experiments
+               List<PCTMCExperiment> experiments
     ]
 @init{       
   Map<String,Double> constantMap = new LinkedHashMap<String,Double>();      
   vars = new LinkedHashMap<ExpressionVariable,AbstractExpression>();
   $plots = LinkedHashMultimap.<AbstractPCTMCAnalysis,PlotDescription>create();
-  $experiments = new LinkedList<PCTMCIterate>();    
+  $experiments = new LinkedList<PCTMCExperiment>();    
 }
 
 : constantDefinition[constantMap]* {$constants = new Constants(constantMap);}
@@ -119,7 +119,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
 };
 
 
-experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCIterate iterate]
+experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment iterate]
 @init{  
   List<RangeSpecification> ranges = new LinkedList<RangeSpecification>(); 
   List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>(); 
@@ -137,6 +137,13 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
     (p=plotAtSpecification[$constants] {plots.add($p.p);})*
    )
   {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,$a.postprocessor,plots,$unfoldedVariables);}
+| ^(TRANSIENT_ITERATE (r=rangeSpecification {ranges.add($r.range);})+
+   (WHERE 
+       ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
+      a=analysis[$pctmc,$constants, null]
+      ps=plotDescriptions
+  {$iterate = new PCTMCTransientIterate(ranges,reEvaluation,$a.analysis, $a.postprocessor,$ps.p, $unfoldedVariables);}
+  )
 ;
 
 rangeSpecification returns[RangeSpecification range]:

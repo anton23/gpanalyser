@@ -49,6 +49,7 @@ ODES: 'ODEs';
 SIMULATION: 'Simulation';
 COMPARE: 'Compare';
 ITERATE: 'Iterate';
+TRANSIENT_ITERATE: 'TransientIterate';
 MINIMISE: 'Minimise';
 
 FROMVALUE: 'from'; 
