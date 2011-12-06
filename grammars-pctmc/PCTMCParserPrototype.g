@@ -8,9 +8,12 @@ options {
 }
 
 tokens{
-  COMPONENT; 
+  COMPONENT;
   CONSTANT;
-  VARIABLE; 
+  VARIABLE;
+  CONSTDEF;
+  VARDEF;
+  STATE; 
   TRANSACTION; 
   TLIST; 
   FUN;
@@ -294,13 +297,13 @@ rangeSpecification+
 ;
 
 constantReEvaluation:
-  id=LOWERCASENAME DEF rhs=expression SEMI ->  $id $rhs
+  id=constant DEF rhs=expression SEMI ->  $id $rhs
 ;
 
 rangeSpecification:
-  constant=LOWERCASENAME FROMVALUE from=REALNUMBER TOVALUE to=REALNUMBER steps=stepSpecification 
- {constants.add($constant.text);}
-  -> ^(RANGE $constant $from $to $steps)
+  c=constant FROMVALUE from=REALNUMBER TOVALUE to=REALNUMBER steps=stepSpecification 
+ {constants.add($c.text);}
+  -> ^(RANGE $c $from $to $steps)
 ;
 
 stepSpecification:
@@ -385,22 +388,29 @@ analysesSpec:
   REPLICATIONS DEF INTEGER SEMI
 ;
 
-var: VAR LOWERCASENAME -> ^(VAR LOWERCASENAME); 
+constant:
+  id=LOWERCASENAME -> ^(CONSTANT LOWERCASENAME)
+;
 
+variable:
+  VAR id=LOWERCASENAME -> ^(VARIABLE LOWERCASENAME)
+; 
 
-state: s=UPPERCASENAME; 
+state: 
+  id=UPPERCASENAME -> ^(STATE UPPERCASENAME)
+; 
 
 //-----Rules for definitions----- 
 
 constantDefinition:
-  id=LOWERCASENAME {hint.push("constant definition has to be of the form\n   <constant> = <number> ;");}  
+  c=constant {hint.push("constant definition has to be of the form\n   <constant> = <number> ;");}  
    DEF  
     (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();} 
-     {constants.add($id.text);}
-     -> ^(CONSTANT $id $rate);
+     {constants.add($c.text);}
+     -> ^(CONSTDEF $c $rate);
   
 varDefinition:
-  var DEF expression SEMI -> ^(VARIABLE var expression);
+  variable DEF expression SEMI -> ^(VARDEF variable expression);
   
 //-----Rules for events
 
@@ -439,14 +449,14 @@ signExpression
 
 primaryExpression:    
       p=combinedPowerProduct {if (requiresExpectation && !insideExpectation) reportError(new CustomRecognitionException(input, "population " + $p.text + " has to be inside an expectation"));}
-     | var 
-     |REALNUMBER
-     |INTEGER
+     | variable 
+     | REALNUMBER
+     | INTEGER
      | LPAR expression RPAR 
      | MIN LPAR expression COMMA expression RPAR -> ^(MIN expression COMMA expression)
      | LOWERCASENAME LPAR expressionList RPAR -> ^(FUN LOWERCASENAME expressionList)
      | TIME 
-     | c = LOWERCASENAME {if (requireDefinitions && !constants.contains($c.text)) 
+     | c = constant {if (requireDefinitions && !constants.contains($c.text)) 
           reportError(new CustomRecognitionException(input, "constant '" + $c.text + "' unknown"));}
      | mean 
      | generalExpectation

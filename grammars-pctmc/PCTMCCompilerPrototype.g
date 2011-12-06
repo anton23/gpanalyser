@@ -140,9 +140,9 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
 ;
 
 rangeSpecification returns[RangeSpecification range]:
-  ^(RANGE constant = LOWERCASENAME from=realnumber to=realnumber 
-    ((IN steps=integer STEPS) {$range = new RangeSpecification($constant.text,$from.value,$to.value,$steps.value); } 
-    | (STEP step=realnumber) {$range = new RangeSpecification($constant.text,$from.value,$to.value,$step.value);}
+  ^(RANGE c=constant from=realnumber to=realnumber 
+    ((IN steps=integer STEPS) {$range = new RangeSpecification($c.text,$from.value,$to.value,$steps.value); } 
+    | (STEP step=realnumber) {$range = new RangeSpecification($c.text,$from.value,$to.value,$step.value);}
     ))
   
 ;
@@ -262,50 +262,48 @@ expressionList returns [List<AbstractExpression> e]
   exp = expression {$e.add($exp.e);} (COMMA exp2 = expression {$e.add($exp2.e); })*
 ;
 
+constant returns [String text]:
+  ^(CONSTANT id=LOWERCASENAME) {$text = $id.text;}
+;
+
 constantDefinition[Map<String,Double> map]:
-^(CONSTANT id=LOWERCASENAME (value=realnumber
-                              {$map.put($id.text,$value.value);}
-                            |valueI=integer
-                              {$map.put($id.text,new Double($valueI.value));}
-                              )
+  ^(CONSTDEF id=constant (value=realnumber {$map.put($id.text,$value.value);}
+                         |valueI=integer   {$map.put($id.text,new Double($valueI.value));})
 );
 
+variable returns [String text]:
+  ^(VARIABLE id=LOWERCASENAME) {$text = $id.text;}
+;
+
 varDefinition:
-  ^(VARIABLE ^(VAR id=LOWERCASENAME) exp=expression{
-       vars.put(new ExpressionVariable($id.text),$exp.e); 
-  });
+  ^(VARDEF ^(VAR id=variable) exp=expression {vars.put(new ExpressionVariable($id.text),$exp.e);})
+;
 
 eventDefinition returns [EventSpecification e]:
- ^(EVENT dec=stateSum  TO  inc=stateSum AT rate=expression)
- {$e=new EventSpecification($dec.t,$inc.t,$rate.e);  }
+  ^(EVENT dec=stateSum  TO  inc=stateSum AT rate=expression) {$e=new EventSpecification($dec.t,$inc.t,$rate.e);}
 ;
 
 initDefinition[Map<State,AbstractExpression> map]:
-  ^(INIT t=state DEF e=expression {$map.put($t.t,$e.e);}); 
+  ^(INIT t=state DEF e=expression {$map.put($t.t,$e.e);})
+; 
 
-
-
-state returns [State t]
-:
-  n=UPPERCASENAME {$t = new PlainState($n.text);}
+state returns [State t]:
+  ^(STATE n=UPPERCASENAME) {$t = new PlainState($n.text);}
 ;
 
 stateSum returns [List<State> t]
-@init{
-  $t = new LinkedList<State>(); 
-}:
+@init{$t = new LinkedList<State>();}:
   (tr=state{$t.add($tr.t);})*
 ;
 
 primary_expression returns[AbstractExpression e]:
 
- ^(VAR id=LOWERCASENAME {$e = new ExpressionVariable($id.text);})
+   id=variable {$e = new ExpressionVariable($id.text);}
  | LPAR ne = expression RPAR {$e = $ne.e;}
- |r = realnumber {$e = new DoubleExpression($r.value);}
- |i = integer {$e = new DoubleExpression((double)$i.value);}
+ | r = realnumber {$e = new DoubleExpression($r.value);}
+ | i = integer {$e = new DoubleExpression((double)$i.value);}
  | TIME {$e = new TimeExpression();}
- |c = LOWERCASENAME {$e = new ConstantExpression($c.text);
-                     }
+ | c=constant {$e = new ConstantExpression($c.text);}
  | cp=combinedPowerProduct {$e = CombinedProductExpression.create($cp.c);}
  | m=mean {$e = $m.m;} 
  | eg = generalExpectation {$e = $eg.e;}
@@ -313,7 +311,7 @@ primary_expression returns[AbstractExpression e]:
  | scm=scentral {$e = $scm.c;}
  | ^(MIN exp1=expression COMMA exp2=expression) {$e = MinExpression.create($exp1.e,$exp2.e); }
  |  {List<AbstractExpression> args = new LinkedList<AbstractExpression>(); }        
-  ^(FUN name=LOWERCASENAME firstArg=expression {args.add($firstArg.e);} (COMMA arg=expression {args.add($arg.e);})*) {$e = FunctionCallExpression.create($name.text,args);}
+   ^(FUN name=LOWERCASENAME firstArg=expression {args.add($firstArg.e);} (COMMA arg=expression {args.add($arg.e);})*) {$e = FunctionCallExpression.create($name.text,args);}
  | ^(PATTERN s=state) {$e = new PatternPopulationExpression($s.t);}  
 ;
 
