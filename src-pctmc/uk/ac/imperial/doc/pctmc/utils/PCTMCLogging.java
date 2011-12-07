@@ -1,5 +1,7 @@
 package uk.ac.imperial.doc.pctmc.utils;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.ConsoleAppender;
@@ -13,6 +15,42 @@ public class PCTMCLogging {
 	
 	private static boolean visible = true; 
 
+    private static Set<IConsole> s_consoles = new HashSet<IConsole>();
+	   
+	/**
+	 * Add {@code _c} to logging consoles
+	 * @param _c
+	 */
+	public static void addConsole(IConsole _c)
+	{
+		if (_c != null)
+		{
+			s_consoles.add(_c);
+		}
+	}
+	
+	/**
+	 * From {@code _c} from logging consoles
+	 * @param _c
+	 */
+	public static void removeConsole(IConsole _c)
+	{
+		if (_c != null)
+		{
+			s_consoles.remove(_c);
+		}
+	}
+	
+	public static void clearConsoles()
+	{
+		for (IConsole c : s_consoles) {c.clear();}
+	}
+
+	public static void printConsoleStats()
+	{
+		for (IConsole c : s_consoles) {c.printStats();}
+	}
+	
 	public static boolean isVisible() {
 		return visible;
 	}
@@ -20,21 +58,49 @@ public class PCTMCLogging {
 	public static void setVisible(boolean visible) {
 		PCTMCLogging.visible = visible;
 	}
-
+	
 	static final Logger LOGGER = Logger.getLogger(PCTMCLogging.class);
 	static {
 		setLogger(LOGGER);
 	}
+	
+	public static void ok(String message) {
+		message=formatMessage(message);
+		if (visible){
+			LOGGER.info(message);
+			for (IConsole c : s_consoles) {c.ok(message);}
+		}
+	}
 
 	public static void info(String message) {
 		message=formatMessage(message);
-		if (visible) LOGGER.info(message);
+		if (visible){
+			LOGGER.info(message);
+			for (IConsole c : s_consoles) {c.info(message);}
+		}
 	}
 
+	public static void warn(String message) {
+		message=formatMessage(message);
+		if (visible){
+			LOGGER.warn(message);
+			for (IConsole c : s_consoles) {c.warn(message);}
+		}
+	}
+	
 	public static void error(String message) {
 		message=formatMessage(message);
 		LOGGER.error(message);
+		for (IConsole c : s_consoles) {c.error(message);}
 	}
+	
+	public static void fatalError(String message)
+	{
+		message=formatMessage(message);
+		LOGGER.error(message);
+		for (IConsole c : s_consoles) {c.fatalError(message);}
+	}
+	
 	
 	public static String getOverhead(){
 		return "              ";
@@ -42,7 +108,10 @@ public class PCTMCLogging {
 
 	public static void debug(String message) {
 			message=formatMessage(message);
-			if (visible) LOGGER.debug("[D] " + message);
+			if (visible) {
+				LOGGER.debug("[D] " + message);
+				for (IConsole c : s_consoles) {c.debug("[D] " + message);}
+			}
 	}
 	
 	protected static int maxChars =  100;

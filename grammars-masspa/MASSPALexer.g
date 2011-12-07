@@ -19,4 +19,5 @@ RECVMSG:'?';
 STOP: 'stop';
 CHANNEL: 'Channel';
 ACOUNT:'#';
-LOC_ANY:'A';
+LOC_ALL:'A';
+LOC_VAR:'x';

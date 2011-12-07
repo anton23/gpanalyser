@@ -21,10 +21,16 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Collection;
   
+import com.google.common.collect.Multimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+  
 import uk.ac.imperial.doc.jexpressions.expressions.*;
 import uk.ac.imperial.doc.jexpressions.constants.*;
 import uk.ac.imperial.doc.jexpressions.variables.*;
-  
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+    
 import uk.ac.imperial.doc.pctmc.analysis.*;
 import uk.ac.imperial.doc.pctmc.odeanalysis.*; 
 import uk.ac.imperial.doc.pctmc.simulation.*;
@@ -36,11 +42,9 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.representation.*; 
 import uk.ac.imperial.doc.pctmc.experiments.iterate.*; 
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.*; 
-
-import com.google.common.collect.Multimap;
-import com.google.common.collect.LinkedHashMultimap;	  
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.*;
+import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
+import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
 
 import uk.ac.imperial.doc.masspa.representation.components.*;
 import uk.ac.imperial.doc.masspa.representation.model.*; 
@@ -51,7 +55,41 @@ import uk.ac.imperial.doc.masspa.util.*;
 
 @members
 {
-  MASSPAModel m_model=null;
+     MASSPAModel m_model=null;
+
+     protected Stack<String> hint = new Stack<String>();
+     
+     protected ErrorReporter errorReporter;
+     
+     public void setErrorReporter(ErrorReporter errorReporter) {
+          this.errorReporter = errorReporter;
+     }
+     
+     public String getErrorHeader(RecognitionException e) {
+    return "line "+e.line+":"+e.charPositionInLine;
+  }
+     
+       public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+       
+        if (errorReporter != null) {
+           errorReporter.addError("["+hdr + "] " + msg);
+        }
+    }
+    
+        
+      public String getErrorMessage(RecognitionException e,
+                              String[] tokenNames) {
+        String ret;
+        if (!hint.isEmpty()) {
+          ret = hint.peek();
+        } else{
+          ret =  super.getErrorMessage(e, tokenNames);
+        }
+        return ret;
+      }
 }
 
 // ***********************************
@@ -61,15 +99,23 @@ import uk.ac.imperial.doc.masspa.util.*;
 start:;
 
 modelDefinition[Map<ExpressionVariable,AbstractExpression> variables, Constants constants] returns [PCTMC pctmc]
-@init{Set<ActionCountState> actions = new HashSet<ActionCountState>();}:
+@init{Set<MASSPAActionCount> actions = new HashSet<MASSPAActionCount>();}:
   agents=agentDefinitions
   model[$agents.agents]
   {$pctmc = MASSPAToPCTMC.getPCTMC(m_model,variables,constants);}
 ;
 
 state returns [State t]:
-  ^(STATE agentPopulation) {$t = agentPopulation.agentPop;}
-| ^(STATE actionCount) {$t = actionCount.aCount;}
+  ^(STATE ^(AGENTPOP id=UPPERCASENAME l=location)) {$t = (State)new MASSPAAgentPop(new ConstComponent($id.text),$l.l);}
+| ^(STATE ^(ACOUNT id=LOWERCASENAME l=location)) {$t = (State)new MASSPAActionCount($id.text,$l.l);}
+;
+
+constant returns [String text]:
+  ^(CONSTANT id=LOWERCASENAME l=location) {$text = $id.text+$l.l.toString();}
+;
+
+variable returns [String text]:
+  ^(VARIABLE id=LOWERCASENAME l=location) {$text = $id.text+$l.l.toString();}
 ;
 
 // ****************************************************
@@ -91,7 +137,7 @@ componentDefinitions[MASSPAAgents agents, String scopeName]:
 ;
 
 message[MASSPAAgents agents] returns [MASSPAMessage m]:
-  msg=UPPERCASENAME {m = agents.getMessage($msg.text);}
+  msg=UPPERCASENAME {$m = agents.getMessage($msg.text); $m = ($m == null) ? new MASSPAMessage($msg.text) : $m;}
 ;
 
 component[MASSPAAgents agents, String scopeName] returns [MASSPAComponent c]:
@@ -107,16 +153,15 @@ choice[MASSPAAgents agents, String scopeName] returns [MASSPAComponent c]
 
 prefix[MASSPAAgents agents, String scopeName] returns [Prefix c]:
   ^(PREFIX TAU r=expression s=primaryComponent[agents, scopeName]){$c = new Prefix("",$r.e,$s.c);}
-| ^(PREFIX a=LOWERCASENAME r=expression s=primaryComponent[agents, scopeName]){$c = new Prefix($a.text,$r.e,$s.c);}
-| ^(SEND TAU r=expression msg=message[agents] nofmsg=expression s=primaryComponent[agents, scopeName]){$c = new SendPrefix("",$r.e,$msg.m,$nofmsg.e,$s.c);}
-| ^(SEND a=LOWERCASENAME r=expression msg=message[agents] nofmsg=expression s=primaryComponent[agents, scopeName]){$c = new SendPrefix($a.text,$r.e,$msg.m,$nofmsg.e,$s.c);}
-| ^(RECV TAU msg=message[agents] msgaccprob=expression s=primaryComponent[agents, scopeName]){$c = new ReceivePrefix("",$msg.m,$msgaccprob.e,$s.c);}
-| ^(RECV a=LOWERCASENAME msg=message[agents] msgaccprob=expression s=primaryComponent[agents, scopeName]){$c = new ReceivePrefix($a.text,$msg.m,$msgaccprob.e,$s.c);}
+| ^(PREFIX a=LOWERCASENAME r=expression s=primaryComponent[agents, scopeName]){agents.addAction($a.text); $c = new Prefix($a.text,$r.e,$s.c);}
+| ^(SEND TAU r=expression msg=message[agents] nofmsg=expression s=primaryComponent[agents, scopeName]){agents.addMessage($msg.m); $c = new SendPrefix("",$r.e,$msg.m,$nofmsg.e,$s.c);}
+| ^(SEND a=LOWERCASENAME r=expression msg=message[agents] nofmsg=expression s=primaryComponent[agents, scopeName]){agents.addAction($a.text); agents.addMessage($msg.m); $c = new SendPrefix($a.text,$r.e,$msg.m,$nofmsg.e,$s.c);}
+| ^(RECV TAU msg=message[agents] msgaccprob=expression s=primaryComponent[agents, scopeName]){agents.addMessage($msg.m); $c = new ReceivePrefix("",$msg.m,$msgaccprob.e,$s.c);}
+| ^(RECV a=LOWERCASENAME msg=message[agents] msgaccprob=expression s=primaryComponent[agents, scopeName]){agents.addAction($a.text); agents.addMessage($msg.m); $c = new ReceivePrefix($a.text,$msg.m,$msgaccprob.e,$s.c);}
 ; 
 
 primaryComponent[MASSPAAgents agents, String scopeName] returns [MASSPAComponent c]:
   id=UPPERCASENAME {$c = agents.getConstComponent(scopeName, $id.text, $UPPERCASENAME.getLine());}
-| ANY  {$c = agents.getAnyComponent();}
 | STOP {$c = agents.getStopComponent();}
 ;
 
@@ -130,9 +175,10 @@ model[MASSPAAgents componentDefinitions] returns [MASSPAModel model]:
 
 location returns [Location l]
 @init{List<Integer> coords = new LinkedList<Integer>();}
-@after{l = (coords.size() > 0) ? new Location(coords) : new AnyLocation();}:
+@after{$l = (coords.size() > 0) ? new Location(coords) : $l;}:
   ^(LOCATION (i=INTEGER {coords.add(Integer.parseInt($i.text));})+)
-| ^(LOCATION ANY)
+| ^(LOCATION LOC_ANY) {$l = AllLocation.getInstance();}
+| ^(LOCATION LOC_VAR) {$l = VarLocation.getInstance();}
 ;
 
 locationDef:
@@ -140,12 +186,11 @@ locationDef:
 ;
 
 agentPopulation returns [MASSPAAgentPop agentPop]:
-  ^(AGENTPOP type=UPPERCASENAME l=location) {$agentPop=m_model.getAgentPop($type.text,$l.l,$AGENTPOP.getLine());}
+  ^(AGENTPOP id=UPPERCASENAME l=location) {$agentPop=m_model.getAgentPop($id.text,$l.l,$AGENTPOP.getLine());}
 ;
 
 actionCount returns [MASSPAActionCount aCount]:
-  ^(ACOUNT LOWERCASENAME) {$aCount = new MASSPAActionCount(LOWERCASENAME.text);}
-| ^(ACOUNT LOWERCASENAME location) {$aCount = new MASSPAActionCount(LOWERCASENAME.text+location.l.toString());}
+  ^(ACOUNT id=LOWERCASENAME l=location) {$aCount = m_model.getActionCount($id.text, $l.l, $ACOUNT.getLine());}
 ;
 
 initVal:
