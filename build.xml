@@ -206,7 +206,7 @@
         </java>    	
    </target>
 
-    <target name="build" depends="plain.build.grammars, build.grammars">
+    <target name="build" depends="MASSPA.build.grammars, plain.build.grammars, build.grammars">
         <mkdir dir="${build.class}"/>
     	
         <javac source="1.6" target="1.6" debug="true" destdir="${build.class}"
@@ -215,22 +215,7 @@
             <src path="${src}"/>
             <src path="${src.generated}"/>
             <src path="${PCTMC.src}"/>
-        	<src path="${plain.src}"/>
-        	<src path="${jexpressions.src}"/>
-            <include name="**/*.java"/> 
-         	<exclude name="**/package-info.java"/> 
-        </javac>
-    </target>
-	
-    <target name="MASSPA.build" depends="plain.build.grammars, MASSPA.build.grammars">
-        <mkdir dir="${build.class}"/>
-    	
-        <javac source="1.6" target="1.6" debug="true" destdir="${build.class}"
-        deprecation="true">
-            <classpath refid="CLASSPATH"/>
-            <src path="${src}"/>
-            <src path="${MASSPA.src.generated}"/>
-            <src path="${PCTMC.src}"/>
+        	<src path="${MASSPA.src}"/>
         	<src path="${plain.src}"/>
         	<src path="${jexpressions.src}"/>
             <include name="**/*.java"/> 
@@ -292,6 +277,10 @@
             </zipfileset>
         	
             <zipfileset dir="${plain.src}" prefix="${zip.root}/${plain.src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
+            <zipfileset dir="${MASSPA.src}" prefix="${zip.root}/${MASSPA.src}">
                 <include name="**/*.java" />
             </zipfileset>
         	

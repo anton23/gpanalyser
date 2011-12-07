@@ -276,7 +276,7 @@ variable returns [String text]:
 ;
 
 varDefinition:
-  ^(VARDEF ^(VAR id=variable) exp=expression {vars.put(new ExpressionVariable($id.text),$exp.e);})
+  ^(VARDEF var=variable exp=expression {vars.put(new ExpressionVariable($var.text),$exp.e);})
 ;
 
 eventDefinition returns [EventSpecification e]:
