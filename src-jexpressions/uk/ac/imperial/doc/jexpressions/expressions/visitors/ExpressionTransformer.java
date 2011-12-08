@@ -11,6 +11,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
@@ -99,6 +100,15 @@ public class ExpressionTransformer implements IExpressionVisitor {
 		e.getB().accept(this);
 		AbstractExpression newB = result;
 		result = MinExpression.create(newA, newB);
+	}
+	
+	@Override
+	public void visit(MaxExpression e) {
+		e.getA().accept(this);
+		AbstractExpression newA = result;
+		e.getB().accept(this);
+		AbstractExpression newB = result;
+		result = MaxExpression.create(newA, newB);
 	}
 
 	public void visit(DivMinExpression e) {

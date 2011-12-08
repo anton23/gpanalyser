@@ -454,6 +454,7 @@ primaryExpression:
      | INTEGER
      | LPAR expression RPAR 
      | MIN LPAR expression COMMA expression RPAR -> ^(MIN expression COMMA expression)
+     | MAX LPAR expression COMMA expression RPAR -> ^(MAX expression COMMA expression)
      | LOWERCASENAME LPAR expressionList RPAR -> ^(FUN LOWERCASENAME expressionList)
      | TIME 
      | c = constant {if (requireDefinitions && !constants.contains($c.text)) 

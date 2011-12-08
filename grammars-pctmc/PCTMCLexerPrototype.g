@@ -27,6 +27,7 @@ PATTERN:'%';
 
 
 MIN: 'min';
+MAX: 'max';
 
 
 POWER: '^';

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -69,13 +70,15 @@ public class MASSPAToPCTMC
 				initMap.put(count, count.getInitVal());
 			}
 		}
-		
+
+		// Localise constants
+		localiseConstants(_model, _constants);
 		// Expand variables
 		inlineVariables(_model, _variables, _constants);
 		
 		// Create evolutions
 		List<EvolutionEvent> events = null;// = createEvolutionEvents(pops, initCounts, actionCounts, _variables, _constants, _model);
-				
+		
 		// Build MASSPAPCTMC
 		return new MASSPAPCTMC(initMap, events, _model);
 		
@@ -99,6 +102,36 @@ public class MASSPAToPCTMC
 		ExpressionFctAndVarInliner inliner = new ExpressionFctAndVarInliner(_loc, _model, _functions, _variables, _constants);
 		_rate.accept(inliner);
 		return inliner.getResult();
+	}
+
+	private static void localiseConstants(MASSPAModel _model, Constants _constants)
+	{
+		Constants cnstscopy = _constants.getCopyOf();
+		for (String cnst : cnstscopy.getConstantsMap().keySet())
+		{
+			String[] cnstNameSplit = cnst.split("@");
+			
+			// This constant may have placeholders in its expression
+			if (VarLocation.getInstance().toString().endsWith(cnstNameSplit[1]))
+			{
+				for (Location loc : _model.getAllLocations())
+				{
+					String localName = cnstNameSplit[0]+loc.toString();
+					if (_constants.getConstantValue(localName)==null)
+					{
+						_constants.setConstantValue(localName, _constants.getConstantValue(cnst));
+					}
+				}
+			}
+			else
+			{
+				Location loc = LocationHelper.getLocalisedLocation(cnst, null);
+				if (!_model.getAllLocations().contains(loc))
+				{
+					throw new AssertionError("Constant " + cnst + " has an invalid location");
+				}
+			}
+		}
 	}
 	
 	private static void inlineVariables(MASSPAModel _model,	Map<ExpressionVariable, AbstractExpression> _variables,	Constants _constants)

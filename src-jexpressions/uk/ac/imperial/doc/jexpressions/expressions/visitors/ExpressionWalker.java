@@ -8,6 +8,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
@@ -74,6 +75,12 @@ public class ExpressionWalker implements IExpressionVisitor {
 
 	@Override
 	public void visit(MinExpression e) {
+		e.getA().accept(this);
+		e.getB().accept(this);
+	}
+	
+	@Override
+	public void visit(MaxExpression e) {
 		e.getA().accept(this);
 		e.getB().accept(this);
 	}

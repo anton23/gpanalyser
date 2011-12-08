@@ -19,7 +19,7 @@ public class MASSPAActionCount extends State
 	public MASSPAActionCount(final String _name, final Location _loc)
 	{
 		if (_name == null) {throw new AssertionError(Messages.s_ACTIONCOUNT_NULL_NAME);}
-		m_name = "#"+_name.replace("#", "");
+		m_name = _name.replace("#", "");
 		m_loc = (_loc == null) ? AllLocation.getInstance() : _loc;
 	}
 
@@ -57,7 +57,7 @@ public class MASSPAActionCount extends State
 	// Object overrides
 	//*******************************************
 	@Override 
-	public String toString() {return m_name+m_loc;}
+	public String toString() {return "#"+m_name+m_loc;}
 	
 	@Override
 	public int hashCode() {return m_name.hashCode();}
