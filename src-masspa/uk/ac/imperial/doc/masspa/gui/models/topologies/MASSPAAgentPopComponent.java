@@ -3,16 +3,8 @@ package uk.ac.imperial.doc.masspa.gui.models.topologies;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
-import org.simpleframework.xml.convert.Convert;
-import org.simpleframework.xml.convert.Converter;
-import org.simpleframework.xml.core.Commit;
-import org.simpleframework.xml.core.Complete;
-import org.simpleframework.xml.core.Persist;
-import org.simpleframework.xml.stream.InputNode;
-import org.simpleframework.xml.stream.OutputNode;
 
 import uk.ac.imperial.doc.masspa.gui.util.ExpressionValidator;
-import uk.ac.imperial.doc.masspa.language.Labels;
 import uk.ac.imperial.doc.masspa.representation.components.AllComponent;
 import uk.ac.imperial.doc.masspa.representation.components.ConstComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;

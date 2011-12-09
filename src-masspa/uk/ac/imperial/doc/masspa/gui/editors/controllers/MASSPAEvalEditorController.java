@@ -8,15 +8,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.text.BadLocationException;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-
-import com.google.common.collect.Multimap;
 
 import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -43,6 +41,8 @@ import uk.ac.imperial.doc.masspa.representation.model.Location;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAAgentPop;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAChannel;
 import uk.ac.imperial.doc.masspa.util.MASSPALogging;
+
+import com.google.common.collect.Multimap;
 
 /**
  * This class controls the MASSPAEvaluator tab.

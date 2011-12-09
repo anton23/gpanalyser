@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.masspa.gui.editors;
 import java.awt.BorderLayout;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -18,8 +19,6 @@ import uk.ac.imperial.doc.masspa.gui.models.ObservableDocument;
 import uk.ac.imperial.doc.masspa.gui.util.CompoundUndoManager;
 import uk.ac.imperial.doc.masspa.gui.util.Constants;
 import uk.ac.imperial.doc.masspa.language.Labels;
-
-import javax.swing.JLabel;
 
 /**
  * This class defines the layout of the

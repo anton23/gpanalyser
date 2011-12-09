@@ -1,8 +1,8 @@
 package uk.ac.imperial.doc.masspa.gui.components.topologies.gen;
 import java.text.NumberFormat;
 
-import javax.swing.JLabel;
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 
 import uk.ac.imperial.doc.masspa.gui.util.Constants;
 import uk.ac.imperial.doc.masspa.language.Labels;

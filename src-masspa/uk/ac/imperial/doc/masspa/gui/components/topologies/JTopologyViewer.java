@@ -11,8 +11,13 @@ import java.util.Set;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionListener;
 
 import uk.ac.imperial.doc.masspa.gui.components.topologies.canvas.JTopologyViewerCanvas;
 import uk.ac.imperial.doc.masspa.gui.models.ObservableTopology;
@@ -21,12 +26,6 @@ import uk.ac.imperial.doc.masspa.gui.models.channels.MASSPAChannelComponent;
 import uk.ac.imperial.doc.masspa.gui.models.topologies.LocationComponent;
 import uk.ac.imperial.doc.masspa.gui.util.Constants;
 import uk.ac.imperial.doc.masspa.language.Labels;
-
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionListener;
 
 public class JTopologyViewer extends JPanel
 {

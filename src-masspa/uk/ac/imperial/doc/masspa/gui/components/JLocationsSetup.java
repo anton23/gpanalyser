@@ -14,9 +14,16 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import uk.ac.imperial.doc.masspa.gui.models.ObservableAgents;
 import uk.ac.imperial.doc.masspa.gui.models.ObservableTopology;
@@ -29,15 +36,7 @@ import uk.ac.imperial.doc.masspa.language.Labels;
 import uk.ac.imperial.doc.masspa.representation.components.AllComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;
 
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.JList;
-
 import com.google.common.collect.Multimap;
-import javax.swing.JTextField;
 
 public class JLocationsSetup extends JPanel
 {

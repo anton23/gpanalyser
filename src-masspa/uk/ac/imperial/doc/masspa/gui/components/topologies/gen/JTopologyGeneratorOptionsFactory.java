@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.masspa.gui.components.topologies.gen;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+
 import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.util.MASSPALogging;
 import uk.ac.imperial.doc.masspa.util.PackageInspector;

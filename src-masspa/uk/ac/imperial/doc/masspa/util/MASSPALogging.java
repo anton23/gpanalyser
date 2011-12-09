@@ -1,9 +1,9 @@
 package uk.ac.imperial.doc.masspa.util;
 
-import java.io.PrintStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 
 import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.pctmc.utils.IConsole;
