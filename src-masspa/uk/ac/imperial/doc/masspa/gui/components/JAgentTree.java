@@ -12,11 +12,11 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import com.google.common.collect.Multimap;
-
 import uk.ac.imperial.doc.masspa.gui.models.ObservableAgents;
 import uk.ac.imperial.doc.masspa.language.Labels;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;
+
+import com.google.common.collect.Multimap;
 
 /**
  * A component that displays MASSPA agent types and their derivatives as trees

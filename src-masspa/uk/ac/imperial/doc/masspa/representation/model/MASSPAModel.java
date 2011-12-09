@@ -6,18 +6,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.masspa.language.Messages;
-import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAAgents;
+import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAMessage;
 import uk.ac.imperial.doc.masspa.util.MASSPALogging;
 import uk.ac.imperial.doc.pctmc.representation.State;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /***
  * This class represents the Markovian Agent Model.

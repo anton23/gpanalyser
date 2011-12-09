@@ -11,15 +11,15 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import uk.ac.imperial.doc.masspa.gui.models.ObservableAgents;
 import uk.ac.imperial.doc.masspa.gui.models.ObservableTopology;
 import uk.ac.imperial.doc.masspa.gui.util.Actions;
 import uk.ac.imperial.doc.masspa.gui.util.Constants;
 import uk.ac.imperial.doc.masspa.language.Labels;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 /**
  * The Channel generator utility panel.

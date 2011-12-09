@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.util.MASSPALogging;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /***
  * This class is used to create component objects from

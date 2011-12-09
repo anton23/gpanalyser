@@ -6,8 +6,18 @@ import java.awt.KeyboardFocusManager;
 import java.io.File;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
+
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
+import org.simpleframework.xml.strategy.CycleStrategy;
+import org.simpleframework.xml.strategy.Strategy;
 
 import uk.ac.imperial.doc.masspa.gui.components.JConsoleTextPane;
 import uk.ac.imperial.doc.masspa.gui.editors.AgentEditor;
@@ -27,17 +37,6 @@ import uk.ac.imperial.doc.masspa.gui.util.KeyStateManager;
 import uk.ac.imperial.doc.masspa.language.Labels;
 import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.util.MASSPALogging;
-
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JMenuBar;
-
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-import org.simpleframework.xml.strategy.CycleStrategy;
-import org.simpleframework.xml.strategy.Strategy;
 
 /**
  * This class specifies the main window of

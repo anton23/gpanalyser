@@ -15,8 +15,6 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.google.common.collect.Multimap;
-
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.masspa.gui.models.ObservableAgents;
 import uk.ac.imperial.doc.masspa.gui.util.Constants;
@@ -26,6 +24,8 @@ import uk.ac.imperial.doc.masspa.representation.components.AllComponent;
 import uk.ac.imperial.doc.masspa.representation.components.AllMessage;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAMessage;
+
+import com.google.common.collect.Multimap;
 
 /**
  * This class contains the basic

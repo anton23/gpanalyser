@@ -15,7 +15,9 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
+import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -36,9 +38,6 @@ import uk.ac.imperial.doc.masspa.representation.components.AllComponent;
 import uk.ac.imperial.doc.masspa.representation.components.AllMessage;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAMessage;
-
-import javax.swing.JToggleButton;
-import javax.swing.JSeparator;
 
 public class JChannelSetup extends JPanel
 {
