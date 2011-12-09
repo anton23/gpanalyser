@@ -7,6 +7,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
@@ -197,4 +198,9 @@ public class MatlabExpressionPrinter implements IExpressionVisitor {
 		}
 	}
 
+	@Override
+	public void visit(IndicatorFunction e) {
+		// TODO Auto-generated method stub
+	}
+	
 }

@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.jexpressions.expressions.visitors;
 import java.util.LinkedList;
 import java.util.List;
 
+import uk.ac.imperial.doc.jexpressions.conditions.ExpressionCondition;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
@@ -10,6 +11,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
@@ -167,6 +169,19 @@ public class ExpressionTransformer implements IExpressionVisitor {
 			newArguments.add(result);
 		}
 		result = FunctionCallExpression.create(e.getName(), newArguments);
-
 	}
+
+	@Override
+	public void visit(IndicatorFunction e) {
+		e.getCondition().getLeft().accept(this);
+		AbstractExpression newLeft = result;
+		
+		e.getCondition().getRight().accept(this);
+		AbstractExpression newRight = result;
+		
+		result = new IndicatorFunction(
+				new ExpressionCondition(newLeft, e.getCondition().getOperator(), newRight)); 
+	}
+	
+	
 }

@@ -38,4 +38,6 @@ public interface IExpressionVisitor {
 	void visit(TimeExpression e);
 
 	void visit(FunctionCallExpression e);
+	
+	void visit(IndicatorFunction e);
 }

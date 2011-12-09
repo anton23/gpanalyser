@@ -7,6 +7,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
@@ -202,5 +203,17 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 			output.append(")");
 		}
 	}
+
+	@Override
+	public void visit(IndicatorFunction e) {
+		output.append("(");
+		output.append("(");
+		output.append(e.getCondition().getLeft());
+		output.append(e.getCondition().getOperator());
+		output.append(e.getCondition().getRight());
+		output.append(") ? 1.0 : 0.0 )");
+	}
+	
+	
 
 }

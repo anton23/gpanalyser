@@ -10,6 +10,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
@@ -24,6 +25,8 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 
+
+// TODO Generalise this for other closures
 public class IntegralInsterterVisitor implements IExpressionVisitor,
 		ICombinedProductExpressionVisitor {
 
@@ -260,4 +263,13 @@ public class IntegralInsterterVisitor implements IExpressionVisitor,
 			result = new UMinusExpression(result);
 		}
 	}
+
+	@Override
+	public void visit(IndicatorFunction e) {
+		if (insert) {
+			result = ProductExpression.create(e, CombinedProductExpression
+					.create(toInsert));
+		}
+	}
+
 }
