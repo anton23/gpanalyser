@@ -16,7 +16,6 @@ import uk.ac.imperial.doc.masspa.representation.model.MASSPAAgentPop;
  * 
  * @author Chris Guenther
  */
-@SuppressWarnings("unused")
 @Root
 public class MASSPAAgentPopComponent extends MASSPAAgentPop
 {
