@@ -177,7 +177,7 @@ location returns [Location l]
 @init{List<Integer> coords = new LinkedList<Integer>();}
 @after{$l = (coords.size() > 0) ? new Location(coords) : $l;}:
   ^(LOCATION (i=INTEGER {coords.add(Integer.parseInt($i.text));})+)
-| ^(LOCATION LOC_ANY) {$l = AllLocation.getInstance();}
+| ^(LOCATION LOC_ALL) {$l = AllLocation.getInstance();}
 | ^(LOCATION LOC_VAR) {$l = VarLocation.getInstance();}
 ;
 

@@ -62,7 +62,7 @@ public class MASSPAToPCTMC
 		localiseConstants(_model, _constants);
 		// Expand variables
 		inlineVariables(_model, _variables, _constants);
-		
+	
 		// Create evolutions
 		List<EvolutionEvent> events = createEvolutionEvents(agentPops, actionCounts, initCounts, _variables, _constants, _model);	
 		
