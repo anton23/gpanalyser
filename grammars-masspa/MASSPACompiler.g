@@ -27,6 +27,7 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
   
 import uk.ac.imperial.doc.jexpressions.expressions.*;
+import uk.ac.imperial.doc.jexpressions.conditions.*;
 import uk.ac.imperial.doc.jexpressions.constants.*;
 import uk.ac.imperial.doc.jexpressions.variables.*;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;

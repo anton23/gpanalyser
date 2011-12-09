@@ -24,6 +24,7 @@ tokens{
   RANGE;
   EXPODE;
   ODETEST;
+  INDICATORFUNCTION;
 }
 
 
@@ -477,8 +478,21 @@ primaryExpression:
      | central
      | scentral
      | PATTERN state -> ^(PATTERN state)
+     | indicatorFunction
 ;
 
+
+indicatorFunction:
+  LBRACK condition RBRACK -> ^(INDICATORFUNCTION condition)
+;
+
+condition:
+expression comparisonOperator expression
+;
+
+comparisonOperator:
+  GT
+;
 
 generalExpectation:
   GENEXPECTATION LBRACK {insideExpectation = true;}

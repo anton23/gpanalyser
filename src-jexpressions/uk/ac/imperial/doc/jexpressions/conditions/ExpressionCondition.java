@@ -13,6 +13,7 @@ public class ExpressionCondition {
 	public ExpressionCondition(AbstractExpression left, ComparisonOperator operator, AbstractExpression right) {
 		this.left = left;
 		this.right = right;
+		this.operator = operator;
 	} 
 	
 

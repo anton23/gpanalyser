@@ -22,6 +22,7 @@ import PCTMCCompilerPrototype;
   import java.util.Collection;
   
   import uk.ac.imperial.doc.jexpressions.expressions.*;
+  import uk.ac.imperial.doc.jexpressions.conditions.*;
   import uk.ac.imperial.doc.jexpressions.constants.*;
   import uk.ac.imperial.doc.jexpressions.variables.*;
   
