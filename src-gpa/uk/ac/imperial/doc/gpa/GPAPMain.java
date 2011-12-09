@@ -12,6 +12,10 @@ import uk.ac.imperial.doc.gpa.plain.syntax.PlainParser;
 import uk.ac.imperial.doc.gpa.syntax.GPACompiler;
 import uk.ac.imperial.doc.gpa.syntax.GPALexer;
 import uk.ac.imperial.doc.gpa.syntax.GPAParser;
+import uk.ac.imperial.doc.masspa.patterns.MASSPAPatternMatcher;
+import uk.ac.imperial.doc.masspa.syntax.MASSPACompiler;
+import uk.ac.imperial.doc.masspa.syntax.MASSPALexer;
+import uk.ac.imperial.doc.masspa.syntax.MASSPAParser;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.postprocessors.languageoutput.JavaOutputAnalysisPostprocessor;
@@ -43,6 +47,9 @@ public class GPAPMain {
 
 				accepts("plain",
 						"reads model descriptions in plain PCTMC format");
+				
+				accepts("masspa",
+						"reads model descriptions in MASSPA format");
 
 				accepts("3D", "displays 3D plots for iterate experiments");
 
@@ -89,7 +96,12 @@ public class GPAPMain {
 			}
 			if (options.has("plain")) {
 				interpreter = createPlainPCTMCInterpreter();
-			} else {
+			}
+			else if (options.has("masspa"))
+			{
+				interpreter = createMASSPAInterpreter();
+			}
+			else {
 				interpreter = createGPEPAInterpreter();
 			}
 
@@ -123,6 +135,11 @@ public class GPAPMain {
 		return new PCTMCInterpreter(GPALexer.class, GPAParser.class,
 				GPACompiler.class, GPEPAPatternMatcher.class);
 
+	}
+	
+	public static PCTMCInterpreter createMASSPAInterpreter() {
+		return new PCTMCInterpreter(MASSPALexer.class, MASSPAParser.class,
+				MASSPACompiler.class, MASSPAPatternMatcher.class);
 	}
 
 	public static PCTMCInterpreter createPlainPCTMCInterpreter() {

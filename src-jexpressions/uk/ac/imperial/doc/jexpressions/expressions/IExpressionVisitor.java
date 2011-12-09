@@ -16,6 +16,8 @@ public interface IExpressionVisitor {
 	void visit(PEPADivExpression e);
 
 	void visit(MinExpression e);
+	
+	void visit(MaxExpression e);
 
 	void visit(DivMinExpression e);
 

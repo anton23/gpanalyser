@@ -5,6 +5,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="src-masspa"/>
 	<classpathentry kind="src" path="test-pctmc"/>
 	<classpathentry kind="src" path="test-gpa"/>
 	<classpathentry kind="src" path="test-jexpressions"/>
@@ -29,5 +30,6 @@
 	<classpathentry kind="lib" path="lib/guava-10.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/org.jzy3d-0.8.4.jar"/>
 	<classpathentry kind="lib" path="lib/ejml-0.17-nogui.jar"/>
+	<classpathentry kind="lib" path="lib/simple-xml-2.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

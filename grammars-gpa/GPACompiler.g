@@ -9,57 +9,50 @@ import PCTMCCompilerPrototype;
 
 @header{
   
-  package uk.ac.imperial.doc.gpa.syntax;
- 
+package uk.ac.imperial.doc.gpa.syntax;
+   
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Collection;
   
-  import java.util.LinkedList;
-  import java.util.Map;
-  import java.util.HashMap;
-  import java.util.Set;
-  import java.util.HashSet;
-  import java.util.LinkedHashMap;
-  import java.util.Collection;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
   
-  import uk.ac.imperial.doc.jexpressions.expressions.*;
-  import uk.ac.imperial.doc.jexpressions.constants.*;
-  import uk.ac.imperial.doc.jexpressions.variables.*;
-  
-  import uk.ac.imperial.doc.pctmc.analysis.*;
-  
-  import uk.ac.imperial.doc.pctmc.odeanalysis.*; 
-  import uk.ac.imperial.doc.pctmc.simulation.*;
-  import uk.ac.imperial.doc.pctmc.compare.*;
-  
-  import uk.ac.imperial.doc.pctmc.expressions.*;
-  import uk.ac.imperial.doc.pctmc.plain.*;
-  import uk.ac.imperial.doc.pctmc.representation.State;
-  import uk.ac.imperial.doc.pctmc.representation.*; 
-  import uk.ac.imperial.doc.pctmc.experiments.iterate.*; 
-  import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.*; 
-  import uk.ac.imperial.doc.pctmc.postprocessors.numerical.*;
-  
-  import com.google.common.collect.Multimap;
-  import com.google.common.collect.LinkedHashMultimap;
-  
-  import com.google.common.collect.HashMultiset;
-  import com.google.common.collect.Multiset;
-  
-  
-  import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
-  import uk.ac.imperial.doc.gpepa.representation.components.*;
-  import uk.ac.imperial.doc.pctmc.expressions.patterns.*;
-  import uk.ac.imperial.doc.gpepa.representation.group.*; 
-  import uk.ac.imperial.doc.gpepa.representation.model.*; 
-  import uk.ac.imperial.doc.gpepa.representation.*;
-  import uk.ac.imperial.doc.gpepa.states.*;
-  import uk.ac.imperial.doc.gpa.patterns.*; 
-  import uk.ac.imperial.doc.gpa.pctmc.*;
-  
-  import uk.ac.imperial.doc.gpa.syntax.CompilerError;
-  import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
-  import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
-  
-  import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+import uk.ac.imperial.doc.jexpressions.expressions.*;
+import uk.ac.imperial.doc.jexpressions.constants.*;
+import uk.ac.imperial.doc.jexpressions.variables.*;
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+    
+import uk.ac.imperial.doc.pctmc.analysis.*;
+import uk.ac.imperial.doc.pctmc.odeanalysis.*; 
+import uk.ac.imperial.doc.pctmc.simulation.*;
+import uk.ac.imperial.doc.pctmc.compare.*;
+import uk.ac.imperial.doc.pctmc.expressions.*;
+import uk.ac.imperial.doc.pctmc.expressions.patterns.*;
+import uk.ac.imperial.doc.pctmc.plain.*;
+import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.*; 
+import uk.ac.imperial.doc.pctmc.experiments.iterate.*; 
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.*; 
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.*;
+import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
+import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
+      
+import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
+import uk.ac.imperial.doc.gpepa.representation.components.*;
+import uk.ac.imperial.doc.gpepa.representation.group.*; 
+import uk.ac.imperial.doc.gpepa.representation.model.*; 
+import uk.ac.imperial.doc.gpepa.representation.*;
+import uk.ac.imperial.doc.gpepa.states.*;
+import uk.ac.imperial.doc.gpa.patterns.*; 
+import uk.ac.imperial.doc.gpa.pctmc.*;
+import uk.ac.imperial.doc.gpa.syntax.CompilerError;
 }
 
 @members {

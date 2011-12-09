@@ -10,6 +10,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
@@ -112,6 +113,24 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor,
 		 */
 	}
 
+	public void visit(MaxExpression e) {
+		e.getA().accept(this);
+		ExpandedExpression eA = result;
+		e.getB().accept(this);
+		ExpandedExpression eB = result;
+		if (eA.equals(eB)) {
+			result = eA;
+		} else {
+			if (eA.isNumber() && eB.isNumber()) {
+				result = new UnexpandableExpression(MinExpression.create(eA
+						.numericalValue(), eB.numericalValue()), normaliser);
+			} else {
+				result = new UnexpandableExpression(MinExpression
+						.create(eA, eB), normaliser);
+			}
+		}
+	}
+	
 	// We treat Div as PEPADiv
 	@Override
 	public void visit(DivExpression e) {

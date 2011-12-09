@@ -10,6 +10,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
@@ -130,6 +131,15 @@ public class ExpressionEvaluator implements IExpressionVisitor {
 		result = Math.min(a, b);
 	}
 
+	@Override
+	public void visit(MaxExpression e) {
+		e.getA().accept(this);
+		double a = result;
+		e.getB().accept(this);
+		double b = result;
+		result = Math.max(a, b);
+	}
+	
 	@Override
 	public void visit(MinusExpression e) {
 		e.getA().accept(this);
