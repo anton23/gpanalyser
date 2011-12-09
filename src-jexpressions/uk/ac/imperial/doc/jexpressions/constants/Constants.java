@@ -46,6 +46,11 @@ public class Constants {
 		}
 	}
 
+	public void recalculateConstantIndex()
+	{
+		calculateConstantIndex();
+	}
+	
 	/**
 	 * Returns the index of the constant with the given name.
 	 * 
