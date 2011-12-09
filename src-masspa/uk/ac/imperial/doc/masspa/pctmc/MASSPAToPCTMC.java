@@ -12,6 +12,7 @@ import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWit
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
@@ -55,21 +56,7 @@ public class MASSPAToPCTMC
 		// Find populations
 		Set<MASSPAAgentPop> agentPops = _model.getAllAgentPopulations();
 		Set<MASSPAActionCount> actionCounts = _model.getAllActionCounts();
-		Map<State, AbstractExpression> initCounts = new HashMap<State, AbstractExpression>();
-		for (MASSPAAgentPop pop : agentPops)
-		{
-			if (!pop.getLocation().equals(VarLocation.getInstance()))
-			{
-				initCounts.put(pop, pop.getInitialPopulation());
-			}
-		}
-		for (MASSPAActionCount count : actionCounts)
-		{
-			if (!count.getLocation().equals(VarLocation.getInstance()))
-			{
-				initCounts.put(count, count.getInitVal());
-			}
-		}
+		Map<State, AbstractExpression> initCounts = createInitialCounts(agentPops, actionCounts, _model);
 
 		// Localise constants
 		localiseConstants(_model, _constants);
@@ -83,6 +70,47 @@ public class MASSPAToPCTMC
 		return new MASSPAPCTMC(initCounts, events, _model);
 	}
 
+	@SuppressWarnings("unchecked")
+	public static Map<State,AbstractExpression> createInitialCounts(final Set<MASSPAAgentPop> _agentPops, final Set<MASSPAActionCount> _actionCounts, final MASSPAModel _model)
+	{
+		Map<State,AbstractExpression> initCounts = new HashMap<State,AbstractExpression>();
+		
+		for (MASSPAAgentPop pop : _agentPops)
+		{
+			if (!pop.getLocation().equals(VarLocation.getInstance()))
+			{
+				// Check if there is at least one non-zero population for any
+				// derivative state of the population we want to add otherwise
+				// there is no point investigating the population as it will
+				// always be 0.
+				boolean zeroAgent = true;
+				for (MASSPAAgentPop p : (Set<MASSPAAgentPop>)_model.getPredecessorPopulations(pop))
+				{
+					if (!p.getInitialPopulation().equals(new IntegerExpression(0)))
+					{
+						zeroAgent = false;
+						break;
+					}
+				}
+	 
+				// At least one derivative state has a non-zero population
+				if (!zeroAgent)
+				{
+					initCounts.put(pop, pop.getInitialPopulation());
+				}
+			}
+		}
+		for (MASSPAActionCount count : _actionCounts)
+		{
+			if (!count.getLocation().equals(VarLocation.getInstance()))
+			{
+				initCounts.put(count, count.getInitVal());
+			}
+		}
+		
+		return initCounts;
+	}
+	
 	protected static AbstractExpression inlineFctsAndVars(AbstractExpression _rate, Location _loc, MASSPAModel _model, Map<FunctionCallExpression, AbstractExpression> _functions, Map<ExpressionVariable, AbstractExpression> _variables, Constants _constants)
 	{	
 		ExpressionFctAndVarInliner inliner = new ExpressionFctAndVarInliner(_loc, _model, _functions, _variables, _constants);
