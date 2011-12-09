@@ -8,6 +8,11 @@ public class ExpressionVariable extends AbstractExpression {
 
 	protected AbstractExpression unfolded;
 
+	public String getName()
+	{
+		return name;
+	}
+	
 	public void setUnfolded(AbstractExpression unfolded) {
 		this.unfolded = unfolded;
 	}
@@ -55,7 +60,7 @@ public class ExpressionVariable extends AbstractExpression {
 	public String toString() {
 		return "$" + name;
 	}
-
+	
 	public ExpressionVariable(String name) {
 		super();
 		this.name = name;
