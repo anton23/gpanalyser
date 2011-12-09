@@ -208,9 +208,9 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 	public void visit(IndicatorFunction e) {
 		output.append("(");
 		output.append("(");
-		output.append(e.getCondition().getLeft());
+		e.getCondition().getLeft().accept(this);
 		output.append(e.getCondition().getOperator());
-		output.append(e.getCondition().getRight());
+		e.getCondition().getRight().accept(this);
 		output.append(") ? 1.0 : 0.0 )");
 	}
 	

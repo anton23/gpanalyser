@@ -320,8 +320,19 @@ primary_expression returns[AbstractExpression e]:
  | ^(MAX exp1=expression COMMA exp2=expression) {$e = MaxExpression.create($exp1.e,$exp2.e); }
  |  {List<AbstractExpression> args = new LinkedList<AbstractExpression>(); }        
    ^(FUN name=LOWERCASENAME firstArg=expression {args.add($firstArg.e);} (COMMA arg=expression {args.add($arg.e);})*) {$e = FunctionCallExpression.create($name.text,args);}
- | ^(PATTERN s=state) {$e = new PatternPopulationExpression($s.t);}  
+ | ^(PATTERN s=state) {$e = new PatternPopulationExpression($s.t);}
+ | ^(INDICATORFUNCTION con=condition) {$e = new IndicatorFunction($con.c);}  
 ;
+
+condition returns [ExpressionCondition c]:
+    e1=expression o=comparisonOperator e2=expression
+    {$c = new ExpressionCondition($e1.e, $o.o, $e2.e);} 
+;
+
+comparisonOperator returns [ComparisonOperator o]:
+  GT {$o = new GreaterThan();}
+;
+
 
 generalExpectation returns [GeneralExpectationExpression e]:
   ^(GENEXPECTATION exp = expression)
