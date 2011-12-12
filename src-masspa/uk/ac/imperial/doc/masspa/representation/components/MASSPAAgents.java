@@ -34,7 +34,7 @@ public class MASSPAAgents
 	
 	public MASSPAAgents()
 	{
-		MASSPALogging.info(Messages.s_AGENT_DEFINITION_ANALYSIS);
+		MASSPALogging.info(Messages.s_COMPILER_AGENT_DEFINITION_ANALYSIS);
 		m_actions = new HashMap<String,String>();
 		m_msgs = new HashMap<MASSPAMessage,MASSPAMessage>();
 		m_scopes = new HashMap<MASSPAComponent,String>();
@@ -158,7 +158,7 @@ public class MASSPAAgents
 				ConstComponent cc = (ConstComponent)c;
 				if (!m_scopes.get(cc).equals(_scope))
 				{
-					String err = String.format(Messages.s_AGENT_STATE_INVALID_SCOPE,_name,m_scopes.get(cc),_scope,_line);
+					String err = String.format(Messages.s_COMPILER_AGENT_STATE_INVALID_SCOPE,_name,m_scopes.get(cc),_scope,_line);
 					MASSPALogging.fatalError(err);
 					throw new AssertionError(err);
 				}
@@ -166,7 +166,7 @@ public class MASSPAAgents
 			}
 			else
 			{
-				String err = String.format(Messages.s_AGENT_STATE_NAME_INVALID,_name,_line);
+				String err = String.format(Messages.s_COMPILER_AGENT_STATE_NAME_INVALID,_name,_line);
 				MASSPALogging.fatalError(err);
 				throw new AssertionError(err);
 			}
@@ -240,7 +240,7 @@ public class MASSPAAgents
 			MASSPAComponent def = m.getDefinition();
 			if (def == null && m instanceof ConstComponent)
 			{
-				String err = String.format(Messages.s_AGENT_STATE_UNDEFINED, m.getName());
+				String err = String.format(Messages.s_COMPILER_AGENT_STATE_UNDEFINED, m.getName());
 				MASSPALogging.fatalError(err);
 				throw new AssertionError(err);
 			}
@@ -248,7 +248,7 @@ public class MASSPAAgents
 			{
 				if (def instanceof ConstComponent)
 				{
-					String err = String.format(Messages.s_AGENT_STATE_DEFINITION_NOT_ALLOWED, m.getName(), def.getName());
+					String err = String.format(Messages.s_COMPILER_AGENT_STATE_DEFINITION_NOT_ALLOWED, m.getName(), def.getName());
 					MASSPALogging.fatalError(err);
 					throw new AssertionError(err);
 				}
@@ -258,7 +258,7 @@ public class MASSPAAgents
 					{
 						if (p==null)
 						{
-							String err = String.format(String.format(Messages.s_AGENT_STATE_INVALID_DEFINITION, m.getName()));
+							String err = String.format(String.format(Messages.s_COMPILER_AGENT_STATE_INVALID_DEFINITION, m.getName()));
 							MASSPALogging.fatalError(err);
 							throw new AssertionError(err);
 						}
@@ -288,14 +288,14 @@ public class MASSPAAgents
 		msgNoReceiver.removeAll(msgNamesReceive);
 		if (msgNoReceiver.size() != 0)
 		{
-			MASSPALogging.warn(String.format(Messages.s_MESSAGES_HAVE_NO_RECEIVER, MASSPAMessage.MsgNamesToString(msgNoReceiver)));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_MESSAGES_HAVE_NO_RECEIVER, MASSPAMessage.MsgNamesToString(msgNoReceiver)));
 		}
 		// Check if any message types have no sender
 		Set<MASSPAMessage> msgNoSender = new HashSet<MASSPAMessage>(msgNamesReceive);
 		msgNoSender.removeAll(msgNamesSend);
 		if (msgNoSender.size() != 0)
 		{
-			MASSPALogging.warn(String.format(Messages.s_MESSAGES_HAVE_NO_SENDER, MASSPAMessage.MsgNamesToString(msgNoSender)));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_MESSAGES_HAVE_NO_SENDER, MASSPAMessage.MsgNamesToString(msgNoSender)));
 		}
 		
 		return true;

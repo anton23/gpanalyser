@@ -18,7 +18,7 @@ public abstract class MASSPAComponent
 	public MASSPAComponent(final String _name)
 	{
 		m_name = _name;
-		if (m_name == null) {throw new AssertionError(Messages.s_MASSPA_COMPONENT_NULL_NAME);}
+		if (m_name == null) {throw new AssertionError(Messages.s_COMPILER_MASSPA_COMPONENT_NULL_NAME);}
 	}
 	
 	public String getName()

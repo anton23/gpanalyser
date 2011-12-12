@@ -18,7 +18,7 @@ public class MASSPAActionCount extends State
 	
 	public MASSPAActionCount(final String _name, final Location _loc)
 	{
-		if (_name == null) {throw new AssertionError(Messages.s_ACTIONCOUNT_NULL_NAME);}
+		if (_name == null) {throw new AssertionError(Messages.s_COMPILER_ACTIONCOUNT_NULL_NAME);}
 		m_name = _name.replace("#", "");
 		m_loc = (_loc == null) ? AllLocation.getInstance() : _loc;
 	}
@@ -48,7 +48,7 @@ public class MASSPAActionCount extends State
 
 	public boolean setInitVal(AbstractExpression _e)
 	{
-		if (_e == null) {throw new AssertionError(String.format(Messages.s_ACTIONCOUNT_NULL_INITVAL,toString()));}
+		if (_e == null) {throw new AssertionError(String.format(Messages.s_COMPILER_ACTIONCOUNT_NULL_INITVAL,toString()));}
 		m_initVal = _e;
 		return hasInitVal();
 	}

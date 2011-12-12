@@ -23,7 +23,7 @@ public class MASSPAPatternMatcher extends PatternMatcher
 		} 
 		else
 		{
-			throw new AssertionError(Messages.s_MASSPA_MATCHER_INCOMPATIBLE_WITH_PCTMC);
+			throw new AssertionError(Messages.s_COMPILER_MASSPA_MATCHER_INCOMPATIBLE_WITH_PCTMC);
 		}
 	} 	
 	

@@ -24,7 +24,7 @@ public class MASSPAPCTMC extends PCTMC
 	public MASSPAPCTMC(Map<State, AbstractExpression> _initMap, Collection<EvolutionEvent> _evolutionEvents, MASSPAModel _model)
 	{
 		super(_initMap, _evolutionEvents);
-		if (_evolutionEvents==null) {throw new AssertionError(Messages.s_MASSPA_PCTMC_NULL_EVO_EVTS);}
+		if (_evolutionEvents==null) {throw new AssertionError(Messages.s_COMPILER_MASSPA_PCTMC_NULL_EVO_EVTS);}
 		m_model = _model;
 		m_model.generateNeighbours();
 	}
