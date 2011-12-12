@@ -436,11 +436,12 @@ integer returns [Integer value]:
   {$value = Integer.parseInt($r.text);}
 ;
 
-odeTest returns [List<CombinedPopulationProduct> moments, Map<CombinedPopulationProduct, AbstractExpression> odes]
+odeTest returns [List<AbstractExpression> moments, Map<CombinedPopulationProduct, AbstractExpression> odes]
 @init{
-  $moments = new LinkedList<CombinedPopulationProduct>();
+  $moments = new LinkedList<AbstractExpression>();
   $odes = new HashMap<CombinedPopulationProduct, AbstractExpression>();
 }:
-^(ODETEST (m=combinedPowerProduct {$moments.add($m.c);})+
+^(ODETEST el=expressionList {$moments.addAll($el.e);}
+        SEMI
           (^(EXPODE lhs=combinedPowerProduct rhs=expression {$odes.put($lhs.c, $rhs.e);}))+
 );

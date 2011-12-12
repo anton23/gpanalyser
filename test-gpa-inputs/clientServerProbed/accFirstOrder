@@ -1,52 +1,52 @@
-Clients:Client<think>Finished;
+E[Clients:Client<think>Finished];
 
-dE[Clients:Client<think>NotFinished]/dt = -div(rr*Clients:Client<think>NotFinished, rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)))*
-min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), rr*Servers:Server);
+dE[Clients:Client<think>NotFinished]/dt = -div(rr*E[Clients:Client<think>NotFinished], rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])))*
+min(rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])), rr*E[Servers:Server]);
 
 dE[Clients:Client_waiting<think>NotFinished]/dt = 
-  div(rr*Clients:Client<think>NotFinished, rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)))
-    *min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), Servers:Server * rr) 
+  div(rr*E[Clients:Client<think>NotFinished], rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])))
+    *min(rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])), E[Servers:Server] * rr) 
     -
-  div(rd*Clients:Client_waiting<think>NotFinished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
-    *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd);
+  div(rd*E[Clients:Client_waiting<think>NotFinished], rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])))
+    *min(rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])), E[Servers:Server_get] * rd);
     
 dE[Clients:Client_think<think>NotFinished]/dt =
-  div(rd*Clients:Client_waiting<think>NotFinished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
-    *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd)
+  div(rd*E[Clients:Client_waiting<think>NotFinished], rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])))
+    *min(rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])), E[Servers:Server_get] * rd)
     -
-  rt * Clients:Client_think<think>NotFinished    
+  rt * E[Clients:Client_think<think>NotFinished]    
    ;  
    
-dE[Clients:Client<think>Finished]/dt = -div(rr*Clients:Client<think>Finished, rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)))*
-	min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), rr*Servers:Server)
-  + Clients:Client_think<think>NotFinished * rt + Clients:Client_think<think>Finished * rt;
+dE[Clients:Client<think>Finished]/dt = -div(rr*E[Clients:Client<think>Finished], rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])))*
+	min(rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])), rr*E[Servers:Server])
+  + E[Clients:Client_think<think>NotFinished] * rt + E[Clients:Client_think<think>Finished] * rt;
 
 
 
 dE[Clients:Client_waiting<think>Finished]/dt = 
-  div(rr*Clients:Client<think>Finished, rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)))
-    *min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), Servers:Server * rr) 
+  div(rr*E[Clients:Client<think>Finished], rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])))
+    *min(rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])), E[Servers:Server] * rr) 
     -
-  div(rd*Clients:Client_waiting<think>Finished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
-    *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd);
+  div(rd*E[Clients:Client_waiting<think>Finished], rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])))
+    *min(rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])), E[Servers:Server_get] * rd);
 
    
 dE[Clients:Client_think<think>Finished]/dt =
- div(rd*Clients:Client_waiting<think>Finished, rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)))
-    *min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd) 
+ div(rd*E[Clients:Client_waiting<think>Finished], rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])))
+    *min(rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])), E[Servers:Server_get] * rd) 
   -  
-  rt * Clients:Client_think<think>Finished    
+  rt * E[Clients:Client_think<think>Finished]    
    ;  
    
 dE[Servers:Server]/dt = 
-  -min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), Servers:Server * rr)
-  +min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd)
-  + Servers:Server_broken * rrst - Servers:Server * rb ;
+  -min(rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])), E[Servers:Server] * rr)
+  +min(rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])), E[Servers:Server_get] * rd)
+  + E[Servers:Server_broken] * rrst - E[Servers:Server] * rb ;
   
 dE[Servers:Server_get]/dt = 
-	min(rr*((Clients:Client<think>NotFinished) + (Clients:Client<think>Finished)), Servers:Server * rr)
-    -min(rd*((Clients:Client_waiting<think>NotFinished) + (Clients:Client_waiting<think>Finished)), Servers:Server_get * rd);
+	min(rr*((E[Clients:Client<think>NotFinished]) + (E[Clients:Client<think>Finished])), E[Servers:Server] * rr)
+    -min(rd*((E[Clients:Client_waiting<think>NotFinished]) + (E[Clients:Client_waiting<think>Finished])), E[Servers:Server_get] * rd);
 
 dE[Servers:Server_broken]/dt =
-  - Servers:Server_broken * rrst + Servers:Server * rb ;    
+  - E[Servers:Server_broken] * rrst + E[Servers:Server] * rb ;    
 

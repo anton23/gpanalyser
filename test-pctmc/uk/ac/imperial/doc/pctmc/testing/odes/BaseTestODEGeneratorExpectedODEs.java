@@ -13,11 +13,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.google.common.collect.Sets;
+
 import uk.ac.imperial.doc.jexpressions.expanded.DoubleConstantCoefficients;
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandedExpression;
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandingExpressionTransformerWithMoments;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
@@ -69,8 +72,8 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 	@SuppressWarnings("unchecked")
 	protected void checkExpectedODEs(String file) throws ParseException, IOException, IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
 		Object compilerReturn = interpreter.parseGenericRule(new ANTLRFileStream(file), "odeTest", false);
-		List<CombinedPopulationProduct> moments = 
-			(List<CombinedPopulationProduct>) compilerReturn.getClass().getField("moments").get(compilerReturn);
+		List<AbstractExpression> expressions = 
+			(List<AbstractExpression>) compilerReturn.getClass().getField("moments").get(compilerReturn);
 		Map<CombinedPopulationProduct, AbstractExpression> expectedODEs = (Map<CombinedPopulationProduct, AbstractExpression>) 
 			compilerReturn.getClass().getField("odes").get(compilerReturn);
 		
@@ -78,6 +81,11 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(
 					representation.getUnfoldedVariables());
 			rhs.accept(setter);
+		}		Set<CombinedPopulationProduct> moments = new HashSet<CombinedPopulationProduct>();
+		for (AbstractExpression e:expressions) {
+			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
+			e.accept(visitor);
+			moments.addAll(visitor.getUsedCombinedMoments());	
 		}
 		
 		int order = 0;
@@ -94,7 +102,7 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 					expectedExpanded, actualExpanded);
 			
 		}
-		assertEquals("The system of ODEs has some additional equations", expectedODEs.keySet(), generator.getMomentIndex().keySet());
+		assertEquals("The system of ODEs has some additional equations " + Sets.difference(generator.getMomentIndex().keySet(), expectedODEs.keySet()), expectedODEs.keySet(), generator.getMomentIndex().keySet());
 	}
 	
 	protected CombinedPopulationProduct parseCombinedProduct(String string) throws ParseException{

@@ -553,8 +553,15 @@ expressionList:
     
 //-----Extra rules for tests
 
-odeTest:
- combinedPowerProduct (COMMA combinedPowerProduct)* SEMI expectedODE+ -> ^(ODETEST combinedPowerProduct+ expectedODE+);
+odeTest
+@init{
+  boolean oldRequiresExpectation = requiresExpectation;
+  requiresExpectation = true;
+}
+@after{
+  requiresExpectation = oldRequiresExpectation;
+}:
+ expressionList SEMI expectedODE+-> ^(ODETEST expressionList SEMI expectedODE+);
 
 expectedODE: 
 DERMEAN LBRACK combinedPowerProduct RBRACK DIVIDE DT DEF expression SEMI -> ^(EXPODE combinedPowerProduct expression);   
