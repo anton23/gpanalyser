@@ -16,7 +16,7 @@ public class SendPrefix extends MessagePrefix
 	{
 		super(_action,_rate,msg,_continuation);
 		m_nofMsgsSent = _nofMsgsSent;
-		if (m_nofMsgsSent == null) {throw new AssertionError(Messages.s_SEND_PREFIX_NULL_NOF_MSG_SENT);}
+		if (m_nofMsgsSent == null) {throw new AssertionError(Messages.s_COMPILER_SEND_PREFIX_NULL_NOF_MSG_SENT);}
 	}
 
 	/**

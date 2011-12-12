@@ -33,9 +33,9 @@ public class MASSPAAgentPop extends State implements Comparable<MASSPAAgentPop>
 	public MASSPAAgentPop(final MASSPAComponent _component, final Location _loc)
 	{
 		setComponent(_component);
-		if (getComponent() == null) {throw new AssertionError(Messages.s_AGENTPOP_NULL_COMPONENT);}
+		if (getComponent() == null) {throw new AssertionError(Messages.s_COMPILER_AGENTPOP_NULL_COMPONENT);}
 		setLocation(_loc);
-		if (getLocation() == null) {throw new AssertionError(Messages.s_AGENTPOP_NULL_LOCATION);}
+		if (getLocation() == null) {throw new AssertionError(Messages.s_COMPILER_AGENTPOP_NULL_LOCATION);}
 	}
 
 	//**********************************************

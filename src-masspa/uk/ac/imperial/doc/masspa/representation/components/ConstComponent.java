@@ -39,13 +39,13 @@ public class ConstComponent extends MASSPAComponent
 	{
 		if (hasDefinition())
 		{
-			MASSPALogging.warn(String.format(Messages.s_AGENT_STATE_REDEFINITION, getName(), _def, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_AGENT_STATE_REDEFINITION, getName(), _def, _line));
 			return false;
 		} 
 		m_definition = _def;
 		if (m_definition==null)
 		{
-			String err = String.format(Messages.s_AGENT_STATE_INVALID_DEFINITION2, getName(), _def, _line);
+			String err = String.format(Messages.s_COMPILER_AGENT_STATE_INVALID_DEFINITION2, getName(), _def, _line);
 			MASSPALogging.fatalError(err);
 			throw new AssertionError(err);
 		}

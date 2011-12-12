@@ -18,17 +18,17 @@ public class Prefix
 	public Prefix(final String _action, final String _rate, final MASSPAComponent _continuation)
 	{
 		this(_action, new ConstantExpression(_rate), _continuation);
-		if (_rate == null) {throw new AssertionError(Messages.s_PREFIX_NULL_RATE);}
+		if (_rate == null) {throw new AssertionError(Messages.s_COMPILER_PREFIX_NULL_RATE);}
 	}
 
 	public Prefix(final String _action, final AbstractExpression _rate, final MASSPAComponent _continuation)
 	{
 		m_action = _action;
-		if (m_action == null) {throw new AssertionError(Messages.s_PREFIX_NULL_ACTION);}
+		if (m_action == null) {throw new AssertionError(Messages.s_COMPILER_PREFIX_NULL_ACTION);}
 		m_rate = _rate;
-		if (m_rate == null) {throw new AssertionError(Messages.s_PREFIX_NULL_RATE);}
+		if (m_rate == null) {throw new AssertionError(Messages.s_COMPILER_PREFIX_NULL_RATE);}
 		m_continuation = _continuation;
-		if (m_continuation == null) {throw new AssertionError(Messages.s_PREFIX_NULL_CONTINUATION);}
+		if (m_continuation == null) {throw new AssertionError(Messages.s_COMPILER_PREFIX_NULL_CONTINUATION);}
 	}
 	
 	/**

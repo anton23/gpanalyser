@@ -20,7 +20,7 @@ public class ChoiceComponent extends MASSPAComponent
 	public ChoiceComponent(final List<Prefix> _choices)
 	{
 		super("");
-		if (_choices == null) {throw new AssertionError(Messages.s_CHOICE_COMPONENT_NULL_CHOICES);}
+		if (_choices == null) {throw new AssertionError(Messages.s_COMPILER_CHOICE_COMPONENT_NULL_CHOICES);}
 		m_choices = Collections.unmodifiableList(_choices);
 	}
 
