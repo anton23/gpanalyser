@@ -60,7 +60,7 @@ public class IntegralInsterterVisitor implements IExpressionVisitor,
 			result = CombinedProductExpression
 					.create(new CombinedPopulationProduct(e.getProduct()
 							.getNakedProduct(), toInsert
-							.getAccumulatedProducts()));
+							.getAccumulatedProducts()));			
 		}
 	}
 
