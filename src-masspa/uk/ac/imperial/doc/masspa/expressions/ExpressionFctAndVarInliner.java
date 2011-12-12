@@ -13,6 +13,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionTransformer;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.IExpressionVariableVisitor;
+import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.representation.components.ConstComponent;
 import uk.ac.imperial.doc.masspa.representation.model.Location;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAActionCount;
@@ -78,7 +79,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 			value = (value == null) ? m_constants.getConstantValue(localConstName.replace(l.toString(), VarLocation.getInstance().toString())) : value;
 			if (value == null)
 			{
-				throw new AssertionError("Constant " + localConstName + " is undefined.");
+				throw new AssertionError(String.format(Messages.s_COMPILER_CONST_UNDEFINED, localConstName));
 			}
 			result = new DoubleExpression(value);			
 		}
@@ -97,7 +98,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 				MASSPAActionCount localCount = m_model.getActionCount(new MASSPAActionCount(((MASSPAActionCount)entry.getKey()).getName(),l));
 				if (localCount == null)
 				{
-					throw new AssertionError("Action count " + entry.getKey() + " refers to an undefined action or location.");
+					throw new AssertionError(String.format(Messages.s_COMPILER_ACTIONCOUNT_INVALID, entry.getKey()));
 				}
 				localisedProduct.put(localCount,entry.getValue());
 			}
@@ -108,7 +109,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 				MASSPAAgentPop localPop = m_model.getAgentPop(new MASSPAAgentPop(new ConstComponent(pop.getComponentName()),l));
 				if (localPop == null)
 				{
-					throw new AssertionError("Agent population " + entry.getKey() + " refers to an undefined agent state or location.");
+					throw new AssertionError(String.format(Messages.s_COMPILER_AGENTPOP_INVALID, entry.getKey()));
 				}
 				localisedProduct.put(localPop,entry.getValue());
 			}
@@ -127,7 +128,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 			s = m_model.getActionCount(new MASSPAActionCount(((MASSPAActionCount) s).getName(), l));
 			if (s == null)
 			{
-				throw new AssertionError("Action count " + s + " refers to an undefined action or location.");
+				throw new AssertionError(String.format(Messages.s_COMPILER_ACTIONCOUNT_INVALID, s));
 			}
 		}
 		else if (s instanceof MASSPAAgentPop)
@@ -137,7 +138,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 			s = m_model.getAgentPop(new MASSPAAgentPop(new ConstComponent(pop.getComponentName()),l));
 			if (s == null)
 			{
-				throw new AssertionError("Agent population " + s + " refers to an undefined agent state or location.");
+				throw new AssertionError(String.format(Messages.s_COMPILER_AGENTPOP_INVALID, s));
 			}
 		}
 		result = new PopulationExpression(s);
@@ -162,7 +163,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 		
 		if (def == null)
 		{
-			throw new AssertionError("Unable to find definition for variable " + e);
+			throw new AssertionError(String.format(Messages.s_COMPILER_VAR_UNDEFINED, e));
 		}
 		
 		ExpressionFctAndVarInliner inliner = new ExpressionFctAndVarInliner(l, m_model, m_functions, m_variables, m_constants);
@@ -195,7 +196,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 		
 		if (funDef == null)
 		{
-			throw new AssertionError("Unable to find definition for function " + e + " or function " + localFunName);
+			throw new AssertionError(String.format(Messages.s_COMPILER_FUN_UNDEFINED, e));
 		}
 
 		// Now create new arg mapping
@@ -205,7 +206,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 		{
 			if (!(ae instanceof ConstantExpression))
 			{
-				throw new AssertionError(ae + " in function definition of " + funDef + " must be constant Expression");
+				throw new AssertionError(String.format(Messages.s_COMPILER_FUN_INVALID_ARG, ae, funDef));
 			}
 			
 			// Substitute if necessary
