@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import uk.ac.imperial.doc.jexpressions.conditions.ExpressionCondition;
+import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
@@ -43,6 +46,30 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			e.getDenominator().accept(this);
 			result = PEPADivExpression.create(newNumerator, result);
 		}
+	}
+	
+	@Override
+	public void visit(ConstantExpression e) {
+		if (insert) {
+			result = ProductExpression.create(e, CombinedProductExpression
+					.create(new CombinedPopulationProduct(moment)));
+			inserted = true;
+		} else {
+			result = e;
+		}
+	}
+	
+	@Override
+	public void visit(IndicatorFunction e) {
+		boolean oldInserted = inserted;
+		e.getCondition().getLeft().accept(this);
+		AbstractExpression newLeft = result;
+		
+		e.getCondition().getRight().accept(this);
+		AbstractExpression newRight = result;
+		inserted = oldInserted;
+		result = new IndicatorFunction(
+				new ExpressionCondition(newLeft, e.getCondition().getOperator(), newRight));
 	}
 
 	@Override
@@ -83,6 +110,8 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 
 	@Override
 	public void visit(CombinedProductExpression e) {
+		if (insert) {
+			inserted = true;
 		if (e.getProduct().getAccumulatedProducts().size() > 0) {
 			throw new AssertionError("Accumulations not allowed in rates!");
 		}
@@ -119,7 +148,11 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			} else {
 				result = getEventMomentInTermsOfCovariances(x);
 			}
+			
 		} 
+		} else {
+			result = e;
+		}
 	}
 
 	public AbstractExpression getOddMomentInTermsOfCovariances(State[] states) {
