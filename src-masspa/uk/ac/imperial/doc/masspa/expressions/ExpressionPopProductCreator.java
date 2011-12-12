@@ -22,6 +22,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionTransformer;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.IExpressionVariableVisitor;
+import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAAgentPop;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
@@ -73,7 +74,7 @@ public class ExpressionPopProductCreator extends ExpressionTransformer  implemen
 	@Override
 	public void visit(AbstractExpression e)
 	{
-		throw new AssertionError("Unsupported visit to expression " + e.toString());
+		throw new AssertionError(String.format(Messages.s_COMPILER_INTERNAL_UNSUPPORTED_EXPR_VISIT,e));
 	}
 
 	@Override
@@ -248,18 +249,18 @@ public class ExpressionPopProductCreator extends ExpressionTransformer  implemen
 	@Override
 	public void visit(PopulationProductExpression e)
 	{
-		throw new AssertionError("Not handled yet");
+		throw new AssertionError(String.format(Messages.s_COMPILER_INTERNAL_UNSUPPORTED_EXPR_VISIT,e));
 	}
 	
 	@Override
 	public void visit(ExpressionVariable e)
 	{
-		throw new AssertionError("Not handled yet");
+		throw new AssertionError(String.format(Messages.s_COMPILER_INTERNAL_UNSUPPORTED_EXPR_VISIT,e));
 	}
 	
 	@Override
 	public void visit(FunctionCallExpression e)
 	{
-		throw new AssertionError("Not handled yet");
+		throw new AssertionError(String.format(Messages.s_COMPILER_INTERNAL_UNSUPPORTED_EXPR_VISIT,e));
 	}
 }

@@ -47,7 +47,11 @@ public class Messages
 	
 	// Compiler
 	public static final String s_COMPILER_CONST_INVALID_LOCATION = "Constant '%s' has an invalid location '%s'.";
+	public static final String s_COMPILER_CONST_UNDEFINED = "Constant '%s' is undefined.";
 	public static final String s_COMPILER_VAR_INVALID_LOCATION = "Variable '%s' has an invalid location '%s'.";
+	public static final String s_COMPILER_VAR_UNDEFINED = "Variable '%s' is undefined.";
+	public static final String s_COMPILER_FUN_UNDEFINED = "Unable to find definition for function '%s'|'%s'";
+	public static final String s_COMPILER_FUN_INVALID_ARG = "Argument '%s' in function definition of function '%s' must be constant Expression";
 	public static final String s_COMPILER_AGENT_DEFINITION_ANALYSIS = "Compiling MASSPA agent definitions";
 	public static final String s_COMPILER_AGENT_STATE_MISSING_DEFINITION = "Missing MASSPA agent state definition for '%s'.";
 	public static final String s_COMPILER_AGENT_STATE_INVALID_DEFINITION = "Invalid MASSPA agent state definition for '%s'.";
@@ -70,6 +74,7 @@ public class Messages
 	public static final String s_COMPILER_MODEL_NULL_COMPONENTS = "Cannot instantiate MASSPAModel with <null> component factory.";
 	public static final String s_COMPILER_LOCATION_DUPLICATE_DEFINITION = "Duplicate definition of location coordinate '%s' in line %d - IGNORING REDEFINITION!!!";
 	public static final String s_COMPILER_LOCATION_NULL_DEFINITION = "Cannot create location with <null> coordinates in line %d.";
+	public static final String s_COMPILER_AGENTPOP_INVALID = "Agent population '%s' refers to an undefined agent state or location.";
 	public static final String s_COMPILER_AGENTPOP_DUPLICATE_DISTRIBUTION_DEFINITION = "Duplicate definition of initial distribution for agent population '%s' in line %d - IGNORING REDEFINITION!!!";	
 	public static final String s_COMPILER_AGENTPOP_INVALID_DEFINITION = "Invalid agent population definition %s%s in line %d.";
 	public static final String s_COMPILER_AGENTPOP_MISSING_COMPONENT_DEFINITION = "Missing component definition for '%s' in agent population definition '%s%s' in line %d.";
@@ -78,7 +83,8 @@ public class Messages
 	public static final String s_COMPILER_AGENTPOP_NULL_COMPONENT = "Cannot instantiate agent population with <null> component.";
 	public static final String s_COMPILER_AGENTPOP_NULL_LOCATION = "Cannot instantiate agent population with <null> location.";
 	public static final String s_COMPILER_AGENTPOP_VARLOCATION_INIT_DISTRIBUTION = "Cannot define initial distribution agent population '%s' in line %d - IGNORING DEFINITION.\nHint: Check if you are trying to assign an initial value to a variable location.";
-	public static final String s_COMPILER_AGENTCOUNT_VARALLLOCATION_INITVAL = "Cannot define initial value for action count '%s' in line %d - IGNORING DEFINITION.\nHint: Check if you are trying to assign an initial value to a variable/global location.";
+	public static final String s_COMPILER_ACTIONCOUNT_VARALLLOCATION_INITVAL = "Cannot define initial value for action count '%s' in line %d - IGNORING DEFINITION.\nHint: Check if you are trying to assign an initial value to a variable/global location.";
+	public static final String s_COMPILER_ACTIONCOUNT_INVALID = "Action count '%s' refers to an undefined action or location.";
 	public static final String s_COMPILER_ACTIONCOUNT_INITVAL_DEFINITION_FAILED = "Failed to set initial value of action count '%s' in line %d.";	;
 	public static final String s_COMPILER_ACTIONCOUNT_NULL_NAME = "Cannot instantiate action count with <null> name.";
 	public static final String s_COMPILER_ACTIONCOUNT_NULL_INITVAL = "Cannot assign initial value of action count '%s' to <null>.";
@@ -108,6 +114,7 @@ public class Messages
 	public static final String s_COMPILER_MASSPA_EVO_EVT_NULL_DECREASING = "Cannot create MASSPAEvolutionEvent with <null> decreasing list.";
 	public static final String s_COMPILER_MASSPA_EVO_EVT_NULL_RATE = "Cannot create MASSPAEvolutionEvent with <null> rate.";
 	public static final String s_COMPILER_MASSPA_PCTMC_NULL_EVO_EVTS  = "Cannot create MASSPA PCTMC with <null> evolution event list.";
+	public static final String s_COMPILER_INTERNAL_UNSUPPORTED_EXPR_VISIT = "Unsupported visit to expression '%s'.";
 	
 	// Console
 	public static final String s_WARNING = "WARNING: %s";

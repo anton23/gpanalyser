@@ -339,7 +339,7 @@ public class MASSPAModel
 	{
 		if (_actionCount.getLocation().equals(VarLocation.getInstance()) || _actionCount.getLocation().equals(AllLocation.getInstance()))
 		{
-			MASSPALogging.error(String.format(Messages.s_COMPILER_AGENTCOUNT_VARALLLOCATION_INITVAL,_actionCount,_line));
+			MASSPALogging.error(String.format(Messages.s_COMPILER_ACTIONCOUNT_VARALLLOCATION_INITVAL,_actionCount,_line));
 			return;
 		}
 		MASSPAActionCount actionCount = getActionCount(_actionCount.getName(), _actionCount.getLocation(), _line);
