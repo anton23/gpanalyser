@@ -23,6 +23,7 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NormalMomentClosure;
+import uk.ac.imperial.doc.pctmc.testing.odes.BaseTestODEGeneratorExpectedODEs;
 public class TestODEGenerator extends NewODEGenerator{
 	
 	protected PCTMCInterpreter interpreter;
@@ -44,25 +45,25 @@ public class TestODEGenerator extends NewODEGenerator{
 				.get(0);
 		AbstractExpression rhs = getDerivativeOfMoment(eClient2);
 		
-		ExpandedExpression expandedExpected = TestODEGeneratorExpectedODEs.expandExpression(expected);
-		ExpandedExpression expandedRhs = TestODEGeneratorExpectedODEs.expandExpression(rhs);
+		ExpandedExpression expandedExpected = TestGPEPAExpectedODEs.expandExpression(expected);
+		ExpandedExpression expandedRhs = TestGPEPAExpectedODEs.expandExpression(rhs);
 		assertEquals(expandedExpected, expandedRhs);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGenerateSystem() throws ParseException, IOException, IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
-		generateODESystem(TestODEGeneratorExpectedODEs.parseCombinedProducts(interpreter, "acc(Clients:Client)"));
+		generateODESystem(BaseTestODEGeneratorExpectedODEs.parseCombinedProducts(interpreter, "acc(Clients:Client)"));
 		Object compilerReturn = interpreter.parseGenericRule(new ANTLRFileStream("test-gpa-inputs/clientServer/accFirstOrder"), "odeTest", false);
 		
 		Map<CombinedPopulationProduct, AbstractExpression> expectedODEs = (Map<CombinedPopulationProduct, AbstractExpression>) 
 			compilerReturn.getClass().getField("odes").get(compilerReturn);
 
 		for (Map.Entry<CombinedPopulationProduct, AbstractExpression> e:expectedODEs.entrySet()) {
-			ExpandedExpression expectedExpanded = TestODEGeneratorExpectedODEs.expandExpression(e.getValue());
-			ExpandedExpression actualExpanded = TestODEGeneratorExpectedODEs.expandExpression((rhs.get(e.getKey())));
+			ExpandedExpression expectedExpanded = TestGPEPAExpectedODEs.expandExpression(e.getValue());
+			ExpandedExpression actualExpanded = TestGPEPAExpectedODEs.expandExpression((rhs.get(e.getKey())));
 			assertEquals("ODE for moment " + e.getKey() + ", difference:\n"
-					+ TestODEGeneratorExpectedODEs.expandExpression(new MinusExpression(e.getValue(), rhs.get(e.getKey()))).toAbstractExpression()+"\n",
+					+ TestGPEPAExpectedODEs.expandExpression(new MinusExpression(e.getValue(), rhs.get(e.getKey()))).toAbstractExpression()+"\n",
 					expectedExpanded, actualExpanded);			
 		}
 	}

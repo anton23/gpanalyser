@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.jexpressions.expanded;
 
+import uk.ac.imperial.doc.jexpressions.conditions.ExpressionCondition;
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -211,7 +212,13 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor,
 
 	@Override
 	public void visit(IndicatorFunction e) {
-		// TODO Auto-generated method stub
+		e.getCondition().getLeft().accept(this);
+		ExpandedExpression eL = result;
+		e.getCondition().getRight().accept(this);
+		ExpandedExpression eR = result;
+        result = new UnexpandableExpression(new IndicatorFunction(
+        		new ExpressionCondition(eL, e.getCondition().getOperator(), eR)), normaliser);
+
 		
 	}
 

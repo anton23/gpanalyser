@@ -19,6 +19,7 @@
 	<property name="jexpressions.test" value="test-jexpressions"/>
 	<property name="gpa.test" value="test-gpa"/>
 	<property name="pctmc.test" value="test-pctmc"/>
+	<property name="plain.test" value="test-plain"/>
 
     <property name="lib" value="lib"/>
     <property name="examples" value="inputs"/>
@@ -368,6 +369,7 @@
 		        	<src path="${jexpressions.test}"/>
 		        	<src path="${pctmc.test}"/>
 		        	<src path="${gpa.test}"/>
+		        	<src path="${plain.test}"/>
 		            <include name="**/*.java"/> 
 		        	<include name="**/*.class"/>
 		         	<exclude name="**/package-info.java"/> 
