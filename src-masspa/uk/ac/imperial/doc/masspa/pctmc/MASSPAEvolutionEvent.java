@@ -26,9 +26,9 @@ public class MASSPAEvolutionEvent extends EvolutionEvent
 	public MASSPAEvolutionEvent(List<State> _decreasing, List<State> _increasing, AbstractExpression _rate, State _kMatrixContribution) 
 	{
 		super(_decreasing, _increasing, _rate);
-		if (_increasing==null){throw new AssertionError(Messages.s_MASSPA_EVO_EVT_NULL_INCREASING);}
-		if (_decreasing==null){throw new AssertionError(Messages.s_MASSPA_EVO_EVT_NULL_DECREASING);}
-		if (_rate==null){throw new AssertionError(Messages.s_MASSPA_EVO_EVT_NULL_RATE);}
+		if (_increasing==null){throw new AssertionError(Messages.s_COMPILER_MASSPA_EVO_EVT_NULL_INCREASING);}
+		if (_decreasing==null){throw new AssertionError(Messages.s_COMPILER_MASSPA_EVO_EVT_NULL_DECREASING);}
+		if (_rate==null){throw new AssertionError(Messages.s_COMPILER_MASSPA_EVO_EVT_NULL_RATE);}
 		m_kMatrixContribution = _kMatrixContribution;
 	}
 	

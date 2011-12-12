@@ -49,11 +49,11 @@ public class MASSPAModel
 	// *************************************************	
 	public MASSPAModel(final MASSPAAgents _compFact)
 	{
-		MASSPALogging.info(Messages.s_MODEL_DEFINITION_ANALYSIS);
+		MASSPALogging.info(Messages.s_COMPILER_MODEL_DEFINITION_ANALYSIS);
 		
 		// Local definitions
 		m_agents = _compFact;
-		if (m_agents == null) {throw new AssertionError(Messages.s_MODEL_NULL_COMPONENTS);}
+		if (m_agents == null) {throw new AssertionError(Messages.s_COMPILER_MODEL_NULL_COMPONENTS);}
 
 		// Spatial definitions
 		m_locations = new HashMap<Location,Location>();
@@ -95,14 +95,14 @@ public class MASSPAModel
 		Location loc = m_locations.get(_loc);
 		if (component == null || loc == null)
 		{
-			String err = String.format(Messages.s_AGENTPOP_INVALID_DEFINITION,_name,_loc,_line);
+			String err = String.format(Messages.s_COMPILER_AGENTPOP_INVALID_DEFINITION,_name,_loc,_line);
 			if (component == null && loc != null)
 			{
-				err = String.format(Messages.s_AGENTPOP_MISSING_COMPONENT_DEFINITION,_name,_name,_loc,_line);
+				err = String.format(Messages.s_COMPILER_AGENTPOP_MISSING_COMPONENT_DEFINITION,_name,_name,_loc,_line);
 			}
 			else if (component != null && loc == null)
 			{
-				err = String.format(Messages.s_AGENTPOP_MISSING_LOCATION_DEFINITION,_loc,_name,_loc,_line);
+				err = String.format(Messages.s_COMPILER_AGENTPOP_MISSING_LOCATION_DEFINITION,_loc,_name,_loc,_line);
 			}
 			MASSPALogging.fatalError(err);
 			throw new AssertionError(err);
@@ -134,14 +134,14 @@ public class MASSPAModel
 		Location loc = (_loc.equals(AllLocation.getInstance())) ? _loc : m_locations.get(_loc);
 		if (action == null || loc == null)
 		{
-			String err = String.format(Messages.s_ACTIONCOUNT_INVALID_DEFINITION,_name,_loc,_line);
+			String err = String.format(Messages.s_COMPILER_ACTIONCOUNT_INVALID_DEFINITION,_name,_loc,_line);
 			if (action == null)
 			{
-				err = String.format(Messages.s_ACTIONCOUNT_MISSING_ACTION,_name,_name,_loc,_line);
+				err = String.format(Messages.s_COMPILER_ACTIONCOUNT_MISSING_ACTION,_name,_name,_loc,_line);
 			}
 			else if (loc == null)
 			{
-				err = String.format(Messages.s_ACTIONCOUNT_MISSING_LOCATION_DEFINITION,_loc,_name,_loc,_line);
+				err = String.format(Messages.s_COMPILER_ACTIONCOUNT_MISSING_LOCATION_DEFINITION,_loc,_name,_loc,_line);
 			}
 			MASSPALogging.fatalError(err);
 			throw new AssertionError(err);
@@ -294,14 +294,14 @@ public class MASSPAModel
 	{
 		if (_l == null)
 		{
-			MASSPALogging.error(String.format(Messages.s_LOCATION_NULL_DEFINITION, _line));
+			MASSPALogging.error(String.format(Messages.s_COMPILER_LOCATION_NULL_DEFINITION, _line));
 			return;
 		}
 		
 		Location loc = m_locations.get(_l);
 		if (loc != null)
 		{
-			MASSPALogging.warn(String.format(Messages.s_LOCATION_DUPLICATE_DEFINITION, loc, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_LOCATION_DUPLICATE_DEFINITION, loc, _line));
 		}
 		else
 		{
@@ -319,13 +319,13 @@ public class MASSPAModel
 	{
 		if (_agentPop.getLocation().equals(VarLocation.getInstance()))
 		{
-			MASSPALogging.error(String.format(Messages.s_AGENTPOP_VARLOCATION_INIT_DISTRIBUTION,_agentPop,_line));
+			MASSPALogging.error(String.format(Messages.s_COMPILER_AGENTPOP_VARLOCATION_INIT_DISTRIBUTION,_agentPop,_line));
 			return;
 		}
 		MASSPAAgentPop agentPop = getAgentPop(_agentPop.getComponentName(), _agentPop.getLocation(), _line);
 		if (!agentPop.setInitialPopulation(_initPop))
 		{
-			MASSPALogging.warn(String.format(Messages.s_AGENTPOP_DUPLICATE_DISTRIBUTION_DEFINITION,_agentPop,_line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_AGENTPOP_DUPLICATE_DISTRIBUTION_DEFINITION,_agentPop,_line));
 		}
 	}
 	
@@ -339,13 +339,13 @@ public class MASSPAModel
 	{
 		if (_actionCount.getLocation().equals(VarLocation.getInstance()) || _actionCount.getLocation().equals(AllLocation.getInstance()))
 		{
-			MASSPALogging.error(String.format(Messages.s_AGENTCOUNT_VARALLLOCATION_INITVAL,_actionCount,_line));
+			MASSPALogging.error(String.format(Messages.s_COMPILER_AGENTCOUNT_VARALLLOCATION_INITVAL,_actionCount,_line));
 			return;
 		}
 		MASSPAActionCount actionCount = getActionCount(_actionCount.getName(), _actionCount.getLocation(), _line);
 		if (!actionCount.setInitVal(_initVal))
 		{
-			MASSPALogging.warn(String.format(Messages.s_ACTIONCOUNT_INITVAL_DEFINITION_FAILED,_actionCount,_line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_ACTIONCOUNT_INITVAL_DEFINITION_FAILED,_actionCount,_line));
 		}
 	}
 	
@@ -368,13 +368,13 @@ public class MASSPAModel
 		MASSPAMessage msg = m_agents.getMessage(_msg);
 		if (msg == null)
 		{
-			MASSPALogging.warn(String.format(Messages.s_CHANNEL_MESSAGE_UNKNOWN, _sender, _receiver, _msg, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_MESSAGE_UNKNOWN, _sender, _receiver, _msg, _line));
 			return;
 		}
 		MASSPAChannel chan = new MASSPAChannel(sender, receiver, msg, _intensity);
 		if (m_channels.get(receiver).contains(chan))
 		{
-			MASSPALogging.warn(String.format(Messages.s_CHANNEL_DUPLICATE_DEFINTION, chan, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_DUPLICATE_DEFINTION, chan, _line));
 		}
 		else
 		{
@@ -402,7 +402,7 @@ public class MASSPAModel
 		MASSPAMovement move = new MASSPAMovement(_leaveAction, from, _enterAction, to, _rate);
 		if (m_movements.get(from).contains(move))
 		{
-			MASSPALogging.warn(String.format(Messages.s_MOVEMENT_DUPLICATE_DEFINTION, move, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_MOVEMENT_DUPLICATE_DEFINTION, move, _line));
 		}
 		else
 		{
@@ -428,7 +428,7 @@ public class MASSPAModel
 		MASSPABirth birth = new MASSPABirth(_action, pop, _rate);
 		if (m_births.containsKey(pop))
 		{
-			MASSPALogging.warn(String.format(Messages.s_BIRTH_DUPLICATE_DEFINTION, birth, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_BIRTH_DUPLICATE_DEFINTION, birth, _line));
 		}
 		else
 		{

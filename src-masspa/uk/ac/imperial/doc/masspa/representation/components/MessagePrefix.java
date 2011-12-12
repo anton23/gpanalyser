@@ -17,7 +17,7 @@ public abstract class MessagePrefix extends Prefix
 	{
 		super(_action,_rate,_continuation);
 		m_msg = msg;
-		if (m_msg == null) {throw new AssertionError(Messages.s_MESSAGE_PREFIX_NULL_MSG);}
+		if (m_msg == null) {throw new AssertionError(Messages.s_COMPILER_MESSAGE_PREFIX_NULL_MSG);}
 	}
 	
 	/**

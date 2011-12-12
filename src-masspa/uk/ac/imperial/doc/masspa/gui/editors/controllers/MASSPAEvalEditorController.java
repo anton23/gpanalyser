@@ -186,7 +186,7 @@ public class MASSPAEvalEditorController implements ITabController, IUndoRedoHand
 							}
 							else
 							{
-								MASSPALogging.warn(String.format(Messages.s_AGENT_STATE_MISSING_DEFINITION,pop.getComponent().getName()));
+								MASSPALogging.warn(String.format(Messages.s_COMPILER_AGENT_STATE_MISSING_DEFINITION,pop.getComponent().getName()));
 							}
 						}
 					}
@@ -239,7 +239,7 @@ public class MASSPAEvalEditorController implements ITabController, IUndoRedoHand
 						{
 							if(m_agents.getMASSPAAgents().getComponent(senderState.getName()) == null)
 							{
-								MASSPALogging.warn(String.format(Messages.s_AGENT_STATE_MISSING_DEFINITION,senderState.getName()));
+								MASSPALogging.warn(String.format(Messages.s_COMPILER_AGENT_STATE_MISSING_DEFINITION,senderState.getName()));
 								continue;
 							}
 						}
@@ -252,7 +252,7 @@ public class MASSPAEvalEditorController implements ITabController, IUndoRedoHand
 						{
 							if(m_agents.getMASSPAAgents().getComponent(receiverState.getName()) == null)
 							{
-								MASSPALogging.warn(String.format(Messages.s_AGENT_STATE_MISSING_DEFINITION,receiverState.getName()));
+								MASSPALogging.warn(String.format(Messages.s_COMPILER_AGENT_STATE_MISSING_DEFINITION,receiverState.getName()));
 								continue;
 							}
 						}

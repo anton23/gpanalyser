@@ -19,6 +19,7 @@ import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.masspa.expressions.ExpressionEvaluatorWithLocationConstants;
 import uk.ac.imperial.doc.masspa.expressions.ExpressionFctAndVarInliner;
 import uk.ac.imperial.doc.masspa.expressions.ExpressionPopProductCreator;
+import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.representation.components.ChoiceComponent;
 import uk.ac.imperial.doc.masspa.representation.components.ConstComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAComponent;
@@ -142,7 +143,7 @@ public class MASSPAToPCTMC
 				Location loc = LocationHelper.getLocalisedLocation(cnst, null);
 				if (!_model.getAllLocations().contains(loc))
 				{
-					throw new AssertionError("Constant " + cnst + " has an invalid location");
+					throw new AssertionError(String.format(Messages.s_COMPILER_CONST_INVALID_LOCATION, cnst, loc));
 				}
 			}
 		}
@@ -178,7 +179,7 @@ public class MASSPAToPCTMC
 				Location loc = LocationHelper.getLocalisedLocation(varName, null);
 				if (!_model.getAllLocations().contains(loc))
 				{
-					throw new AssertionError("Variable " + varName + " has an invalid location");
+					throw new AssertionError(String.format(Messages.s_COMPILER_VAR_INVALID_LOCATION, varName, loc));
 				}
 				AbstractExpression varExpr = var.getValue();
 				AbstractExpression inlinedFctAndVars = inlineFctsAndVars(varExpr, loc, _model, null, _variables, _constants);	
