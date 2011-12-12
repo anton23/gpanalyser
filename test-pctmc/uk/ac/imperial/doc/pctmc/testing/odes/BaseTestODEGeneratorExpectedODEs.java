@@ -1,10 +1,8 @@
-package uk.ac.imperial.doc.gpanalyser.testing.odes;
+package uk.ac.imperial.doc.pctmc.testing.odes;
 
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +12,14 @@ import org.antlr.runtime.ANTLRFileStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
-import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.jexpressions.expanded.DoubleConstantCoefficients;
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandedExpression;
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandingExpressionTransformerWithMoments;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
@@ -31,45 +28,41 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.NormalMomentClosure;
 
 
 @RunWith(Parameterized.class)
-public class TestODEGeneratorExpectedODEs {
+public abstract class BaseTestODEGeneratorExpectedODEs {
 	
 
 	protected PCTMCInterpreter interpreter;
 	protected PCTMCFileRepresentation representation;
 	protected String file;
 	
-	@Parameters
-	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] {
-				{"simpleModel"}, {"clientServer"},
-				{"clientServerProbed"}});
-	}
-	
-	public TestODEGeneratorExpectedODEs(String file) throws ParseException {
-		this.interpreter = GPAPMain.createGPEPAInterpreter();
-		this.representation = interpreter.parsePCTMCFile("test-gpa-inputs/" + file + "/model.gpepa");		
+	protected abstract PCTMCInterpreter initialiseInterpreter();
+	protected abstract String getPath();
+
+	public BaseTestODEGeneratorExpectedODEs(String file) throws ParseException {
+		this.interpreter  = initialiseInterpreter();
+		this.representation = interpreter.parsePCTMCFile(getPath() + file + "/model.gpepa");		
 		this.file = file;
 	}
 	
 	@Test
 	public void testFirstMoments() throws ParseException, IllegalArgumentException, SecurityException, IOException, IllegalAccessException, NoSuchFieldException {
-		checkExpectedODEs("test-gpa-inputs/" + file + "/firstOrder");
+		checkExpectedODEs(getPath() + file + "/firstOrder");
 	}
 	
 	@Test
 	public void testSecondMoments() throws ParseException, IllegalArgumentException, SecurityException, IOException, IllegalAccessException, NoSuchFieldException {
-		checkExpectedODEs("test-gpa-inputs/" + file + "/secondOrder");		
+		checkExpectedODEs(getPath() + file + "/secondOrder");		
 	}
 	
 	
 	@Test
 	public void testFirstAccumulatedMoments() throws ParseException, IllegalArgumentException, SecurityException, IOException, IllegalAccessException, NoSuchFieldException {
-		checkExpectedODEs("test-gpa-inputs/" + file + "/accFirstOrder");
+		checkExpectedODEs(getPath() + file + "/accFirstOrder");
 	}
 	
 	@Test
 	public void testSecondAccumulatedMoments() throws ParseException, IllegalArgumentException, SecurityException, IOException, IllegalAccessException, NoSuchFieldException {
-		checkExpectedODEs("test-gpa-inputs/" + file + "/accSecondOrder");
+		checkExpectedODEs(getPath() + file + "/accSecondOrder");
 	}
 	
 
@@ -80,6 +73,12 @@ public class TestODEGeneratorExpectedODEs {
 			(List<CombinedPopulationProduct>) compilerReturn.getClass().getField("moments").get(compilerReturn);
 		Map<CombinedPopulationProduct, AbstractExpression> expectedODEs = (Map<CombinedPopulationProduct, AbstractExpression>) 
 			compilerReturn.getClass().getField("odes").get(compilerReturn);
+		
+		for (AbstractExpression rhs:expectedODEs.values()) {
+			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(
+					representation.getUnfoldedVariables());
+			rhs.accept(setter);
+		}
 		
 		int order = 0;
 		for (CombinedPopulationProduct m:moments) {
@@ -102,7 +101,7 @@ public class TestODEGeneratorExpectedODEs {
 		return (CombinedPopulationProduct) interpreter.parseGenericRule(string, "combinedPowerProduct", false);
 	}
 	
-	protected static Set<CombinedPopulationProduct> parseCombinedProducts(PCTMCInterpreter interpreter, String... string) throws ParseException{
+	public static Set<CombinedPopulationProduct> parseCombinedProducts(PCTMCInterpreter interpreter, String... string) throws ParseException{
 		Set<CombinedPopulationProduct> ret = new HashSet<CombinedPopulationProduct>();
 		for  (String s:string) {
 			ret.add((CombinedPopulationProduct) interpreter.parseGenericRule(s, "combinedPowerProduct", false));
