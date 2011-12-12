@@ -26,7 +26,7 @@ public class MASSPAMessage implements Comparable<MASSPAMessage>
 	public MASSPAMessage(final String _msg)
 	{
 		m_msg = _msg;
-		if (m_msg == null) {throw new AssertionError(Messages.s_MASSPA_MESSAGE_NULL_MSG_NAME);}
+		if (m_msg == null) {throw new AssertionError(Messages.s_COMPILER_MASSPA_MESSAGE_NULL_MSG_NAME);}
 	}
 	
 	// Getter

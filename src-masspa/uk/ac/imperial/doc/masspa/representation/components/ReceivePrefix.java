@@ -17,7 +17,7 @@ public class ReceivePrefix extends MessagePrefix
 	{
 		super(_action,new IntegerExpression(1),msg,_continuation);
 		m_acceptanceProb = _acceptanceProb;
-		if (m_acceptanceProb == null) {throw new AssertionError(Messages.s_RECEIVE_PREFIX_NULL_ACC_PROB);}
+		if (m_acceptanceProb == null) {throw new AssertionError(Messages.s_COMPILER_RECEIVE_PREFIX_NULL_ACC_PROB);}
 	}
 
 	/**

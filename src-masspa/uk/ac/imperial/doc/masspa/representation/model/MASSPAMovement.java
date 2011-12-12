@@ -36,15 +36,15 @@ public class MASSPAMovement implements Comparable<MASSPAMovement>
 	public MASSPAMovement(final String _leaveAction, final MASSPAAgentPop _from, final String _enterAction, final MASSPAAgentPop _to, final AbstractExpression _rate)
 	{	
 		setLeaveAction(_leaveAction);
-		if (getLeaveAction() == null) {throw new AssertionError(Messages.s_MOVEMENT_NULL_LEAVE_ACTION);}
+		if (getLeaveAction() == null) {throw new AssertionError(Messages.s_COMPILER_MOVEMENT_NULL_LEAVE_ACTION);}
 		setFrom(_from);
-		if (getFrom() == null) {throw new AssertionError(Messages.s_MOVEMENT_NULL_FROM);}
+		if (getFrom() == null) {throw new AssertionError(Messages.s_COMPILER_MOVEMENT_NULL_FROM);}
 		setEnterAction(_enterAction);
-		if (getEnterAction() == null) {throw new AssertionError(Messages.s_MOVEMENT_NULL_ENTER_ACTION);}
+		if (getEnterAction() == null) {throw new AssertionError(Messages.s_COMPILER_MOVEMENT_NULL_ENTER_ACTION);}
 		setTo(_to);
-		if (getTo() == null) {throw new AssertionError(Messages.s_MOVEMENT_NULL_TO);}
+		if (getTo() == null) {throw new AssertionError(Messages.s_COMPILER_MOVEMENT_NULL_TO);}
 		setRate(_rate);
-		if (getRate() == null) {throw new AssertionError(Messages.s_MOVEMENT_NULL_RATE);}
+		if (getRate() == null) {throw new AssertionError(Messages.s_COMPILER_MOVEMENT_NULL_RATE);}
 	}
 
 	// Getters/Setters

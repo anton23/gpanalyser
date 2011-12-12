@@ -36,13 +36,13 @@ public class MASSPAChannel implements Comparable<MASSPAChannel>
 	public MASSPAChannel(final MASSPAAgentPop _sender, final MASSPAAgentPop _receiver, final MASSPAMessage _msg, final AbstractExpression _intensity)
 	{
 		setSender(_sender);
-		if (getSender() == null) {throw new AssertionError(Messages.s_CHANNEL_NULL_SENDER);}
+		if (getSender() == null) {throw new AssertionError(Messages.s_COMPILER_CHANNEL_NULL_SENDER);}
 		setReceiver(_receiver);
-		if (getReceiver() == null) {throw new AssertionError(Messages.s_CHANNEL_NULL_RECEIVER);}
+		if (getReceiver() == null) {throw new AssertionError(Messages.s_COMPILER_CHANNEL_NULL_RECEIVER);}
 		setMsg(_msg);
-		if (getMsg() == null) {throw new AssertionError(Messages.s_CHANNEL_NULL_MESSAGE);}
+		if (getMsg() == null) {throw new AssertionError(Messages.s_COMPILER_CHANNEL_NULL_MESSAGE);}
 		setIntensity(_intensity);
-		if (getIntensity() == null) {throw new AssertionError(Messages.s_CHANNEL_NULL_INTENSITY);}
+		if (getIntensity() == null) {throw new AssertionError(Messages.s_COMPILER_CHANNEL_NULL_INTENSITY);}
 	}
 
 	// Getters/Setters

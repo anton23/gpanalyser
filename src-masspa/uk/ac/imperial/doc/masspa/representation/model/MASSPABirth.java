@@ -30,11 +30,11 @@ public class MASSPABirth implements Comparable<MASSPABirth>
 	public MASSPABirth(final String _action, final MASSPAAgentPop _pop, final AbstractExpression _rate)
 	{	
 		setAction(_action);
-		if (getAction() == null) {throw new AssertionError(Messages.s_BIRTH_NULL_ACTION);}
+		if (getAction() == null) {throw new AssertionError(Messages.s_COMPILER_BIRTH_NULL_ACTION);}
 		setPop(_pop);
-		if (getPop() == null) {throw new AssertionError(Messages.s_BIRTH_NULL_POP);}
+		if (getPop() == null) {throw new AssertionError(Messages.s_COMPILER_BIRTH_NULL_POP);}
 		setRate(_rate);
-		if (getRate() == null) {throw new AssertionError(Messages.s_BIRTH_NULL_RATE);}
+		if (getRate() == null) {throw new AssertionError(Messages.s_COMPILER_BIRTH_NULL_RATE);}
 	}
 
 	// Getters/Setters
