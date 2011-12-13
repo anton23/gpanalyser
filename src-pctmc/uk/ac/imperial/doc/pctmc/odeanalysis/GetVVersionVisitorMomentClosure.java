@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import uk.ac.imperial.doc.jexpressions.conditions.ExpressionCondition;
-import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.ExpressionCondition;
 import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -41,14 +40,16 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 			e.getNumerator().accept(this);
 			result = PEPADivExpression.create(result, e.getDenominator());
 		} else {
+			insert = true;
 			e.getNumerator().accept(this);
 			AbstractExpression newNumerator = result;
 			e.getDenominator().accept(this);
+			insert = false;
 			result = PEPADivExpression.create(newNumerator, result);
 		}
 	}
 	
-	@Override
+/*	@Override
 	public void visit(ConstantExpression e) {
 		if (insert) {
 			result = ProductExpression.create(e, CombinedProductExpression
@@ -57,16 +58,19 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 		} else {
 			result = e;
 		}
-	}
+	}*/
 	
 	@Override
 	public void visit(IndicatorFunction e) {
 		boolean oldInserted = inserted;
+		boolean oldInsert = insert;
+		insert = true;
 		e.getCondition().getLeft().accept(this);
 		AbstractExpression newLeft = result;
 		
 		e.getCondition().getRight().accept(this);
 		AbstractExpression newRight = result;
+		insert = oldInsert;
 		inserted = oldInserted;
 		result = new IndicatorFunction(
 				new ExpressionCondition(newLeft, e.getCondition().getOperator(), newRight));
