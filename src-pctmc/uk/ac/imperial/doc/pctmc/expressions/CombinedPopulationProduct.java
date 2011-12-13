@@ -64,6 +64,13 @@ public class CombinedPopulationProduct {
 		accProducts.add(accProduct);
 		return new CombinedPopulationProduct(null, accProducts);
 	}
+	
+	public static CombinedPopulationProduct getMeanAccumulatedProduct(PopulationProduct p) {
+		Multiset<PopulationProduct> accProducts = HashMultiset
+				.<PopulationProduct> create();
+		accProducts.add(p);
+		return new CombinedPopulationProduct(null, accProducts);
+	}
 
 	int order = -1;
 

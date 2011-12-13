@@ -49,17 +49,6 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 		}
 	}
 	
-/*	@Override
-	public void visit(ConstantExpression e) {
-		if (insert) {
-			result = ProductExpression.create(e, CombinedProductExpression
-					.create(new CombinedPopulationProduct(moment)));
-			inserted = true;
-		} else {
-			result = e;
-		}
-	}*/
-	
 	@Override
 	public void visit(IndicatorFunction e) {
 		boolean oldInserted = inserted;
@@ -90,7 +79,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 		result = CombinedProductExpression.create(product);
 	}
 
-	private boolean inserted = false;
+	protected boolean inserted = false;
 
 	@Override
 	public void visit(ProductExpression e) {
