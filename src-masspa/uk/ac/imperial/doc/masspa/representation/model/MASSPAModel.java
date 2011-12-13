@@ -43,6 +43,7 @@ public class MASSPAModel
 	private final HashMultimap<MASSPAAgentPop,MASSPAMovement> m_movementsReverse;
 	private final HashMap<MASSPAAgentPop,MASSPABirth> m_births;
 	private final HashMultimap<MASSPAAgentPop, MASSPAAgentPop> m_neighbours;
+	private MASSPAChannel.RateType m_rateType = MASSPAChannel.s_defaultRate;
 	
 	// *************************************************
 	// Constructor
@@ -53,7 +54,11 @@ public class MASSPAModel
 		
 		// Local definitions
 		m_agents = _compFact;
-		if (m_agents == null) {throw new AssertionError(Messages.s_COMPILER_MODEL_NULL_COMPONENTS);}
+		if (m_agents == null)
+		{
+			MASSPALogging.fatalError(Messages.s_COMPILER_MODEL_NULL_COMPONENTS);
+			throw new AssertionError(Messages.s_COMPILER_MODEL_NULL_COMPONENTS);
+		}
 
 		// Spatial definitions
 		m_locations = new HashMap<Location,Location>();
@@ -73,6 +78,14 @@ public class MASSPAModel
 	// *****************************************************************
 	// Getters
 	// *****************************************************************
+	/**
+	 * @return rate type of channel
+	 */
+	public MASSPAChannel.RateType getChannelType()
+	{
+		return m_rateType;
+	}
+	
 	/**
 	 * @return the object which holds the information about the
 	 * 		   non-spatial aspects of the MASSPA model
@@ -350,6 +363,31 @@ public class MASSPAModel
 	}
 	
 	/**
+	 * Set properties of channel communication type. E.g. whether the
+	 * channel rate is based on mass action XY or multi-server min(X,Y) kinetics.
+	 * 
+	 * @param {@code _type}
+	 * @param {@code _line} token line in model file
+	 */
+	public void setChannelType(final String _type, final int _line)
+	{
+		if(_type.equals(Messages.s_COMPILER_KEYWORD_MULTISERVER))
+		{
+			m_rateType = MASSPAChannel.RateType.MULTISERVER;
+		}
+		else if(_type.equals(Messages.s_COMPILER_KEYWORD_MASSACTION))
+		{
+			m_rateType = MASSPAChannel.RateType.MASSACTION;
+		}
+		else
+		{
+			String err = String.format(Messages.s_COMPILER_INVALID_CHANNELTYPE, _type, _line);
+			MASSPALogging.fatalError(err);
+			throw new AssertionError(err);
+		}
+	}
+	
+	/**
 	 * Create a channel between any two agent populations
 	 * @param _sender sending agent population
 	 * @param _receiver receiving agent population
@@ -360,7 +398,7 @@ public class MASSPAModel
 	public void addChannel(final MASSPAAgentPop _sender, final MASSPAAgentPop _receiver, final MASSPAMessage _msg, final AbstractExpression _intensity, final int _line)
 	{
 		// Check if parameters are ok
-		new MASSPAChannel(_sender, _receiver, _msg, _intensity);
+		new MASSPAChannel(_sender, _receiver, _msg, _intensity, m_rateType);
 		
 		// Create actual channel
 		MASSPAAgentPop sender = getAgentPop(_sender.getComponentName(), _sender.getLocation(), _line);
@@ -371,7 +409,7 @@ public class MASSPAModel
 			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_MESSAGE_UNKNOWN, _msg, _sender, _receiver, _line));
 			return;
 		}
-		MASSPAChannel chan = new MASSPAChannel(sender, receiver, msg, _intensity);
+		MASSPAChannel chan = new MASSPAChannel(sender, receiver, msg, _intensity, m_rateType);
 		if (m_channels.get(receiver).contains(chan))
 		{
 			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_DUPLICATE_DEFINTION, chan, _line));

@@ -272,7 +272,7 @@ public class MASSPAEvalEditorController implements ITabController, IUndoRedoHand
 								{
 									MASSPAAgentPop senderPop = new MASSPAAgentPop(s,senderLoc); 
 									MASSPAAgentPop receiverPop = new MASSPAAgentPop(r,receiverLoc);
-									MASSPAChannel ch = new MASSPAChannel(senderPop,receiverPop,m,intensity);
+									MASSPAChannel ch = new MASSPAChannel(senderPop,receiverPop,m,intensity,MASSPAChannel.s_defaultRate);
 									
 									// Check if this is the more specific channel
 									if (generatedChannelsOrigin.containsKey(ch))

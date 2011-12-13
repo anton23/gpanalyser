@@ -100,6 +100,8 @@ tokens
 	     String[] ret = new String[tokenNames.length];
 	     Map<String, String> map = new HashMap<String, String>();
 	     map.put("SEMI", "';'");
+	     map.put("LBRACK", "'['");
+	     map.put("RBRACK", "']'");
 	     map.put("LBRACE", "'{'");
 	     map.put("RBRACE", "'}'");
 	     map.put("EOF", "the end of file");
@@ -337,7 +339,13 @@ initVal:
 ;
 
 channel:
-  CHANNEL 
+  CHANNELTYPE
+  {hint.push(String.format(Messages.s_PARSER_CHANNELTYPE_MISSING_LBRACK));} LBRACK {hint.pop();}
+  {hint.push(String.format(Messages.s_PARSER_CHANNELTYPE_INCORRECT_TYPE));} LOWERCASENAME {hint.pop();}
+  {hint.push(String.format(Messages.s_PARSER_CHANNELTYPE_MISSING_RBRACK));} RBRACK {hint.pop();}
+  {hint.push(String.format(Messages.s_PARSER_CHANNELTYPE_MISSING_SEMI));} SEMI {hint.pop();}
+  -> ^(CHANNELTYPE LOWERCASENAME)
+| CHANNEL 
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_LPAR));} LPAR {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_INVALID_SENDER));} sender=agentPopulation {hint.pop();}
   COMMA 
@@ -348,5 +356,5 @@ channel:
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_DEF));} DEF {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_EXPR));} intensity=expression {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_SEMI));} SEMI {hint.pop();}
-  -> ^(CHANNEL $sender $receiver $msg $intensity) 
+  -> ^(CHANNEL $sender $receiver $msg $intensity)
 ;

@@ -200,5 +200,6 @@ initVal:
 ;
 
 channel:
-  ^(CHANNEL sender=agentPopulation receiver=agentPopulation msg=message[m_model.getMASSPAAgents()] intensity=expression) {m_model.addChannel($sender.agentPop,$receiver.agentPop,$msg.m,$intensity.e,$CHANNEL.getLine());}
+  ^(CHANNELTYPE type=LOWERCASENAME) {m_model.setChannelType($type.text,$CHANNELTYPE.getLine());}
+| ^(CHANNEL sender=agentPopulation receiver=agentPopulation msg=message[m_model.getMASSPAAgents()] intensity=expression) {m_model.addChannel($sender.agentPop,$receiver.agentPop,$msg.m,$intensity.e,$CHANNEL.getLine());}
 ;

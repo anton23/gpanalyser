@@ -36,6 +36,10 @@ public class Messages
 	public static final String s_PARSER_INVALID_ACTION_COUNT_LOCATION = "Action count '%s' must have location of type '@(A)' or '@(INT(,INT)+)";
 	public static final String s_PARSER_INVALID_AGENT_POPULATION_DEF = "Agent population definition must have form 'agentPop = Expr;'";
 	public static final String s_PARSER_INVALID_ACTION_COUNT_DEF = "Agent population definition must have form '#actionCount = Expr;'";
+	public static final String s_PARSER_CHANNELTYPE_MISSING_LBRACK  = "Invalid channeltype statement - missing '['";
+	public static final String s_PARSER_CHANNELTYPE_INCORRECT_TYPE  = "Invalid channeltype statement - invalid type. Try options like multiServer or massAction.";
+	public static final String s_PARSER_CHANNELTYPE_MISSING_RBRACK  = "Invalid channeltype statement - missing ']'";
+	public static final String s_PARSER_CHANNELTYPE_MISSING_SEMI  = "Invalid channeltype statement - missing ';'";
 	public static final String s_PARSER_CHANNEL_MISSING_LPAR = "Invalid channel definition - missing '('";
 	public static final String s_PARSER_CHANNEL_INVALID_SENDER = "Invalid channel definition - try (SENDERAGENTPOP,receiverAgentPop,msgName).";
 	public static final String s_PARSER_CHANNEL_INVALID_RECEIVER = "Invalid channel definition - try (senderAgentPop,RECEIVERAGENTPOP,msgName).";
@@ -44,7 +48,7 @@ public class Messages
 	public static final String s_PARSER_CHANNEL_MISSING_DEF = "Invalid channel definition - missing '='";
 	public static final String s_PARSER_CHANNEL_MISSING_EXPR = "Invalid channel definition - missing intensity expression.";
 	public static final String s_PARSER_CHANNEL_MISSING_SEMI = "Invalid channel definition - missing ';'";
-	
+		
 	// Compiler
 	public static final String s_COMPILER_CONST_INVALID_LOCATION = "Constant '%s' has an invalid location '%s'.";
 	public static final String s_COMPILER_CONST_UNDEFINED = "Constant '%s' is undefined.";
@@ -93,6 +97,7 @@ public class Messages
 	public static final String s_COMPILER_ACTIONCOUNT_MISSING_LOCATION_DEFINITION = "Missing location definition for %s in action count '%s%s' in line %d.";
 	public static final String s_COMPILER_ACTIONCOUNT_MISSING_ACTION = "Action '%s' used in the action count initial value assignment '%s%s' in line %d never occurs.";
 	public static final String s_COMPILER_ACTIONCOUNT_INVALID_DEFINITION = "Invalid action count initial value assignment definition '%s%s' in line %d.";
+	public static final String s_COMPILER_INVALID_CHANNELTYPE = "'%s' in line %d is an invalid channeltype. Try 'multiServer' or 'massAction' instead.";
 	public static final String s_COMPILER_CHANNEL_DUPLICATE_DEFINTION = "Duplicate definition of channel '%s' in line %d - IGNORING REDEFINITION!!!";
 	public static final String s_COMPILER_CHANNEL_NULL_SENDER = "Cannot instantiate channel with <null> sender.";
 	public static final String s_COMPILER_CHANNEL_NULL_RECEIVER = "Cannot instantiate channel with <null> receiver.";
@@ -117,6 +122,8 @@ public class Messages
 	public static final String s_COMPILER_MASSPA_EVO_EVT_NULL_RATE = "Cannot create MASSPAEvolutionEvent with <null> rate.";
 	public static final String s_COMPILER_MASSPA_PCTMC_NULL_EVO_EVTS  = "Cannot create MASSPA PCTMC with <null> evolution event list.";
 	public static final String s_COMPILER_INTERNAL_UNSUPPORTED_EXPR_VISIT = "Unsupported visit to expression '%s'.";
+	public static final String s_COMPILER_KEYWORD_MULTISERVER = "multiServer";
+	public static final String s_COMPILER_KEYWORD_MASSACTION = "massAction";
 	
 	// Console
 	public static final String s_WARNING = "WARNING: %s";
