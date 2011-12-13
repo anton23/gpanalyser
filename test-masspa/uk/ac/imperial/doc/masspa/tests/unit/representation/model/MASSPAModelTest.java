@@ -8,12 +8,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import uk.ac.imperial.doc.masspa.language.Labels;
+import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.representation.components.ConstComponent;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAAgents;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAMessage;
 import uk.ac.imperial.doc.masspa.representation.model.Location;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAActionCount;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAAgentPop;
+import uk.ac.imperial.doc.masspa.representation.model.MASSPAChannel;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAModel;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAMovement;
 import uk.ac.imperial.doc.masspa.representation.model.VarLocation;
@@ -141,6 +143,20 @@ public class MASSPAModelTest extends ModelTestUtil
 		m_model.getActionCount("Test1", s_loc1, 3);
 	}
 	
+	public void getChannelType()
+	{
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MASSACTION, 2);
+		assertEquals(m_model.getChannelType(),MASSPAChannel.RateType.MASSACTION);
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MULTISERVER, 1);
+		assertEquals(m_model.getChannelType(),MASSPAChannel.RateType.MULTISERVER);
+	}
+	
+	@Test(expected=AssertionError.class)
+	public void getChannelTypeFailure()
+	{
+		m_model.setChannelType("blaaa", 2);
+	}
+
 	// *****************************************************************
 	// Test "All" Getters
 	// *****************************************************************
@@ -384,6 +400,27 @@ public class MASSPAModelTest extends ModelTestUtil
 		m_model.addChannel(s_pop1,s_pop2,s_msg1,null,0);
 	}
 	
+	@Test
+	public void testAddChannel()
+	{
+		m_model.addLocation(s_loc1, 2);
+		m_model.addLocation(s_loc2, 2);
+		m_model.addLocation(s_loc3, 2);
+		m_agents.addMessage(s_msg1);
+		m_agents.addMessage(s_msg2);
+		m_agents.getConstComponent("Scope1",s_comp1.getName(), 0);
+		m_agents.getConstComponent("Scope2",s_comp2.getName(), 0);
+		m_agents.getConstComponent("Scope3",s_comp3.getName(), 0);
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MASSACTION, 2);
+		m_model.addChannel(s_pop1,s_pop2,s_msg1,s_expr1,0);
+		MASSPAChannel chan = m_model.getAllChannels(s_pop2, s_msg1).iterator().next();
+		assertEquals(chan.getRateType(),MASSPAChannel.RateType.MASSACTION);
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MULTISERVER, 2);
+		m_model.addChannel(s_pop1,s_pop3,s_msg1,s_expr1,0);
+		chan = m_model.getAllChannels(s_pop3, s_msg1).iterator().next();
+		assertEquals(chan.getRateType(),MASSPAChannel.RateType.MULTISERVER);
+	}
+		
 	@Test(expected=AssertionError.class)
 	public void testAddMovementMissingLoc()
 	{
