@@ -314,23 +314,34 @@ public class MASSPAToPCTMC
 											double rate = simplifyRate(rateExpr,_constants);
 											if (rate == 0) {continue;}
 				
-											// E[nofSender nofReceiver]
-											Map<State, Integer> map = new HashMap<State, Integer>();
-											//map.put(chan.getSender(), 1);
-											map.put(pop, 1);
-											map.put(intensity.getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
-						
-											Map<State, Integer> map2 = new HashMap<State, Integer>();
-											map2.put(chan.getSender(), 1);
-											map2.put(intensity.getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
-											
+
 											// Add any countActions to increasing set
 											addCountActions(increasing,decreasing,p.getAction(),pop.getLocation(),_actionCounts);
 											addCountActions(increasing,decreasing,rp.getAction(),contPop.getLocation(),_actionCounts);
 											
 											// Combined rate: rate = rate * E[nofSender nofReceiver]
-											AbstractExpression ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));								
-											//AbstractExpression ae = ProductExpression.create(new DoubleExpression(rate),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));								
+											AbstractExpression ae=null;
+											Map<State, Integer> map = new HashMap<State, Integer>();
+											Map<State, Integer> map2 = new HashMap<State, Integer>();
+											if (chan.getRateType() == MASSPAChannel.RateType.MULTISERVER)
+											{
+												// min(E[nofSender], E[nofReceiver])
+												map.put(pop, 1);
+												map.put(intensity.getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
+												map2.put(chan.getSender(), 1);
+												map2.put(intensity.getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
+																								
+												ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
+											}
+											else if (chan.getRateType() == MASSPAChannel.RateType.MASSACTION)
+											{
+												// E[nofSender nofReceiver]
+												map.put(chan.getSender(), 1);
+												map.put(pop, 1);
+												map.put(intensity.getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
+												
+												ae = ProductExpression.create(new DoubleExpression(rate),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));								
+											}
 											events.add(new EvolutionEvent(decreasing, increasing, ae));
 										}
 									}
