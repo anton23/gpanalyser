@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.jexpressions.expressions;
 
-import uk.ac.imperial.doc.jexpressions.conditions.ExpressionCondition;
 
 public class IndicatorFunction extends AbstractExpression {
 	

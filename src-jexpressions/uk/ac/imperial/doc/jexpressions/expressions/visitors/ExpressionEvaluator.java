@@ -201,7 +201,12 @@ public class ExpressionEvaluator implements IExpressionVisitor {
 
 	@Override
 	public void visit(IndicatorFunction e) {
-		result = e.getCondition().evaluate(this) ? 1.0 : 0.0;
+		e.getCondition().getLeft().accept(this);
+		double leftValue = result;
+		e.getCondition().getRight().accept(this);
+		double rightValue = result;
+		result = e.getCondition().getOperator().compare(leftValue, rightValue)
+		          ? 1.0 : 0.0;
 	}
 	
 
