@@ -75,7 +75,7 @@ public class MASSPAAgents
 	 */
 	public void addAction(final String _name)
 	{
-		if (getAction(_name) != null) {return;}
+		if (getAction(_name) != null || _name == null) {return;}
 		m_actions.put(_name,_name);
 	}
 	
@@ -96,6 +96,7 @@ public class MASSPAAgents
 	 */
 	public final MASSPAMessage getMessage(final String _msg)
 	{
+		if (_msg == null) {return null;}
 		return getMessage(new MASSPAMessage(_msg));
 	}
 	
@@ -105,6 +106,7 @@ public class MASSPAAgents
 	 */
 	public final MASSPAMessage getMessage(final MASSPAMessage _msg)
 	{
+		if (_msg == null) {return null;}
 		return m_msgs.get(_msg);
 	}
 	
@@ -114,7 +116,7 @@ public class MASSPAAgents
 	 */
 	public void addMessage(final MASSPAMessage _msg)
 	{
-		if (getMessage(_msg) != null) {return;}
+		if (_msg == null || getMessage(_msg) != null) {return;}
 		m_msgs.put(_msg, _msg);
 	}
 	
