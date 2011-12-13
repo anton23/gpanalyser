@@ -74,6 +74,8 @@ public class Messages
 	public static final String s_COMPILER_MODEL_NULL_COMPONENTS = "Cannot instantiate MASSPAModel with <null> component factory.";
 	public static final String s_COMPILER_LOCATION_DUPLICATE_DEFINITION = "Duplicate definition of location coordinate '%s' in line %d - IGNORING REDEFINITION!!!";
 	public static final String s_COMPILER_LOCATION_NULL_DEFINITION = "Cannot create location with <null> coordinates in line %d.";
+	public static final String s_COMPILER_LOCATION_NULL_COORDS = "Cannot have location with <null> coordinates.";
+	public static final String s_COMPILER_LOCATION_DIM_MISMATCH = "Location dimension mismatch";
 	public static final String s_COMPILER_AGENTPOP_INVALID = "Agent population '%s' refers to an undefined agent state or location.";
 	public static final String s_COMPILER_AGENTPOP_DUPLICATE_DISTRIBUTION_DEFINITION = "Duplicate definition of initial distribution for agent population '%s' in line %d - IGNORING REDEFINITION!!!";	
 	public static final String s_COMPILER_AGENTPOP_INVALID_DEFINITION = "Invalid agent population definition %s%s in line %d.";

@@ -131,7 +131,7 @@ public class MASSPAModel
 	public MASSPAActionCount getActionCount(final String _name, final Location _loc, final int _line)
 	{
 		String action = m_agents.getAction(_name);
-		Location loc = (_loc.equals(AllLocation.getInstance())) ? _loc : m_locations.get(_loc);
+		Location loc = (_loc != null && _loc.equals(AllLocation.getInstance())) ? _loc : m_locations.get(_loc);
 		if (action == null || loc == null)
 		{
 			String err = String.format(Messages.s_COMPILER_ACTIONCOUNT_INVALID_DEFINITION,_name,_loc,_line);
@@ -368,7 +368,7 @@ public class MASSPAModel
 		MASSPAMessage msg = m_agents.getMessage(_msg);
 		if (msg == null)
 		{
-			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_MESSAGE_UNKNOWN, _sender, _receiver, _msg, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_MESSAGE_UNKNOWN, _msg, _sender, _receiver, _line));
 			return;
 		}
 		MASSPAChannel chan = new MASSPAChannel(sender, receiver, msg, _intensity);

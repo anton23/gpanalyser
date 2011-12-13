@@ -45,8 +45,8 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 /***
- * This class converts a MASSPA model into a SPCTMC
- * (Spatial Parameterised CTMC).
+ * This class converts a MASSPA model into a PCTMC
+ * (Population CTMC).
  * 
  * @author Chris Guenther
  */
@@ -54,17 +54,14 @@ public class MASSPAToPCTMC
 {
 	public static PCTMC getPCTMC(MASSPAModel _model, Map<ExpressionVariable, AbstractExpression> _variables, Constants _constants)
 	{	
-		// Find populations
+		// Create initial populations
 		Set<MASSPAAgentPop> agentPops = _model.getAllAgentPopulations();
 		Set<MASSPAActionCount> actionCounts = _model.getAllActionCounts();
 		Map<State, AbstractExpression> initCounts = createInitialCounts(agentPops, actionCounts, _model);
 
-		// Localise constants
-		localiseConstants(_model, _constants);
-		// Expand variables
-		inlineVariables(_model, _variables, _constants);
-	
 		// Create evolutions
+		localiseConstants(_model, _constants);
+		inlineVariables(_model, _variables, _constants);
 		List<EvolutionEvent> events = createEvolutionEvents(agentPops, actionCounts, initCounts, _variables, _constants, _model);	
 		
 		// Build MASSPAPCTMC
@@ -334,7 +331,7 @@ public class MASSPAToPCTMC
 											// Combined rate: rate = rate * E[nofSender nofReceiver]
 											AbstractExpression ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));								
 											//AbstractExpression ae = ProductExpression.create(new DoubleExpression(rate),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));								
-											events.add(new MASSPAEvolutionEvent(decreasing, increasing, ae, chan.getSender()));
+											events.add(new EvolutionEvent(decreasing, increasing, ae));
 										}
 									}
 								}

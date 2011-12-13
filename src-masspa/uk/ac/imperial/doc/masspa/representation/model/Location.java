@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import uk.ac.imperial.doc.masspa.language.Messages;
+
 public class Location implements Comparable<Location>
 {
 	private List<Integer> m_coords;
@@ -12,6 +14,10 @@ public class Location implements Comparable<Location>
 	
 	public Location(List<Integer> _coords)
 	{
+		if (_coords == null)
+		{
+			throw new AssertionError(Messages.s_COMPILER_LOCATION_NULL_COORDS);
+		}
 		setCoords(_coords);
 	}
 	
@@ -34,7 +40,7 @@ public class Location implements Comparable<Location>
 	//**********************************************
 	public double getDistanceTo(Location _l)
 	{
-		if (m_coords.size() != _l.m_coords.size()) {throw new RuntimeException("Location dimension mismatch");}
+		if (m_coords.size() != _l.m_coords.size()) {throw new AssertionError(Messages.s_COMPILER_LOCATION_DIM_MISMATCH);}
 		double lenSqd = 0;
 		for (int i=0; i<m_coords.size();i++)
 		{
@@ -67,14 +73,15 @@ public class Location implements Comparable<Location>
 		if (!(_obj instanceof Location)) {return false;}
 		Location _loc = (Location)_obj;
 		if (m_coords.size() - _loc.m_coords.size() != 0) {return false;}
-		for (int i=0; i<m_coords.size(); i++)
+		int i;
+		for (i=0; i<m_coords.size(); i++)
 		{
 			if (m_coords.get(i)-_loc.m_coords.get(i) != 0)
 			{
 				return false;
 			}
 		}
-		return true;
+		return _loc.getClass() == this.getClass();
 	}
 
 	//**********************************************
