@@ -475,6 +475,7 @@ primaryExpression:
           reportError(new CustomRecognitionException(input, "constant '" + $c.text + "' unknown"));}
      | mean 
      | generalExpectation
+     | moment
      | central
      | scentral
      | PATTERN state -> ^(PATTERN state)
@@ -527,6 +528,12 @@ scentral:
    SCENTRAL LBRACK {insideExpectation = true;}
       expression COMMA INTEGER RBRACK
    {insideExpectation = false;} -> ^(SCENTRAL expression INTEGER)
+;
+
+moment:
+  MOMENT LBRACK  {insideExpectation = true;}
+      expression COMMA INTEGER RBRACK
+   {insideExpectation = false;} -> ^(MOMENT expression INTEGER)
 ;
 
 

@@ -288,7 +288,7 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, IConstantEx
 
 	@Override
 	public void visit(IndicatorFunction e) {
-		boolean oldInsert = insert;
+		/*boolean oldInsert = insert;
 		insert = true;
 		e.getCondition().getLeft().accept(this);
 		AbstractExpression newLeft = result;
@@ -297,7 +297,8 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, IConstantEx
 		AbstractExpression newRight = result;
 		insert = oldInsert;
 		result = new IndicatorFunction(
-				new ExpressionCondition(newLeft, e.getCondition().getOperator(), newRight));
+				new ExpressionCondition(newLeft, e.getCondition().getOperator(), newRight));*/
+		result = e;
 	}
 	
 

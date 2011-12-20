@@ -12,9 +12,23 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 public class AccumulatedIntegralInsterterVisitor extends
 		IntegralInsterterVisitor {
 
+	int maxOrder = 1;
+	
 	public AccumulatedIntegralInsterterVisitor(
 			CombinedPopulationProduct toInsert) {
 		super(toInsert);
+	}
+	
+	@Override
+	public void visit(CombinedProductExpression e) {
+		// assumes the combined product has no accumulated products
+		foundMoment = true;
+		if (insert) {
+			result = CombinedProductExpression
+					.create(CombinedPopulationProduct.getProductOf(e.getProduct(), toInsert));
+		} else {
+			result = e;
+		}
 	}
 
 	@Override
