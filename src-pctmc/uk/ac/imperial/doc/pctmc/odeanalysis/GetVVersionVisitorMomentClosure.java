@@ -51,7 +51,7 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 	
 	@Override
 	public void visit(IndicatorFunction e) {
-		boolean oldInserted = inserted;
+	/*	boolean oldInserted = inserted;
 		boolean oldInsert = insert;
 		insert = true;
 		e.getCondition().getLeft().accept(this);
@@ -62,7 +62,8 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 		insert = oldInsert;
 		inserted = oldInserted;
 		result = new IndicatorFunction(
-				new ExpressionCondition(newLeft, e.getCondition().getOperator(), newRight));
+				new ExpressionCondition(newLeft, e.getCondition().getOperator(), newRight));*/
+		result = e;
 	}
 
 	@Override

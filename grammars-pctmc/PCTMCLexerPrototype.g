@@ -45,6 +45,7 @@ GENEXPECTATION: 'Eg';
 CENTRAL: 'CM';
 SCENTRAL: 'SCM';
 VARIANCE: 'Var';
+MOMENT: 'Moment';
 
 ODES: 'ODEs';
 SIMULATION: 'Simulation';
