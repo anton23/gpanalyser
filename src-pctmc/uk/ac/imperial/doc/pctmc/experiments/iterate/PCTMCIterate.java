@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.pctmc.experiments.iterate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,18 +42,48 @@ public class PCTMCIterate extends PCTMCExperiment {
 	protected NumericalPostprocessor postprocessor;
 
 	private Map<PlotAtDescription, double[][]> results;
+	
+	private double[][][] data;
+	
+	private boolean processPlots;
 
 	private RangeSpecification[] minRangesArray;
 	private int[] steps;
 	private int iterations;
 	private int show;
-
+	
+	private static final int NTHREADS = 2;
+	
+	private List<PCTMCIterate> parts;
+	
+	public List<PCTMCIterate> split(int n) {
+		List<PCTMCIterate> ret = new ArrayList<PCTMCIterate>(n);
+		if (n==1) {
+			ret.add(this);
+			return ret;
+		}
+		if (ranges.isEmpty()) {
+			ret.add(new PCTMCIterate(minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, 1, true));
+			return ret;
+		} else {
+			List<RangeSpecification> firstRangeParts = ranges.get(0).split(n);
+			List<RangeSpecification> restOfRanges = ranges.subList(1, ranges.size());
+			for (RangeSpecification r:firstRangeParts) {
+				List<RangeSpecification> tmpRanges = new ArrayList<RangeSpecification>();
+				tmpRanges.add(r);
+				tmpRanges.addAll(restOfRanges);
+				ret.add(new PCTMCIterate(tmpRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, 1, false));
+			}
+		}
+		return ret;		
+	}
+	
 	public PCTMCIterate(List<RangeSpecification> ranges,
 			Map<String, AbstractExpression> reEvaluations,
 			AbstractPCTMCAnalysis analysis,
 			NumericalPostprocessor postprocessor,
 			List<PlotAtDescription> plots,
-			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
+			Map<ExpressionVariable, AbstractExpression> unfoldedVariables, int nParts, boolean processPlots) {
 		super();
 		this.ranges = ranges;
 		this.reEvaluations = reEvaluations;
@@ -61,6 +92,17 @@ public class PCTMCIterate extends PCTMCExperiment {
 		this.plots = plots;
 		this.unfoldedVariables = unfoldedVariables;
 		minRanges = new LinkedList<RangeSpecification>();
+		this.parts = split(nParts);
+		this.processPlots = processPlots;
+	}
+	
+	public PCTMCIterate(List<RangeSpecification> ranges,
+			Map<String, AbstractExpression> reEvaluations,
+			AbstractPCTMCAnalysis analysis,
+			NumericalPostprocessor postprocessor,
+			List<PlotAtDescription> plots,
+			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
+		this(ranges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, NTHREADS, true);
 	}
 
 	public PCTMCIterate(List<RangeSpecification> ranges,
@@ -70,18 +112,55 @@ public class PCTMCIterate extends PCTMCExperiment {
 			AbstractPCTMCAnalysis analysis,
 			NumericalPostprocessor postprocessor,
 			List<PlotAtDescription> plots,
-			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
+			Map<ExpressionVariable, AbstractExpression> unfoldedVariables, int nParts, boolean processPlots) {
 		this(ranges, reEvaluations, analysis, postprocessor, plots,
-				unfoldedVariables);
+				unfoldedVariables, nParts, processPlots);
 		this.minSpecification = minSpecification;
 		this.minRanges = minRanges;
 	}
+	
+	public PCTMCIterate(List<RangeSpecification> ranges,
+			PlotAtDescription minSpecification,
+			List<RangeSpecification> minRanges,
+			Map<String, AbstractExpression> reEvaluations,
+			AbstractPCTMCAnalysis analysis,
+			NumericalPostprocessor postprocessor,
+			List<PlotAtDescription> plots,
+			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
+		this(ranges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, NTHREADS, true);
+	}
 
-	public void run(Constants constants) {
-		Constants tmpConstants = constants.getCopyOf();
-
-		if (ranges.size() == 2 || ranges.size() == 1 || ranges.size() == 0) {
-			iterate2d(tmpConstants);
+	public void run(Constants constants) {		
+		if (parts.size() > 1) {
+			for (PCTMCIterate part:parts) {
+				part.run(constants);
+			}
+			joinData();
+		} else {
+			Constants tmpConstants = constants.getCopyOf();
+			if (ranges.size() == 2 || ranges.size() == 1 || ranges.size() == 0) {
+				iterate2d(tmpConstants);
+			}
+		}
+		if (processPlots) {
+			switch(ranges.size()) {
+				case 0:processPlots0D(data); break;
+				case 1:processPlots1D(ranges.get(0), data); break;
+				case 2:processPlots2D(ranges.get(0), ranges.get(1), data); break;
+			}
+		}
+	}
+	
+	protected void joinData() {
+		int steps2 = ranges.size()>1 ? ranges.get(1).getSteps():1;		                                   			
+		data = new double[plots.size()][ranges.get(0).getSteps()][steps2];
+		for (int plot = 0; plot < plots.size(); plot++) {
+			int tmp = 0;
+			for (PCTMCIterate part:parts) {
+				for (int i = 0; i<part.getRanges().get(0).getSteps(); i++,tmp++) {
+					data[plot][tmp] = part.getData()[plot][i];
+				}
+			}
 		}
 	}
 
@@ -95,38 +174,41 @@ public class PCTMCIterate extends PCTMCExperiment {
 	}
 
 	public void prepare(Constants constants) {
-		List<AbstractExpression> usedExpressions = new LinkedList<AbstractExpression>();
-		List<PlotAtDescription> tmpPlots = new LinkedList<PlotAtDescription>(
-				plots);
-		if (!minRanges.isEmpty()) {
-			tmpPlots.add(minSpecification);
-		}
-		for (PlotAtDescription plot : tmpPlots) {
-			plot.unfoldExpressions(unfoldedVariables);
-			usedExpressions.addAll(plot.getPlotExpressions());
-		}
-		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
-		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
-		for (AbstractExpression exp : usedExpressions) {
-			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
-			exp.accept(visitor);
-			usedProducts.addAll(visitor.getUsedCombinedMoments());
-			usedGeneralExpectations
-					.addAll(visitor.getUsedGeneralExpectations());
-		}
-
-		PCTMCLogging.info("Preparing analysis:");
-		PCTMCLogging.increaseIndent();
-		analysis.setUsedMoments(usedProducts);
-
-		analysis.prepare(constants);
-		PCTMCLogging.decreaseIndent();
-		postprocessor.prepare(analysis, constants);
-
-		for (PlotAtDescription p : tmpPlots) {
-			AbstractExpressionEvaluator updater = postprocessor
-					.getExpressionEvaluator(p.getPlotExpressions(), constants);
-			p.setEvaluator(updater);
+		// Prepares analysis only if it's a top level iterate		
+		if (processPlots) {
+			List<AbstractExpression> usedExpressions = new LinkedList<AbstractExpression>();
+			List<PlotAtDescription> tmpPlots = new LinkedList<PlotAtDescription>(
+					plots);
+			if (!minRanges.isEmpty()) {
+				tmpPlots.add(minSpecification);
+			}
+			for (PlotAtDescription plot : tmpPlots) {
+				plot.unfoldExpressions(unfoldedVariables);
+				usedExpressions.addAll(plot.getPlotExpressions());
+			}
+			Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
+			Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
+			for (AbstractExpression exp : usedExpressions) {
+				CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
+				exp.accept(visitor);
+				usedProducts.addAll(visitor.getUsedCombinedMoments());
+				usedGeneralExpectations
+						.addAll(visitor.getUsedGeneralExpectations());
+			}
+	
+			PCTMCLogging.info("Preparing analysis:");
+			PCTMCLogging.increaseIndent();
+			analysis.setUsedMoments(usedProducts);
+	
+			analysis.prepare(constants);
+			PCTMCLogging.decreaseIndent();
+			postprocessor.prepare(analysis, constants);
+	
+			for (PlotAtDescription p : tmpPlots) {
+				AbstractExpressionEvaluator updater = postprocessor
+						.getExpressionEvaluator(p.getPlotExpressions(), constants);
+				p.setEvaluator(updater);
+			}
 		}
 	}
 
@@ -139,13 +221,13 @@ public class PCTMCIterate extends PCTMCExperiment {
 			xRange = ranges.get(0);
 			yRange = ranges.get(1);
 		} else if (ranges.size() == 1) {
-			xRange = new RangeSpecification("tmp", 0.0, 0.0, 1);
-			yRange = ranges.get(0);
+			yRange = new RangeSpecification("_tmp", 0.0, 0.0, 1);
+			xRange = ranges.get(0);
 		} else {
-			xRange = new RangeSpecification("tmp", 0.0, 0.0, 1);
-			yRange = new RangeSpecification("tmp2", 0.0, 0.0, 1);
+			xRange = new RangeSpecification("_tmp", 0.0, 0.0, 1);
+			yRange = new RangeSpecification("_tmp2", 0.0, 0.0, 1);
 		}
-		double[][][] data = new double[plots.size()][xRange.getSteps()][yRange
+		data = new double[plots.size()][xRange.getSteps()][yRange
 				.getSteps()];
 
 		for (int p = 0; p < plots.size(); p++) {
@@ -179,12 +261,9 @@ public class PCTMCIterate extends PCTMCExperiment {
 			for (int y = 0; y < yRange.getSteps(); y++) {
 				double yValue = yRange.getStep(y);
 				constants.setConstantValue(yRange.getConstant(), yValue);
-				// if (!minRanges.isEmpty()){
+
 				if (!minimise(constants))
 					continue;
-				/*
-				 * } else { iterations++; }
-				 */
 
 				reEvaluate(constants, reEvaluations);
 				postprocessor.calculateDataPoints(constants);
@@ -197,11 +276,15 @@ public class PCTMCIterate extends PCTMCExperiment {
 		}
 		PCTMCLogging.decreaseIndent();
 		PCTMCLogging.setVisible(true);
+		PCTMCLogging.decreaseIndent();
+	}
+	 
+	
+	private void processPlots2D(RangeSpecification xRange, RangeSpecification yRange, double[][][] data) {
 		results = new HashMap<PlotAtDescription, double[][]>();
 		for (int i = 0; i < plots.size(); i++) {
 			PlotAtDescription plot = plots.get(i);
 			PCTMCLogging.info("Plotting " + plot);
-			if (ranges.size() == 2) {
 				results.put(plot, data[i]);
 				ChartUtils3D.drawChart(toShortString(), plot.toString(),
 						data[i], xRange.getFrom(), xRange.getDc(), yRange
@@ -217,35 +300,50 @@ public class PCTMCIterate extends PCTMCExperiment {
 							.getConstant(), yRange.getConstant(), plot
 							.toString());
 				}
-			}
-			if (ranges.size() == 1) {
-				double[][] newData = new double[yRange.getSteps()][1];
-				for (int j = 0; j < yRange.getSteps(); j++) {
-					newData[j][0] = data[i][0][j];
+		}
+	}
+	
+	private void processPlots1D(RangeSpecification range, double[][][] data) {
+		results = new HashMap<PlotAtDescription, double[][]>();
+		for (int i = 0; i < plots.size(); i++) {
+			PlotAtDescription plot = plots.get(i);
+			PCTMCLogging.info("Plotting " + plot);
+
+				double[][] newData = new double[range.getSteps()][1];
+				for (int j = 0; j < range.getSteps(); j++) {
+					newData[j][0] = data[i][j][0];
 				}
 				results.put(plot, newData);
 				XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(
-						newData, yRange.getFrom(), yRange.getDc(),
+						newData, range.getFrom(), range.getDc(),
 						new String[] { plot.toString() });
 
-				PCTMCChartUtilities.drawChart(dataset, yRange.getConstant(),
+				PCTMCChartUtilities.drawChart(dataset, range.getConstant(),
 						"count", "", toShortString());
 				if (!plot.getFilename().isEmpty()) {
 					FileUtils.writeCSVfile(plot.getFilename(), dataset);
 					FileUtils.writeGnuplotFile(plot.getFilename(), "", Lists
-							.newArrayList(plot.toString()), yRange
+							.newArrayList(plot.toString()), range
 							.getConstant(), "");
 				}
-			}
-			if (ranges.size() == 0) {
+
+		}
+	}
+	
+	private void processPlots0D(double[][][] data) {
+		results = new HashMap<PlotAtDescription, double[][]>();
+		for (int i = 0; i < plots.size(); i++) {
+			PlotAtDescription plot = plots.get(i);
+			PCTMCLogging.info("Plotting " + plot);
 				results.put(plot, data[i]);
 				PCTMCLogging.info("The value of " + plot.toString()
 						+ " at optimum is " + data[i][0][0]);
-			}
-		}
-		PCTMCLogging.decreaseIndent();
-	}
 
+		}
+		
+	}
+	
+	
 	private boolean minimise(Constants constants) {
 		int step[] = new int[minRanges.size()];
 		double min = 0.0;
@@ -365,4 +463,9 @@ public class PCTMCIterate extends PCTMCExperiment {
 	public Map<PlotAtDescription, double[][]> getResults() {
 		return results;
 	}
+
+	public double[][][] getData() {
+		return data;
+	}
+	
 }
