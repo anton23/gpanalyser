@@ -20,11 +20,11 @@ public class CompareExpressionEvaluator extends AbstractExpressionEvaluator{
                 this.evaluator1 = evaluator1;
                 this.evaluator2 = evaluator2;
         }
-
+        /*
         @Override
         public void setRates(double[] r) {
                 super.setRates(r);
-        }
+        }*/
 
         @Override
         public int getNumberOfExpressions() {
@@ -32,7 +32,7 @@ public class CompareExpressionEvaluator extends AbstractExpressionEvaluator{
         }
 
         @Override
-        public double[] update(double[] values, double t) {
+        public double[] update(double[] r, double[] values, double t) {
                 return null;
         }
 }

@@ -91,8 +91,11 @@ public class Constants {
 	 * @return A copy of the current Constants instance with the same index.
 	 */
 	public Constants getCopyOf() {
-		return new Constants(new HashMap<String, Double>(constants),
-				new HashMap<String, Integer>(constantIndex));
+		HashMap<String, Double> newMap = new HashMap<String, Double>();
+		newMap.putAll(constants);
+		Constants ret = new Constants(newMap,
+				constantIndex);
+		return ret;
 	}
 
 	/**

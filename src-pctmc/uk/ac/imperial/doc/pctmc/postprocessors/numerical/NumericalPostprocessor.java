@@ -35,7 +35,8 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 
 	protected double stopTime;
 	protected double stepSize;
-
+	 
+	public abstract NumericalPostprocessor getNewPreparedPostprocessor(Constants constants);
 	
 	@Override
 	public String toString() {
@@ -98,13 +99,13 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 
 
 	public double[][] plotData(AbstractPCTMCAnalysis analysis,
-			Constants variables, List<AbstractExpression> expressions,
+			Constants constants, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
 		for (int i = 0; i < expressions.size(); i++) {
 			names[i] = expressions.get(i).toString();
 		}
-		double[][] data = evaluateExpressions(expressions, variables);
+		double[][] data = evaluateExpressions(expressions, constants);
 		XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,
 				stepSize, names);
 		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
@@ -166,12 +167,12 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	 * @return
 	 */
 	public double[][] evaluateExpressions(AbstractExpressionEvaluator evaluator, Constants constants){
-		evaluator.setRates(constants.getFlatConstants());
+		//evaluator.setRates(constants.getFlatConstants());
 		
 		double[][] selectedData = new double[dataPoints.length][evaluator.getNumberOfExpressions()];
 
 		for (int t = 0; t < selectedData.length; t++) {
-			selectedData[t] = evaluator.update(dataPoints[t], t * stepSize);
+			selectedData[t] = evaluator.update(constants.getFlatConstants(),dataPoints[t], t * stepSize);
 		}
 
 		return selectedData;
@@ -182,12 +183,12 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	}
 	
 	public double[] evaluateExpressionsAtTimes(AbstractExpressionEvaluator evaluator, double[] times,Constants constants){
-		evaluator.setRates(constants.getFlatConstants());
+		//			evaluator.setRates(constants.getFlatConstants());
 		
 		double[] selectedData = new double[evaluator.getNumberOfExpressions()];
 
 		for (int e = 0; e<evaluator.getNumberOfExpressions(); e++){
-			double[] tmp = evaluator.update(dataPoints[getTimeIndex(times[e])], getTimeIndex(times[e]) * stepSize);
+			double[] tmp = evaluator.update(constants.getFlatConstants(),dataPoints[getTimeIndex(times[e])], getTimeIndex(times[e]) * stepSize);
 			selectedData[e] = tmp[e];
 		}
 		
@@ -209,6 +210,4 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		}
 		return new EvaluatorMethod(body,plotExpressions.size(),returnArray);
 	}
-
-	
 }

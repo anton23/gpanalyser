@@ -130,10 +130,25 @@ public class PCTMCIterate extends PCTMCExperiment {
 		this(ranges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, NTHREADS, true);
 	}
 
-	public void run(Constants constants) {		
+	public void run(final Constants constants) {		
 		if (parts.size() > 1) {
-			for (PCTMCIterate part:parts) {
-				part.run(constants);
+			List<Thread> threads = new LinkedList<Thread>();
+			for (final PCTMCIterate part:parts) {
+				Thread t = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						part.run(constants);						
+					}
+				});
+				threads.add(t); 
+				t.start();				
+			}
+			try {
+			for (Thread t:threads) {
+				t.join();
+			}
+			} catch(InterruptedException e) {
+				e.printStackTrace();
 			}
 			joinData();
 		} else {
@@ -209,6 +224,13 @@ public class PCTMCIterate extends PCTMCExperiment {
 						.getExpressionEvaluator(p.getPlotExpressions(), constants);
 				p.setEvaluator(updater);
 			}
+		} else {
+			this.postprocessor = this.postprocessor.getNewPreparedPostprocessor(constants);
+		}
+		if (parts.size() > 1) {
+			for (PCTMCIterate part:parts) {
+				part.prepare(constants);
+			}
 		}
 	}
 
@@ -260,18 +282,22 @@ public class PCTMCIterate extends PCTMCExperiment {
 			constants.setConstantValue(xRange.getConstant(), xValue);
 			for (int y = 0; y < yRange.getSteps(); y++) {
 				double yValue = yRange.getStep(y);
+				
 				constants.setConstantValue(yRange.getConstant(), yValue);
-
+				
 				if (!minimise(constants))
 					continue;
+				
 
 				reEvaluate(constants, reEvaluations);
 				postprocessor.calculateDataPoints(constants);
-
+				
 				for (int i = 0; i < plots.size(); i++) {
 					data[i][x][y] = evaluateConstrainedReward(plots.get(i),
 							constants);
-				}
+				}			
+
+				
 			}
 		}
 		PCTMCLogging.decreaseIndent();
@@ -403,7 +429,6 @@ public class PCTMCIterate extends PCTMCExperiment {
 			return values[0];
 		else
 			return Double.POSITIVE_INFINITY;
-
 	}
 
 	public static boolean next(int[] is, int[] steps) {
