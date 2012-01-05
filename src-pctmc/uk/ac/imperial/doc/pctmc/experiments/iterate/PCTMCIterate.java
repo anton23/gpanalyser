@@ -26,6 +26,7 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.Lists;
 
@@ -51,8 +52,6 @@ public class PCTMCIterate extends PCTMCExperiment {
 	private int[] steps;
 	private int iterations;
 	private int show;
-	
-	private static final int NTHREADS = 2;
 	
 	private List<PCTMCIterate> parts;
 	
@@ -102,7 +101,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 			NumericalPostprocessor postprocessor,
 			List<PlotAtDescription> plots,
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
-		this(ranges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, NTHREADS, true);
+		this(ranges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, PCTMCOptions.nthreads, true);
 	}
 
 	public PCTMCIterate(List<RangeSpecification> ranges,
@@ -127,11 +126,13 @@ public class PCTMCIterate extends PCTMCExperiment {
 			NumericalPostprocessor postprocessor,
 			List<PlotAtDescription> plots,
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
-		this(ranges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, NTHREADS, true);
+		this(ranges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, PCTMCOptions.nthreads, true);
 	}
 
-	public void run(final Constants constants) {		
+	public void run(final Constants constants) {
+		PCTMCLogging.info("Running experiment " + this.toString()); 
 		if (parts.size() > 1) {
+			PCTMCLogging.setVisible(false);
 			List<Thread> threads = new LinkedList<Thread>();
 			for (final PCTMCIterate part:parts) {
 				Thread t = new Thread(new Runnable() {
@@ -147,6 +148,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 			for (Thread t:threads) {
 				t.join();
 			}
+			PCTMCLogging.setVisible(true);
 			} catch(InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -235,7 +237,6 @@ public class PCTMCIterate extends PCTMCExperiment {
 	}
 
 	private void iterate2d(Constants constants) {
-		PCTMCLogging.info("Running experiment " + this.toString());
 		PCTMCLogging.increaseIndent();
 		RangeSpecification xRange;
 		RangeSpecification yRange;
@@ -301,7 +302,6 @@ public class PCTMCIterate extends PCTMCExperiment {
 			}
 		}
 		PCTMCLogging.decreaseIndent();
-		PCTMCLogging.setVisible(true);
 		PCTMCLogging.decreaseIndent();
 	}
 	 
@@ -384,9 +384,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 			postprocessor.calculateDataPoints(constants);
 			iterations++;
 			if ((iterations) % show == 0) {
-				PCTMCLogging.setVisible(true);
-				PCTMCLogging.info(iterations + "iterations finished.");
-				PCTMCLogging.setVisible(false);
+				PCTMCLogging.infoForce(iterations + "iterations finished.");
 			}
 			if (minSpecification == null) {
 				return true;
