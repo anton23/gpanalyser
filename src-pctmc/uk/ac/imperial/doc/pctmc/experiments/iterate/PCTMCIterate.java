@@ -71,7 +71,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 				List<RangeSpecification> tmpRanges = new ArrayList<RangeSpecification>();
 				tmpRanges.add(r);
 				tmpRanges.addAll(restOfRanges);
-				ret.add(new PCTMCIterate(tmpRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, 1, false));
+				ret.add(new PCTMCIterate(tmpRanges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, 1, false));
 			}
 		}
 		return ret;		
@@ -83,16 +83,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 			NumericalPostprocessor postprocessor,
 			List<PlotAtDescription> plots,
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables, int nParts, boolean processPlots) {
-		super();
-		this.ranges = ranges;
-		this.reEvaluations = reEvaluations;
-		this.analysis = analysis;
-		this.postprocessor = postprocessor;
-		this.plots = plots;
-		this.unfoldedVariables = unfoldedVariables;
-		minRanges = new LinkedList<RangeSpecification>();
-		this.parts = split(nParts);
-		this.processPlots = processPlots;
+		this(ranges, null, null, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, nParts, processPlots);
 	}
 	
 	public PCTMCIterate(List<RangeSpecification> ranges,
@@ -112,10 +103,17 @@ public class PCTMCIterate extends PCTMCExperiment {
 			NumericalPostprocessor postprocessor,
 			List<PlotAtDescription> plots,
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables, int nParts, boolean processPlots) {
-		this(ranges, reEvaluations, analysis, postprocessor, plots,
-				unfoldedVariables, nParts, processPlots);
+		this.ranges = ranges;
+		this.reEvaluations = reEvaluations;
+		this.analysis = analysis;
+		this.postprocessor = postprocessor;
+		this.plots = plots;
+		this.unfoldedVariables = unfoldedVariables;
 		this.minSpecification = minSpecification;
 		this.minRanges = minRanges;
+		minRanges = new LinkedList<RangeSpecification>();
+		this.parts = split(nParts);
+		this.processPlots = processPlots;
 	}
 	
 	public PCTMCIterate(List<RangeSpecification> ranges,
@@ -384,7 +382,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 			postprocessor.calculateDataPoints(constants);
 			iterations++;
 			if ((iterations) % show == 0) {
-				PCTMCLogging.infoForce(iterations + "iterations finished.");
+				PCTMCLogging.infoForce(iterations + " iterations finished.");
 			}
 			if (minSpecification == null) {
 				return true;
