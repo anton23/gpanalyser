@@ -8,13 +8,13 @@ package uk.ac.imperial.doc.jexpressions.javaoutput.statements;
  * 
  */
 public abstract class AbstractExpressionEvaluator {
-	protected double[] r;
+	//protected double[] r;
 
-	public void setRates(double[] r) {
+	/*public void setRates(double[] r) {
 		this.r = r;
-	}
+	}*/
 
 	public abstract int getNumberOfExpressions();
 
-	public abstract double[] update(double[] values, double t);
+	public abstract double[] update(double[] r, double[] values, double t);
 }

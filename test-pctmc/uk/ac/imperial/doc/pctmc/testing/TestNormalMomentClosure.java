@@ -15,7 +15,7 @@ import com.google.common.collect.Sets;
 
 public class TestNormalMomentClosure {
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Test
 	public void testPartitions() {
 		Set<Set<List<Integer>>> expected = (Set)Sets.newHashSet(

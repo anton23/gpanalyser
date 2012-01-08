@@ -79,6 +79,12 @@ public class PCTMCLogging {
 			for (IConsole c : s_consoles) {c.info(message);}
 		}
 	}
+	
+	public static void infoForce(String message) {
+		message=formatMessage(message);
+		LOGGER.info(message);
+		for (IConsole c : s_consoles) {c.info(message);}
+	}
 
 	public static void warn(String message) {
 		message=formatMessage(message);
