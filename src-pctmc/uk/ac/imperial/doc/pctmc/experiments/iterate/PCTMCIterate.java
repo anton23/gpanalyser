@@ -128,7 +128,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 	}
 
 	public void run(final Constants constants) {
-		PCTMCLogging.info("Running experiment " + this.toString()); 
+		PCTMCLogging.info("Running experiment\n" + this.toString()); 
 		if (parts.size() > 1) {
 			PCTMCLogging.setVisible(false);
 			List<Thread> threads = new LinkedList<Thread>();
@@ -439,7 +439,8 @@ public class PCTMCIterate extends PCTMCExperiment {
 
 	@Override
 	public String toString() {
-		return "Iterate " + ToStringUtils.iterableToSSV(ranges, ",") + "\n"
+		return "Iterate " + ToStringUtils.iterableToSSV(ranges, "\n        ") + "\n" + 
+		   	 	(minRanges.isEmpty()?"":("Minimise " + minSpecification + " " + ToStringUtils.iterableToSSV(minRanges, "\n         ") + "\n"))
 				+ analysis.toString();
 	}
 
@@ -447,15 +448,13 @@ public class PCTMCIterate extends PCTMCExperiment {
 		String ret = "Iterate";
 		for (RangeSpecification r : ranges) {
 			ret += " ";
-			ret += r.getConstant() + "(" + r.getFrom() + "-" + r.getTo() + ","
-					+ r.getSteps() + " steps" + ")";
+			ret += r.getConstant();
 		}
 		if (!minRanges.isEmpty()) {
 			ret += " minimise " + minSpecification + " ";
 			for (RangeSpecification r : minRanges) {
 				ret += " ";
-				ret += r.getConstant() + "(" + r.getFrom() + "-" + r.getTo()
-						+ "," + r.getSteps() + " steps" + ")";
+				ret += r.getConstant();
 			}
 		}
 		return ret;
@@ -488,5 +487,4 @@ public class PCTMCIterate extends PCTMCExperiment {
 	public double[][][] getData() {
 		return data;
 	}
-	
 }
