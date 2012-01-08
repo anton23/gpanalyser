@@ -9,6 +9,8 @@ public class PCTMCOptions {
 	
 	public static boolean debug = false;
 	
+	public static int nthreads = 1;
+	
 	public static String debugFolder = "tmp";
 	
 	public static int maxVariables = 100000;

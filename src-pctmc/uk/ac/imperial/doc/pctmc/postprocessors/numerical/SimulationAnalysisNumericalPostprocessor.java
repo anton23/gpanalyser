@@ -46,6 +46,15 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", replications = " + replications+")";
 	}
 	
+	
+	@Override
+	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,
 			double stepSize, int replications) {
 		super(stopTime, stepSize);
