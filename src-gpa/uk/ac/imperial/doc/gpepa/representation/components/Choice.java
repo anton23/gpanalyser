@@ -1,11 +1,12 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
 
 /**
@@ -20,9 +21,7 @@ public class Choice extends PEPAComponent {
 
 	@Override
 	public boolean matchPattern(PEPAComponent pattern) {
-		if (pattern instanceof AnyComponent)
-			return true;
-		return this.equals(pattern);
+		return (pattern instanceof AnyComponent) || equals(pattern);
 	}
 
 	@Override
@@ -46,20 +45,29 @@ public class Choice extends PEPAComponent {
 	}
 
 	@Override
-	public List<Prefix> getPrefixes(PEPAComponentDefinitions definitions) {
-		List<Prefix> ret = new LinkedList<Prefix>();
-		for (Prefix p : choices) {
-			PEPAComponent newConinuation = definitions.getShorthand(p
+	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
+		List<AbstractPrefix> ret = new LinkedList<AbstractPrefix>();
+		for (AbstractPrefix p : choices) {
+			PEPAComponent newContinuation = definitions.getShorthand(p
 					.getContinuation());
-			ret.add(new Prefix(p.getAction(), p.getRate(), newConinuation));
+            try {
+			    ret.add(p.getClass().getDeclaredConstructor
+                        (String.class, AbstractExpression.class, PEPAComponent.class,
+                                List.class)
+                        .newInstance(p.getAction(), p.getRate(),
+                                newContinuation, p.getImmediatesRaw()));
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
 		}
 		return ret;
 	}
 
-	@Override
+    @Override
 	public Set<String> getActions() {
 		Set<String> ret = new HashSet<String>();
-		for (Prefix p : choices) {
+		for (AbstractPrefix p : choices) {
 			ret.add(p.getAction());
 		}
 		return ret;
@@ -75,7 +83,7 @@ public class Choice extends PEPAComponent {
 		ret.add(shorthand);
 		known.add(shorthand);
 		known.add(this);
-		for (Prefix p : choices) {
+		for (AbstractPrefix p : choices) {
 			if (!(p.getContinuation() instanceof Stop)) {
 				// ret.add(p.getContinuation()); //TODO check
 				Set<PEPAComponent> states = p.getContinuation()
@@ -84,16 +92,16 @@ public class Choice extends PEPAComponent {
 			}
 		}
 		return ret;
-	}
+    }
 
-	public Choice(List<Prefix> choices) {
+	public Choice(List<AbstractPrefix> choices) {
 		super();
 		this.choices = choices;
 	}
 
-	private List<Prefix> choices;
+	private List<AbstractPrefix> choices;
 
-	public List<Prefix> getChoices() {
+	public List<AbstractPrefix> getChoices() {
 		return choices;
 	}
 
@@ -101,4 +109,13 @@ public class Choice extends PEPAComponent {
 		return ToStringUtils.iterableToSSV(choices, "+");
 	}
 
+    public ImmediatePrefix getImmediate() {
+        for (AbstractPrefix choice : choices) {
+            if (choice instanceof ImmediatePrefix)
+            {
+                return (ImmediatePrefix)choice;
+            }
+        }
+        return null;
+    }
 }

@@ -192,7 +192,7 @@ public class PCTMCInterpreter {
 			throws ParseException {
 		try {
 			PCTMCFileRepresentation pctmcFileRepresentation = new PCTMCFileRepresentation(
-					parseGenericRule(stream, "system", true));
+					parseGenericRule(stream, "completeSystem", true));
 			if (patternMatcherClass != null) {
 				PatternMatcher patternMatcher = patternMatcherClass
 						.getConstructor(PCTMC.class).newInstance(

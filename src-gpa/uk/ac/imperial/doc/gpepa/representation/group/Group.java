@@ -1,17 +1,16 @@
 package uk.ac.imperial.doc.gpepa.representation.group;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.Multimap;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 
-import com.google.common.collect.Multimap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class representing a component group.
@@ -29,14 +28,15 @@ public class Group {
 		return new Group(newComponents); 
 	}
 
-	public Group(Multimap<PEPAComponent, AbstractExpression> countMultimap){
+	public Group(Multimap<PEPAComponent, AbstractExpression> countMultimap) {
 		counts = new HashMap<PEPAComponent,AbstractExpression>();  
 		for (PEPAComponent c:countMultimap.keySet()){
 			AbstractExpression summation = SumExpression.create(countMultimap.get(c));
 			counts.put(c, summation); 
 		}
 	}
-	
+
+    public Group() { }
 	
 	private Map<PEPAComponent,AbstractExpression> counts; 
 	
@@ -44,8 +44,12 @@ public class Group {
 		if (!counts.containsKey(component)) return DoubleExpression.ZERO; 
 		return counts.get(component); 
 	}
-	
-	public void setCountExpression(PEPAComponent component,AbstractExpression value){
+
+    void setCounts(Map<PEPAComponent, AbstractExpression> counts) {
+        this.counts = counts;
+    }
+
+    public void setCountExpression(PEPAComponent component,AbstractExpression value){
 		counts.put(component, value);
 	}
 
@@ -124,6 +128,4 @@ public class Group {
 			return false;
 		return true;
 	}
-	
-	
 }

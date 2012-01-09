@@ -46,6 +46,15 @@ public class GPEPAToPCTMC {
 			if (countActions.contains(event.getAction())){
 				increasing.add(new GPEPAActionCount(event.getAction()));
 			}
+
+            List<String> actions = event.getImmediateActions();
+            for (String action : actions)
+            {
+                if (countActions.contains(action)){
+                    increasing.add(new GPEPAActionCount(action));
+                }
+            }
+
 			events.add(new EvolutionEvent(decreasing, increasing, event.getRate()));
 		}
 		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions); 

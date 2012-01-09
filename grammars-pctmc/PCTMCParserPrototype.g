@@ -13,7 +13,7 @@ tokens{
   VARIABLE;
   CONSTDEF;
   VARDEF;
-  STATE; 
+  STATE;
   TRANSACTION; 
   TLIST; 
   FUN;
@@ -224,13 +224,20 @@ tokens{
   }
 }*/
 
+completeSystem:
+  system extensions EOF
+;
+
+extensions: ;
+
 system:
   {requireDefinitions = true;}
   constantDefinition* varDefinition* 
   {hint.push("incomplete model definition");} modelDefinition {hint.pop();}
   {hint.push("allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise'");}
   analysis* experiment*
-  EOF {hint.pop();};
+  {hint.pop();}
+;
 
 modelDefinition:
   eventDefinition*
@@ -315,7 +322,7 @@ constantReEvaluation:
 ;
 
 rangeSpecification:
-  c=constant FROMVALUE from=REALNUMBER TOVALUE to=REALNUMBER steps=stepSpecification 
+  c=constant FROMVALUE from=REALNUMBER TOVALUE to=REALNUMBER steps=stepSpecification
  {constants.add($c.text);}
   -> ^(RANGE $c $from $to $steps)
 ;
@@ -408,16 +415,16 @@ constant:
 
 variable:
   VAR id=LOWERCASENAME -> ^(VARIABLE LOWERCASENAME)
-; 
+;
 
-state: 
+state:
   id=UPPERCASENAME -> ^(STATE UPPERCASENAME)
-; 
+;
 
 //-----Rules for definitions----- 
 
 constantDefinition:
-  c=constant {hint.push("constant definition has to be of the form\n   <constant> = <number> ;");}  
+  c=constant {hint.push("constant definition has to be of the form\n   <constant> = <number> ;");}
    DEF  
     (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();} 
      {constants.add($c.text);}
@@ -463,7 +470,7 @@ signExpression
 
 primaryExpression:    
       p=combinedPowerProduct {if (requiresExpectation && !insideExpectation) reportError(new CustomRecognitionException(input, "population " + $p.text + " has to be inside an expectation"));}
-     | variable 
+     | variable
      | REALNUMBER
      | INTEGER
      | LPAR expression RPAR 
@@ -471,7 +478,7 @@ primaryExpression:
      | MAX LPAR expression COMMA expression RPAR -> ^(MAX expression COMMA expression)
      | LOWERCASENAME LPAR expressionList RPAR -> ^(FUN LOWERCASENAME expressionList)
      | TIME 
-     | c = constant {if (requireDefinitions && !constants.contains($c.text)) 
+     | c = constant {if (requireDefinitions && !constants.contains($c.text))
           reportError(new CustomRecognitionException(input, "constant '" + $c.text + "' unknown"));}
      | mean 
      | generalExpectation

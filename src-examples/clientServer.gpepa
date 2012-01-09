@@ -1,13 +1,11 @@
-rr = 2.0; 
-rtmt = 0.3; 
+rr = 2.0;
+rtmt = 0.3;
 rt = 0.27;
-rb = 0.1; 
+rb = 0.1;
 rd = 1.0;
-rrst = 1.0; 
-n = 100.0; 
-m = 60.0; 
-
-$reward = 2.0*#think + (-1.0)*acc(Servers:Server) + 2.0*acc(Servers:Server_get);
+rrst = 1.0;
+n = 100.0;
+m = 60.0;
 
 Client = (request,rr).Client_waiting; 
 Client_waiting = (data,rd).Client_think; 
@@ -19,31 +17,9 @@ Server_broken = (reset,rrst).Server;
 
 Clients{Client[n]}<request,data>Servers{Server[m]}
 
-Count think; 
-
-
-ODEs(stopTime=40.0,stepSize=0.1,density=10){
- 	E[Clients:Client];
-}
-
-Iterate m from 1.0 to 100.0 in 30 steps 
-        rb from 0.0 to 2.0 in 30 steps
-ODEs(stopTime=40.1,stepSize=0.1,density=10){} plot{
-    E[$reward] at 40.0; 
-}
-
-Iterate 
-     m from 1.0 to 100.0 in 30 steps
-       Minimise E[$reward] at 40.0	
-         rb from 0.0 to 2.0 in 30 steps
-ODEs(stopTime=40.1,stepSize=0.1,density=10){} plot{
-    E[$reward] at 40.0; 
-    rb at 1.0;
-}
-
-Minimise E[$reward] at 40.0	
-         rb from 0.0 to 2.0 in 30 steps
-ODEs(stopTime=40.1,stepSize=0.1,density=10){} plot{
-    E[$reward] at 40.0; 
-    rb at 1.0;
+Probe {
+    PM4 = begin : start, end : stop
+    observes LProbe = (data!, think):begin,eE:end<-
+    where Clients{Client[n]}
+    => ClientWithProbe{(Client<think, data>LProbe)[n]}
 }

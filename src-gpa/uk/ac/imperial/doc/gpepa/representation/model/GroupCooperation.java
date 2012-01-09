@@ -1,22 +1,13 @@
 package uk.ac.imperial.doc.gpepa.representation.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
-import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
-
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
+import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
+import uk.ac.imperial.doc.jexpressions.expressions.*;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+
+import java.util.*;
 
 /**
  * Representation of the group cooperation structure of a model.
@@ -80,6 +71,11 @@ public class GroupCooperation extends GroupedModel {
 					increases.addAll(re.getIncreases());
 					decreases.addAll(le.getDecreases());
 					decreases.addAll(re.getDecreases());
+                    
+                    List<String> immediateActions
+                        = new LinkedList<String>() ;
+                    immediateActions.addAll(le.getImmediateActions());
+                    immediateActions.addAll(re.getImmediateActions());
 
 					AbstractExpression leftApparentRate = left
 							.getMomentOrientedRateExpression(action,
@@ -94,8 +90,8 @@ public class GroupCooperation extends GroupedModel {
 					AbstractExpression rate = DivDivMinExpression.create(
 							leftRate, rightRate, leftApparentRate,
 							rightApparentRate);
-					events.add(new PEPAEvolutionEvent(action, rate, increases,
-							decreases));
+					events.add(new PEPAEvolutionEvent(action, immediateActions,
+                            rate, increases, decreases));
 				}
 			}
 		}
@@ -136,14 +132,36 @@ public class GroupCooperation extends GroupedModel {
 		this.left = left;
 		this.right = right;
 		this.actions = actions;
-		componentGroups = new HashMap<String, LabelledComponentGroup>();
-		componentGroups.putAll(left.getComponentGroups());
-		componentGroups.putAll(right.getComponentGroups());
+		refreshComponentGroups();
 	}
 
 	private GroupedModel left;
 	private GroupedModel right;
 	private Set<String> actions;
+
+	public GroupedModel getLeft() {
+		return left;
+	}
+
+	public GroupedModel getRight() {
+		return right;
+	}
+
+    private void refreshComponentGroups() {
+        componentGroups = new HashMap<String, LabelledComponentGroup>();
+        componentGroups.putAll(left.getComponentGroups());
+        componentGroups.putAll(right.getComponentGroups());
+    }
+    
+	public void setLeft(GroupedModel left) {
+		this.left = left;
+        refreshComponentGroups();
+	}
+
+	public void setRight(GroupedModel right) {
+		this.right = right;
+        refreshComponentGroups();
+	}
 
 	public String toString() {
 		String leftString = left.toString();
@@ -195,5 +213,10 @@ public class GroupCooperation extends GroupedModel {
 		return true;
 	}
 	
-	
+	@Override
+    public void enumerateGroupedModelParents(Map<GroupedModel, GroupedModel> groupedModels, GroupedModel owner)
+    {
+        left.enumerateGroupedModelParents(groupedModels, this);
+        right.enumerateGroupedModelParents(groupedModels, this);
+    }
 }
