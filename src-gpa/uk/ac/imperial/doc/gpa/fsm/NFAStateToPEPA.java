@@ -5,6 +5,7 @@ import java.util.*;
 
 public class NFAStateToPEPA
 {
+/*
 	public static Set<NFAState> detectBlindPaths (NFAState startingState)
 	{
 		Set<NFAState> blinds = new HashSet<NFAState> ();
@@ -34,6 +35,7 @@ public class NFAStateToPEPA
 			}
 		}
 	}
+*/
 
 	// modifies the states branching from the starting state
 	// (including the starting state)
