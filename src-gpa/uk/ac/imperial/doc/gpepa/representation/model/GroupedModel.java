@@ -1,16 +1,12 @@
 package uk.ac.imperial.doc.gpepa.representation.model;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+
+import java.util.*;
 
 
 
@@ -90,5 +86,6 @@ public abstract class GroupedModel {
 	@Override
 	public abstract boolean equals(Object obj);
 	
-
+	public abstract void enumerateGroupedModelParents
+        (Map<GroupedModel, GroupedModel> groupedModels, GroupedModel owner);
 }

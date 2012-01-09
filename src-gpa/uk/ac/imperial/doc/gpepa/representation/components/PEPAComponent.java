@@ -16,7 +16,7 @@ public abstract class PEPAComponent {
 	/**
 	 * Returns the derivative states of this component. Given a set of known
 	 * states to avoid infinite recursion.
-	 * 
+	 *
 	 * @param known
 	 *            A set of already seen states.
 	 * @param definitions
@@ -34,10 +34,10 @@ public abstract class PEPAComponent {
 
 	public abstract Set<String> getActions(PEPAComponentDefinitions definitions);
 
-	public abstract List<Prefix> getPrefixes(
+	public abstract List<AbstractPrefix> getPrefixes(
 			PEPAComponentDefinitions definitions);
 
-	@Override
+    @Override
 	public abstract int hashCode();
 
 	@Override

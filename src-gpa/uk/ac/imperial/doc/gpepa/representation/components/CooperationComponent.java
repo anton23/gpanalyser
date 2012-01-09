@@ -1,16 +1,14 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
-
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 
 public class CooperationComponent extends PEPAComponent {
 
@@ -90,69 +88,82 @@ public class CooperationComponent extends PEPAComponent {
 		ret.add(shorthand);
 		known.add(shorthand);
 		known.add(this);
-		for (Prefix p : getPrefixes(definitions)) {
+		for (AbstractPrefix p : getPrefixes(definitions)) {
 			ret.addAll(p.getContinuation().getDerivativeStates(known,
 					definitions));
 		}
 		return ret;
 	}
 
-	@Override
-	public List<Prefix> getPrefixes(PEPAComponentDefinitions definitions) {
-		List<Prefix> leftPrefixes = left.getPrefixes(definitions);
-		List<Prefix> rightPrefixes = right.getPrefixes(definitions);
-		List<Prefix> ret = new LinkedList<Prefix>();
+    @Override
+	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
+		List<AbstractPrefix> leftAbstractPrefixes = left.getPrefixes(definitions);
+		List<AbstractPrefix> rightAbstractPrefixes = right.getPrefixes(definitions);
+		List<AbstractPrefix> ret = new LinkedList<AbstractPrefix>();
 
-		Multimap<String, Prefix> leftActionmap = LinkedHashMultimap
-				.<String, Prefix> create();
+		Multimap<String, AbstractPrefix> leftActionmap = LinkedHashMultimap
+				.<String, AbstractPrefix> create();
 
-		Multimap<String, Prefix> rightActionmap = LinkedHashMultimap
-				.<String, Prefix> create();
+		Multimap<String, AbstractPrefix> rightActionmap = LinkedHashMultimap
+				.<String, AbstractPrefix> create();
 
 		// only left evolves
-		for (Prefix leftPrefix : leftPrefixes) {
-			String action = leftPrefix.getAction();
+		for (AbstractPrefix leftAbstractPrefix : leftAbstractPrefixes) {
+			String action = leftAbstractPrefix.getAction();
 			if (!cooperationSet.contains(action)) {
 				PEPAComponent newContinuation = definitions
-						.getShorthand(new CooperationComponent(leftPrefix
+						.getShorthand(new CooperationComponent(leftAbstractPrefix
 								.getContinuation(), right, cooperationSet));
-				ret.add(new Prefix(action, leftPrefix.getRate(),
-						newContinuation));
-			} else {
-				leftActionmap.put(action, leftPrefix);
+                try {
+                    ret.add(leftAbstractPrefix.getClass().getDeclaredConstructor
+                            (String.class, AbstractExpression.class,
+                                    PEPAComponent.class, List.class)
+                            .newInstance(action, leftAbstractPrefix.getRate(),
+                                    newContinuation,
+                                    leftAbstractPrefix.getImmediatesRaw()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+				leftActionmap.put(action, leftAbstractPrefix);
 			}
 		}
 		// only right evolves
-		for (Prefix rightPrefix : rightPrefixes) {
-			String action = rightPrefix.getAction();
+		for (AbstractPrefix rightAbstractPrefix : rightAbstractPrefixes) {
+			String action = rightAbstractPrefix.getAction();
 			if (!cooperationSet.contains(action)) {
 				PEPAComponent newContinuation = definitions
 						.getShorthand(new CooperationComponent(left,
-								rightPrefix.getContinuation(), cooperationSet));
-				ret.add(new Prefix(action, rightPrefix.getRate(),
-						newContinuation));
-			} else {
-				rightActionmap.put(action, rightPrefix);
+								rightAbstractPrefix.getContinuation(), cooperationSet));
+                try {
+                    ret.add(rightAbstractPrefix.getClass().getDeclaredConstructor
+                            (String.class, AbstractExpression.class,
+                                    PEPAComponent.class, List.class)
+                            .newInstance(action, rightAbstractPrefix.getRate(),
+                                    newContinuation,
+                                    rightAbstractPrefix.getImmediatesRaw()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+				rightActionmap.put(action, rightAbstractPrefix);
 			}
 		}
 		// both evolve
 		for (String action : leftActionmap.keySet()) {
-			for (Prefix leftPrefix : leftActionmap.get(action)) {
-				for (Prefix rightPrefix : rightActionmap.get(action)) {
+			for (AbstractPrefix leftAbstractPrefix : leftActionmap.get(action)) {
+				for (AbstractPrefix rightAbstractPrefix : rightActionmap.get(action)) {
+
 					PEPAComponent newContinuation = definitions
-							.getShorthand(new CooperationComponent(leftPrefix
-									.getContinuation(), rightPrefix
+							.getShorthand(new CooperationComponent(leftAbstractPrefix
+									.getContinuation(), rightAbstractPrefix
 									.getContinuation(), cooperationSet));
-					AbstractExpression leftRate = leftPrefix.getRate();
-					AbstractExpression rightRate = rightPrefix.getRate();
-					AbstractExpression leftApparentRate = definitions
-							.getApparentRateExpression(action, left);
-					AbstractExpression rightApparentRate = definitions
-							.getApparentRateExpression(action, right);
-					AbstractExpression rate = DivDivMinExpression.create(
-							leftRate, rightRate, leftApparentRate,
-							rightApparentRate);
-					ret.add(new Prefix(action, rate, newContinuation));
+                    AbstractExpression leftApparentRate = definitions
+                            .getApparentRateExpression(action, left);
+                    AbstractExpression rightApparentRate = definitions
+                            .getApparentRateExpression(action, right);
+                    ret.add(leftAbstractPrefix.getCooperation(rightAbstractPrefix,
+                            rightApparentRate, leftApparentRate, newContinuation));
 				}
 			}
 		}

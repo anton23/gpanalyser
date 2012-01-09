@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -13,9 +14,7 @@ import java.util.Set;
 public class ComponentId extends PEPAComponent {
 	@Override
 	public boolean matchPattern(PEPAComponent pattern) {
-		if (pattern instanceof AnyComponent)
-			return true;
-		return this.equals(pattern);
+		return (pattern instanceof AnyComponent) || equals(pattern);
 	}
 
 	@Override
@@ -40,12 +39,16 @@ public class ComponentId extends PEPAComponent {
 
 	@Override
 	// TODO Does not allow redefinitions of constants, i.e. A = B
-	public List<Prefix> getPrefixes(PEPAComponentDefinitions definitions) {
-		return definitions.getComponentDefinition(name)
-				.getPrefixes(definitions);
+	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
+        PEPAComponent component = definitions.getComponentDefinition(name);
+        if (component != null)
+        {
+            return component.getPrefixes(definitions);
+        }
+        return new LinkedList<AbstractPrefix>();
 	}
 
-	@Override
+    @Override
 	public Set<String> getActions() {
 		return new HashSet<String>();
 	}

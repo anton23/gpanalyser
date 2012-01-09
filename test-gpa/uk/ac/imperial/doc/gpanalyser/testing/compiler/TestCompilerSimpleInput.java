@@ -5,15 +5,11 @@ import static org.junit.Assert.assertEquals;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
-import uk.ac.imperial.doc.gpepa.representation.components.Choice;
-import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
-import uk.ac.imperial.doc.gpepa.representation.components.Prefix;
+import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
@@ -54,8 +50,8 @@ public class TestCompilerSimpleInput extends BaseCompilerTest {
 	public void testComponentDefinitions() {
 		Map<String, PEPAComponent> definitions = pctmc.getComponentDefinitions().getDefinitions();
 		Map<String, PEPAComponent> definitionsExpected = new HashMap<String, PEPAComponent>();
-		definitionsExpected.put("A", new Choice((List<Prefix>)Lists.newArrayList(new Prefix("a", new ConstantExpression("ra"), new ComponentId("B")))));
-		definitionsExpected.put("B", new Choice((List<Prefix>)Lists.newArrayList(new Prefix("b", new ConstantExpression("rb"), new ComponentId("A")))));
+		definitionsExpected.put("A", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("a", new ConstantExpression("ra"), new ComponentId("B"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("B", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("b", new ConstantExpression("rb"), new ComponentId("A"), new LinkedList<ImmediatePrefix>()))));
 		assertEquals(definitionsExpected, definitions);
 	}
 	

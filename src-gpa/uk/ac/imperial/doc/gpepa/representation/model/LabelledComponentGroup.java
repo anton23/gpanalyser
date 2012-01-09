@@ -1,13 +1,8 @@
 package uk.ac.imperial.doc.gpepa.representation.model;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
-import uk.ac.imperial.doc.gpepa.representation.components.Prefix;
 import uk.ac.imperial.doc.gpepa.representation.components.Stop;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -17,6 +12,8 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
+
+import java.util.*;
 
 /**
  * Representation of the labelled component group structure of a model.
@@ -44,23 +41,24 @@ public class LabelledComponentGroup extends GroupedModel {
 			 * PEPAComponent s = definitions
 			 * .getComponentDefinition(derivative);
 			 */
-			for (final Prefix prefix : derivative.getPrefixes(definitions)) {
-				if (!restrictedActions.contains(prefix.getAction())) {
+			for (final AbstractPrefix abstractPrefix : derivative.getPrefixes(definitions)) {
+				if (!restrictedActions.contains(abstractPrefix.getAction())) {
 
-					AbstractExpression parameter = prefix.getRate();
-					AbstractExpression rate = ProductExpression.create(
-							new PopulationExpression(new GPEPAState(new GroupComponentPair(label,
-									derivative))), parameter);
+					AbstractExpression rate = abstractPrefix.getCountOrientedRate (
+                            new PopulationExpression(new GPEPAState
+                                (new GroupComponentPair(label, derivative))));
 
 					List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
-					PEPAComponent continuation = prefix.getContinuation();
+					PEPAComponent continuation = abstractPrefix.getContinuation();
 					if (!(continuation instanceof Stop))
 						increases.add(new GroupComponentPair(label,
 								continuation));
 					List<GroupComponentPair> decreases = new LinkedList<GroupComponentPair>();
 					decreases.add(new GroupComponentPair(label, derivative));
-					events.add(new PEPAEvolutionEvent(prefix.getAction(), rate,
-							increases, decreases));
+					events.add(new PEPAEvolutionEvent(
+                            abstractPrefix.getAction(),
+                            abstractPrefix.getImmediates(),
+                            rate, increases, decreases));
 				}
 			}
 		}
@@ -146,4 +144,10 @@ public class LabelledComponentGroup extends GroupedModel {
 			return false;
 		return true;
 	}
+
+    @Override
+    public void enumerateGroupedModelParents
+        (Map<GroupedModel, GroupedModel> groupedModels, GroupedModel owner) {
+        groupedModels.put (this, owner);
+    }
 }

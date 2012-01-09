@@ -1,4 +1,5 @@
 parser grammar GPAParser;
+
 options {
   language = Java;
   output = AST; 
@@ -9,7 +10,6 @@ options {
 
 import PCTMCParserPrototype;
 
-
 tokens{
   COMPONENT;
   LABELLEDGROUP;
@@ -18,20 +18,71 @@ tokens{
   MULT;
   COOPCOMP;
   PAIR;
+  INGROUP;
+  DOT;
+
+  //Local
+
+  PASSIVE               ;
+  REPETITION            ;
+  RL_SINGLE_BRACKETED   ;
+  RL_BRACKETED          ;
+  RL_SINGLE             ;
+  PROBEL                ;
+  RLS                   ;
+  RL_SINGLE             ;
+  RL                    ;
+  CHOICE_OP             ;
+  BINARY_OP             ;
+  UNARY_OP              ;
+  COMMA                 ;
+  ZERO_ONE              ;
+  PLUS                  ;
+  NEGATION_OP           ;
+  SIGNAL                ;
+  EMPTY                 ;
+  CCA                   ;
+  ACTION                ;
+  ACTION_NAME           ;
+
+  //Global
+
+  START                 ;
+  BRACKETED             ;
+  PROBEG                ;
+  RG                    ;
+  LOGICAL_NEGATION      ;
+  LOGICAL_OR            ;
+  LOGICAL_AND           ;
+  TRUE                  ;
+  FALSE                 ;
+  COMPARISON            ;
+  EXPRESSION			;
+  
+  //Probes
+  
+  WHERE					;
+  OBSERVES				;
+  IN					;
+  SUBSTITUTE			;
+  PROBE_DEF				;
+  PROBES				;
+  MAIN_MODEL            ;
 }
 
-@header{
-  package uk.ac.imperial.doc.gpa.syntax; 
-  
-  import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;  
-  import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
-  import uk.ac.imperial.doc.pctmc.syntax.ParsingData;
-  import uk.ac.imperial.doc.pctmc.syntax.GPAParsingData;
-  import uk.ac.imperial.doc.pctmc.syntax.PlainParsingData;
-  
-  import java.util.LinkedList;
-  import java.util.Set;
-  import java.util.HashSet;
+@header
+{
+	package uk.ac.imperial.doc.gpa.syntax; 
+
+	import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;  
+	import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
+	import uk.ac.imperial.doc.pctmc.syntax.ParsingData;
+	import uk.ac.imperial.doc.pctmc.syntax.GPAParsingData;
+	import uk.ac.imperial.doc.pctmc.syntax.PlainParsingData;
+
+	import java.util.LinkedList;
+	import java.util.Set;
+	import java.util.HashSet;
 }
 
 //This is a hack until the composite grammars are implemented in a better way
@@ -41,6 +92,8 @@ tokens{
   protected Set<String> groupNames = new HashSet<String>();
   protected Set<String> tmpComponentNames = new HashSet<String>();
   protected Set<String> componentNames = new HashSet<String>();
+  private boolean checkComponentNames;
+  private boolean checkGroupNames;
     
   protected Stack<String> hint;
   
@@ -57,6 +110,8 @@ tokens{
   } 
   
   public void setParsingData(ParsingData parsingData) {
+       checkComponentNames = true;
+       checkGroupNames = true;
        if (parsingData instanceof GPAParsingData) {
             componentNames = ((GPAParsingData)parsingData).getComponentNames();
             groupNames = ((GPAParsingData)parsingData).getGroupNames();
@@ -99,14 +154,18 @@ tokens{
 
 start:;
 
-modelDefinition: 
-  {hint.push("at least one PEPA component definition required");} componentDefinition+ {hint.pop();}
+modelDefinition:
+  {hint.push("at least one PEPA component definition required");} componentDefinitions {hint.pop();}
   {hint.push("missing system equation");} model {hint.pop();}
   countActions? ;
 
 
 countActions:
   COUNTACTIONS (LOWERCASENAME)+ SEMI -> ^(COUNTACTIONS LOWERCASENAME+)
+;
+
+componentDefinitions:
+  componentDefinition+
 ;
 
 componentDefinition:
@@ -130,10 +189,14 @@ prefix:
   | primaryComponent;
   
 properPrefix:
-  LPAR LOWERCASENAME COMMA expression RPAR DOT prefix -> ^(PREFIX LOWERCASENAME expression prefix) ;  
+  LPAR LOWERCASENAME COMMA expression RPAR DOT prefix -> ^(PREFIX expression LOWERCASENAME prefix)
+  | LPAR LOWERCASENAME COMMA PASSIVE RPAR DOT prefix -> ^(PREFIX PASSIVE LOWERCASENAME prefix)
+  | LOWERCASENAME DOT prefix -> ^(PREFIX LOWERCASENAME prefix);
   
 primaryComponent:
-   n = UPPERCASENAME {if (gPCTMCParserPrototype.requireDefinitions && !componentNames.contains($n.text)){
+   n = UPPERCASENAME {if (checkComponentNames
+                            && gPCTMCParserPrototype.requireDefinitions
+                            && !componentNames.contains($n.text)){
       displayRecognitionError(getTokenNames(), new CustomRecognitionException(input, "unknown component '" + $n.text+"'"));}}
  | STOP
  | ANY
@@ -151,7 +214,7 @@ labelledGroup:
   | LPAR model RPAR -> model;
  
 cooperationSet:
-   LANGLE {hint.push("expecting a (possibly empty) list of action names");} 
+   LANGLE {hint.push("expecting a (possibly empty) list of action names");}
       LOWERCASENAME 
        (COMMA {hint.push("cooperation set has to be of the form <a1, a2, ..., >");} LOWERCASENAME {hint.pop();})* 
        {hint.pop();}
@@ -180,8 +243,168 @@ ACOUNT LOWERCASENAME -> ^(ACOUNT LOWERCASENAME)
 groupComponentPair:
      {hint.push("populations have to be of the form 'Group:Component'");}
      n=UPPERCASENAME      
-     INGROUP {if (gPCTMCParserPrototype.requireDefinitions && !groupNames.contains($n.text)) {
+     INGROUP {if (checkGroupNames
+                    && gPCTMCParserPrototype.requireDefinitions
+                    && !groupNames.contains($n.text)) {
           reportError(new CustomRecognitionException(input, "invalid group label " + $n.text));
      }} component  
      {hint.pop();} -> ^(PAIR UPPERCASENAME component)
 ;
+
+extensions
+	:	probe_def*
+			-> ^(PROBES probe_def*) ;
+
+//Local
+
+probel
+	:	rl_signal REPETITION?
+			-> ^(PROBEL rl_signal REPETITION?) ;
+
+rl_signal
+	:	rl_single (INGROUP signal)? (COMMA rl_signal)?
+			-> ^(RLS rl_single signal? rl_signal?) ;
+
+rl_single
+	:	rl_single_bracketed
+			-> ^(RL_SINGLE rl_single_bracketed)
+		| rl_single_actions
+			-> ^(RL_SINGLE rl_single_actions) ;
+
+rl_single_actions
+	:	immediateActions rl_un_operators?
+			-> ^(ACTION immediateActions rl_un_operators?) ;
+
+rl_single_bracketed
+	:	rl_bracketed rl_un_operators?
+			-> ^(RL_SINGLE_BRACKETED rl_bracketed rl_un_operators?) ;
+
+rl
+	:	rl_single (rl_bin_operators rl)?
+			-> ^(RL rl_single (rl rl_bin_operators)?) ;
+
+rl_bin_operators
+	:	COMMA -> ^(BINARY_OP COMMA)
+		| PAR -> ^(BINARY_OP PAR)
+		| SEMI -> ^(BINARY_OP SEMI)
+		| DIVIDE -> ^(BINARY_OP DIVIDE)
+		| AT -> ^(BINARY_OP AT) ;
+
+rl_un_operators
+	:	(LBRACK e1=expression (COMMA e2=expression)? RBRACK)
+			-> ^(UNARY_OP $e1 (COMMA $e2)?)
+		| ZERO_ONE -> ^(UNARY_OP ZERO_ONE)
+		| PLUS -> ^(UNARY_OP PLUS)
+		| TIMES -> ^(UNARY_OP TIMES)
+		| NEGATION_OP -> ^(UNARY_OP NEGATION_OP) ;
+
+rl_bracketed
+	:	LPAR rl RPAR
+			-> ^(RL_BRACKETED rl) ;
+
+signal
+	:	LOWERCASENAME
+			-> ^(SIGNAL LOWERCASENAME) ;
+
+immediateActions
+	:	eventual_specific_action
+		| subsequent_specific_action
+		| DOT | EMPTY ;
+
+eventual_specific_action
+	:	CCA subsequent_specific_action
+			-> ^(CCA DOT ^(UNARY_OP TIMES) subsequent_specific_action
+			DOT ^(UNARY_OP TIMES)) ;
+
+subsequent_specific_action
+	:	LOWERCASENAME
+			-> ^(ACTION_NAME LOWERCASENAME) ; 
+
+//Global
+
+probeg
+	:	start_sync=rg INGROUP START COMMA stop_sync=rg INGROUP STOP REPETITION?
+			-> ^(PROBEG $start_sync $stop_sync REPETITION?) ;
+
+rg
+	:	(LBRACE pred RBRACE)? rl_single (rl_bin_operators rg)?
+			-> ^(RG rl_single pred? (rg rl_bin_operators)?) ;
+
+//Predicates for global
+
+pred
+	:	(logical_pred | negation)
+		((LOGICAL_OR | LOGICAL_AND) pred)? ;
+
+negation
+	:	LOGICAL_NEGATION logical_pred
+			-> ^(LOGICAL_NEGATION logical_pred) ;
+
+logical_pred
+	:	TRUE | FALSE | b_expr ;
+
+b_expr
+	:	r_expr1=r_expr comparison r_expr2=r_expr
+			-> ^(comparison $r_expr1 $r_expr2) ;
+
+comparison
+    :   COMPARISON | LANGLE | RANGLE ;
+
+r_expr
+	:	concrete_r_expr (binary_op r_expr)?
+			-> ^(EXPRESSION concrete_r_expr (binary_op r_expr)?) ;
+
+binary_op
+	:	PLUS | MINUS | TIMES | DIVIDE ;
+
+concrete_r_expr
+	:	componentCount | expression ;
+
+componentCount
+@init
+{
+    checkGroupNames = false;
+    checkComponentNames = false;
+}
+@after
+{
+    checkGroupNames = true;
+    checkComponentNames = true;
+}
+	:	groupComponentPair ;
+
+//Probe_spec
+
+probe_def
+	:	PROBE_DEF LBRACE probe_spec RBRACE
+			-> ^(PROBE_DEF probe_spec) ;
+
+probe_spec
+	:	UPPERCASENAME DEF probeg (OBSERVES local_probes WHERE locations)?
+			-> ^(DEF UPPERCASENAME probeg (local_probes locations)?) ;
+
+local_probes
+	:	local_probe_ass (COMMA local_probe_ass)* ;
+
+local_probe_ass
+	:	UPPERCASENAME DEF probel
+			-> ^(DEF UPPERCASENAME probel) ;
+
+locations
+	:	location (COMMA location)* ;
+
+location
+	:
+		{
+			checkComponentNames = true;
+		}
+		model1=model
+		{
+			checkComponentNames = false;
+		}
+		SUBSTITUTE
+		model2=model
+		{
+			checkComponentNames = true;
+		}
+			-> ^(SUBSTITUTE $model1 $model2) ;

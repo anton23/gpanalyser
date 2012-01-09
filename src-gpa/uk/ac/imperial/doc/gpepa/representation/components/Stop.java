@@ -15,16 +15,12 @@ public class Stop extends PEPAComponent {
 
 	@Override
 	public boolean matchPattern(PEPAComponent pattern) {
-		if (pattern instanceof AnyComponent)
-			return true;
-		return this.equals(pattern);
+        return pattern instanceof AnyComponent || this.equals(pattern);
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == this)
-			return true;
-		return (o instanceof Stop);
+		return (o == this) || (o instanceof Stop);
 	}
 
 	@Override
@@ -38,11 +34,11 @@ public class Stop extends PEPAComponent {
 	}
 
 	@Override
-	public List<Prefix> getPrefixes(PEPAComponentDefinitions definitions) {
-		return new LinkedList<Prefix>();
+	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
+		return new LinkedList<AbstractPrefix>();
 	}
 
-	@Override
+    @Override
 	public Set<String> getActions() {
 		return new HashSet<String>();
 	}
@@ -53,7 +49,7 @@ public class Stop extends PEPAComponent {
 		return new HashSet<PEPAComponent>();
 	}
 
-	public Stop() {
+    public Stop() {
 		super();
 	}
 

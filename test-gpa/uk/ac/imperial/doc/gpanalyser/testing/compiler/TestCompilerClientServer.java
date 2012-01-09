@@ -6,15 +6,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
-import uk.ac.imperial.doc.gpepa.representation.components.Choice;
-import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
-import uk.ac.imperial.doc.gpepa.representation.components.Prefix;
+import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupCooperation;
@@ -61,20 +57,20 @@ public class TestCompilerClientServer extends BaseCompilerTest {
 	public void testComponentDefinitions() {
 		Map<String, PEPAComponent> definitions = pctmc.getComponentDefinitions().getDefinitions();
 		Map<String, PEPAComponent> definitionsExpected = new HashMap<String, PEPAComponent>();
-		definitionsExpected.put("Client", new Choice((List<Prefix>)Lists.newArrayList(
-				new Prefix("request", new ConstantExpression("rr"), new ComponentId("Client_waiting")))));
-		definitionsExpected.put("Client_waiting", new Choice((List<Prefix>)Lists.newArrayList(
-				new Prefix("data", new ConstantExpression("rd"), new ComponentId("Client_think")))));
-		definitionsExpected.put("Client_think", new Choice((List<Prefix>)Lists.newArrayList(
-				new Prefix("think", new ConstantExpression("rt"), new ComponentId("Client")))));
+		definitionsExpected.put("Client", new Choice(Lists.newArrayList(
+                (AbstractPrefix) new Prefix("request", new ConstantExpression("rr"), new ComponentId("Client_waiting"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("Client_waiting", new Choice(Lists.newArrayList(
+                (AbstractPrefix) new Prefix("data", new ConstantExpression("rd"), new ComponentId("Client_think"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("Client_think", new Choice(Lists.newArrayList(
+                (AbstractPrefix) new Prefix("think", new ConstantExpression("rt"), new ComponentId("Client"), new LinkedList<ImmediatePrefix>()))));
 		
-		definitionsExpected.put("Server", new Choice((List<Prefix>)Lists.newArrayList(
-				new Prefix("request", new ConstantExpression("rr"), new ComponentId("Server_get")),
-				new Prefix("break", new ConstantExpression("rb"), new ComponentId("Server_broken")))));
-		definitionsExpected.put("Server_get", new Choice((List<Prefix>)Lists.newArrayList(
-				new Prefix("data", new ConstantExpression("rd"), new ComponentId("Server")))));
-		definitionsExpected.put("Server_broken", new Choice((List<Prefix>)Lists.newArrayList(
-				new Prefix("reset", new ConstantExpression("rrst"), new ComponentId("Server")))));
+		definitionsExpected.put("Server", new Choice(Lists.newArrayList(
+                (AbstractPrefix) new Prefix("request", new ConstantExpression("rr"), new ComponentId("Server_get"), new LinkedList<ImmediatePrefix>()),
+                (AbstractPrefix) new Prefix("break", new ConstantExpression("rb"), new ComponentId("Server_broken"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("Server_get", new Choice(Lists.newArrayList(
+                (AbstractPrefix) new Prefix("data", new ConstantExpression("rd"), new ComponentId("Server"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("Server_broken", new Choice(Lists.newArrayList(
+                (AbstractPrefix) new Prefix("reset", new ConstantExpression("rrst"), new ComponentId("Server"), new LinkedList<ImmediatePrefix>()))));
 
 		assertEquals(definitionsExpected, definitions);
 	}
