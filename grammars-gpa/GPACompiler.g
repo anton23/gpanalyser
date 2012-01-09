@@ -247,6 +247,29 @@ import PCTMCCompilerPrototype;
 		}
 	}
 
+    private void removeAnyTransitions (NFAState startingState)
+    {
+		Set<ITransition> alphabet
+			= NFAtoDFA.detectAlphabet (startingState, false, excluded);
+		Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
+		for (NFAState state : states)
+		{
+        	Map<ITransition, NFAState> transitions = state.getRawTransitions ();
+        	for (ITransition transition : transitions.keySet ())
+        	{
+        		if (transition instanceof AnyTransition)
+        		{
+        			NFAState other = transitions.get (transition);
+        			for (ITransition newTransition : alphabet)
+        			{
+        				state.addTransitionIfNotExisting (newTransition, other);
+        			}
+        			transitions.remove (transition);
+        		}
+        	}
+		}
+    }
+
 	private Map<String, PEPAComponent>
 		loadProbe (String probeComp, GPAParser parser) throws Exception
 	{
@@ -535,6 +558,7 @@ probel [String name]
                 		(new EmptyTransition (), starting_state);
 				}
 				starting_state = NFAtoDFA.convertToDFA (starting_state, t);
+				removeAnyTransitions (starting_state);
 
 				ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 				NFAStateToPEPA.HybridDFAtoPEPA
@@ -902,6 +926,7 @@ probeg
 					starting_state1 = NFAtoDFA.convertToDFA (starting_state1,
 						$probe_spec::probe.getName ());
 				}
+				removeAnyTransitions (starting_state1);
 				$probe_spec::probe.setStartingState (starting_state1);
 			} ;
 

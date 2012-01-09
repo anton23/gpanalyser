@@ -95,6 +95,11 @@ public class NFAState
 		return Collections.unmodifiableMap (outgoings);
 	}
 
+    public Map<ITransition, NFAState> getRawTransitions ()
+    {
+        return outgoings;
+    }
+
     public NFAPredicate getPredicate ()
     {
         return predicate;
