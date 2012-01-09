@@ -25,6 +25,7 @@ tokens{
   EXPODE;
   ODETEST;
   INDICATORFUNCTION;
+  GT;
 }
 
 
@@ -492,7 +493,7 @@ expression comparisonOperator expression
 ;
 
 comparisonOperator:
-  GT
+  RANGLE -> GT
 ;
 
 generalExpectation:

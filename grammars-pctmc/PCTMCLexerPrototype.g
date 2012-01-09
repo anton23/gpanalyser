@@ -65,7 +65,7 @@ WHERE:'where';
 WHEN: 'when'; 
 AND:'and';
 GEQ:'>=';
-GT:'>';
+RANGLE:'>';
 
 DERMEAN: 'dE';
 DT: 'dt';
