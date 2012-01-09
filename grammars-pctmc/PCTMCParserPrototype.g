@@ -25,6 +25,8 @@ tokens{
   EXPODE;
   ODETEST;
   INDICATORFUNCTION;
+  ODESETTINGS;
+  SIMULATIONSETTINGS;
 }
 
 
@@ -362,14 +364,12 @@ odeAnalysis:
   ODES 
   odeParameters?
   {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
-      LPAR
-  STOPTIME DEF stopTime = expression COMMA
-  STEPSIZE DEF stepSize = expression COMMA
-  DENSITY DEF density=INTEGER   
-  RPAR {hint.pop();}LBRACE
+  odeSettings
+  {hint.pop();}
+  LBRACE
     plotDescription*
   RBRACE
-  -> ^(ODES odeParameters? $stopTime COMMA $stepSize COMMA $density LBRACE plotDescription* RBRACE )
+  -> ^(ODES odeParameters? odeSettings LBRACE plotDescription* RBRACE )
 ;
 
 odeParameters:
@@ -381,17 +381,33 @@ odeParameters:
 ;
 
 parameter:
-   LOWERCASENAME DEF (UPPERCASENAME|REALNUMBER|INTEGER) ;
+  LOWERCASENAME DEF (UPPERCASENAME|REALNUMBER|INTEGER) ;
+
+odeSettings:
+  LPAR
+    STOPTIME DEF stopTime = expression COMMA
+    STEPSIZE DEF stepSize = expression COMMA
+    DENSITY DEF density = INTEGER
+  RPAR
+  -> ^(ODESETTINGS $stopTime COMMA $stepSize COMMA $density)
+;
  
 simulation:
-  SIMULATION LPAR
-  STOPTIME DEF stopTime = expression COMMA
-  STEPSIZE DEF stepSize = expression COMMA
-  REPLICATIONS DEF replications=INTEGER   
-  RPAR LBRACE
+  SIMULATION
+  simulationSettings
+  LBRACE
     plotDescription*
   RBRACE
-  -> ^(SIMULATION $stopTime COMMA $stepSize COMMA $replications LBRACE plotDescription* RBRACE )
+  -> ^(SIMULATION simulationSettings LBRACE plotDescription* RBRACE )
+;
+
+simulationSettings:
+  LPAR
+    STOPTIME DEF stopTime = expression COMMA
+    STEPSIZE DEF stepSize = expression COMMA
+    REPLICATIONS DEF replications = INTEGER
+  RPAR
+  -> ^(SIMULATIONSETTINGS $stopTime COMMA $stepSize COMMA $replications)
 ;
 
 plotDescription:

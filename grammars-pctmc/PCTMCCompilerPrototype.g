@@ -228,21 +228,32 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
              (COMMA p=parameter
                           {parameters.put($p.name, $p.value);})*
           RBRACK)?
-         stop=expression COMMA step=expression COMMA den=integer LBRACE
+         settings=odeSettings LBRACE
          ps=plotDescriptions
     RBRACE
    ){
       $analysis = new PCTMCODEAnalysis($pctmc, parameters);
       ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
-      $stop.e.accept(stopEval);
+      $settings.stopTime.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-      $step.e.accept(stepEval);
+      $settings.stepSize.accept(stepEval);
       $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-          stepEval.getResult(),$den.value);
+          stepEval.getResult(),$settings.density);
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p);
    }
 
+;
+
+odeSettings returns
+  [AbstractExpression stopTime, AbstractExpression stepSize, int density]:
+  ^(ODESETTINGS stopExpr=expression COMMA
+  	stepExpr=expression COMMA dens=INTEGER)
+  {
+      $stopTime = $stopExpr.e;
+      $stepSize = $stepExpr.e;
+      $density = Integer.parseInt ($dens.text);
+  }
 ;
 
 parameter returns [String name, Object value]:
@@ -253,22 +264,31 @@ parameter returns [String name, Object value]:
 
 simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]:
-  ^(SIMULATION stop=expression COMMA step=expression COMMA replications=integer LBRACE
-         ps=plotDescriptions
-    RBRACE
-   ){
+  ^(SIMULATION settings=simulationSettings LBRACE ps=plotDescriptions RBRACE)
+  {
       $analysis = new PCTMCSimulation($pctmc);
 
       ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
-      $stop.e.accept(stopEval);
+      $settings.stopTime.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-      $step.e.accept(stepEval);
+      $settings.stepSize.accept(stepEval);
 
-      $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$replications.value);
+      $postprocessor = new SimulationAnalysisNumericalPostprocessor
+      	(stopEval.getResult(),stepEval.getResult(),$settings.replications);
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p);
    }
+;
 
+simulationSettings returns
+  [AbstractExpression stopTime, AbstractExpression stepSize, int replications]:
+  ^(SIMULATIONSETTINGS stopExpr=expression
+  	COMMA stepExpr=expression COMMA repl=INTEGER)
+  {
+      $stopTime = $stopExpr.e;
+      $stepSize = $stepExpr.e;
+      $replications = Integer.parseInt ($repl.text);
+  }
 ;
 
 plotDescriptions returns [List<PlotDescription> p]

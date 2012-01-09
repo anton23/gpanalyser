@@ -281,7 +281,8 @@ import PCTMCCompilerPrototype;
 	    List<GPEPAState> stateObservers,
 	    List<AbstractExpression> statesCountExpressions,
 	    Map<String, AbstractExpression> stateCombPopMapping,
-	    Map<String, PEPAComponent> newComponents)
+	    Map<String, PEPAComponent> newComponents,
+	    AbstractExpression stopTime, AbstractExpression stepSize, int density)
 	{
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC
             (new PEPAComponentDefinitions (newComponents)
@@ -324,9 +325,16 @@ System.out.println (pctmc);
         plotDescriptions.add (new PlotDescription (statesCountExpressions));
         analysis.setUsedMoments (moments);
         analysis.prepare (mainConstants);
-        NumericalPostprocessor postprocessor
-            = new ODEAnalysisNumericalPostprocessor (100, 0.1, 10);
-        analysis.addPostprocessor (postprocessor);
+		ExpressionEvaluatorWithConstants stopEval
+		 = new ExpressionEvaluatorWithConstants (mainConstants);
+		stopTime.accept (stopEval);
+		ExpressionEvaluatorWithConstants stepEval
+			 = new ExpressionEvaluatorWithConstants (mainConstants);
+		stepSize.accept (stepEval);
+		NumericalPostprocessor postprocessor
+		 = new ODEAnalysisNumericalPostprocessor
+			(stopEval.getResult (), stepEval.getResult (), density);
+       analysis.addPostprocessor (postprocessor);
         analysis.notifyPostprocessors (mainConstants, plotDescriptions);
         return postprocessor;
 	}
@@ -1059,6 +1067,9 @@ scope
 	GPAParser parser;
 	GroupedModel model;
 	List<GPEPAState> stateObservers;
+	AbstractExpression stop_time;
+	AbstractExpression step_size;
+	int density;
 }
 @init
 {
@@ -1067,7 +1078,14 @@ scope
 	$probe_def::model = deepCloner.deepClone (mainModel);
 	$probe_def::stateObservers = new LinkedList<GPEPAState> ();
 }
-	:	^(PROBE_DEF probe_spec) ;
+	:	^(PROBE_DEF
+			settings=odeSettings
+				{
+					$probe_def::stop_time = $settings.stopTime;
+					$probe_def::step_size = $settings.stepSize;
+					$probe_def::density = $settings.density;
+				}
+			probe_spec) ;
 
 probe_spec
 scope
@@ -1098,7 +1116,9 @@ scope
                 NumericalPostprocessor postprocessor = runTheProbedSystem
                     ($probe_def::model, countActionsStrings,
                         $probe_def::stateObservers, statesCountExpressions,
-                        mapping, $probe_spec::newComponents);
+                        mapping, $probe_spec::newComponents,
+                        $probe_def::stop_time, $probe_def::step_size,
+                        $probe_def::density);
                 double[][] data = postprocessor.evaluateExpressions
                     (statesCountExpressions, mainConstants);
                 double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
