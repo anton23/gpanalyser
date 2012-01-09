@@ -376,8 +376,8 @@ componentCount
 //Probe_spec
 
 probe_def
-	:	PROBE_DEF LBRACE probe_spec RBRACE
-			-> ^(PROBE_DEF probe_spec) ;
+	:	PROBE_DEF odeSettings LBRACE probe_spec RBRACE
+			-> ^(PROBE_DEF odeSettings probe_spec) ;
 
 probe_spec
 	:	UPPERCASENAME DEF probeg (OBSERVES local_probes WHERE locations)?

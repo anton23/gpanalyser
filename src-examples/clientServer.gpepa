@@ -17,7 +17,7 @@ Server_broken = (reset,rrst).Server;
 
 Clients{Client[n]}<request,data>Servers{Server[m]}
 
-Probe {
+Probe (stopTime=100, stepSize=0.1, density=10) {
     PM4 = begin : start, end : stop
     observes LProbe = (data!, think):begin,eE:end<-
     where Clients{Client[n]}
