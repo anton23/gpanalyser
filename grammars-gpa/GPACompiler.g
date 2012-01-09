@@ -114,7 +114,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   m=model
   (ca=countActions {actions=$countActions.actions;})?  
   {   
-    $pctmc  = GPEPAToPCTMC.getPCTMC(new PEPAComponentDefinitions($cd.componentDefinitions),$m.model,actions);
+    $pctmc  = GPEPAToPCTMC.getPCTMC(new PEPAComponentDefinitions($cd.componentDefinitions),$m.model,actions, $unfoldedVariables);
   }
 ;
 
