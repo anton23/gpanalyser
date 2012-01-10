@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
@@ -30,6 +31,24 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 		}
 	}
 	
+	
+	
+	@Override
+	public void visit(FunctionCallExpression e) {
+		
+		if (insert) {
+			List<AbstractExpression> newArguments = new LinkedList<AbstractExpression>();
+			for (AbstractExpression a:e.getArguments()) {
+				a.accept(this);
+				newArguments.add(result);
+			}
+			result = FunctionCallExpression.create(e.getName(), newArguments);
+			inserted = true;
+		} else {
+			result = e;
+		}
+	}
+
 	@Override
 	public void visit(CombinedProductExpression e) {
 		if (e.getProduct().getAccumulatedProducts().isEmpty()) {
@@ -110,6 +129,4 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 			result = e;
 		}
 	}
-
-
 }
