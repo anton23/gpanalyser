@@ -48,7 +48,7 @@ public class GlobalProbe implements IProbe
     
     public Set<ITransition> getAvailableTransitions ()
     {
-        return currentState.getTransitions ().keySet ();
+        return currentState.getAvailableNonSignalTransitions ();
     }
 
     public void advanceWithTransition (ITransition transition,
