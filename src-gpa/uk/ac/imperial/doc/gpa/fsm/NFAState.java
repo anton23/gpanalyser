@@ -61,7 +61,13 @@ public class NFAState
 
     public NFAState advanceWithTransition (ITransition transition)
     {
-        return outgoings.get(transition);
+        NFAState next = outgoings.get(transition);
+        // self-loop
+        if (next == null)
+        {
+            next = this;
+        }
+        return next;
     }
 
 	public NFAState advanceWithTransition (ITransition transition,
@@ -88,6 +94,19 @@ public class NFAState
             }
         }
         return Collections.unmodifiableMap (signalTransitions);
+    }
+
+    public Set<ITransition> getAvailableNonSignalTransitions ()
+    {
+        Map<ITransition, NFAState> transitions
+            = new HashMap<ITransition, NFAState> ();
+        transitions.putAll (outgoings);
+        Map<ITransition, NFAState> signals = getSignalTransitions ();
+        for (ITransition signal : signals.keySet ())
+        {
+            transitions.remove (signal);
+        }
+        return Collections.unmodifiableMap (transitions).keySet ();
     }
     
 	public Map<ITransition, NFAState> getTransitions ()
