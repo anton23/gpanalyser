@@ -16,4 +16,9 @@ public class EmptyTransition implements ITransition
     {
         return new EmptyTransition ();
     }
+
+    public ITransition getSimpleTransition ()
+    {
+        throw new Error("EmptyTransition cannot create a simple transition.");
+    }
 }

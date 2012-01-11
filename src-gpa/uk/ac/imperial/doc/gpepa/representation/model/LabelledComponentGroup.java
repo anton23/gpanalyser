@@ -41,23 +41,24 @@ public class LabelledComponentGroup extends GroupedModel {
 			 * PEPAComponent s = definitions
 			 * .getComponentDefinition(derivative);
 			 */
-			for (final AbstractPrefix abstractPrefix : derivative.getPrefixes(definitions)) {
-				if (!restrictedActions.contains(abstractPrefix.getAction())) {
+			for (final AbstractPrefix prefix : derivative.getPrefixes(definitions)) {
+				if (!restrictedActions.contains(prefix.getAction())) {
 
-					AbstractExpression rate = abstractPrefix.getCountOrientedRate (
-                            new PopulationExpression(new GPEPAState
-                                (new GroupComponentPair(label, derivative))));
+					AbstractExpression rate
+                        = ProductExpression.create(new PopulationExpression(
+                            new GPEPAState(new GroupComponentPair(label, derivative))),
+                            prefix.getRate());
 
 					List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
-					PEPAComponent continuation = abstractPrefix.getContinuation();
+					PEPAComponent continuation = prefix.getContinuation();
 					if (!(continuation instanceof Stop))
 						increases.add(new GroupComponentPair(label,
 								continuation));
 					List<GroupComponentPair> decreases = new LinkedList<GroupComponentPair>();
 					decreases.add(new GroupComponentPair(label, derivative));
 					events.add(new PEPAEvolutionEvent(
-                            abstractPrefix.getAction(),
-                            abstractPrefix.getImmediates(),
+                            prefix.getAction(),
+                            prefix.getImmediates(),
                             rate, increases, decreases));
 				}
 			}

@@ -28,4 +28,9 @@ public class AnyTransition implements ITransition
     {
         return new AnyTransition ();
     }
+
+    public ITransition getSimpleTransition ()
+    {
+        throw new Error("AnyTransition cannot create a simple transition.");
+    }
 }

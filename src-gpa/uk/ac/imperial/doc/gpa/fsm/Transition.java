@@ -2,7 +2,7 @@ package uk.ac.imperial.doc.gpa.fsm;
 
 public class Transition implements ITransition
 {
-	private String name = null;
+	protected String name = null;
 
 	public Transition (String name)
 	{
@@ -40,5 +40,10 @@ public class Transition implements ITransition
     public ITransition getCopy ()
     {
         return new Transition (name);
+    }
+
+    public ITransition getSimpleTransition ()
+    {
+        return getCopy ();
     }
 }

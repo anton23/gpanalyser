@@ -60,7 +60,8 @@ tokens{
   EXPRESSION			;
   
   //Probes
-  
+
+  SIGNALS				;
   WHERE					;
   OBSERVES				;
   IN					;
@@ -80,6 +81,8 @@ tokens{
 	import uk.ac.imperial.doc.pctmc.syntax.GPAParsingData;
 	import uk.ac.imperial.doc.pctmc.syntax.PlainParsingData;
 
+	import java.util.Collection;
+	import java.util.Iterator;
 	import java.util.LinkedList;
 	import java.util.Set;
 	import java.util.HashSet;
@@ -304,6 +307,9 @@ rl_bracketed
 
 signal
 	:	LOWERCASENAME
+			{
+            	$probe_spec::signals.add ($LOWERCASENAME.text);
+			}
 			-> ^(SIGNAL LOWERCASENAME) ;
 
 immediateActions
@@ -380,8 +386,26 @@ probe_def
 			-> ^(PROBE_DEF odeSettings probe_spec) ;
 
 probe_spec
-	:	UPPERCASENAME DEF probeg (OBSERVES local_probes WHERE locations)?
-			-> ^(DEF UPPERCASENAME probeg (local_probes locations)?) ;
+scope
+{
+	List<String> signals;
+	StringBuilder signalsString;
+}
+@init
+{
+	$probe_spec::signals = new ArrayList<String> ();
+	$probe_spec::signalsString = new StringBuilder ();
+}
+	:	UPPERCASENAME DEF probeg (OBSERVES local_probes WHERE locations)? LOWERCASENAME*
+				{
+					for (String signal :$probe_spec::signals)
+					{
+						$probe_spec::signalsString.append (signal);
+						$probe_spec::signalsString.append (";");
+					}
+				}
+			-> ^(DEF SIGNALS[$probe_spec::signalsString.toString ()]
+					UPPERCASENAME (local_probes locations)? probeg) ;
 
 local_probes
 	:	local_probe_ass (COMMA local_probe_ass)* ;

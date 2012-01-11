@@ -40,12 +40,6 @@ public class ImmediatePrefix extends AbstractPrefix {
                 " and " + otherAbstractPrefix.getClass().getName());
     }
 
-    public AbstractExpression getCountOrientedRate (AbstractExpression expr)
-    {
-        throw new Error("Cannot get count oriented rate for " +
-                "ImmediatePrefix, must do vanishing state removal.");
-    }
-
     public ImmediatePrefix(String action, AbstractExpression weight,
                            PEPAComponent continuation) {
         super();

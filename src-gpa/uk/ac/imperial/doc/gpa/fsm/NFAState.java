@@ -133,6 +133,12 @@ public class NFAState
     @Override
     public boolean equals (Object o)
     {
+        List<NFAState> visited = new ArrayList<NFAState> ();
+        return equals (o, visited);
+    }
+
+    public boolean equals (Object o, List<NFAState> visited)
+    {
         if (this == o)
         {
             return true;
@@ -148,9 +154,16 @@ public class NFAState
         {
             return false;
         }
-        if (!outgoings.equals (nfaState.outgoings))
+        for (ITransition transition : outgoings.keySet ())
         {
-            return false;
+            if (!visited.contains (outgoings.get (transition)))
+            {
+                boolean equal = outgoings.get (transition).equals (this);
+                if (!equal)
+                {
+                    return false;
+                }
+            }
         }
         if (predicate != null ? !predicate.equals (nfaState.predicate)
             : nfaState.predicate != null)
