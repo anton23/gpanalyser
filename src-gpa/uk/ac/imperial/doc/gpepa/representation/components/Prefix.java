@@ -66,11 +66,6 @@ public class Prefix extends AbstractPrefix {
             + otherAbstractPrefix.getClass().getName());
     }
 
-    public AbstractExpression getCountOrientedRate (AbstractExpression expr)
-    {
-        return ProductExpression.create(expr, getRate());
-    }
-
 	public Prefix(String action, AbstractExpression rate,
 			PEPAComponent continuation, List<ImmediatePrefix> immediates) {
 		super();

@@ -1,44 +1,27 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
-public class SignalTransition implements ITransition
+public class SignalTransition extends Transition
 {
-	private String name = null;
-
 	public SignalTransition(String name)
 	{
-		this.name = name;
+		super (name);
 	}
 
-	public String getName ()
-	{
-		return name;
-	}
-
-	public String toString ()
-	{
-		return name;
-	}
-
+    @Override
     public String toPEPAString ()
     {
         return name + ".";
     }
 
-	@Override
-	public boolean equals (Object transition)
-	{
-		return (transition instanceof SignalTransition
-			&& ((SignalTransition)transition).getName ().equals (name));
-	}
-
-	@Override
-	public int hashCode ()
-	{
-		return name.hashCode () + 1;
-	}
-
+    @Override
     public ITransition getCopy ()
     {
         return new SignalTransition (name);
+    }
+
+    @Override
+    public ITransition getSimpleTransition ()
+    {
+        return new Transition (name);
     }
 }

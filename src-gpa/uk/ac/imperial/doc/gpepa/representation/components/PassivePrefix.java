@@ -49,11 +49,6 @@ public class PassivePrefix extends AbstractPrefix {
                 + otherAbstractPrefix.getClass().getName());
     }
 
-    public AbstractExpression getCountOrientedRate (AbstractExpression expr)
-    {
-        return new IntegerExpression(Integer.MAX_VALUE);
-    }
-
     // dummy compatible constructor
     public PassivePrefix(String action, AbstractExpression rate,
                          PEPAComponent continuation,

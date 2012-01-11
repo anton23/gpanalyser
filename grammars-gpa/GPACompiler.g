@@ -114,6 +114,7 @@ import PCTMCCompilerPrototype;
 	private GroupedModel mainModel;
 	private Map<ExpressionVariable, AbstractExpression> mainUnfoldedVariables;
 	private Constants mainConstants;
+	private PEPAComponentDefinitions mainDefinitions;
 	private Map<String, PEPAComponent> components;
 	private List<ITransition> excluded = new LinkedList<ITransition> ();
 	Cloner deepCloner = new Cloner ();
@@ -247,10 +248,9 @@ import PCTMCCompilerPrototype;
 		}
 	}
 
-    private void removeAnyTransitions (NFAState startingState)
+    private void removeAnyTransitions
+    	(Set<ITransition> alphabet, NFAState startingState)
     {
-		Set<ITransition> alphabet
-			= NFAtoDFA.detectAlphabet (startingState, false, excluded);
 		Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
 		for (NFAState state : states)
 		{
@@ -262,12 +262,27 @@ import PCTMCCompilerPrototype;
         			NFAState other = transitions.get (transition);
         			for (ITransition newTransition : alphabet)
         			{
-        				state.addTransitionIfNotExisting (newTransition, other);
+        				state.addTransitionIfNotExisting
+        					(newTransition.getSimpleTransition (), other);
         			}
         			transitions.remove (transition);
         		}
         	}
 		}
+    }
+
+    private void extendStatesWithSelfLoops
+        	(Set<ITransition> alphabet, NFAState startingState)
+    {
+    	 Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
+         for (NFAState state : states)
+         {
+         	for (ITransition transition : alphabet)
+         	{
+         		state.addTransitionIfNotExisting
+         			(transition.getSimpleTransition (), state);
+         	}
+         }
     }
 
 	private Map<String, PEPAComponent>
@@ -331,12 +346,12 @@ System.out.println (pctmc);
             (pctmc, parameters);
         for (String action : countActions)
         {
-            Multiset<State> actions = HashMultiset.<State>create();
+            Multiset<State> cooperationActions = HashMultiset.<State>create();
             GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
-            actions.add (gpepaAction);
+            cooperationActions.add (gpepaAction);
             CombinedPopulationProduct combinedActions
                 = new CombinedPopulationProduct
-                    (new PopulationProduct (actions));
+                    (new PopulationProduct (cooperationActions));
             moments.add (combinedActions);
             AbstractExpression combPop
                 = CombinedProductExpression.create (combinedActions);
@@ -382,29 +397,30 @@ start:;
 
 modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Constants constants] returns [PCTMC pctmc]
 @init{
-  Set<String> actions = new HashSet<String>();
+  Set<String> cooperationActions = new HashSet<String>();
   mainConstants = constants;
   mainUnfoldedVariables = unfoldedVariables;
 }:
   cd = componentDefinitions
   {
     components = $cd.componentDefinitions;
+    mainDefinitions = new PEPAComponentDefinitions (components);
   }
   m=model
   {
     mainModel = $m.model;
   }
-  (ca=countActions {actions=$countActions.actions;})?
+  (ca=countActions {cooperationActions=$countActions.cooperationActions;})?
   {
-    $pctmc  = GPEPAToPCTMC.getPCTMC(new PEPAComponentDefinitions($cd.componentDefinitions),$m.model,actions);
+    $pctmc  = GPEPAToPCTMC.getPCTMC(new PEPAComponentDefinitions($cd.componentDefinitions),$m.model,cooperationActions);
   }
 ;
 
-countActions returns[Set<String> actions]
+countActions returns[Set<String> cooperationActions]
 @init{
-  $actions = new HashSet<String>();
+  $cooperationActions = new HashSet<String>();
 }:
-  ^(COUNTACTIONS (a=LOWERCASENAME {$actions.add($a.text);} )+)
+  ^(COUNTACTIONS (a=LOWERCASENAME {$cooperationActions.add($a.text);} )+)
 ;
 
 componentDefinitions returns [Map<String,PEPAComponent> componentDefinitions]
@@ -418,8 +434,8 @@ componentDefinitions returns [Map<String,PEPAComponent> componentDefinitions]
   })+
 ;
 model returns [GroupedModel model]:
-  ^(COOP l=model actions=coop r=model){
-    model = new GroupCooperation($l.model,$r.model,$actions.actions);
+  ^(COOP l=model cooperationActions=coop r=model){
+    model = new GroupCooperation($l.model,$r.model,$cooperationActions.cooperationActions);
   }
  | ^(LABELLEDGROUP label=UPPERCASENAME g=group){
     $model = new LabelledComponentGroup($label.text,$g.group);
@@ -468,7 +484,7 @@ component returns [PEPAComponent c]:
 
 coopComponent returns [PEPAComponent c]:
   ^(COOPCOMP l=component  a=coop r=component{
-        $c = new CooperationComponent($l.c,$r.c,$a.actions);
+        $c = new CooperationComponent($l.c,$r.c,$a.cooperationActions);
     
     }  )  ;
   
@@ -512,13 +528,13 @@ primaryComponent returns [PEPAComponent c]:
   } 
 ;
   
-coop returns [Set<String> actions]
+coop returns [Set<String> cooperationActions]
 @init{
-  actions = new HashSet<String>();
+  cooperationActions = new HashSet<String>();
 }:
   (a=LOWERCASENAME{
   if (!$a.text.isEmpty()){
-    actions.add($a.text);
+    cooperationActions.add($a.text);
     } 
    })+
 ;
@@ -542,14 +558,12 @@ probel [String name]
 					($proberl.starting_state, t);
 				NFAState accepting = NFAtoDFA.detectSingleAcceptingState
 					(starting_state);
-				Set<ITransition> alphabet = NFAtoDFA.detectAlphabet
-						(starting_state, false, new LinkedList<ITransition> ());
 				if (rp == null)
 				{
-					for (ITransition transition : alphabet)
+					for (ITransition transition : $probe_spec::allActions)
 					{
 						accepting.addTransitionIfNotExisting
-							(transition, accepting);
+							(transition.getSimpleTransition (), accepting);
 					}
 				}
 				else
@@ -558,15 +572,17 @@ probel [String name]
                 		(new EmptyTransition (), starting_state);
 				}
 				starting_state = NFAtoDFA.convertToDFA (starting_state, t);
-				removeAnyTransitions (starting_state);
+				removeAnyTransitions ($probe_spec::allActions, starting_state);
+			    $probe_spec::alphabet.addAll
+			    	(NFAtoDFA.detectAlphabet (starting_state, true, excluded));
+				extendStatesWithSelfLoops
+					($probe_spec::allActions, starting_state);
 
 				ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 				NFAStateToPEPA.HybridDFAtoPEPA
 					(starting_state, $name, 0, new PrintStream (stream));
 				$probe_spec::newComponents.putAll
 					(loadProbe (stream.toString (), $probe_def::parser));
-			    $probe_spec::alphabet.addAll
-			        (NFAtoDFA.detectAlphabet (starting_state, true, excluded));
 			} ;
 
 rl_signal returns [NFAState starting_state]
@@ -926,11 +942,10 @@ probeg
 					starting_state1 = NFAtoDFA.convertToDFA (starting_state1,
 						$probe_spec::probe.getName ());
 				}
-				removeAnyTransitions (starting_state1);
+				removeAnyTransitions ($probe_spec::allActions, starting_state1);
 				$probe_spec::probe.setStartingState (starting_state1);
 			} ;
 
-// equivalent to rl
 rg [NFAState current_state] returns [NFAState reached_state]
 @init
 {
@@ -963,7 +978,6 @@ rg [NFAState current_state] returns [NFAState reached_state]
 			} ;
 
 // Predicates for global
-
 main_pred returns [NFAPredicate predicate]
     :   p=pred
         {
@@ -1116,6 +1130,7 @@ probe_spec
 scope
 {
     Set<ITransition> alphabet;
+    Set<ITransition> allActions;
     IProbe probe;
     Map<String, PEPAComponent> newComponents;
 }
@@ -1125,9 +1140,26 @@ scope
 	gprobe.setName ("GlobalProbe");
 	$probe_spec::probe = gprobe;
 	$probe_spec::alphabet = new HashSet<ITransition> ();
+	$probe_spec::allActions = new HashSet<ITransition> ();
+	Set<String> actions = mainDefinitions.getActions ();
+	for (String action : actions)
+	{
+		$probe_spec::allActions.add (new Transition (action));
+	}
 	$probe_spec::newComponents = deepCloner.deepClone (components);
 }
-	:	^(DEF UPPERCASENAME probeg (local_probes locations)?)
+	:	^(DEF signalNames=SIGNALS
+						{
+							String signalsString = $signalNames.text;
+							String[] signals = signalsString.split (";");
+							for (String signal : signals)
+							{
+								$probe_spec::allActions.add
+									(new SignalTransition (signal));
+System.out.println (signal);
+							}
+						}
+			UPPERCASENAME (local_probes locations) probeg ?)
 			{
                 Set<ITransition> countActions = NFAtoDFA.detectAlphabet
                         (gprobe.getStartingState (), true, excluded);

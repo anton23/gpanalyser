@@ -5,4 +5,6 @@ public interface ITransition
     public String toPEPAString ();
 
     public ITransition getCopy ();
+
+    public ITransition getSimpleTransition ();
 }

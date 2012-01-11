@@ -77,7 +77,4 @@ public abstract class AbstractPrefix
              AbstractExpression otherApparentRate,
              AbstractExpression thisApparentRate,
              PEPAComponent newContinuation);
-
-    public abstract AbstractExpression getCountOrientedRate
-        (AbstractExpression expr);
 }
