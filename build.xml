@@ -1,0 +1,403 @@
+<!-- GPA ANT build script. 
+(c) 2011 Anton Stefanek
+-->
+
+<project name="GPAPCTMC" default="build" basedir=".">
+    <property file="config.properties"/>
+
+    <!-- global properties -->
+    <property name="version" value="0.9.2"/>
+	<property name="java.library.path" value="lib"/>
+	
+    <!-- directories -->
+    <property name="build.out" value="build"/>
+    <property name="dist.out" value="build/dist/"/>
+    <property name="build.class" value="${build.out}/classes" />
+	
+	<property name="test.out" value="test-build"/>
+	<property name="test.class" value="${test.out}/classes"/>
+	<property name="jexpressions.test" value="test-jexpressions"/>
+	<property name="pctmc.test" value="test-pctmc"/>
+	<property name="plain.test" value="test-plain"/>
+	<property name="masspa.test" value="test-masspa"/>
+	<property name="gpa.test" value="test-gpa"/>
+    
+	<property name="lib" value="lib"/>
+    <property name="examples" value="inputs"/>
+	<property name="jexpressions.src" value="src-jexpressions"/>
+	<property name="src.generated" value="genSrc"/>
+	<property name="PCTMC.grammars" value="grammars-pctmc"/>
+	<property name="PCTMC.src" value="src-pctmc"/>
+	<property name="plain.grammars" value="grammars-plain"/>
+	<property name="plain.src" value="src-plain"/>
+	<property name="plain.package.generated" value="uk/ac/imperial/doc/gpa/plain/syntax"/>
+    <property name="MASSPA.src"  value="src-masspa"/>
+    <property name="MASSPA.grammars" value="grammars-masspa"/>
+	<property name="MASSPA.package.generated" value="uk/ac/imperial/doc/masspa/syntax"/>
+	<property name="grammars" value="grammars-gpa"/>
+	<property name="src"  value="src-gpa"/>
+	<property name="package.generated" value="uk/ac/imperial/doc/gpa/syntax"/>
+	
+    <!-- ANTLR and grammars -->
+    <property name="antlr" value="antlr-3.4.jar"/>
+	<property name="PCTMC.lexer" value="PCTMCLexerPrototype.g"/>
+    <property name="plain.lexer" value="PlainLexer.g"/>
+    <property name="MASSPA.lexer" value="MASSPALexer.g"/>
+    <property name="lexer" value="GPALexer.g"/>
+	<property name="PCTMC.parser" value="PCTMCParserPrototype.g"/>
+    <property name="plain.parser" value="PlainParser.g"/>
+    <property name="MASSPA.parser" value="MASSPAParser.g"/>
+    <property name="parser" value="GPAParser.g"/>
+	<property name="PCTMC.compiler" value="PCTMCCompilerPrototype.g"/>
+    <property name="plain.compiler" value="PlainCompiler.g"/>	
+    <property name="MASSPA.compiler" value="MASSPACompiler.g"/>
+    <property name="compiler" value="GPACompiler.g"/>
+	
+    <!-- JAR properties -->
+    <property name="author" value="Anton Stefanek" />
+    <property name="main.class" value="uk.ac.imperial.doc.gpa.GPAPMain"/>
+    <property name="masspa.main.class" value="uk.ac.imperial.doc.masspa.MASSPAMain"/>
+    <property name="jar.name" value="gpa-${version}.jar"/>
+    <property name="jar.name.link" value="gpa.jar"/>
+	
+    <path id="CLASSPATH">
+        <fileset dir="${lib}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="init">
+        <tstamp/>
+    </target>
+ 		
+    <target name="plain.needGrammars">
+        <uptodate property="plain.grammar.dontGenerate"
+        targetfile="${src.generated}/${plain.package.generated}/PlainCompiler.java">
+            <srcfiles dir="${plain.grammars}" includes="**/*.g" />
+        	<srcfiles dir="${PCTMC.grammars}" includes="**/*.g" />
+        </uptodate>
+    </target>
+
+    <target name="MASSPA.needGrammars">
+        <uptodate property="MASSPA.grammar.dontGenerate"
+        targetfile="${src.generated}/${MASSPA.package.generated}/MASSPACompiler.java">
+            <srcfiles dir="${MASSPA.grammars}" includes="**/*.g" />
+        	<srcfiles dir="${PCTMC.grammars}" includes="**/*.g" />
+        </uptodate>
+    </target>
+
+    <target name="needGrammars">
+        <uptodate property="grammar.dontGenerate"
+        targetfile="${src.generated}/${package.generated}/GPACompiler.java">
+            <srcfiles dir="${grammars}" includes="**/*.g" />
+        	<srcfiles dir="${PCTMC.grammars}" includes="**/*.g" />
+        </uptodate>
+    </target>
+	
+    <target name="plain.build.grammars" depends="init,plain.needGrammars"
+    unless="plain.grammar.dontGenerate" description="Generate plain lexer/parser/compiler." >
+    	
+        <mkdir dir="${src.generated}"/>
+	    <java classname="org.antlr.Tool">
+	    	<arg value="-lib" />
+	    	<arg value="${PCTMC.grammars}" />
+	        <arg value="-fo" />
+	        <arg value="${src.generated}/${plain.package.generated}" />
+	        <arg value="${plain.grammars}/${plain.lexer}" />
+	        <classpath>
+	            <pathelement location="${lib}/${antlr}"/>
+	        </classpath>
+	    </java>
+	
+	     <java classname="org.antlr.Tool">
+	    	<arg value="-lib"/>
+	    	<arg value="${PCTMC.grammars}"/>
+	        <arg value="-fo" />
+	        <arg value="${src.generated}/${plain.package.generated}" />
+	        <arg value="${plain.grammars}/${plain.parser}" />
+	        <classpath>
+	            <pathelement location="${lib}/${antlr}"/>
+	        </classpath>
+	    </java>
+	
+	     <java classname="org.antlr.Tool">
+	    	<arg value="-lib"/>
+	    	<arg value="${PCTMC.grammars}"/>
+	     	<arg value="-fo" />        
+	        <arg value="${src.generated}/${plain.package.generated}" />
+	        <arg value="${plain.grammars}/${plain.compiler}" />
+	        <classpath>
+	            <pathelement location="${lib}/${antlr}"/>
+	        </classpath>
+	    </java>
+	</target>
+	
+    <target name="MASSPA.build.grammars" depends="init,MASSPA.needGrammars"
+    unless="MASSPA.grammar.dontGenerate" description="Generate MASSPA lexer/parser/compiler." >
+    	
+        <mkdir dir="${src.generated}"/>
+	    <java classname="org.antlr.Tool">
+	    	<arg value="-lib" />
+	    	<arg value="${PCTMC.grammars}" />
+	        <arg value="-fo" />
+	        <arg value="${src.generated}/${MASSPA.package.generated}" />
+	        <arg value="${MASSPA.grammars}/${MASSPA.lexer}" />
+	        <classpath>
+	            <pathelement location="${lib}/${antlr}"/>
+	        </classpath>
+	    </java>
+	
+	     <java classname="org.antlr.Tool">
+	    	<arg value="-lib"/>
+	    	<arg value="${PCTMC.grammars}"/>
+	        <arg value="-fo" />
+	        <arg value="${src.generated}/${MASSPA.package.generated}" />
+	        <arg value="${MASSPA.grammars}/${MASSPA.parser}" />
+	        <classpath>
+	            <pathelement location="${lib}/${antlr}"/>
+	        </classpath>
+	    </java>
+	
+	     <java classname="org.antlr.Tool">
+	    	<arg value="-lib"/>
+	    	<arg value="${PCTMC.grammars}"/>
+	     	<arg value="-fo" />        
+	        <arg value="${src.generated}/${MASSPA.package.generated}" />
+	        <arg value="${MASSPA.grammars}/${MASSPA.compiler}" />
+	        <classpath>
+	            <pathelement location="${lib}/${antlr}"/>
+	        </classpath>
+	    </java>
+	</target>
+	
+    <target name="build.grammars" depends="init,needGrammars"
+    unless="grammar.dontGenerate" description="Generate GPA lexer/parser/compiler." >
+
+        <mkdir dir="${src.generated}"/>
+        <java classname="org.antlr.Tool">
+        	<arg value="-lib" />
+        	<arg value="${PCTMC.grammars}" />
+            <arg value="-fo" />
+            <arg value="${src.generated}/${package.generated}" />
+            <arg value="${grammars}/${lexer}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+
+         <java classname="org.antlr.Tool">
+        	<arg value="-lib"/>
+        	<arg value="${PCTMC.grammars}"/>
+            <arg value="-fo" />
+            <arg value="${src.generated}/${package.generated}" />
+            <arg value="${grammars}/${parser}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>
+
+         <java classname="org.antlr.Tool">
+        	<arg value="-lib"/>
+        	<arg value="${PCTMC.grammars}"/>
+         	<arg value="-fo" />        
+            <arg value="${src.generated}/${package.generated}" />
+            <arg value="${grammars}/${compiler}" />
+            <classpath>
+                <pathelement location="${lib}/${antlr}"/>
+            </classpath>
+        </java>    	
+   </target>
+
+    <target name="build" depends="MASSPA.build.grammars, plain.build.grammars, build.grammars">
+        <mkdir dir="${build.class}"/>
+    	
+        <javac source="1.6" target="1.6" debug="true" destdir="${build.class}"
+        deprecation="true">
+            <classpath refid="CLASSPATH"/>
+            <src path="${src}"/>
+            <src path="${src.generated}"/>
+            <src path="${PCTMC.src}"/>
+        	<src path="${MASSPA.src}"/>
+        	<src path="${plain.src}"/>
+        	<src path="${jexpressions.src}"/>
+            <include name="**/*.java"/> 
+         	<exclude name="**/package-info.java"/> 
+        </javac>
+    </target>
+
+    <target name="clean">
+        <delete dir="${test.out}" includeemptydirs="true" includes="**"/>
+        <delete dir="${build.out}" includeemptydirs="true" includes="**"/>
+        <delete dir="${dist.out}" includeemptydirs="true" includes="**"/>
+        <delete dir="${src.generated}"  includeemptydirs="true" includes="**"/>     
+    </target>
+
+    <target name="dist">
+        <mkdir dir="${dist.out}"/>
+    </target>
+
+    <target name="jar" depends="build,dist">
+        <jar destfile="${dist.out}/${jar.name}" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Built-By" value="${author}"/>
+                <attribute name="Main-Class" value="${main.class}"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Java-Library-Path" value="lib"/>
+            </manifest>
+            <fileset dir="${build.class}"/>
+
+        	<fileset dir=".">
+        		<include name="LICENSE"/>	
+        		<include name="LICENSES"/>
+        	</fileset>
+        	<zipgroupfileset dir="${lib}" includes="**/*.jar" excludes="META-INF/*.SF"/>
+        </jar>
+
+    	
+        <copy file="gpa-linux-amd64.sh" tofile = "${dist.out}/gpa-${version}-linux-amd64.sh"/>
+        <replace file="${dist.out}/gpa-${version}-linux-amd64.sh" token="@version" value="${version}"/>
+        <copy file="gpa-linux-i586.sh" tofile = "${dist.out}/gpa-${version}-linux-i586.sh"/>
+        <replace file="${dist.out}/gpa-${version}-linux-i586.sh" token="@version" value="${version}"/>
+        <copy file="gpa-windows-amd64.bat" tofile = "${dist.out}/gpa-${version}-windows-amd64.bat"/>
+        <replace file="${dist.out}/gpa-${version}-windows-amd64.bat" token="@version" value="${version}"/>
+        <copy file="gpa-windows-i586.bat" tofile = "${dist.out}/gpa-${version}-windows-i586.bat"/>
+        <replace file="${dist.out}/gpa-${version}-windows-i586.bat" token="@version" value="${version}"/>
+        <copy file="gpa-macosx.sh" tofile = "${dist.out}/gpa-${version}-macosx.sh"/>
+        <replace file="${dist.out}/gpa-${version}-macosx.sh" token="@version" value="${version}"/>    	
+    </target>
+
+    <target name="dist-src" depends="init,dist">
+        <property name="zip.root" value="gpa-src-${version}"/>
+        <zip destfile="${dist.out}/gpa-src-${version}.zip">
+            <!-- java source and ANTLR grammars-->
+            <zipfileset dir="${src}" prefix="${zip.root}/${src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
+            <zipfileset dir="${PCTMC.src}" prefix="${zip.root}/${PCTMC.src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
+            <zipfileset dir="${plain.src}" prefix="${zip.root}/${plain.src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
+            <zipfileset dir="${MASSPA.src}" prefix="${zip.root}/${MASSPA.src}">
+                <include name="**/*.java" />
+            </zipfileset>
+        	
+            <zipfileset dir="${jexpressions.src}" prefix="${zip.root}/${jexpressions.src}">
+                <include name="**/*.java" />
+            </zipfileset>
+
+            <zipfileset dir="${grammars}" prefix="${zip.root}/${grammars}">
+                <include name="**/*.g" />
+            </zipfileset>
+        	
+            <zipfileset dir="${PCTMC.grammars}" prefix="${zip.root}/${PCTMC.grammars}">
+                <include name="**/*.g" />
+            </zipfileset>
+        	
+        	 <zipfileset dir="${plain.grammars}" prefix="${zip.root}/${plain.grammars}">
+        	                <include name="**/*.g" />
+        	 </zipfileset>
+
+            
+            <!-- build file and license -->
+        	
+            <zipfileset dir="." prefix="${zip.root}">
+                <include name="build.xml"/>
+            	<include name="LICENSE"/>	
+            	<include name="LICENSES"/>
+            	<include name="gpa-linux-amd64.sh"/>
+            	<include name="gpa-linux-i586.sh"/>
+            	<include name="gpa-windows-amd64.bat"/>
+                <include name="gpa-windows-i586.bat"/>            	
+                <include name="gpa-macosx.sh"/>            	
+                <include name="README.txt"/>
+            </zipfileset>
+
+
+            <!-- libraries -->
+            <zipfileset dir="${lib}" prefix="${zip.root}/${lib}"/>
+        </zip>
+    </target>
+	
+	
+	<target name="dist-bin" depends="init,dist,jar">
+	        <property name="zip.root" value="gpa-${version}"/>
+	        <zip destfile="${dist.out}/gpa-${version}.zip">
+	            
+	            <zipfileset dir="." prefix="${zip.root}">
+	            	<include name="LICENSE"/>	
+	            	<include name="LICENSES"/>
+            		<include name="README.txt"/>            	
+	            </zipfileset>
+	        	
+	        	<zipfileset dir="${dist.out}" prefix="${zip.root}">
+	             	<include name="gpa-${version}-linux-amd64.sh"/>
+		            <include name="gpa-${version}-linux-i586.sh"/>	        		
+	                <include name="gpa-${version}-windows-amd64.bat"/>
+	                <include name="gpa-${version}-windows-i586.bat"/>
+		            <include name="gpa-${version}-macosx.sh"/>	        		
+	        	</zipfileset>
+
+	            <!-- native libraries -->
+	            <zipfileset dir="${lib}" prefix="${zip.root}/${lib}">
+	            	<exclude name="**/*.jar"/>
+	            </zipfileset>
+	        	
+	        	<zipfileset dir="${dist.out}" prefix="${zip.root}/${dist.out}">
+	        		<include name="gpa-${version}.jar"/>
+	        	</zipfileset>
+	        </zip>
+	    </target>
+	
+	
+	
+	<target name="build-test" depends="build">
+		   <mkdir dir="${test.class}"/>
+		        <javac source="1.6" target="1.6" debug="true" destdir="${test.class}"
+		        deprecation="true">
+		        	<classpath>
+		        		<path location="${build.class}"/>
+	        		        <fileset dir="${lib}">
+	        		            <include name="*.jar"/>
+	        		        </fileset>
+        		      </classpath>		        	
+		        	
+		            <src path="${build.class}"/>
+		        	<src path="${jexpressions.test}"/>
+		        	<src path="${pctmc.test}"/>
+		        	<src path="${plain.test}"/>
+		        	<src path="${masspa.test}"/>
+			        <src path="${gpa.test}"/>
+		        	<include name="**/*.java"/> 
+		        	<include name="**/*.class"/>
+		         	<exclude name="**/package-info.java"/> 
+		        </javac>
+	</target>
+	
+	<target name="test" depends="build-test">
+	    <mkdir dir="reports/tests" />
+	    <junit fork="yes" printsummary="true" showoutput="true" outputtoformatters="true">
+	      <formatter type="xml"/>
+	
+	      <classpath>
+	      	<path location="${build.class}"/>
+	        <path location="${test.class}"/>
+	        <fileset dir="${lib}">
+	            <include name="*.jar"/>
+	        </fileset>
+	      </classpath>
+	      <batchtest todir="reports/tests">
+	        <fileset dir="${test.class}">
+	            <include name="**/Test*.class"/>
+	        </fileset>
+	      </batchtest>
+	      <formatter type="brief" usefile="false"/>
+	    </junit>
+	</target>
+
+	
+</project>
