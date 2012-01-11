@@ -84,10 +84,10 @@ public class MASSPAChannelTest extends ModelTestUtil
     @Test
     public void testRateType()
     {
-    	m_channel1.setRateType(MASSPAChannel.RateType.MASSACTION);
-    	assertEquals(m_channel1.getRateType(),MASSPAChannel.RateType.MASSACTION);
-    	m_channel1.setRateType(MASSPAChannel.RateType.MULTISERVER);
-    	assertEquals(m_channel1.getRateType(),MASSPAChannel.RateType.MULTISERVER);
+    	m_channel1.setRateType(MASSPAChannel.RateType.MASSACTION_ASYNC);
+    	assertEquals(m_channel1.getRateType(),MASSPAChannel.RateType.MASSACTION_ASYNC);
+    	m_channel1.setRateType(MASSPAChannel.RateType.MULTISERVER_SYNC);
+    	assertEquals(m_channel1.getRateType(),MASSPAChannel.RateType.MULTISERVER_SYNC);
     }
     
     @Test
@@ -113,11 +113,11 @@ public class MASSPAChannelTest extends ModelTestUtil
     	m_channel1.setIntensity(s_expr1);
     	m_channel2.setIntensity(s_expr2);
     	assertTrue(m_channel1.equals(m_channel1));
-    	assertTrue(m_channel1.equals(new MASSPAChannel(s_pop1,s_pop2,s_msg1,s_expr1,MASSPAChannel.RateType.MULTISERVER)));
-    	assertTrue(new MASSPAChannel(s_pop1,s_pop2,s_msg1,s_expr1,MASSPAChannel.RateType.MASSACTION).equals(m_channel1));
+    	assertTrue(m_channel1.equals(new MASSPAChannel(s_pop1,s_pop2,s_msg1,s_expr1,MASSPAChannel.RateType.MULTISERVER_SYNC)));
+    	assertTrue(new MASSPAChannel(s_pop1,s_pop2,s_msg1,s_expr1,MASSPAChannel.RateType.MASSACTION_ASYNC).equals(m_channel1));
     	assertTrue(m_channel2.equals(m_channel2));
-    	assertTrue(m_channel2.equals(new MASSPAChannel(s_pop2,s_pop1,s_msg2,s_expr2,MASSPAChannel.RateType.MASSACTION)));
-    	assertTrue(new MASSPAChannel(s_pop2,s_pop1,s_msg2,s_expr2,MASSPAChannel.RateType.MASSACTION).equals(m_channel2));
+    	assertTrue(m_channel2.equals(new MASSPAChannel(s_pop2,s_pop1,s_msg2,s_expr2,MASSPAChannel.RateType.MASSACTION_ASYNC)));
+    	assertTrue(new MASSPAChannel(s_pop2,s_pop1,s_msg2,s_expr2,MASSPAChannel.RateType.MASSACTION_ASYNC).equals(m_channel2));
     	
     	assertFalse(m_channel1.equals(null));
     	assertFalse(m_channel2.equals(null));

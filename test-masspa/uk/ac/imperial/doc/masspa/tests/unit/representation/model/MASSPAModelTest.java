@@ -145,10 +145,10 @@ public class MASSPAModelTest extends ModelTestUtil
 	
 	public void getChannelType()
 	{
-		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MASSACTION, 2);
-		assertEquals(m_model.getChannelType(),MASSPAChannel.RateType.MASSACTION);
-		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MULTISERVER, 1);
-		assertEquals(m_model.getChannelType(),MASSPAChannel.RateType.MULTISERVER);
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MASSACTION_ASYNC, 2);
+		assertEquals(m_model.getChannelType(),MASSPAChannel.RateType.MASSACTION_ASYNC);
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MULTISERVER_SYNC, 1);
+		assertEquals(m_model.getChannelType(),MASSPAChannel.RateType.MULTISERVER_SYNC);
 	}
 	
 	@Test(expected=AssertionError.class)
@@ -411,14 +411,14 @@ public class MASSPAModelTest extends ModelTestUtil
 		m_agents.getConstComponent("Scope1",s_comp1.getName(), 0);
 		m_agents.getConstComponent("Scope2",s_comp2.getName(), 0);
 		m_agents.getConstComponent("Scope3",s_comp3.getName(), 0);
-		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MASSACTION, 2);
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MASSACTION_ASYNC, 2);
 		m_model.addChannel(s_pop1,s_pop2,s_msg1,s_expr1,0);
 		MASSPAChannel chan = m_model.getAllChannels(s_pop2, s_msg1).iterator().next();
-		assertEquals(chan.getRateType(),MASSPAChannel.RateType.MASSACTION);
-		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MULTISERVER, 2);
+		assertEquals(chan.getRateType(),MASSPAChannel.RateType.MASSACTION_ASYNC);
+		m_model.setChannelType(Messages.s_COMPILER_KEYWORD_MULTISERVER_SYNC, 2);
 		m_model.addChannel(s_pop1,s_pop3,s_msg1,s_expr1,0);
 		chan = m_model.getAllChannels(s_pop3, s_msg1).iterator().next();
-		assertEquals(chan.getRateType(),MASSPAChannel.RateType.MULTISERVER);
+		assertEquals(chan.getRateType(),MASSPAChannel.RateType.MULTISERVER_SYNC);
 	}
 		
 	@Test(expected=AssertionError.class)

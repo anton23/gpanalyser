@@ -6,50 +6,10 @@ package uk.ac.imperial.doc.masspa.language;
  * @author Chris Guenther
  */
 public class Messages
-{
-	// Parser
-	public static final String s_PARSER_AGENT_DEFINITION_REQUIRED = "At least agent definition is required.";
-	public static final String s_PARSER_MODEL_DEFINITION_REQUIRED = "Model definition missing or incorrect.";
-	public static final String s_PARSER_INVALID_AGENT_SCOPE = "Invalid definition of agent scope '%s'";
-	public static final String s_PARSER_INVALID_AGENT_MISSING_LBRACE = "Invalid definition of agent '%s' - missing '{'";
-	public static final String s_PARSER_INVALID_AGENT_MISSING_RBRACE = "Invalid definition of agent '%s' - missing '}'";
-	public static final String s_PARSER_INVALID_AGENT_MISSING_SEMI = "Invalid definition of agent '%s' - missing ';'";
-	public static final String s_PARSER_INVALID_AGENT_STATE_DEFINITION = "Invalid definition of agent state '%s' - ';'";
-	public static final String s_PARSER_INVALID_AGENT_STATE_MISSING_SEMI = "Invalid definition of agent state '%s' - missing ';'";
-	public static final String s_PARSER_CHOICE_INVALID_PREFIX = "Summation operator must be followed by a proper prefix, e.g. (a, ra).C";
-	public static final String s_PARSER_INVALID_TAU_PREFIX_DEFINITION = "Silent action prefix must have form (RateExpr).C";
-	public static final String s_PARSER_INVALID_PREFIX_DEFINITION = "Action prefix must have form (actionName, RateExpr).C";
-	public static final String s_PARSER_INVALID_TAU_SEND_PREFIX_DEFINITION = "Silent Send prefix must have form !(RateExpr,MsgType,#MsgsSentExpr).C";
-	public static final String s_PARSER_INVALID_SEND_PREFIX_DEFINITION = "Send prefix must have form !(actionName, RateExpr,MsgType,#MsgsSentExpr).C";
-	public static final String s_PARSER_INVALID_TAU_RECV_PREFIX_DEFINITION = "Silent Receive prefix must have form ?(MsgType,MsgAcceptProbability).C";
-	public static final String s_PARSER_INVALID_RECV_PREFIX_DEFINITION = "Receive prefix must have form ?(actionName,MsgType,MsgAcceptProbability).C";
-	public static final String s_PARSER_INVALID_PRIMARY_COMPONENT = "Primary component must be another agent state in same scope or 'stop'.";
-	public static final String s_PARSER_MISSING_LOCATION_DEF = "Missing location definition 'Locations = {Loc,Loc,...};'";
-	public static final String s_PARSER_INVALID_LOCATION_IN_CONST_NAME = "Constants names must have locations of type '@(x)' or '@(INT(,INT)+)'";
-	public static final String s_PARSER_INVALID_LOCATION_IN_VAR_NAME = "Variable names must have locations of type '@(x)' or '@(INT(,INT)+)'";
-	public static final String s_PARSER_INVALID_LOCATION_DEF_MISSING_LBRACE = "Invalid definition of locations - missing '{'";
-	public static final String s_PARSER_INVALID_LOCATION_DEF_INVALID_LOC = "Invalid location in locations definition - location list must be (INT(,INT)+),(INT(,INT)+),...";
-	public static final String s_PARSER_INVALID_LOCATION_DEF_MISSING_RBRACE = "Invalid definition of locations - missing '}'";
-	public static final String s_PARSER_INVALID_LOCATION_DEF_MISSING_SEMI = "Invalid definition of locations - missing ';'";
-	public static final String s_PARSER_MISSING_INITIAL_VALUES = "Missing initial agent population/action count definitions.";
-	public static final String s_PARSER_INVALID_AGENT_POPULATION_LOCATION = "Agent population '%s' must have location of type '@(INT(,INT)+)";
-	public static final String s_PARSER_INVALID_ACTION_COUNT_LOCATION = "Action count '%s' must have location of type '@(A)' or '@(INT(,INT)+)";
-	public static final String s_PARSER_INVALID_AGENT_POPULATION_DEF = "Agent population definition must have form 'agentPop = Expr;'";
-	public static final String s_PARSER_INVALID_ACTION_COUNT_DEF = "Agent population definition must have form '#actionCount = Expr;'";
-	public static final String s_PARSER_CHANNELTYPE_MISSING_LBRACK  = "Invalid channeltype statement - missing '['";
-	public static final String s_PARSER_CHANNELTYPE_INCORRECT_TYPE  = "Invalid channeltype statement - invalid type. Try options like multiServer or massAction.";
-	public static final String s_PARSER_CHANNELTYPE_MISSING_RBRACK  = "Invalid channeltype statement - missing ']'";
-	public static final String s_PARSER_CHANNELTYPE_MISSING_SEMI  = "Invalid channeltype statement - missing ';'";
-	public static final String s_PARSER_CHANNEL_MISSING_LPAR = "Invalid channel definition - missing '('";
-	public static final String s_PARSER_CHANNEL_INVALID_SENDER = "Invalid channel definition - try (SENDERAGENTPOP,receiverAgentPop,msgName).";
-	public static final String s_PARSER_CHANNEL_INVALID_RECEIVER = "Invalid channel definition - try (senderAgentPop,RECEIVERAGENTPOP,msgName).";
-	public static final String s_PARSER_CHANNEL_INVALID_MSG = "Invalid channel definition - try (senderAgentPop,receiverAgentPop,MSGNAME).";
-	public static final String s_PARSER_CHANNEL_MISSING_RPAR = "Invalid channel definition - missing ')'";
-	public static final String s_PARSER_CHANNEL_MISSING_DEF = "Invalid channel definition - missing '='";
-	public static final String s_PARSER_CHANNEL_MISSING_EXPR = "Invalid channel definition - missing intensity expression.";
-	public static final String s_PARSER_CHANNEL_MISSING_SEMI = "Invalid channel definition - missing ';'";
-		
+{	
 	// Compiler
+	public static final String s_COMPILER_KEYWORD_MULTISERVER_SYNC = "multiServerSync";
+	public static final String s_COMPILER_KEYWORD_MASSACTION_ASYNC = "massActionAsync";
 	public static final String s_COMPILER_CONST_INVALID_LOCATION = "Constant '%s' has an invalid location '%s'.";
 	public static final String s_COMPILER_CONST_UNDEFINED = "Constant '%s' is undefined.";
 	public static final String s_COMPILER_VAR_INVALID_LOCATION = "Variable '%s' has an invalid location '%s'.";
@@ -80,6 +40,7 @@ public class Messages
 	public static final String s_COMPILER_LOCATION_NULL_DEFINITION = "Cannot create location with <null> coordinates in line %d.";
 	public static final String s_COMPILER_LOCATION_NULL_COORDS = "Cannot have location with <null> coordinates.";
 	public static final String s_COMPILER_LOCATION_DIM_MISMATCH = "Location dimension mismatch";
+	public static final String s_COMPILER_LOCATION_INVALID_ALLLOCATION_USE = "%s is invalid. Constants, Variables and Functions can only have location @(x) or @(INT(,INT)+)";
 	public static final String s_COMPILER_AGENTPOP_INVALID = "Agent population '%s' refers to an undefined agent state or location.";
 	public static final String s_COMPILER_AGENTPOP_DUPLICATE_DISTRIBUTION_DEFINITION = "Duplicate definition of initial distribution for agent population '%s' in line %d - IGNORING REDEFINITION!!!";	
 	public static final String s_COMPILER_AGENTPOP_INVALID_DEFINITION = "Invalid agent population definition %s%s in line %d.";
@@ -97,7 +58,7 @@ public class Messages
 	public static final String s_COMPILER_ACTIONCOUNT_MISSING_LOCATION_DEFINITION = "Missing location definition for %s in action count '%s%s' in line %d.";
 	public static final String s_COMPILER_ACTIONCOUNT_MISSING_ACTION = "Action '%s' used in the action count initial value assignment '%s%s' in line %d never occurs.";
 	public static final String s_COMPILER_ACTIONCOUNT_INVALID_DEFINITION = "Invalid action count initial value assignment definition '%s%s' in line %d.";
-	public static final String s_COMPILER_INVALID_CHANNELTYPE = "'%s' in line %d is an invalid channeltype. Try 'multiServer' or 'massAction' instead.";
+	public static final String s_COMPILER_INVALID_CHANNELTYPE = "'%s' in line %d is an invalid channeltype. Try '"+s_COMPILER_KEYWORD_MULTISERVER_SYNC+"' or '"+s_COMPILER_KEYWORD_MASSACTION_ASYNC+"' instead.";
 	public static final String s_COMPILER_CHANNEL_DUPLICATE_DEFINTION = "Duplicate definition of channel '%s' in line %d - IGNORING REDEFINITION!!!";
 	public static final String s_COMPILER_CHANNEL_NULL_SENDER = "Cannot instantiate channel with <null> sender.";
 	public static final String s_COMPILER_CHANNEL_NULL_RECEIVER = "Cannot instantiate channel with <null> receiver.";
@@ -122,8 +83,47 @@ public class Messages
 	public static final String s_COMPILER_MASSPA_EVO_EVT_NULL_RATE = "Cannot create MASSPAEvolutionEvent with <null> rate.";
 	public static final String s_COMPILER_MASSPA_PCTMC_NULL_EVO_EVTS  = "Cannot create MASSPA PCTMC with <null> evolution event list.";
 	public static final String s_COMPILER_INTERNAL_UNSUPPORTED_EXPR_VISIT = "Unsupported visit to expression '%s'.";
-	public static final String s_COMPILER_KEYWORD_MULTISERVER = "multiServer";
-	public static final String s_COMPILER_KEYWORD_MASSACTION = "massAction";
+	
+	// Parser
+	public static final String s_PARSER_MODEL_DEFINITION_REQUIRED = "Model definition missing or incorrect.";
+	public static final String s_PARSER_AGENT_DEFINITION_REQUIRED = "At least one agent definition is required.";
+	public static final String s_PARSER_INVALID_AGENT_SCOPE = "Invalid definition of agent scope '%s'";
+	public static final String s_PARSER_INVALID_AGENT_MISSING_LBRACE = "Invalid definition of agent '%s' - missing '{'";
+	public static final String s_PARSER_INVALID_AGENT_MISSING_RBRACE = "Invalid definition of agent '%s' - missing '}'";
+	public static final String s_PARSER_INVALID_AGENT_MISSING_SEMI = "Invalid definition of agent '%s' - missing ';'";
+	public static final String s_PARSER_MISSING_AGENT_STATE_DEFINITION = "Define at least one state for agent '%s'. Hint: Make sure agent state names start with upper-case letters.";
+	public static final String s_PARSER_INVALID_AGENT_STATE_DEFINITION = "Invalid definition of agent state '%s' - ';'";
+	public static final String s_PARSER_INVALID_AGENT_STATE_MISSING_SEMI = "Invalid definition of agent state '%s' - missing ';'";
+	public static final String s_PARSER_CHOICE_INVALID_PREFIX = "Require proper prefix, e.g. (a, ra).C";
+	public static final String s_PARSER_INVALID_TAU_PREFIX_DEFINITION = "Silent prefix must have form (RateExpr).C";
+	public static final String s_PARSER_INVALID_PREFIX_DEFINITION = "prefix must have form (actionName, RateExpr).C";
+	public static final String s_PARSER_INVALID_TAU_SEND_PREFIX_DEFINITION = "Silent Send prefix must have form !(RateExpr,MsgType,#MsgsSentExpr).C";
+	public static final String s_PARSER_INVALID_SEND_PREFIX_DEFINITION = "Send prefix must have form !(actionName, RateExpr,MsgType,#MsgsSentExpr).C";
+	public static final String s_PARSER_INVALID_TAU_RECV_PREFIX_DEFINITION = "Silent Receive prefix must have form ?(MsgType,MsgAcceptProbability).C";
+	public static final String s_PARSER_INVALID_RECV_PREFIX_DEFINITION = "Receive prefix must have form ?(actionName,MsgType,MsgAcceptProbability).C";
+	public static final String s_PARSER_MISSING_LOCATION_DEF = "Missing location definition 'Locations = {Loc,Loc,...};'";
+	public static final String s_PARSER_INVALID_LOCATION_IN_CONST_NAME = "Constants names must have locations of type '@(x)' or '@(INT(,INT)+)'";
+	public static final String s_PARSER_INVALID_LOCATION_IN_VAR_NAME = "Variable names must have locations of type '@(x)' or '@(INT(,INT)+)'";
+	public static final String s_PARSER_INVALID_LOCATION_DEF_MISSING_LBRACE = "Invalid definition of locations - missing '{'";
+	public static final String s_PARSER_INVALID_LOCATION_DEF_INVALID_LOC = "Invalid location in locations definition - location list must be (INT(,INT)+),(INT(,INT)+),...";
+	public static final String s_PARSER_INVALID_LOCATION_DEF_MISSING_RBRACE = "Invalid definition of locations - missing '}'";
+	public static final String s_PARSER_INVALID_LOCATION_DEF_MISSING_SEMI = "Invalid definition of locations - missing ';'";
+	public static final String s_PARSER_MISSING_INITIAL_VALUES = "Missing initial agent population/action count definitions.";
+	public static final String s_PARSER_INVALID_AGENT_POPULATION_LOCATION = "Agent population '%s' must have location of type '@(INT(,INT)+)";
+	public static final String s_PARSER_INVALID_ACTION_COUNT_LOCATION = "Action count '%s' must have location of type '@(A)' or '@(INT(,INT)+)";
+	public static final String s_PARSER_INVALID_AGENT_POPULATION_DEF = "Agent population definition must have form 'agentPop = Expr;'";
+	public static final String s_PARSER_INVALID_ACTION_COUNT_DEF = "Action count definition must have form '#actionCount = Expr;'";
+	public static final String s_PARSER_CHANNELTYPE_MISSING_LBRACK  = "Invalid channeltype statement - missing '['";
+	public static final String s_PARSER_CHANNELTYPE_INCORRECT_TYPE  = "Invalid channeltype statement - invalid type. Try '"+s_COMPILER_KEYWORD_MULTISERVER_SYNC+"' or '"+s_COMPILER_KEYWORD_MASSACTION_ASYNC + "'.";
+	public static final String s_PARSER_CHANNELTYPE_MISSING_RBRACK  = "Invalid channeltype statement - missing ']'";
+	public static final String s_PARSER_CHANNELTYPE_MISSING_SEMI  = "Invalid channeltype statement - missing ';'";
+	public static final String s_PARSER_CHANNEL_MISSING_LPAR = "Invalid channel definition - missing '('";
+	public static final String s_PARSER_CHANNEL_INVALID_SENDER = "Invalid channel definition - try (SENDERAGENTPOP,receiverAgentPop,msgName).";
+	public static final String s_PARSER_CHANNEL_INVALID_RECEIVER = "Invalid channel definition - try (senderAgentPop,RECEIVERAGENTPOP,msgName).";
+	public static final String s_PARSER_CHANNEL_INVALID_MSG = "Invalid channel definition - try (senderAgentPop,receiverAgentPop,MSGNAME).";
+	public static final String s_PARSER_CHANNEL_MISSING_RPAR = "Invalid channel definition - missing ')'";
+	public static final String s_PARSER_CHANNEL_MISSING_EXPR = "Invalid channel definition - missing intensity expression.";
+	public static final String s_PARSER_CHANNEL_MISSING_SEMI = "Invalid channel definition - missing ';'";
 	
 	// Console
 	public static final String s_WARNING = "WARNING: %s";

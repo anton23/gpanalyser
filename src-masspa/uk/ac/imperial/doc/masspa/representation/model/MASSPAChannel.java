@@ -14,8 +14,8 @@ import uk.ac.imperial.doc.masspa.representation.components.MASSPAMessage;
  */
 public class MASSPAChannel implements Comparable<MASSPAChannel>
 {
-	public enum RateType{MULTISERVER,MASSACTION};
-	public final static RateType s_defaultRate = RateType.MULTISERVER;
+	public enum RateType{MULTISERVER_SYNC,MASSACTION_ASYNC};
+	public final static RateType s_defaultRate = RateType.MULTISERVER_SYNC;
 	
 	private MASSPAAgentPop m_sender;
 	private MASSPAAgentPop m_receiver;

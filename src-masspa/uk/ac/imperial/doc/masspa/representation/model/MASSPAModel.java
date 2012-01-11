@@ -371,13 +371,13 @@ public class MASSPAModel
 	 */
 	public void setChannelType(final String _type, final int _line)
 	{
-		if(_type.equals(Messages.s_COMPILER_KEYWORD_MULTISERVER))
+		if(_type.equals(Messages.s_COMPILER_KEYWORD_MULTISERVER_SYNC))
 		{
-			m_rateType = MASSPAChannel.RateType.MULTISERVER;
+			m_rateType = MASSPAChannel.RateType.MULTISERVER_SYNC;
 		}
-		else if(_type.equals(Messages.s_COMPILER_KEYWORD_MASSACTION))
+		else if(_type.equals(Messages.s_COMPILER_KEYWORD_MASSACTION_ASYNC))
 		{
-			m_rateType = MASSPAChannel.RateType.MASSACTION;
+			m_rateType = MASSPAChannel.RateType.MASSACTION_ASYNC;
 		}
 		else
 		{

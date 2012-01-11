@@ -263,14 +263,15 @@ modelDefinition:
 agentDefinition:
   {hint.push(String.format(Messages.s_PARSER_INVALID_AGENT_SCOPE,$scopeName.text));} AGENT scopeName=UPPERCASENAME {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_INVALID_AGENT_MISSING_LBRACE,$scopeName.text));} LBRACE {hint.pop();}
-  componentDefinition+ 
+  {hint.push(String.format(Messages.s_PARSER_MISSING_AGENT_STATE_DEFINITION,$scopeName.text));} componentDefinition+ {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_INVALID_AGENT_MISSING_RBRACE,$scopeName.text));} RBRACE {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_INVALID_AGENT_MISSING_SEMI,$scopeName.text));} SEMI {hint.pop();}
   -> ^(AGENT $scopeName componentDefinition+)
 ;
 
 componentDefinition:
-  id=UPPERCASENAME DEF {hint.push(String.format(Messages.s_PARSER_INVALID_AGENT_STATE_DEFINITION,$id.text));} s=component {hint.pop();}
+  id=UPPERCASENAME DEF
+  {hint.push(String.format(Messages.s_PARSER_INVALID_AGENT_STATE_DEFINITION,$id.text));} s=component {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_INVALID_AGENT_STATE_MISSING_SEMI,$id.text));} SEMI {hint.pop();}
   -> ^(COMPONENT $id $s)
 ;
@@ -280,7 +281,8 @@ component:
 ;
 
 choice:
-  prefix (PLUS {hint.push(String.format(Messages.s_PARSER_CHOICE_INVALID_PREFIX));} prefix {hint.pop();})*
+  {hint.push(String.format(Messages.s_PARSER_CHOICE_INVALID_PREFIX));} prefix {hint.pop();}
+  (PLUS {hint.push(String.format(Messages.s_PARSER_CHOICE_INVALID_PREFIX));} prefix {hint.pop();})*
   -> prefix+
 ;
 
@@ -291,7 +293,7 @@ prefix:
 | SENDMSG {hint.push(String.format(Messages.s_PARSER_INVALID_SEND_PREFIX_DEFINITION));} LPAR action=LOWERCASENAME COMMA r=expression COMMA msg=UPPERCASENAME COMMA nofmsg=expression RPAR DOT s=primaryComponent {hint.pop();} -> ^(SEND $action $r $msg $nofmsg $s)
 | RECVMSG {hint.push(String.format(Messages.s_PARSER_INVALID_TAU_RECV_PREFIX_DEFINITION));} LPAR msg=UPPERCASENAME COMMA msgaccprob=expression RPAR DOT s=primaryComponent {hint.pop();} -> ^(RECV TAU $msg $msgaccprob $s) 
 | RECVMSG {hint.push(String.format(Messages.s_PARSER_INVALID_RECV_PREFIX_DEFINITION));}  LPAR action=LOWERCASENAME COMMA msg=UPPERCASENAME COMMA msgaccprob=expression RPAR DOT s=primaryComponent {hint.pop();} -> ^(RECV $action $msg $msgaccprob $s) 
-| {hint.push(String.format(Messages.s_PARSER_INVALID_PRIMARY_COMPONENT));} primaryComponent {hint.pop();}
+| primaryComponent
 ;
 
 primaryComponent:
@@ -353,7 +355,7 @@ channel:
   COMMA 
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_INVALID_MSG));} msg=UPPERCASENAME {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_RPAR));} RPAR {hint.pop();} 
-  {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_DEF));} DEF {hint.pop();}
+  DEF
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_EXPR));} intensity=expression {hint.pop();}
   {hint.push(String.format(Messages.s_PARSER_CHANNEL_MISSING_SEMI));} SEMI {hint.pop();}
   -> ^(CHANNEL $sender $receiver $msg $intensity)
