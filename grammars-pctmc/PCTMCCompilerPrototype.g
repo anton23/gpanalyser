@@ -332,6 +332,7 @@ condition returns [ExpressionCondition c]:
 
 comparisonOperator returns [ComparisonOperator o]:
   GT {$o = new GreaterThan();}
+ |LT {$o = new LessThan();} 
 ;
 
 

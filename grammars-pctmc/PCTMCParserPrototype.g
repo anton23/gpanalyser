@@ -26,6 +26,7 @@ tokens{
   ODETEST;
   INDICATORFUNCTION;
   GT;
+  LT;
 }
 
 
@@ -493,7 +494,8 @@ expression comparisonOperator expression
 ;
 
 comparisonOperator:
-  RANGLE -> GT
+    RANGLE -> GT
+   |LANGLE -> LT
 ;
 
 generalExpectation:

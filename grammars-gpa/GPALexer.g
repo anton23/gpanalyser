@@ -9,7 +9,6 @@ import PCTMCLexerPrototype;
  
 LBRACK: '['; 
 RBRACK: ']'; 
-LANGLE: '<';
 PAR: '|';
 DOT: '.';
 MIN: 'min';
