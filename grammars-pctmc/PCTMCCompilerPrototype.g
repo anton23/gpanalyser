@@ -202,6 +202,7 @@ odeAnalysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,Plo
 returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
+  Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
   ^(ODES  
          (LBRACK
@@ -209,7 +210,9 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
              (COMMA p=parameter 
                           {parameters.put($p.name, $p.value);})* 
           RBRACK)?
-         stop=expression COMMA step=expression COMMA den=integer LBRACE 
+         stop=expression COMMA step=expression COMMA den=integer 
+          (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*         
+         LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
@@ -218,8 +221,13 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
       $stop.e.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
       $step.e.accept(stepEval);
-      $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-          stepEval.getResult(),$den.value);
+      if (postprocessorParameters.isEmpty()) {
+        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+            stepEval.getResult(),$den.value);
+      } else {
+        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+           stepEval.getResult(),$den.value, postprocessorParameters);
+      }
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
@@ -227,9 +235,11 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 ;
 
 parameter returns [String name, Object value]:
-  p=LOWERCASENAME DEF (n=UPPERCASENAME{$name = $p.text; $value = $n.text;}
-                      |r=realnumber  {$name = $p.text; $value = $r.value;}
-                      |i=integer  {$name = $p.text; $value = $i.value;})
+  p=LOWERCASENAME {$name = $p.text;}
+          DEF (n=UPPERCASENAME{$value = $n.text;}
+              |r=realnumber  {$value = $r.value;}
+              |i=integer  {$value = $i.value;}
+              |f=FILENAME {$value=$f.text.replace("\"","");})
 ;
 
 simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 

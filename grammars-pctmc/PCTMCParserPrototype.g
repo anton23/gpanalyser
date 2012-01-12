@@ -360,11 +360,12 @@ odeAnalysis:
       LPAR
   STOPTIME DEF stopTime = expression COMMA
   STEPSIZE DEF stepSize = expression COMMA
-  DENSITY DEF density=INTEGER   
+  DENSITY DEF density=INTEGER  
+  (COMMA parameter)*
   RPAR {hint.pop();}LBRACE
     plotDescription*
   RBRACE
-  -> ^(ODES odeParameters? $stopTime COMMA $stepSize COMMA $density LBRACE plotDescription* RBRACE )
+  -> ^(ODES odeParameters? $stopTime COMMA $stepSize COMMA $density (COMMA parameter)* LBRACE plotDescription* RBRACE )
 ;
 
 odeParameters:
@@ -375,8 +376,10 @@ odeParameters:
   RBRACK
 ;
 
+
+
 parameter:
-   LOWERCASENAME DEF (UPPERCASENAME|REALNUMBER|INTEGER) ;
+   LOWERCASENAME DEF (UPPERCASENAME|REALNUMBER|INTEGER|FILENAME) ;
  
 simulation:
   SIMULATION LPAR

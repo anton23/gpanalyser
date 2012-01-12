@@ -49,6 +49,12 @@ public class PCTMCJavaImplementationProvider implements
 				"GeneratedODEs", constants, combinedMomentsIndex);
 		return new JavaODEsPreprocessed(odes);
 	}
+	
+	public JavaODEsPreprocessed getPreprocessedODEImplementationFromCode(String code, String className) {
+		SystemOfODEs ret = (SystemOfODEs) ClassCompiler.getInstance(code,
+				className);
+		return new JavaODEsPreprocessed(ret);
+	}
 
 	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method,
 			String className, Constants constants,
