@@ -66,6 +66,7 @@ WHEN: 'when';
 AND:'and';
 GEQ:'>=';
 RANGLE:'>';
+LANGLE:'<';
 
 DERMEAN: 'dE';
 DT: 'dt';
