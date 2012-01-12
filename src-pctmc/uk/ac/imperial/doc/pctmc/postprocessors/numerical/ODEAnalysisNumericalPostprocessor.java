@@ -1,11 +1,6 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
@@ -16,6 +11,7 @@ import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import com.google.common.collect.BiMap;
 
@@ -49,15 +45,10 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 			Object value = parameters.get("overrideCode");
 			if (value instanceof String) {
 				String asString = ((String) value);
-				FileInputStream stream;
 				try {
-					stream = new FileInputStream(new File(asString));
-					FileChannel fc = stream.getChannel();
-					MappedByteBuffer buffer = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-					overrideCode =  Charset.defaultCharset().decode(buffer).toString();
+					overrideCode =  FileUtils.readFile(asString);
 					String[] split = asString.split("/");
 					overrideCodeClassName = split[split.length-1].replace(".java", "");
-					stream.close();
 				}
 				catch (IOException e) {
 					throw new AssertionError("File + " + asString + " cannot be open!");

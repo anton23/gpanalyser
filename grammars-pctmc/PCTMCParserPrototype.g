@@ -386,10 +386,11 @@ simulation:
   STOPTIME DEF stopTime = expression COMMA
   STEPSIZE DEF stepSize = expression COMMA
   REPLICATIONS DEF replications=INTEGER   
+  (COMMA parameter)*
   RPAR LBRACE
     plotDescription*
   RBRACE
-  -> ^(SIMULATION $stopTime COMMA $stepSize COMMA $replications LBRACE plotDescription* RBRACE )
+  -> ^(SIMULATION $stopTime COMMA $stepSize COMMA $replications (COMMA parameter)* LBRACE plotDescription* RBRACE )
 ;
 
 plotDescription:

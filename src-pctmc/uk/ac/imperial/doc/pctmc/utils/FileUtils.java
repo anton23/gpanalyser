@@ -2,9 +2,13 @@ package uk.ac.imperial.doc.pctmc.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.jfree.data.xy.XYSeriesCollection;
@@ -106,6 +110,14 @@ public class FileUtils {
 		}
 	}
 
+	public static String readFile(String filename) throws IOException {
+		FileInputStream stream = new FileInputStream(new File(filename));
+		FileChannel fc = stream.getChannel();
+		MappedByteBuffer buffer = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+		String ret =  Charset.defaultCharset().decode(buffer).toString();
+		stream.close();
+		return ret;
+	}
 	
 	
 	public static void write3Dfile(String filename,double[][] data,double minx,double dx,double miny,double dy) {

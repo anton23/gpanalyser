@@ -243,8 +243,13 @@ parameter returns [String name, Object value]:
 ;
 
 simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
-returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]:
-  ^(SIMULATION stop=expression COMMA step=expression COMMA replications=integer LBRACE 
+returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
+@init{
+  Map<String, Object> parameters = new HashMap<String, Object>();
+}:
+  ^(SIMULATION stop=expression COMMA step=expression COMMA replications=integer 
+    (COMMA p=parameter {parameters.put($p.name, $p.value);})*
+    LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
@@ -254,12 +259,15 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]:
       $stop.e.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
       $step.e.accept(stepEval);
-      
-      $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$replications.value);
+      if (parameters.isEmpty()) {
+        $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$replications.value);
+      } else {
+        $postprocessor = new SimulationAnalysisNumericalPostprocessor(
+            stopEval.getResult(),stepEval.getResult(),$replications.value, parameters);
+      }
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
-  
 ;
 
 plotDescriptions returns [List<PlotDescription> p]
