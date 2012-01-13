@@ -1,6 +1,8 @@
 package uk.ac.imperial.doc.pctmc.javaoutput.analysis;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -11,6 +13,7 @@ import uk.ac.imperial.doc.jexpressions.statements.Assignment;
 import uk.ac.imperial.doc.jexpressions.statements.IAssignmentVisitor;
 import uk.ac.imperial.doc.jexpressions.statements.IIncrementVisitor;
 import uk.ac.imperial.doc.jexpressions.statements.Increment;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 
 import com.google.common.collect.BiMap;
@@ -25,15 +28,18 @@ public class JavaStatementPrinterCombinedProductBased extends
 		JavaStatementPrinter implements IIncrementVisitor, IAssignmentVisitor {
 
 	protected IExpressionPrinterFactory lhsFactory;
+	
+	protected Set<ExpressionVariable> rhsVariables;
 
 	public JavaStatementPrinterCombinedProductBased(Constants parameters,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex,
-			String oldY, String newY) {
+			String oldY, String newY, boolean expandVariables) {
 		super(new JavaCombinedProductBasedExpressionPrinterFactory(parameters,
-				combinedMomentsIndex, generalExpectationIndex, oldY));
+				combinedMomentsIndex, generalExpectationIndex, oldY, expandVariables));
 		lhsFactory = new JavaCombinedProductBasedExpressionPrinterFactory(
-				parameters, combinedMomentsIndex, generalExpectationIndex, newY);
+				parameters, combinedMomentsIndex, generalExpectationIndex, newY, expandVariables);
+		rhsVariables = new HashSet<ExpressionVariable>();
 	}
 
 	@Override
@@ -50,6 +56,7 @@ public class JavaStatementPrinterCombinedProductBased extends
 		output.append("+=");
 		output.append(rhsString);
 		output.append(";");
+		rhsVariables.addAll(((JavaPrinterCombinedProductBased)rhsPrinter).getVariables());
 	}
 
 	@Override
@@ -66,5 +73,13 @@ public class JavaStatementPrinterCombinedProductBased extends
 		output.append("=");
 		output.append(rhsString);
 		output.append(";");
+		rhsVariables.addAll(((JavaPrinterCombinedProductBased)rhsPrinter).getVariables());
+
 	}
+
+	public Set<ExpressionVariable> getRhsVariables() {
+		return rhsVariables;
+	}
+	
+	
 }

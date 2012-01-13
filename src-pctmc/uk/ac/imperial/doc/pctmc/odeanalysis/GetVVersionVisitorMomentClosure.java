@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ExpressionCondition;
 import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;

@@ -5,11 +5,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.javaoutput.analysis.JavaPrinterCombinedProductBased;
 import uk.ac.imperial.doc.pctmc.javaoutput.analysis.JavaStatementPrinterCombinedProductBased;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.IODEMethodVisitor;
@@ -53,16 +58,18 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 	public void visit(ODEMethod s) {
 
 		String[] javaMomentODEs = new String[s.getBody().length + 1];
+		Set<ExpressionVariable> variables = new HashSet<ExpressionVariable>();
 		for (int i = 0; i < s.getBody().length; i++) {
 			JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
 					constants, combinedMomentsIndex, generalExpectationIndex,
-					OLDY, NEWY);
+					OLDY, NEWY, false);
 			s.getBody()[i].accept(tmp);
 			javaMomentODEs[i] = tmp.toString() + "\n";
+			variables.addAll(tmp.getRhsVariables());
 		}
 		JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
 				constants, combinedMomentsIndex, generalExpectationIndex, OLDY,
-				NEWY);
+				NEWY, false);
 		javaMomentODEs[s.getBody().length] = tmp.toString();
 
 		StringBuilder header = new StringBuilder();
@@ -71,6 +78,9 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 				+ "public class " + GENERATEDCLASSNAME + " extends "
 				+ SystemOfODEs.class.getName() + "{\n");
 		header.append(javaMomentODEs[javaMomentODEs.length - 1]);
+		for (ExpressionVariable v:variables) {
+			header.append("double " + v.getName() + ";\n");
+		}
 		int line = 0;
 		int method = 0;
 		int nODEs = javaMomentODEs.length;
@@ -91,6 +101,15 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 				header
 						.append("public double[] derivn(double x, double[] y) {\n");
 				int nOdes = combinedMomentsIndex.size();
+				for (ExpressionVariable v:variables) {
+					header.append(v.getName() + " = ");
+					JavaPrinterCombinedProductBased printer = new JavaPrinterCombinedProductBased(
+							constants, combinedMomentsIndex, generalExpectationIndex,
+							OLDY, true);
+					v.getUnfolded().accept(printer);
+					header.append(printer.toString());
+					header.append(";\n");
+				}
 				header.append("double[] newy = new double[" + nOdes + "];\n");
 			} else {
 				code.append("private void derivn" + method

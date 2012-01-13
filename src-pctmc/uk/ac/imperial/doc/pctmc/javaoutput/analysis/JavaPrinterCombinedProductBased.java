@@ -4,7 +4,7 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.javaoutput.JavaPrinterWithConstants;
+import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
@@ -19,7 +19,7 @@ import com.google.common.collect.BiMap;
  * @author Anton Stefanek
  * 
  */
-public class JavaPrinterCombinedProductBased extends JavaPrinterWithConstants
+public class JavaPrinterCombinedProductBased extends JavaExpressionPrinterWithVariables
 		implements ICombinedProductExpressionVisitor,
 		IGeneralExpectationExpressionVisitor {
 	
@@ -28,10 +28,10 @@ public class JavaPrinterCombinedProductBased extends JavaPrinterWithConstants
 
 	private String f;
 	
-	public JavaPrinterCombinedProductBased(Constants parameters,
+	public JavaPrinterCombinedProductBased(Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			Map<AbstractExpression, Integer> generalExpectationIndex, String f) {
-		super(parameters);
+			Map<AbstractExpression, Integer> generalExpectationIndex, String f, boolean expandVariables) {
+		super(constants, expandVariables);
 		this.combinedMomentsIndex = combinedMomentsIndex;
 		this.generalExpectationIndex = generalExpectationIndex;
 		this.f = f;

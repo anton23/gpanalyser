@@ -47,7 +47,7 @@ public class JavaMethodPrinter {
 			JavaStatementPrinter printer = new JavaStatementPrinter(
 					new JavaCombinedProductBasedExpressionPrinterFactory(
 							constants, combinedMomentsIndex,
-							generalExpectationIndex, "values"));
+							generalExpectationIndex, "values", true));
 			s.accept(printer);
 			ret.append("    " + printer + "\n");
 		}
