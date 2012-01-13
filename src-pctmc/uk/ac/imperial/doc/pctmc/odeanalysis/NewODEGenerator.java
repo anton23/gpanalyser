@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -105,6 +105,7 @@ public class NewODEGenerator {
 		} else {
 			derivative = getDerivativeOfAccumulatedMoment(moment);
 		}
+		
 		rhs.put(moment, derivative);		
 		// Generates ODEs for moments occurring on the RHS
 		CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();

@@ -6,6 +6,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 
 import com.google.common.collect.Multiset;
 
@@ -136,7 +137,7 @@ public class ExpandedExpression extends AbstractExpression {
 	}
 
 	public AbstractExpression toAbstractExpression() {
-		return DivExpression.create(numerator.toAbstractExpression(),
+		return PEPADivExpression.create(numerator.toAbstractExpression(),
 				denominator.toAbstractExpression());
 	}
 

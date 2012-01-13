@@ -22,7 +22,6 @@ public class ContractingExpressionTransformer extends
 
 	@Override
 	public void visit(CombinedProductExpression e) {
-		// TODO Auto-generated method stub
-
+		result = e;
 	}
 }

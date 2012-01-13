@@ -27,7 +27,9 @@ public class UnexpandableExpression extends ExpandedExpression {
 
 	@Override
 	public AbstractExpression toAbstractExpression() {
-		return expression;
+		ContractingExpressionTransformer c = new ContractingExpressionTransformer();
+		expression.accept(c);
+		return c.getResult();
 	}
 
 	@Override

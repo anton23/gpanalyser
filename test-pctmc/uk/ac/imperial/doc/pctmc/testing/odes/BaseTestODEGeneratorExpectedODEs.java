@@ -125,6 +125,7 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 	public static ExpandedExpression expandExpression(AbstractExpression e) {
 		ExpandingExpressionTransformerWithMoments t = new ExpandingExpressionTransformerWithMoments(new DoubleConstantCoefficients());
 		e.accept(t);
-		return t.getResult();
+		ExpandedExpression ret = t.getResult();
+		return ret;
 	}
 }
