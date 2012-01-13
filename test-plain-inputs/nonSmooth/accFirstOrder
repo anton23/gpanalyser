@@ -1,0 +1,6 @@
+E[{A}];
+
+dE[{A}]/dt = E[{U}]*pa - E[{A}]*pu + E[{B}]*mu - [E[{C}] > 0]*E[{A}]*gamma;
+dE[{B}]/dt = -E[{B}]*mu + [E[{C}] > 0]*E[{A}]*gamma;
+dE[{U}]/dt = - E[{U}]*pa + E[{A}]*pu;
+dE[{C}]/dt = [$maxC > E[{C}]]*E[{A}]*lambda - [E[{C}] > 0]*E[{A}]*gamma;
