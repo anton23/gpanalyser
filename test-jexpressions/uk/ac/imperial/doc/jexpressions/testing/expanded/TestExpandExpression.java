@@ -115,7 +115,15 @@ public class TestExpandExpression extends BaseTestExpandedExpression {
 				interpreter);
 		assertEqualMomentExpressions("(A:A)*ra/((A:A)*ra+(B:B)*rb)*(C:C) + ((B:B)*rb/((A:A)*ra+(B:B)*rb))*(C:C)", "C:C",
 				interpreter);
-
+		assertEqualMomentExpressions(
+		 "((C:C)*(rq2)+((div((SA:S)*(rs2),((SA:S)*(rs2)+(SB:S)*(rs2)+(SC:S)*(rs2)))"+
+		  "*min((C:C2)*(rs2),((SA:S)*(rs2)+(SC:S)*(rs2)+(SB:S)*(rs2)))))*(-1.0)"+
+		 "+((div((SB:S)*(rs2),((SA:S)*(rs2)+(SB:S)*(rs2)+(SC:S)*(rs2)))"+
+		  "*min((C:C2)*(rs2),((SA:S)*(rs2)+(SB:S)*(rs2)+(SC:S)*(rs2)))))*(-1.0)"+
+		 "+((div((SC:S)*(rs2),((SA:S)*(rs2)+(SB:S)*(rs2)+(SC:S)*(rs2)))"+
+		  "*min((C:C2)*(rs2),((SA:S)*(rs2)+(SB:S)*(rs2)+(SC:S)*(rs2)))))*(-1.0))",
+		"((C:C)*(rq2)+min((C:C2)*(rs2),((SA:S)*(rs2)+(SB:S)*(rs2)+(SC:S)*(rs2)))*(-1.0))",
+				interpreter);
 	}
 
 	private void assertEqualMomentExpressions(String s1, String s2,

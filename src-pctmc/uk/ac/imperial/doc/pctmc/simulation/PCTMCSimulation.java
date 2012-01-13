@@ -1,10 +1,15 @@
 package uk.ac.imperial.doc.pctmc.simulation;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
+import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 
 import com.google.common.collect.BiMap;
@@ -35,7 +40,13 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	private void prepareAccumulatedIndex() {
 		int j = 0;
 		accumulatedMomentIndex = HashBiMap.<PopulationProduct, Integer> create();
-		for (CombinedPopulationProduct combinedProduct : usedCombinedProducts) {
+		Collection<CombinedPopulationProduct> requiredProducts = new HashSet<CombinedPopulationProduct>(usedCombinedProducts);
+		for (EvolutionEvent event:pctmc.getEvolutionEvents()) {
+			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
+			event.getRate().accept(visitor);
+			requiredProducts.addAll(visitor.getUsedCombinedMoments());
+		}
+		for (CombinedPopulationProduct combinedProduct : requiredProducts) {
 			for (PopulationProduct accumulatedProduct : combinedProduct
 					.getAccumulatedProducts()) {
 				if (!accumulatedMomentIndex.containsKey(accumulatedProduct)) 

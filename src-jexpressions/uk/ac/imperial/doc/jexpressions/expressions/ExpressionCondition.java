@@ -1,7 +1,6 @@
-package uk.ac.imperial.doc.jexpressions.conditions;
+package uk.ac.imperial.doc.jexpressions.expressions;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluator;
+import uk.ac.imperial.doc.jexpressions.conditions.ComparisonOperator;
 
 public class ExpressionCondition {
 	
@@ -15,15 +14,6 @@ public class ExpressionCondition {
 		this.right = right;
 		this.operator = operator;
 	} 
-	
-
-	public boolean evaluate(ExpressionEvaluator evaluator) {
-		left.accept(evaluator);
-		double leftValue = evaluator.getResult();
-		right.accept(evaluator);
-		double rightValue = evaluator.getResult();
-		return operator.compare(leftValue, rightValue);
-	}
 	
 	@Override
 	public String toString() {

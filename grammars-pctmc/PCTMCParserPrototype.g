@@ -25,6 +25,8 @@ tokens{
   EXPODE;
   ODETEST;
   INDICATORFUNCTION;
+  GT;
+  LT;
 }
 
 
@@ -358,11 +360,12 @@ odeAnalysis:
       LPAR
   STOPTIME DEF stopTime = expression COMMA
   STEPSIZE DEF stepSize = expression COMMA
-  DENSITY DEF density=INTEGER   
+  DENSITY DEF density=INTEGER  
+  (COMMA parameter)*
   RPAR {hint.pop();}LBRACE
     plotDescription*
   RBRACE
-  -> ^(ODES odeParameters? $stopTime COMMA $stepSize COMMA $density LBRACE plotDescription* RBRACE )
+  -> ^(ODES odeParameters? $stopTime COMMA $stepSize COMMA $density (COMMA parameter)* LBRACE plotDescription* RBRACE )
 ;
 
 odeParameters:
@@ -373,18 +376,21 @@ odeParameters:
   RBRACK
 ;
 
+
+
 parameter:
-   LOWERCASENAME DEF (UPPERCASENAME|REALNUMBER|INTEGER) ;
+   LOWERCASENAME DEF (UPPERCASENAME|REALNUMBER|INTEGER|FILENAME) ;
  
 simulation:
   SIMULATION LPAR
   STOPTIME DEF stopTime = expression COMMA
   STEPSIZE DEF stepSize = expression COMMA
   REPLICATIONS DEF replications=INTEGER   
+  (COMMA parameter)*
   RPAR LBRACE
     plotDescription*
   RBRACE
-  -> ^(SIMULATION $stopTime COMMA $stepSize COMMA $replications LBRACE plotDescription* RBRACE )
+  -> ^(SIMULATION $stopTime COMMA $stepSize COMMA $replications (COMMA parameter)* LBRACE plotDescription* RBRACE )
 ;
 
 plotDescription:
@@ -475,6 +481,7 @@ primaryExpression:
           reportError(new CustomRecognitionException(input, "constant '" + $c.text + "' unknown"));}
      | mean 
      | generalExpectation
+     | moment
      | central
      | scentral
      | PATTERN state -> ^(PATTERN state)
@@ -491,7 +498,8 @@ expression comparisonOperator expression
 ;
 
 comparisonOperator:
-  GT
+    RANGLE -> GT
+   |LANGLE -> LT
 ;
 
 generalExpectation:
@@ -527,6 +535,12 @@ scentral:
    SCENTRAL LBRACK {insideExpectation = true;}
       expression COMMA INTEGER RBRACK
    {insideExpectation = false;} -> ^(SCENTRAL expression INTEGER)
+;
+
+moment:
+  MOMENT LBRACK  {insideExpectation = true;}
+      expression COMMA INTEGER RBRACK
+   {insideExpectation = false;} -> ^(MOMENT expression INTEGER)
 ;
 
 
