@@ -8,13 +8,19 @@ import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariableSettter;
 
 public class ExpressionVariableSetterPCTMC extends ExpressionVariableSettter
 		implements ICombinedProductExpressionVisitor,
-		IGeneralExpectationExpressionVisitor {
+		IGeneralExpectationExpressionVisitor,
+		IPopulationVisitor{
 
 	
 
 
 	
 	
+	@Override
+	public void visit(PopulationExpression e) {
+		
+	}
+
 	@Override
 	public void visit(GeneralExpectationExpression e) {
 		e.getExpression().accept(this);

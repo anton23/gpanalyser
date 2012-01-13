@@ -26,6 +26,7 @@ import uk.ac.imperial.doc.pctmc.simulation.SimulationUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AggregatedStateNextEventGenerator;
 import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
@@ -36,6 +37,9 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	private SimulationUpdater updater;
 	private AccumulatorUpdater accUpdater; 
 	private AggregatedStateNextEventGenerator eventGenerator;
+	
+	private String overrideCode;
+	private String overrideCodeClassName;
 
 	protected int replications; 
 
@@ -62,6 +66,29 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	}
 
 
+	public SimulationAnalysisNumericalPostprocessor(double stopTime,
+			double stepSize, int replications, Map<String, Object> parameters) {
+		this(stopTime, stepSize, replications);
+		if (parameters.containsKey("overrideCode")) {
+			Object value = parameters.get("overrideCode");
+			if (value instanceof String) {
+				String asString = ((String) value);
+				try {
+					overrideCode =  FileUtils.readFile(asString);
+					String[] split = asString.split("/");
+					overrideCodeClassName = split[split.length-1].replace(".java", "");
+				}
+				catch (IOException e) {
+					throw new AssertionError("File + " + asString + " cannot be open!");
+				}
+				
+			} else {
+				throw new AssertionError("Given value of 'overrideCode' has to be a filename!");
+			}
+		}
+
+	}
+	
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
 		super.prepare(analysis, constants);
@@ -80,13 +107,19 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		PCTMCLogging.info("Generating one step generator.");
 		PCTMCLogging.increaseIndent();
 
-		String code = getEventGeneratorCode(constants);
+		String code;
+		String className;
+		if (overrideCode==null) {
+			code = getEventGeneratorCode(constants);
+			className = generatorName;
+		} else {
+			code = overrideCode;
+			className = overrideCodeClassName;
+		}
 		PCTMCLogging.decreaseIndent();
 
 		eventGenerator = (AggregatedStateNextEventGenerator) ClassCompiler.getInstance(code,
-				generatorName);
-
-		
+				className);
 		}
 	}
 

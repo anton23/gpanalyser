@@ -1,9 +1,9 @@
 package uk.ac.imperial.doc.pctmc.simulation.utils;
 
 
+
 public class GillespieSimulator {
 
-		
 
 	
 	public static double[][] simulateAccumulated(AggregatedStateNextEventGenerator g,
@@ -26,6 +26,8 @@ public class GillespieSimulator {
 		double[] toAccumulate = new double[accumulator.n];
 		
 		double[] previousCounts = new double[n+accumulator.n]; 
+		
+
 			
 		while (currentTime < stopTime) {
 						
@@ -34,6 +36,24 @@ public class GillespieSimulator {
 			}
 			
 			double duration = g.nextStep(counts);
+			
+			double oldTime = currentTime; 
+			currentTime += duration;
+			
+			if (duration <= 0.0) {
+					if (t==1){
+						toAccumulate = accumulator.update(ret[t-1],stepSize);
+						
+						for (int i = 0; i<accumulator.n; i++){
+							ret[t][n+i]=toAccumulate[i]; 
+						}
+					}
+					t++;
+					break;
+			}
+
+			
+			
 			double[] realAccumulate = accumulator.update(previousCounts, duration); 
 			
 			for (int i = 0; i<accumulator.n; i++){
@@ -41,21 +61,7 @@ public class GillespieSimulator {
 			}
 			
 			
-			if (duration <= 0.0) {
-				
-				if (t==1){
-					toAccumulate = accumulator.update(ret[t-1],stepSize);
-					
-					for (int i = 0; i<accumulator.n; i++){
-						ret[t][n+i]=toAccumulate[i]; 
-					}
-				}
-				t++;
-				break;
-			}
-			
-			double oldTime = currentTime; 
-			currentTime += duration;
+
 
 			
 			int currentT = (int) Math.floor(currentTime / stepSize);

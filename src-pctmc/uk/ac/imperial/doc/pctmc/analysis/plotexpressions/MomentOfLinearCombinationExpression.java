@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.pctmc.analysis.plotexpressions;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -9,6 +10,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.ExpressionWrapper;
 import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.utils.Multinomial;
@@ -24,7 +26,9 @@ import com.google.common.collect.Multiset;
 public class MomentOfLinearCombinationExpression extends ExpressionWrapper {
 
 	private List<AbstractExpression> coefficients;
-	private List<CombinedPopulationProduct> combinedMoments;
+	private List<CombinedPopulationProduct> combinedMoments;	
+	protected final AbstractExpression originalExpression;
+
 	private int order;
 
 	public MomentOfLinearCombinationExpression(
@@ -33,6 +37,17 @@ public class MomentOfLinearCombinationExpression extends ExpressionWrapper {
 		super(createExpression(coefficients, combinedMoments, order));
 		this.coefficients = coefficients;
 		this.combinedMoments = combinedMoments;
+		this.order = order;
+		this.originalExpression = this.internalExpression;
+	}
+	
+	public MomentOfLinearCombinationExpression(AbstractExpression e, int order, Map<ExpressionVariable, AbstractExpression> var) {
+		super(MomentOfLinearCombinationExpression
+				.createExpression(new MeanOfLinearCombinationExpression(e, var)
+						.getCoefficients(),
+						new MeanOfLinearCombinationExpression(e, var)
+								.getCombinedProducts(), order));
+		this.originalExpression = e;
 		this.order = order;
 	}
 
@@ -94,17 +109,7 @@ public class MomentOfLinearCombinationExpression extends ExpressionWrapper {
 
 	@Override
 	public String toString() {
-		String ret = "Moment[";
-		boolean first = true;
-		for (int i = 0; i < combinedMoments.size(); i++) {
-			if (first) {
-				first = false;
-			} else {
-				ret += "+";
-			}
-			ret += coefficients.get(i).toString() + "*"
-					+ combinedMoments.get(i).toString();
-		}
+		String ret = "Moment[" + originalExpression;		
 		return ret + "," + order + "]";
 	}
 
