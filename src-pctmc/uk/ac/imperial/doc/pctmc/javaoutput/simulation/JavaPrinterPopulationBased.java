@@ -3,7 +3,7 @@ package uk.ac.imperial.doc.pctmc.javaoutput.simulation;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.jexpressions.javaoutput.JavaPrinterWithConstants;
+import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IPopulationProductVisitor;
@@ -21,7 +21,7 @@ import com.google.common.collect.Multiset;
  * @author Anton Stefanek
  *
  */
-public class JavaPrinterPopulationBased extends JavaPrinterWithConstants implements
+public class JavaPrinterPopulationBased extends JavaExpressionPrinterWithVariables implements
 		IPopulationVisitor, IPopulationProductVisitor,ICombinedProductExpressionVisitor {
 	
 	private BiMap<State, Integer> stateIndex;
@@ -29,8 +29,8 @@ public class JavaPrinterPopulationBased extends JavaPrinterWithConstants impleme
 	private String f;
 	
 	public JavaPrinterPopulationBased(Constants constants,
-			BiMap<State, Integer> stateIndex,BiMap<PopulationProduct,Integer> accumulatedProductsIndex, String f) {
-		super(constants);
+			BiMap<State, Integer> stateIndex,BiMap<PopulationProduct,Integer> accumulatedProductsIndex, String f, boolean expandVariables) {
+		super(constants, expandVariables);
 		this.stateIndex = stateIndex;
 		this.accumulatedProductsIndex = accumulatedProductsIndex;
 		this.f = f;

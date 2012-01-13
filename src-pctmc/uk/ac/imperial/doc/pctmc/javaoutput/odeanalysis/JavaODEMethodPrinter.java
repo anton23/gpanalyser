@@ -79,7 +79,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 				+ SystemOfODEs.class.getName() + "{\n");
 		header.append(javaMomentODEs[javaMomentODEs.length - 1]);
 		for (ExpressionVariable v:variables) {
-			header.append("double " + v.getName() + ";\n");
+			header.append("double " + JavaExpressionPrinterWithVariables.escapeName(v.getName()) + ";\n");
 		}
 		int line = 0;
 		int method = 0;
@@ -102,7 +102,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 						.append("public double[] derivn(double x, double[] y) {\n");
 				int nOdes = combinedMomentsIndex.size();
 				for (ExpressionVariable v:variables) {
-					header.append(v.getName() + " = ");
+					header.append(JavaExpressionPrinterWithVariables.escapeName(v.getName()) + " = ");
 					JavaPrinterCombinedProductBased printer = new JavaPrinterCombinedProductBased(
 							constants, combinedMomentsIndex, generalExpectationIndex,
 							OLDY, true);

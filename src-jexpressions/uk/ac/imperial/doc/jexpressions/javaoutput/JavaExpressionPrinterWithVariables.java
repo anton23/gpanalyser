@@ -12,6 +12,10 @@ public class JavaExpressionPrinterWithVariables extends JavaPrinterWithConstants
 	protected Set<ExpressionVariable> variables;
 	protected boolean expandVariables;
 	
+	public static String escapeName(String name) {
+		return "_" + name;
+	}
+	
 	public JavaExpressionPrinterWithVariables(Constants constants, boolean expandVariables) {
 		super(constants);
 		variables = new HashSet<ExpressionVariable>();
@@ -23,7 +27,7 @@ public class JavaExpressionPrinterWithVariables extends JavaPrinterWithConstants
 		if (expandVariables) {
 			e.getUnfolded().accept(this);
 		} else {
-			output.append(e.getName());
+			output.append(escapeName(e.getName()));
 			variables.add(e);
 		}
 	}
