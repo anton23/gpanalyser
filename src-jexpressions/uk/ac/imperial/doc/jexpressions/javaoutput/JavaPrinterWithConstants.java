@@ -19,7 +19,6 @@ public class JavaPrinterWithConstants extends JavaExpressionPrinter implements
 
 	public JavaPrinterWithConstants(Constants constants) {
 		super();
-
 		this.constants = constants;
 	}
 
