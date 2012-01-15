@@ -62,12 +62,16 @@ public abstract class AbstractPrefix
     public abstract AbstractExpression getRate ();
 
     public AbstractPrefix getCooperation
-            (AbstractPrefix otherAbstractPrefix,
+            (String cooperationAction, AbstractPrefix otherAbstractPrefix,
              AbstractExpression otherApparentRate,
              AbstractExpression thisApparentRate,
              PEPAComponent newContinuation)
     {
-        if (!action.equals(otherAbstractPrefix.getAction())) return null;
+        if (!cooperationAction.equals(otherAbstractPrefix.getAction())
+            && !otherAbstractPrefix.getImmediates().contains(cooperationAction))
+        {
+            return null;
+        }
         return getCooperationImpl(otherAbstractPrefix, otherApparentRate,
             thisApparentRate, newContinuation);
     }

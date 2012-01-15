@@ -109,46 +109,57 @@ public class CooperationComponent extends PEPAComponent {
 
 		// only left evolves
 		for (AbstractPrefix leftAbstractPrefix : leftAbstractPrefixes) {
-			String action = leftAbstractPrefix.getAction();
-			if (!cooperationSet.contains(action)) {
-				PEPAComponent newContinuation = definitions
-						.getShorthand(new CooperationComponent(leftAbstractPrefix
-								.getContinuation(), right, cooperationSet));
-                try {
-                    ret.add(leftAbstractPrefix.getClass().getDeclaredConstructor
-                            (String.class, AbstractExpression.class,
-                                    PEPAComponent.class, List.class)
-                            .newInstance(action, leftAbstractPrefix.getRate(),
-                                    newContinuation,
-                                    leftAbstractPrefix.getImmediatesRaw()));
-                } catch (Exception e) {
-                    e.printStackTrace();
+			List<String> actions = new LinkedList<String>();
+            actions.add(leftAbstractPrefix.getAction());
+            actions.addAll(leftAbstractPrefix.getImmediates());
+            for (String action : actions)
+            {
+                if (!cooperationSet.contains(action)) {
+                    PEPAComponent newContinuation = definitions
+                            .getShorthand(new CooperationComponent(leftAbstractPrefix
+                                    .getContinuation(), right, cooperationSet));
+                    try {
+                        ret.add(leftAbstractPrefix.getClass().getDeclaredConstructor
+                                (String.class, AbstractExpression.class,
+                                        PEPAComponent.class, List.class)
+                                .newInstance(action, leftAbstractPrefix.getRate(),
+                                        newContinuation,
+                                        leftAbstractPrefix.getImmediatesRaw()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    leftActionmap.put(action, leftAbstractPrefix);
                 }
-            } else {
-				leftActionmap.put(action, leftAbstractPrefix);
-			}
+            }
 		}
 		// only right evolves
 		for (AbstractPrefix rightAbstractPrefix : rightAbstractPrefixes) {
-			String action = rightAbstractPrefix.getAction();
-			if (!cooperationSet.contains(action)) {
-				PEPAComponent newContinuation = definitions
-						.getShorthand(new CooperationComponent(left,
-								rightAbstractPrefix.getContinuation(), cooperationSet));
-                try {
-                    ret.add(rightAbstractPrefix.getClass().getDeclaredConstructor
-                            (String.class, AbstractExpression.class,
-                                    PEPAComponent.class, List.class)
-                            .newInstance(action, rightAbstractPrefix.getRate(),
-                                    newContinuation,
-                                    rightAbstractPrefix.getImmediatesRaw()));
-                } catch (Exception e) {
-                    e.printStackTrace();
+            List<String> actions = new LinkedList<String>();
+            actions.add(rightAbstractPrefix.getAction());
+            actions.addAll(rightAbstractPrefix.getImmediates());
+            for (String action : actions)
+            {
+                if (!cooperationSet.contains(action)) {
+                    PEPAComponent newContinuation = definitions
+                            .getShorthand(new CooperationComponent(left,
+                                    rightAbstractPrefix.getContinuation(), cooperationSet));
+                    try {
+                        ret.add(rightAbstractPrefix.getClass().getDeclaredConstructor
+                                (String.class, AbstractExpression.class,
+                                        PEPAComponent.class, List.class)
+                                .newInstance(action, rightAbstractPrefix.getRate(),
+                                        newContinuation,
+                                        rightAbstractPrefix.getImmediatesRaw()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    rightActionmap.put(action, rightAbstractPrefix);
                 }
-            } else {
-				rightActionmap.put(action, rightAbstractPrefix);
-			}
+            }
 		}
+
 		// both evolve
 		for (String action : leftActionmap.keySet()) {
 			for (AbstractPrefix leftAbstractPrefix : leftActionmap.get(action)) {
@@ -159,11 +170,18 @@ public class CooperationComponent extends PEPAComponent {
 									.getContinuation(), rightAbstractPrefix
 									.getContinuation(), cooperationSet));
                     AbstractExpression leftApparentRate = definitions
-                            .getApparentRateExpression(action, left);
+                            .getApparentRateExpression
+                                    (leftAbstractPrefix.getAction(), left);
                     AbstractExpression rightApparentRate = definitions
-                            .getApparentRateExpression(action, right);
-                    ret.add(leftAbstractPrefix.getCooperation(rightAbstractPrefix,
-                            rightApparentRate, leftApparentRate, newContinuation));
+                            .getApparentRateExpression
+                                    (rightAbstractPrefix.getAction(), right);
+                    AbstractPrefix newPrefix = leftAbstractPrefix.getCooperation
+                            (action, rightAbstractPrefix, rightApparentRate,
+                                leftApparentRate, newContinuation);
+                    if (newPrefix != null)
+                    {
+                        ret.add(newPrefix);
+                    }
 				}
 			}
 		}

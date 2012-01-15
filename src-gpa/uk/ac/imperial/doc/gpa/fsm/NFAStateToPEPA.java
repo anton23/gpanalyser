@@ -5,38 +5,6 @@ import java.util.*;
 
 public class NFAStateToPEPA
 {
-/*
-	public static Set<NFAState> detectBlindPaths (NFAState startingState)
-	{
-		Set<NFAState> blinds = new HashSet<NFAState> ();
-		detectBlindPathsI (startingState, blinds,
-			new HashSet<NFAState> ());
-		return blinds;
-	}
-
-	private static void detectBlindPathsI
-		(NFAState startingState, Set<NFAState> blinds, Set<NFAState> visited)
-	{
-		Map<ITransition, NFAState> transitions
-			= startingState.getTransitions ();
-
-		if (transitions.size () == 0)
-		{
-			blinds.add (startingState);
-		}
-
-		for (ITransition transition : transitions.keySet ())
-		{
-			NFAState nextState = transitions.get (transition);
-			if (!visited.contains (nextState))
-			{
-				visited.add (nextState);
-				detectBlindPathsI (nextState, blinds, visited);
-			}
-		}
-	}
-*/
-
 	// modifies the states branching from the starting state
 	// (including the starting state)
 	public static void HybridDFAtoPEPA
@@ -63,7 +31,7 @@ public class NFAStateToPEPA
 		out.print (startingState + " = ");
 		visited.add (startingState);
 
-		List<NFAState> derivedStates = new ArrayList<NFAState> ();
+		Collection<NFAState> derivedStates = new HashSet<NFAState> ();
 		Map<ITransition, NFAState> transitions
 			= startingState.getTransitions ();
 

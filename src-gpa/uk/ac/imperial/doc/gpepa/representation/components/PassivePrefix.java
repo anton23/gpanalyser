@@ -45,8 +45,7 @@ public class PassivePrefix extends AbstractPrefix {
             nPref.addImmediates(otherAbstractPrefix.getImmediatesRaw());
             return nPref;
         }
-        throw new Error("Unsupported cooperation between PassivePrefix and "
-                + otherAbstractPrefix.getClass().getName());
+        return null;
     }
 
     // dummy compatible constructor

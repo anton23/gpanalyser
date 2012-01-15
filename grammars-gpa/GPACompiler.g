@@ -274,14 +274,14 @@ import PCTMCCompilerPrototype;
     private void extendStatesWithSelfLoops
         	(Set<ITransition> alphabet, NFAState startingState)
     {
-    	 Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
+		 Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
          for (NFAState state : states)
          {
-         	for (ITransition transition : alphabet)
-         	{
-         		state.addTransitionIfNotExisting
-         			(transition.getSimpleTransition (), state);
-         	}
+			for (ITransition transition : alphabet)
+			{
+				state.addTransitionIfNotExisting
+					(transition.getSimpleTransition (), state);
+			}
          }
     }
 
@@ -597,7 +597,6 @@ rl_signal returns [NFAState starting_state]
 				{
 					signal = new SignalTransition ($sig.name);
 				}
-				NFAPrinter.printNFA ($starting_state);
 				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
 				NFAPrinter.printNFA ($starting_state);
 				NFAState acc_state = new NFAState (t);
@@ -611,7 +610,6 @@ rl_signal returns [NFAState starting_state]
 					new_acc_state.addTransition
 						(new EmptyTransition (), $next_rl.starting_state);
 				}
-				NFAPrinter.printNFA ($starting_state);
 			} ;
 
 rl_single [NFAState current_state]
@@ -790,6 +788,16 @@ rl_un_operators [NFAState sub_starting_state,
 			{
 				$starting_state
 					= NFAtoDFA.convertToDFA ($sub_starting_state, t);
+				Set<NFAState> accepting
+					= NFAtoDFA.detectAllAcceptingStates ($starting_state);
+				for (NFAState state : accepting)
+				{
+					for (ITransition transition : $probe_spec::allActions)
+					{
+						state.addTransitionIfNotExisting
+							(transition.getSimpleTransition (), state);
+					}
+				}
 				invertAcceptingStates ($starting_state);
 				unifyAcceptingStates ($starting_state, $reached_state);
 			} ;
