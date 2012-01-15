@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.gpepa.representation.components;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 
 import java.util.List;
@@ -50,6 +51,14 @@ public class Prefix extends AbstractPrefix {
             AbstractExpression coopRate = DivDivMinExpression.create(
                     getRate(), otherAbstractPrefix.getRate(),
                     thisApparentRate, otherApparentRate);
+            try
+            {
+                if (coopRate instanceof DoubleExpression && ((DoubleExpression) coopRate).getValue() == 0) throw new Exception("lsls");
+            }
+            catch (Exception ex)
+            {
+                System.out.println();
+            }
             Prefix nPref = new Prefix(getAction(), coopRate,
                     newContinuation, immediates);
             nPref.addImmediates(otherAbstractPrefix.getImmediatesRaw());
@@ -57,6 +66,14 @@ public class Prefix extends AbstractPrefix {
         }
         if (otherAbstractPrefix instanceof PassivePrefix)
         {
+            try
+            {
+                if (thisApparentRate instanceof DoubleExpression && ((DoubleExpression) thisApparentRate).getValue() == 0) throw new Exception("lsls");
+            }
+            catch (Exception ex)
+            {
+                System.out.println();
+            }
             Prefix nPref = new Prefix(getAction(),
                 thisApparentRate, newContinuation, immediates);
             nPref.addImmediates(otherAbstractPrefix.getImmediatesRaw());

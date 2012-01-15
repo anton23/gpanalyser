@@ -1,10 +1,6 @@
 package uk.ac.imperial.doc.gpa.pctmc;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -57,6 +53,13 @@ public class GPEPAToPCTMC {
 
 			events.add(new EvolutionEvent(decreasing, increasing, event.getRate()));
 		}
-		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions); 
+
+        // remove duplicate events
+        Set<EvolutionEvent> hs = new LinkedHashSet<EvolutionEvent>();
+        hs.addAll(events);
+        events.clear();
+        events.addAll(hs);
+
+		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions);
 	}
 }

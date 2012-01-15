@@ -98,7 +98,8 @@ public class PEPAComponentDefinitions {
                     for (AbstractPrefix prefix : prefixes) {
                         if (prefix.getContinuation().equals
                                 (newDefinitions.getShorthand(choice))) {
-                            predecessorExists = true;
+                            predecessorExists = newDefinitions.getShorthand(choice)
+                                    .equals(newDefinitions.getShorthand(otherChoice));
                             String name = newDefinitions.inverseDefinitions
                                     .remove(otherChoice);
                             List<ImmediatePrefix> immediates
