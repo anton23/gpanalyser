@@ -35,7 +35,7 @@ import uk.ac.imperial.doc.masspa.representation.model.MASSPAChannel;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAModel;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAMovement;
 import uk.ac.imperial.doc.masspa.representation.model.VarLocation;
-import uk.ac.imperial.doc.masspa.util.LocationHelper;
+import uk.ac.imperial.doc.masspa.representation.model.util.LocationHelper;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
@@ -45,8 +45,8 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 /***
- * This class converts a MASSPA model into a SPCTMC
- * (Spatial Parameterised CTMC).
+ * This class converts a MASSPA model into a PCTMC
+ * (Population CTMC).
  * 
  * @author Chris Guenther
  */
@@ -54,18 +54,25 @@ public class MASSPAToPCTMC
 {
 	public static PCTMC getPCTMC(MASSPAModel _model, Map<ExpressionVariable, AbstractExpression> _variables, Constants _constants)
 	{	
-		// Find populations
+		// Create initial populations
 		Set<MASSPAAgentPop> agentPops = _model.getAllAgentPopulations();
 		Set<MASSPAActionCount> actionCounts = _model.getAllActionCounts();
 		Map<State, AbstractExpression> initCounts = createInitialCounts(agentPops, actionCounts, _model);
 
-		// Localise constants
-		localiseConstants(_model, _constants);
-		// Expand variables
-		inlineVariables(_model, _variables, _constants);
-	
 		// Create evolutions
+		localiseConstants(_model, _constants);
+		inlineVariables(_model, _variables, _constants);
 		List<EvolutionEvent> events = createEvolutionEvents(agentPops, actionCounts, initCounts, _variables, _constants, _model);	
+
+		/*
+		for (MASSPAAgentPop pop : agentPops)
+		{
+			System.out.println(pop.getNameAndInitPop());
+		}
+		for (EvolutionEvent evo : events)
+		{
+			System.out.println(evo);
+		}*/
 		
 		// Build MASSPAPCTMC
 		return new MASSPAPCTMC(initCounts, events, _model);
@@ -87,7 +94,8 @@ public class MASSPAToPCTMC
 				boolean zeroAgent = true;
 				for (MASSPAAgentPop p : (Set<MASSPAAgentPop>)_model.getPredecessorPopulations(pop))
 				{
-					if (!p.getInitialPopulation().equals(new IntegerExpression(0)))
+					if (!p.getInitialPopulation().equals(new IntegerExpression(0)) &&
+						!p.getInitialPopulation().equals(new DoubleExpression(0.0)))
 					{
 						zeroAgent = false;
 						break;
@@ -233,7 +241,6 @@ public class MASSPAToPCTMC
 	{
 		ExpressionEvaluatorWithConstants eval = new ExpressionEvaluatorWithLocationConstants(_constants,_loc);
 		_rate.accept(eval);
-		System.out.print(eval.getResult());
 		return eval.getResult();
 	}
 	
@@ -264,7 +271,7 @@ public class MASSPAToPCTMC
 					if(!_initCounts.containsKey(contPop)) {continue;}
 
 					// Local event (i.e. non-message induced event)
-					if (!(p instanceof ReceivePrefix) && !(p instanceof SendPrefix))
+					if (!(p instanceof ReceivePrefix))
 					{
 						List<State> increasing = new LinkedList<State>();			
 						List<State> decreasing = new LinkedList<State>();
@@ -278,8 +285,31 @@ public class MASSPAToPCTMC
 						// Add any countActions to increasing set
 						addCountActions(increasing,decreasing,p.getAction(),pop.getLocation(),_actionCounts);
 						
-						// Create and add event
-						events.add(new EvolutionEvent(decreasing, increasing, evoRate));
+						// Check if there is an asynchronous channel for send prefix
+						if (p instanceof SendPrefix)
+						{
+							boolean allSynchChannel=true;
+							for (MASSPAChannel chan : _model.getAllChannelsSender(pop, ((SendPrefix)p).getMsg()))
+							{
+								if (chan.getRateType() != MASSPAChannel.RateType.MULTISERVER_SYNC)
+								{
+									allSynchChannel=false;
+									break;
+								}
+							}
+							
+							// At least one channel is asynchronous
+							if (!allSynchChannel)
+							{
+								// Create and add event
+								events.add(new EvolutionEvent(decreasing, increasing, evoRate));	
+							}	
+						}
+						else
+						{
+							// Create and add event
+							events.add(new EvolutionEvent(decreasing, increasing, evoRate));	
+						}
 					}
 					// External event (i.e. message induced event)
 					if (p instanceof ReceivePrefix)
@@ -302,39 +332,73 @@ public class MASSPAToPCTMC
 										{
 											List<State> increasing = new LinkedList<State>();			
 											List<State> decreasing = new LinkedList<State>();
-											decreasing.add(pop);
-											decreasing.add(chan.getSender());
-											increasing.add(contPop);
-											increasing.add(new MASSPAAgentPop(sp.getContinuation(),chan.getSender().getLocation()));
-											
+
 											AbstractExpression msgEmissionRateExpr = ProductExpression.create(sp.getRate(),sp.getNofMsgsSent());
 											double msgEmissionRate = simplifyRateUsingLocationConsts(msgEmissionRateExpr,_constants,chan.getSender().getLocation());
 											double msgAccProb = simplifyRateUsingLocationConsts(rp.getAcceptanceProbability(),_constants,pop.getLocation());
-											CombinedProductExpression intensity = (CombinedProductExpression)chan.getIntensity();
+											AbstractExpression intensity = (AbstractExpression)chan.getIntensity();
 											
 											// Simplify acc prob * Intensity * msg emission rate expression
 											AbstractExpression rateExpr = ProductExpression.create(new DoubleExpression(msgAccProb),new DoubleExpression(msgEmissionRate));
 											double rate = simplifyRate(rateExpr,_constants);
 											if (rate == 0) {continue;}
-				
-											// E[nofSender nofReceiver]
-											Map<State, Integer> map = new HashMap<State, Integer>();
-											//map.put(chan.getSender(), 1);
-											map.put(pop, 1);
-											map.put(intensity.getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
-						
-											Map<State, Integer> map2 = new HashMap<State, Integer>();
-											map2.put(chan.getSender(), 1);
-											map2.put(intensity.getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
-											
+
 											// Add any countActions to increasing set
-											addCountActions(increasing,decreasing,p.getAction(),pop.getLocation(),_actionCounts);
 											addCountActions(increasing,decreasing,rp.getAction(),contPop.getLocation(),_actionCounts);
 											
 											// Combined rate: rate = rate * E[nofSender nofReceiver]
-											AbstractExpression ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));								
-											//AbstractExpression ae = ProductExpression.create(new DoubleExpression(rate),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));								
-											events.add(new MASSPAEvolutionEvent(decreasing, increasing, ae, chan.getSender()));
+											AbstractExpression ae=null;
+											Map<State, Integer> map = new HashMap<State, Integer>();
+											Map<State, Integer> map2 = new HashMap<State, Integer>();
+											if (chan.getRateType() == MASSPAChannel.RateType.MULTISERVER_SYNC)
+											{
+												// Add any countActions to increasing set
+												addCountActions(increasing,decreasing,sp.getAction(),chan.getSender().getLocation(),_actionCounts);
+												
+												// Synchronous
+												decreasing.add(pop);
+												decreasing.add(chan.getSender());
+												increasing.add(contPop);
+												increasing.add(new MASSPAAgentPop(sp.getContinuation(),chan.getSender().getLocation()));
+																								
+												// min(E[nofSender], E[nofReceiver])
+												map.put(pop, 1);
+												map2.put(chan.getSender(), 1);
+												// Special case when intensity is a population
+												if (intensity instanceof CombinedProductExpression)
+												{
+													map.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
+													map2.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
+													ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
+												}
+												else
+												{
+													rate *= simplifyRate(intensity,_constants);
+													ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
+												}
+											}
+											else if (chan.getRateType() == MASSPAChannel.RateType.MASSACTION_ASYNC)
+											{
+												// Asynchronous
+												decreasing.add(pop);
+												increasing.add(contPop);
+												
+												// E[nofSender nofReceiver]
+												map.put(chan.getSender(), 1);
+												map.put(pop, 1);
+												// Special case when intensity is a population
+												if (intensity instanceof CombinedProductExpression)
+												{
+													map.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
+													ae = ProductExpression.create(new DoubleExpression(rate),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));
+												}
+												else
+												{
+													rate *= simplifyRate(intensity,_constants);
+													ae = ProductExpression.create(new DoubleExpression(rate),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));
+												}
+											}
+											events.add(new EvolutionEvent(decreasing, increasing, ae));
 										}
 									}
 								}

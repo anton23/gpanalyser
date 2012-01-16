@@ -20,7 +20,7 @@ import uk.ac.imperial.doc.masspa.representation.model.MASSPAActionCount;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAAgentPop;
 import uk.ac.imperial.doc.masspa.representation.model.MASSPAModel;
 import uk.ac.imperial.doc.masspa.representation.model.VarLocation;
-import uk.ac.imperial.doc.masspa.util.LocationHelper;
+import uk.ac.imperial.doc.masspa.representation.model.util.LocationHelper;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;

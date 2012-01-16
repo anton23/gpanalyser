@@ -18,8 +18,6 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	private PCTMCODEAnalysis odeAnalysis;
 
 	private int density;
-
-	
 	
 	public int getDensity() {
 		return density;
@@ -33,6 +31,27 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 			int density) {
 		super(stopTime, stepSize);
 		this.density = density;
+	}
+	
+	private ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
+			PCTMCODEAnalysis odeAnalysis, JavaODEsPreprocessed preprocessedImplementation) {
+		this(stopTime, stepSize, density);
+		this.odeAnalysis = odeAnalysis;
+		this.preprocessedImplementation = preprocessedImplementation;
+		this.momentIndex = odeAnalysis.getMomentIndex();
+		this.generalExpectationIndex = odeAnalysis.getGeneralExpectationIndex();
+		this.dataPoints = null;
+	}
+	
+
+	@Override
+	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
+		assert(odeAnalysis!=null);
+		PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider();
+		ODEAnalysisNumericalPostprocessor ret = new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, density, odeAnalysis, javaImplementation
+				.getPreprocessedODEImplementation(
+						odeAnalysis.getOdeMethod(), constants, momentIndex));
+		return ret;
 	}
 
 	@Override
@@ -61,7 +80,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	@Override
 	public void calculateDataPoints(Constants constants) {
 		if (odeAnalysis != null) {
-			initial = getInitialValues(constants);
+			initial = getInitialValues(constants);			
 			dataPoints = new PCTMCJavaImplementationProvider().runODEAnalysis(
 					preprocessedImplementation, initial, stopTime, stepSize,
 					density, constants);

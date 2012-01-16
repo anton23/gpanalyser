@@ -18,6 +18,7 @@ SENDMSG:'!';
 RECVMSG:'?';
 STOP: 'stop';
 CHANNEL: 'Channel';
+CHANNELTYPE: 'ChannelType';
 ACOUNT:'#';
 LOC_ALL:'A';
 LOC_VAR:'x';

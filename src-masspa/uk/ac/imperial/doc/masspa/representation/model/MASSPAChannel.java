@@ -14,10 +14,14 @@ import uk.ac.imperial.doc.masspa.representation.components.MASSPAMessage;
  */
 public class MASSPAChannel implements Comparable<MASSPAChannel>
 {
+	public enum RateType{MULTISERVER_SYNC,MASSACTION_ASYNC};
+	public final static RateType s_defaultRate = RateType.MULTISERVER_SYNC;
+	
 	private MASSPAAgentPop m_sender;
 	private MASSPAAgentPop m_receiver;
 	private MASSPAMessage m_msg;
 	private AbstractExpression m_intensity;
+	private RateType m_rateType;
 	
 	/**
 	 *
@@ -31,9 +35,10 @@ public class MASSPAChannel implements Comparable<MASSPAChannel>
 	 * @param _sender sending agent population
 	 * @param _receiver receiving agent population
 	 * @param _msg message that is sent
-	 * @param _intensity regulate channel quality (0<_intensity<1 => message loss, 1<_intensity message multiplication) 
+	 * @param _intensity regulate channel quality (0<_intensity<1 => message loss, 1<_intensity message multiplication)
+	 * @param _rateType defines the rate kinetics we assume for this channel
 	 */
-	public MASSPAChannel(final MASSPAAgentPop _sender, final MASSPAAgentPop _receiver, final MASSPAMessage _msg, final AbstractExpression _intensity)
+	public MASSPAChannel(final MASSPAAgentPop _sender, final MASSPAAgentPop _receiver, final MASSPAMessage _msg, final AbstractExpression _intensity, final RateType _rateType)
 	{
 		setSender(_sender);
 		if (getSender() == null) {throw new AssertionError(Messages.s_COMPILER_CHANNEL_NULL_SENDER);}
@@ -43,6 +48,7 @@ public class MASSPAChannel implements Comparable<MASSPAChannel>
 		if (getMsg() == null) {throw new AssertionError(Messages.s_COMPILER_CHANNEL_NULL_MESSAGE);}
 		setIntensity(_intensity);
 		if (getIntensity() == null) {throw new AssertionError(Messages.s_COMPILER_CHANNEL_NULL_INTENSITY);}
+		setRateType(_rateType);	
 	}
 
 	// Getters/Setters
@@ -54,6 +60,8 @@ public class MASSPAChannel implements Comparable<MASSPAChannel>
 	public MASSPAMessage getMsg() {return m_msg;}
 	public void setIntensity(AbstractExpression _intensity) {m_intensity =_intensity;}
 	public AbstractExpression getIntensity() {return m_intensity;}
+	public void setRateType(RateType _rateType) {m_rateType = _rateType;}
+	public RateType getRateType() {return m_rateType;}
 	
 	//*******************************************
 	// Implement Comparable interface

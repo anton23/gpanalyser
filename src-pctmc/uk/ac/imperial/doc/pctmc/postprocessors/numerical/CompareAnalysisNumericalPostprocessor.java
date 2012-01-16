@@ -27,6 +27,12 @@ public class CompareAnalysisNumericalPostprocessor extends
 		
 	}
 
+	@Override
+	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 	@Override
 	public void calculateDataPoints(Constants constants) {

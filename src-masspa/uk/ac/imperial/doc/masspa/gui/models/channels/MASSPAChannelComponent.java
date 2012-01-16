@@ -31,13 +31,16 @@ public class MASSPAChannelComponent extends MASSPAChannel
 	 * @param _receiver
 	 * @param _msg
 	 * @param _intensity
+	 * @param _rateType
 	 */
 	public MASSPAChannelComponent(MASSPAAgentPopComponent _sender,
 								  MASSPAAgentPopComponent _receiver,
 								  MASSPAMessage _msg,
-								  AbstractExpression _intensity)
+								  AbstractExpression _intensity/*,
+								  RateType _rateType*/)
 	{
-		super(_sender, _receiver, _msg, _intensity);
+		// TODO: serialize rate
+		super(_sender, _receiver, _msg, _intensity, s_defaultRate);
 	}
 	
 	//**********************************************

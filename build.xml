@@ -17,11 +17,12 @@
 	<property name="test.out" value="test-build"/>
 	<property name="test.class" value="${test.out}/classes"/>
 	<property name="jexpressions.test" value="test-jexpressions"/>
-	<property name="gpa.test" value="test-gpa"/>
 	<property name="pctmc.test" value="test-pctmc"/>
 	<property name="plain.test" value="test-plain"/>
-
-    <property name="lib" value="lib"/>
+	<property name="masspa.test" value="test-masspa"/>
+	<property name="gpa.test" value="test-gpa"/>
+    
+	<property name="lib" value="lib"/>
     <property name="examples" value="inputs"/>
 	<property name="jexpressions.src" value="src-jexpressions"/>
 	<property name="src.generated" value="genSrc"/>
@@ -368,9 +369,10 @@
 		            <src path="${build.class}"/>
 		        	<src path="${jexpressions.test}"/>
 		        	<src path="${pctmc.test}"/>
-		        	<src path="${gpa.test}"/>
 		        	<src path="${plain.test}"/>
-		            <include name="**/*.java"/> 
+		        	<src path="${masspa.test}"/>
+			        <src path="${gpa.test}"/>
+		        	<include name="**/*.java"/> 
 		        	<include name="**/*.class"/>
 		         	<exclude name="**/package-info.java"/> 
 		        </javac>

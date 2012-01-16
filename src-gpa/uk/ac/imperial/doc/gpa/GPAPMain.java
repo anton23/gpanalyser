@@ -52,6 +52,10 @@ public class GPAPMain {
 						"reads model descriptions in MASSPA format");
 
 				accepts("3D", "displays 3D plots for iterate experiments");
+				
+				accepts("nthreads", "number of threads available to analyses")
+				.withRequiredArg().ofType(Integer.class)
+						.describedAs("number of threads");
 
 				accepts("help", "show help");
 			}
@@ -93,6 +97,16 @@ public class GPAPMain {
 			}
 			if (options.has("3D")) {
 				PCTMCChartUtilities.jogl = true;
+			}
+			if (options.has("nthreads")) {
+				Integer nthreads = (Integer)options.valueOf("nthreads");
+				if (nthreads<1) {
+					nthreads = 1;
+				}
+				if (nthreads > Runtime.getRuntime().availableProcessors()) {
+					PCTMCLogging.info("Using more threads (" + nthreads + ") than available processors (" + Runtime.getRuntime().availableProcessors() + ")");
+				}
+				PCTMCOptions.nthreads = nthreads;
 			}
 			if (options.has("plain")) {
 				interpreter = createPlainPCTMCInterpreter();

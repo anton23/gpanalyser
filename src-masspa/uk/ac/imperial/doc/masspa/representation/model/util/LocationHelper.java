@@ -1,7 +1,8 @@
-package uk.ac.imperial.doc.masspa.util;
+package uk.ac.imperial.doc.masspa.representation.model.util;
 
 import java.util.LinkedList;
 
+import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.representation.model.AllLocation;
 import uk.ac.imperial.doc.masspa.representation.model.Location;
 import uk.ac.imperial.doc.masspa.representation.model.VarLocation;
@@ -24,7 +25,7 @@ public class LocationHelper
 		}
 		else if (_s.contains(AllLocation.getInstance().toString()))
 		{
-			throw new AssertionError(_s + " is invalid. Constants, Variables and Functions can only have location @(x) or @(INT(,INT)+)");
+			throw new AssertionError(String.format(Messages.s_COMPILER_LOCATION_INVALID_ALLLOCATION_USE, _s));
 		}
 
 		String coordsStr = (_s.split("@"))[1];

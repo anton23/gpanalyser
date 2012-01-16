@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAAgents;
@@ -39,10 +39,12 @@ public class MASSPAModel
 	private final Map<MASSPAAgentPop,MASSPAAgentPop> m_agentPops;
 	private final Map<MASSPAActionCount,MASSPAActionCount> m_actionCounts;
 	private final HashMultimap<MASSPAAgentPop,MASSPAChannel> m_channels;
+	private final HashMultimap<MASSPAAgentPop,MASSPAChannel> m_channelsSender;
 	private final HashMultimap<MASSPAAgentPop,MASSPAMovement> m_movements;
 	private final HashMultimap<MASSPAAgentPop,MASSPAMovement> m_movementsReverse;
 	private final HashMap<MASSPAAgentPop,MASSPABirth> m_births;
 	private final HashMultimap<MASSPAAgentPop, MASSPAAgentPop> m_neighbours;
+	private MASSPAChannel.RateType m_rateType = MASSPAChannel.s_defaultRate;
 	
 	// *************************************************
 	// Constructor
@@ -53,7 +55,11 @@ public class MASSPAModel
 		
 		// Local definitions
 		m_agents = _compFact;
-		if (m_agents == null) {throw new AssertionError(Messages.s_COMPILER_MODEL_NULL_COMPONENTS);}
+		if (m_agents == null)
+		{
+			MASSPALogging.fatalError(Messages.s_COMPILER_MODEL_NULL_COMPONENTS);
+			throw new AssertionError(Messages.s_COMPILER_MODEL_NULL_COMPONENTS);
+		}
 
 		// Spatial definitions
 		m_locations = new HashMap<Location,Location>();
@@ -62,6 +68,7 @@ public class MASSPAModel
 		m_agentPops = new HashMap<MASSPAAgentPop,MASSPAAgentPop>();
 		m_actionCounts = new HashMap<MASSPAActionCount,MASSPAActionCount>();
 		m_channels = HashMultimap.create();
+		m_channelsSender = HashMultimap.create();
 		m_movements = HashMultimap.create();
 		m_movementsReverse = HashMultimap.create();
 		m_births = new HashMap<MASSPAAgentPop,MASSPABirth>();
@@ -73,6 +80,14 @@ public class MASSPAModel
 	// *****************************************************************
 	// Getters
 	// *****************************************************************
+	/**
+	 * @return rate type of channel
+	 */
+	public MASSPAChannel.RateType getChannelType()
+	{
+		return m_rateType;
+	}
+	
 	/**
 	 * @return the object which holds the information about the
 	 * 		   non-spatial aspects of the MASSPA model
@@ -131,7 +146,7 @@ public class MASSPAModel
 	public MASSPAActionCount getActionCount(final String _name, final Location _loc, final int _line)
 	{
 		String action = m_agents.getAction(_name);
-		Location loc = (_loc.equals(AllLocation.getInstance())) ? _loc : m_locations.get(_loc);
+		Location loc = (_loc != null && _loc.equals(AllLocation.getInstance())) ? _loc : m_locations.get(_loc);
 		if (action == null || loc == null)
 		{
 			String err = String.format(Messages.s_COMPILER_ACTIONCOUNT_INVALID_DEFINITION,_name,_loc,_line);
@@ -209,7 +224,7 @@ public class MASSPAModel
 				// Set population size to 0 if it isn't defined
 				if (!pop.hasInitialPopulation())
 				{
-					pop.setInitialPopulation(new IntegerExpression(0));
+					pop.setInitialPopulation(new DoubleExpression(0.0));
 				}
 			}
 		}
@@ -226,7 +241,7 @@ public class MASSPAModel
 		for (String action : m_agents.getActions())
 		{			
 			MASSPAActionCount globalCount = getActionCount(action,AllLocation.getInstance(),-1);
-			globalCount.setInitVal(new IntegerExpression(0));
+			globalCount.setInitVal(new DoubleExpression(0.0));
 			for (Location loc : m_locations.values())
 			{
 				MASSPAActionCount count = getActionCount(action,loc,-1);
@@ -234,7 +249,7 @@ public class MASSPAModel
 				// Set population size to 0 if it isn't defined
 				if (!count.hasInitVal())
 				{
-					count.setInitVal(new IntegerExpression(0));
+					count.setInitVal(new DoubleExpression(0.0));
 				}
 				// Add to global action count population
 				else
@@ -264,6 +279,24 @@ public class MASSPAModel
 		return l;
 	}
 
+	/**
+	 * @param _sender
+	 * @param _msg 
+	 * @return all channels for {@code _msg} that have sending agent population {@code _sender}
+	 */
+	public Set<MASSPAChannel> getAllChannelsSender(final MASSPAAgentPop _sender, final MASSPAMessage _msg)
+	{
+		Set<MASSPAChannel> l = new HashSet<MASSPAChannel>();
+		for (MASSPAChannel chan : m_channelsSender.get(_sender))
+		{
+			if (chan.getMsg().equals(_msg))
+			{
+				l.add(chan);
+			}
+		}
+		return l;
+	}
+	
 	/**
 	 * @param _from population we want to find the outgoing movements of
 	 * @return unmodifiable set all movements out of {@code _from}
@@ -350,6 +383,31 @@ public class MASSPAModel
 	}
 	
 	/**
+	 * Set properties of channel communication type. E.g. whether the
+	 * channel rate is based on mass action XY or multi-server min(X,Y) kinetics.
+	 * 
+	 * @param {@code _type}
+	 * @param {@code _line} token line in model file
+	 */
+	public void setChannelType(final String _type, final int _line)
+	{
+		if(_type.equals(Messages.s_COMPILER_KEYWORD_MULTISERVER_SYNC))
+		{
+			m_rateType = MASSPAChannel.RateType.MULTISERVER_SYNC;
+		}
+		else if(_type.equals(Messages.s_COMPILER_KEYWORD_MASSACTION_ASYNC))
+		{
+			m_rateType = MASSPAChannel.RateType.MASSACTION_ASYNC;
+		}
+		else
+		{
+			String err = String.format(Messages.s_COMPILER_INVALID_CHANNELTYPE, _type, _line);
+			MASSPALogging.fatalError(err);
+			throw new AssertionError(err);
+		}
+	}
+	
+	/**
 	 * Create a channel between any two agent populations
 	 * @param _sender sending agent population
 	 * @param _receiver receiving agent population
@@ -360,7 +418,7 @@ public class MASSPAModel
 	public void addChannel(final MASSPAAgentPop _sender, final MASSPAAgentPop _receiver, final MASSPAMessage _msg, final AbstractExpression _intensity, final int _line)
 	{
 		// Check if parameters are ok
-		new MASSPAChannel(_sender, _receiver, _msg, _intensity);
+		new MASSPAChannel(_sender, _receiver, _msg, _intensity, m_rateType);
 		
 		// Create actual channel
 		MASSPAAgentPop sender = getAgentPop(_sender.getComponentName(), _sender.getLocation(), _line);
@@ -368,10 +426,10 @@ public class MASSPAModel
 		MASSPAMessage msg = m_agents.getMessage(_msg);
 		if (msg == null)
 		{
-			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_MESSAGE_UNKNOWN, _sender, _receiver, _msg, _line));
+			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_MESSAGE_UNKNOWN, _msg, _sender, _receiver, _line));
 			return;
 		}
-		MASSPAChannel chan = new MASSPAChannel(sender, receiver, msg, _intensity);
+		MASSPAChannel chan = new MASSPAChannel(sender, receiver, msg, _intensity, m_rateType);
 		if (m_channels.get(receiver).contains(chan))
 		{
 			MASSPALogging.warn(String.format(Messages.s_COMPILER_CHANNEL_DUPLICATE_DEFINTION, chan, _line));
@@ -379,6 +437,7 @@ public class MASSPAModel
 		else
 		{
 			m_channels.put(receiver,chan);
+			m_channelsSender.put(sender,chan);
 		}
 	}
 
