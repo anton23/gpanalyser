@@ -14,6 +14,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -319,9 +320,13 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		code.append("}\n");
 		if (PCTMCOptions.debug) {
 			File file = new File(PCTMCOptions.debugFolder + "/codeSim");
+			File file2 = new File(PCTMCOptions.debugFolder + "/simFriendly");
 			try {
 				Writer out = new BufferedWriter(new FileWriter(file));
 				out.write(code.toString());
+				out.close();
+				out = new BufferedWriter(new FileWriter(file2));
+				out.write(ToStringUtils.iterableToSSV(simulation.getPCTMC().getEvolutionEvents(), "\n"));
 				out.close();
 			} catch (IOException e) {
 				PCTMCLogging.error(e.getStackTrace().toString());
