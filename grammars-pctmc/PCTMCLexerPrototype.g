@@ -45,6 +45,7 @@ GENEXPECTATION: 'Eg';
 CENTRAL: 'CM';
 SCENTRAL: 'SCM';
 VARIANCE: 'Var';
+MOMENT: 'Moment';
 
 ODES: 'ODEs';
 SIMULATION: 'Simulation';
@@ -64,7 +65,7 @@ WHERE:'where';
 WHEN: 'when'; 
 AND:'and';
 GEQ:'>=';
-GT:'>';
+RANGLE:'>';
 
 DERMEAN: 'dE';
 DT: 'dt';

@@ -14,13 +14,15 @@ import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class GPEPAToPCTMC {
 	
-	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,GroupedModel model,Set<String> countActions){
+	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,GroupedModel model,Set<String> countActions, Map<ExpressionVariable,AbstractExpression> unfoldedVariables){
 		Map<State,AbstractExpression> initCounts = new HashMap<State,AbstractExpression>();
 		for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
 			GPEPAState s = new GPEPAState(p); 
@@ -46,7 +48,10 @@ public class GPEPAToPCTMC {
 			if (countActions.contains(event.getAction())){
 				increasing.add(new GPEPAActionCount(event.getAction()));
 			}
-			events.add(new EvolutionEvent(decreasing, increasing, event.getRate()));
+			AbstractExpression rate = event.getRate();
+			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(unfoldedVariables);			
+			rate.accept(setter);
+			events.add(new EvolutionEvent(decreasing, increasing, rate));
 		}
 		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions); 
 	}

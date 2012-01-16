@@ -313,8 +313,9 @@ primary_expression returns[AbstractExpression e]:
  | c=constant {$e = new ConstantExpression($c.text);}
  | cp=combinedPowerProduct {$e = CombinedProductExpression.create($cp.c);}
  | m=mean {$e = $m.m;} 
- | eg = generalExpectation {$e = $eg.e;}
+ | eg = generalExpectation {$e = $eg.e;}  
  | cm=central {$e = $cm.c;}
+ | mom = moment {$e = $mom.c;}
  | scm=scentral {$e = $scm.c;}
  | ^(MIN exp1=expression COMMA exp2=expression) {$e = MinExpression.create($exp1.e,$exp2.e); }
  | ^(MAX exp1=expression COMMA exp2=expression) {$e = MaxExpression.create($exp1.e,$exp2.e); }
@@ -345,6 +346,11 @@ mean returns [MeanOfLinearCombinationExpression m]:
 
 central returns [CentralMomentOfLinearCombinationExpression c]:
   ^(CENTRAL e=expression n=integer) {$c = new CentralMomentOfLinearCombinationExpression($e.e,$n.value,vars);}
+;
+
+
+moment returns [MomentOfLinearCombinationExpression c]:
+  ^(MOMENT e=expression n=integer) {$c = new MomentOfLinearCombinationExpression($e.e,$n.value,vars);}
 ;
 
 scentral returns [StandardisedCentralMomentOfLinearCombinationExpression c]:

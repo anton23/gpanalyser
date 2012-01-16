@@ -26,6 +26,8 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IPopulationVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 
 /**
  * Expression visitor for collecting used moments.
@@ -34,7 +36,12 @@ import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor
  * 
  */
 public class CollectUsedMomentsVisitor implements IExpressionVisitor,
-		ICombinedProductExpressionVisitor, IGeneralExpectationExpressionVisitor {
+		ICombinedProductExpressionVisitor, IGeneralExpectationExpressionVisitor, IPopulationVisitor {
+
+	@Override
+	public void visit(PopulationExpression e) {
+		// TODO Auto-generated method stub		
+	}
 
 	private Set<CombinedPopulationProduct> usedCombinedMoments;
 	private Set<AbstractExpression> usedGeneralExpectations;

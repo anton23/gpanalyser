@@ -25,6 +25,7 @@ tokens{
   EXPODE;
   ODETEST;
   INDICATORFUNCTION;
+  GT;
 }
 
 
@@ -475,6 +476,7 @@ primaryExpression:
           reportError(new CustomRecognitionException(input, "constant '" + $c.text + "' unknown"));}
      | mean 
      | generalExpectation
+     | moment
      | central
      | scentral
      | PATTERN state -> ^(PATTERN state)
@@ -491,7 +493,7 @@ expression comparisonOperator expression
 ;
 
 comparisonOperator:
-  GT
+  RANGLE -> GT
 ;
 
 generalExpectation:
@@ -527,6 +529,12 @@ scentral:
    SCENTRAL LBRACK {insideExpectation = true;}
       expression COMMA INTEGER RBRACK
    {insideExpectation = false;} -> ^(SCENTRAL expression INTEGER)
+;
+
+moment:
+  MOMENT LBRACK  {insideExpectation = true;}
+      expression COMMA INTEGER RBRACK
+   {insideExpectation = false;} -> ^(MOMENT expression INTEGER)
 ;
 
 
