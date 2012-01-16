@@ -258,14 +258,23 @@ public class MASSPAModelTest extends ModelTestUtil
 		m_model.addChannel(s_pop2,s_pop1,new MASSPAMessage("Unknown"),s_expr2,0);
 		
 		assertEquals(0,m_model.getAllChannels(s_pop1, s_msg1).size());
+		assertEquals(1,m_model.getAllChannelsSender(s_pop1, s_msg1).size());
 		assertEquals(1,m_model.getAllChannels(s_pop1, s_msg2).size());
+		assertEquals(0,m_model.getAllChannelsSender(s_pop1, s_msg2).size());
 		assertEquals(2,m_model.getAllChannels(s_pop2, s_msg1).size());
+		assertEquals(0,m_model.getAllChannelsSender(s_pop2, s_msg1).size());
 		assertEquals(0,m_model.getAllChannels(s_pop2, s_msg2).size());
+		assertEquals(1,m_model.getAllChannelsSender(s_pop2, s_msg2).size());
 		assertEquals(0,m_model.getAllChannels(s_pop3, s_msg1).size());
+		assertEquals(1,m_model.getAllChannelsSender(s_pop3, s_msg1).size());
 		assertEquals(0,m_model.getAllChannels(s_pop3, s_msg2).size());
+		assertEquals(0,m_model.getAllChannelsSender(s_pop3, s_msg2).size());
 		assertEquals(0,m_model.getAllChannels(null, s_msg2).size());
+		assertEquals(0,m_model.getAllChannelsSender(null, s_msg2).size());
 		assertEquals(0,m_model.getAllChannels(s_pop3, null).size());
+		assertEquals(0,m_model.getAllChannelsSender(s_pop3, null).size());
 		assertEquals(0,m_model.getAllChannels(null, null).size());
+		assertEquals(0,m_model.getAllChannelsSender(null, null).size());
 	}
 	
 	@Test
