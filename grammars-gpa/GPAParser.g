@@ -265,8 +265,8 @@ probel
 			-> ^(PROBEL rl_signal REPETITION?) ;
 
 rl_signal
-	:	rl_single (INGROUP signal)? (COMMA rl_signal)?
-			-> ^(RLS rl_single signal? rl_signal?) ;
+	:	rl_single INGROUP signal (COMMA rl_signal)?
+			-> ^(RLS rl_single signal rl_signal?) ;
 
 rl_single
 	:	rl_single_bracketed
@@ -396,7 +396,7 @@ scope
 	$probe_spec::signals = new ArrayList<String> ();
 	$probe_spec::signalsString = new StringBuilder ();
 }
-	:	UPPERCASENAME DEF probeg (OBSERVES local_probes WHERE locations)? LOWERCASENAME*
+	:	UPPERCASENAME DEF probeg (OBSERVES local_probes WHERE locations)?
 				{
 					for (String signal :$probe_spec::signals)
 					{
@@ -411,7 +411,7 @@ local_probes
 	:	local_probe_ass (COMMA local_probe_ass)* ;
 
 local_probe_ass
-	:	UPPERCASENAME DEF probel
+	:	LBRACE UPPERCASENAME DEF probel RBRACE
 			-> ^(DEF UPPERCASENAME probel) ;
 
 locations
@@ -419,15 +419,12 @@ locations
 
 location
 	:
-		{
-			checkComponentNames = true;
-		}
-		model1=model
+		LBRACE model1=model
 		{
 			checkComponentNames = false;
 		}
 		SUBSTITUTE
-		model2=model
+		model2=model RBRACE
 		{
 			checkComponentNames = true;
 		}

@@ -590,15 +590,10 @@ rl_signal returns [NFAState starting_state]
 {
 	$starting_state = new NFAState (t);
 }
-	:	^(RLS rl_single [$starting_state] sig=signal? next_rl=rl_signal?)
+	:	^(RLS rl_single [$starting_state] sig=signal next_rl=rl_signal?)
 			{
-				ITransition signal = new EmptyTransition ();
-				if (sig != null)
-				{
-					signal = new SignalTransition ($sig.name);
-				}
+				ITransition signal = new SignalTransition ($sig.name);
 				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
-				NFAPrinter.printNFA ($starting_state);
 				NFAState acc_state = new NFAState (t);
 				unifyAcceptingStates ($starting_state, acc_state);
 				NFAState new_acc_state = new NFAState (t);
