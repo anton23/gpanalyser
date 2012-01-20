@@ -30,7 +30,6 @@ public class GPEPAToPCTMC {
 		List<PEPAEvolutionEvent> observableEvolutionEvents = model.getObservableEvolutionEvents(componentDefinitions);
 		List<EvolutionEvent> events = new LinkedList<EvolutionEvent>(); 
 		for (PEPAEvolutionEvent event:observableEvolutionEvents){
-
 			List<State> increasing = new LinkedList<State>();			
 			List<State> decreasing = new LinkedList<State>();
 			for (GroupComponentPair p:event.getDecreases()){

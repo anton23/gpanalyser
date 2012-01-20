@@ -34,16 +34,16 @@ public class PassivePrefix extends AbstractPrefix {
         return DoubleExpression.ZERO;
     }
 
-    public AbstractPrefix getCooperationImpl(AbstractPrefix otherAbstractPrefix,
+    public AbstractPrefix getCooperationImpl(String newAction,
+                                             AbstractPrefix otherAbstractPrefix,
                                              AbstractExpression otherApparentRate,
                                              AbstractExpression thisApparentRate,
-                                             PEPAComponent newContinuation) {
+                                             PEPAComponent newContinuation,
+                                             List<ImmediatePrefix> newImmediates) {
         if (otherAbstractPrefix instanceof Prefix)
         {
-            Prefix nPref = new Prefix(getAction(),
-                otherApparentRate, newContinuation, immediates);
-            nPref.addImmediates(otherAbstractPrefix.getImmediatesRaw());
-            return nPref;
+            return new Prefix(newAction,otherApparentRate,
+                    newContinuation, newImmediates);
         }
         return null;
     }
