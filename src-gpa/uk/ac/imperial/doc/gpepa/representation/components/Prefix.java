@@ -42,42 +42,24 @@ public class Prefix extends AbstractPrefix {
         return rate;
 	}
 
-    public AbstractPrefix getCooperationImpl(AbstractPrefix otherAbstractPrefix,
+    public AbstractPrefix getCooperationImpl(String newAction,
+                                             AbstractPrefix otherAbstractPrefix,
                                              AbstractExpression otherApparentRate,
                                              AbstractExpression thisApparentRate,
-                                             PEPAComponent newContinuation) {
+                                             PEPAComponent newContinuation,
+                                             List<ImmediatePrefix> newImmediates) {
         if (otherAbstractPrefix instanceof Prefix)
         {
             AbstractExpression coopRate = DivDivMinExpression.create(
                     getRate(), otherAbstractPrefix.getRate(),
                     thisApparentRate, otherApparentRate);
-            try
-            {
-                if (coopRate instanceof DoubleExpression && ((DoubleExpression) coopRate).getValue() == 0) throw new Exception("lsls");
-            }
-            catch (Exception ex)
-            {
-                System.out.println();
-            }
-            Prefix nPref = new Prefix(getAction(), coopRate,
-                    newContinuation, immediates);
-            nPref.addImmediates(otherAbstractPrefix.getImmediatesRaw());
-            return nPref;
+            return new Prefix(newAction, coopRate,
+                    newContinuation, newImmediates);
         }
         if (otherAbstractPrefix instanceof PassivePrefix)
         {
-            try
-            {
-                if (thisApparentRate instanceof DoubleExpression && ((DoubleExpression) thisApparentRate).getValue() == 0) throw new Exception("lsls");
-            }
-            catch (Exception ex)
-            {
-                System.out.println();
-            }
-            Prefix nPref = new Prefix(getAction(),
-                thisApparentRate, newContinuation, immediates);
-            nPref.addImmediates(otherAbstractPrefix.getImmediatesRaw());
-            return nPref;
+            return new Prefix(newAction, thisApparentRate,
+                    newContinuation, newImmediates);
         }
         throw new Error("Unsupported cooperation between Prefix and "
             + otherAbstractPrefix.getClass().getName());

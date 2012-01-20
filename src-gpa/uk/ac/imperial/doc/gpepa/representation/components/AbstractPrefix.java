@@ -13,72 +13,107 @@ public abstract class AbstractPrefix
     protected PEPAComponent continuation;
     protected AbstractExpression immediateSum = DoubleExpression.ZERO;
     protected List<ImmediatePrefix> immediates
-        = new LinkedList<ImmediatePrefix> ();
+        = new LinkedList<ImmediatePrefix>();
 
-    public String getAction ()
-    {
+    public String getAction() {
         return action;
     }
 
-    public PEPAComponent getContinuation ()
-    {
+    public PEPAComponent getContinuation() {
         return continuation;
     }
 
-    public void setContinuation (PEPAComponent continuation)
-    {
+    public void setContinuation(PEPAComponent continuation) {
         this.continuation = continuation;
     }
 
-    public List<ImmediatePrefix> getImmediatesRaw ()
-    {
+    public List<ImmediatePrefix> getImmediatesRaw() {
         return immediates;
     }
 
-    public List<String> getImmediates ()
-    {
-        List<String> actions = new LinkedList<String> ();
-        for (ImmediatePrefix immediate : immediates)
-        {
-            actions.add (immediate.getAction ());
+    public List<ImmediatePrefix> getImmediatesRawCopy() {
+        List<ImmediatePrefix> actions = new LinkedList<ImmediatePrefix>();
+        for (ImmediatePrefix immediate : immediates) {
+            actions.add (immediate);
         }
         return actions;
     }
 
-    public void addImmediate (ImmediatePrefix imm)
-    {
-        immediateSum = SumExpression.create (immediateSum, imm.getWeight ());
-        immediates.add (imm);
+    public List<String> getImmediates() {
+        List<String> actions = new LinkedList<String>();
+        for (ImmediatePrefix immediate : immediates) {
+            actions.add (immediate.getAction());
+        }
+        return actions;
+    }
+
+    public void addImmediate(ImmediatePrefix imm) {
+        immediateSum = SumExpression.create (immediateSum, imm.getWeight());
+        immediates.add(imm);
     }
     
-    public void addImmediates (List<ImmediatePrefix> immediates)
-    {
-        for (ImmediatePrefix immediate : immediates)
-        {
-            addImmediate (immediate);
+    public void addImmediates(List<ImmediatePrefix> immediates) {
+        for (ImmediatePrefix immediate : immediates) {
+            addImmediate(immediate);
         }
     }
 
-    public abstract AbstractExpression getRate ();
+    public abstract AbstractExpression getRate();
 
-    public AbstractPrefix getCooperation
-            (String cooperationAction, AbstractPrefix otherAbstractPrefix,
-             AbstractExpression otherApparentRate,
-             AbstractExpression thisApparentRate,
-             PEPAComponent newContinuation)
-    {
-        if (!cooperationAction.equals(otherAbstractPrefix.getAction())
-            && !otherAbstractPrefix.getImmediates().contains(cooperationAction))
-        {
+    public AbstractPrefix getCooperation(String cooperationAction,
+                                         AbstractPrefix otherAbstractPrefix,
+                                         AbstractExpression otherApparentRate,
+                                         AbstractExpression thisApparentRate,
+                                         PEPAComponent newContinuation) {
+        int thisContains = 0;
+        int otherContains = 0;
+        if (getImmediates().contains(cooperationAction)) {
+            thisContains = 2;
+        }
+        if (cooperationAction.equals(getAction())) {
+            thisContains = 1;
+        }
+        if (otherAbstractPrefix.getImmediates().contains(cooperationAction)) {
+            otherContains = 2;
+        }
+        if (cooperationAction.equals(otherAbstractPrefix.getAction())) {
+            otherContains = 1;
+        }
+
+        if ((thisContains == 0 || otherContains == 0)
+                || (thisContains == 2 && otherContains == 2)) {
             return null;
         }
-        return getCooperationImpl(otherAbstractPrefix, otherApparentRate,
-            thisApparentRate, newContinuation);
+
+        List<ImmediatePrefix> newImmediates = getImmediatesRawCopy();
+        newImmediates.addAll(otherAbstractPrefix.getImmediatesRawCopy());
+        String action = cooperationAction;
+        // new prefix will have the main action as the new action
+        if (thisContains == 2 || otherContains == 2) {
+            if (thisContains == 2) {
+                action = getAction();
+            }
+            if (otherContains == 2) {
+                action = otherAbstractPrefix.getAction();
+            }
+/*
+            for (ImmediatePrefix immediate : newImmediates) {
+                if (immediate.getAction().equals(cooperationAction)) {
+                    newImmediates.remove(immediate);
+                    break;
+                }
+            }
+*/
+        }
+
+        return getCooperationImpl(action, otherAbstractPrefix, otherApparentRate,
+            thisApparentRate, newContinuation, newImmediates);
     }
 
-    protected abstract AbstractPrefix getCooperationImpl
-            (AbstractPrefix otherAbstractPrefix,
-             AbstractExpression otherApparentRate,
-             AbstractExpression thisApparentRate,
-             PEPAComponent newContinuation);
+    protected abstract AbstractPrefix getCooperationImpl(String newAction,
+                                                         AbstractPrefix otherAbstractPrefix,
+                                                         AbstractExpression otherApparentRate,
+                                                         AbstractExpression thisApparentRate,
+                                                         PEPAComponent newContinuation,
+                                                         List<ImmediatePrefix> newImmediates);
 }

@@ -3,6 +3,8 @@ package uk.ac.imperial.doc.gpepa.representation.components;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
+import java.util.List;
+
 public class ImmediatePrefix extends AbstractPrefix {
 
     private AbstractExpression weight;
@@ -32,10 +34,12 @@ public class ImmediatePrefix extends AbstractPrefix {
         return weight;
     }
 
-    public AbstractPrefix getCooperationImpl(AbstractPrefix otherAbstractPrefix,
+    public AbstractPrefix getCooperationImpl(String newAction,
+                                             AbstractPrefix otherAbstractPrefix,
                                              AbstractExpression otherApparentRate,
                                              AbstractExpression thisApparentRate,
-                                             PEPAComponent newContinuation) {
+                                             PEPAComponent newContinuation,
+                                             List<ImmediatePrefix> newImmediates) {
         throw new Error("Unsupported cooperation between ImmediatePrefix" +
                 " and " + otherAbstractPrefix.getClass().getName());
     }
