@@ -143,12 +143,9 @@ import PCTMCCompilerPrototype;
 				NFAState new_state1 = state1.advanceWithTransition (transition);
 				NFAState new_state2 = state2.advanceWithTransition (transition);
 
-				if (new_state1 != null  && new_state2 != null)
-				{
-					cstate.addTransition (transition,
-						CartesianUtils.getCartesianState
-							(new_state1, new_state2, cartesianStates));
-				}
+				cstate.addTransition (transition,
+					CartesianUtils.getCartesianState
+						(new_state1, new_state2, cartesianStates));
 			}
 		}
 
@@ -165,65 +162,104 @@ import PCTMCCompilerPrototype;
 				});
 	}
 
-	private NFAState getResetCombination
-		(CartesianUtils.CartesianState startingCartesian,
-		List<CartesianUtils.CartesianState> cartesianStates, String naming)
-	{
-		for (CartesianUtils.CartesianState cstate : cartesianStates)
-		{
-			NFAState state1 = cstate.getState1 ();
-			NFAState state2 = cstate.getState2 ();
+    	private NFAState getResetCombination
+    		(CartesianUtils.CartesianState startingCartesian,
+    		List<CartesianUtils.CartesianState> cartesianStates, String naming)
+    	{
+    		for (CartesianUtils.CartesianState cstate : cartesianStates)
+    		{
+    			NFAState state1 = cstate.getState1 ();
+    			NFAState state2 = cstate.getState2 ();
 
-			if (state1.isAccepting () || state2.isAccepting ())
-			{
-				continue;
-			}
+    			if (state2.isAccepting ())
+    			{
+    				continue;
+    			}
 
-			Map<ITransition, NFAState> transitions
-				= new HashMap<ITransition, NFAState> ();
-			transitions.putAll (state1.getTransitions ());
-			transitions.putAll (state2.getTransitions ());
+    			Map<ITransition, NFAState> transitions
+    				= new HashMap<ITransition, NFAState> ();
+    			transitions.putAll (state1.getTransitions ());
+    			transitions.putAll (state2.getTransitions ());
 
-			for (ITransition transition : transitions.keySet ())
-			{
-				NFAState new_state1 = state1.advanceWithTransition (transition);
-				NFAState new_state2 = state2.advanceWithTransition (transition);
-				
-				if (new_state1 == null)
-				{
-					new_state1 = state1;
-				}
-				
-				if (new_state2 == null)
-				{
-					new_state2 = state2;
-				}
+    			for (ITransition transition : transitions.keySet ())
+    			{
+    				NFAState new_state1 = state1.advanceWithTransition (transition);
+    				NFAState new_state2 = state2.advanceWithTransition (transition);
 
-				if (new_state2.isAccepting ())
-				{
-					cstate.addTransition (transition, startingCartesian);
-				}
-				else
-				{
-					cstate.addTransition (transition,
-						CartesianUtils.getCartesianState
-							(new_state1, new_state2, cartesianStates));
-				}
-			}
-		}
+    				if (new_state2.isAccepting ())
+    				{
+    					cstate.addTransition (transition, startingCartesian);
+    				}
+    				else
+    				{
+    					cstate.addTransition (transition,
+    						CartesianUtils.getCartesianState
+    							(new_state1, new_state2, cartesianStates));
+    				}
+    			}
+    		}
 
-		return CartesianUtils.convertCartesianToDFA
-			(startingCartesian, cartesianStates, naming,
-				new CartesianUtils.AcceptingCartesianStateFilter ()
-				{
-					public boolean isAccepting
-						(CartesianUtils.CartesianState cstate)
-					{
-						return (cstate.getState1 ().isAccepting ()
-							&& !cstate.getState2 ().isAccepting ());
-					}
-				});
-	}
+    		return CartesianUtils.convertCartesianToDFA
+    			(startingCartesian, cartesianStates, naming,
+    				new CartesianUtils.AcceptingCartesianStateFilter ()
+    				{
+    					public boolean isAccepting
+    						(CartesianUtils.CartesianState cstate)
+    					{
+    						return (cstate.getState1 ().isAccepting ()
+    							&& !cstate.getState2 ().isAccepting ());
+    					}
+    				});
+    	}
+
+    	private NFAState getFailCombination
+    		(CartesianUtils.CartesianState startingCartesian,
+    		List<CartesianUtils.CartesianState> cartesianStates,
+    		String naming, Set<ITransition> alphabet)
+    	{
+    		for (CartesianUtils.CartesianState cstate : cartesianStates)
+    		{
+                if (cstate.getState2 ().isAccepting ())
+                {
+                    for (ITransition action : alphabet)
+                    {
+                        cstate.addTransitionIfNotExisting
+                                (action.getSimpleTransition (), cstate);
+                    }
+                    continue;
+                }
+
+    			NFAState state1 = cstate.getState1 ();
+    			NFAState state2 = cstate.getState2 ();
+
+    			Map<ITransition, NFAState> transitions
+    				= new HashMap<ITransition, NFAState> ();
+    			transitions.putAll (state1.getTransitions ());
+    			transitions.putAll (state2.getTransitions ());
+
+    			for (ITransition transition : transitions.keySet ())
+    			{
+    				NFAState new_state1 = state1.advanceWithTransition (transition);
+    				NFAState new_state2 = state2.advanceWithTransition (transition);
+
+    				cstate.addTransition (transition,
+    					CartesianUtils.getCartesianState
+    						(new_state1, new_state2, cartesianStates));
+    			}
+    		}
+
+    		return CartesianUtils.convertCartesianToDFA
+    			(startingCartesian, cartesianStates, naming,
+    				new CartesianUtils.AcceptingCartesianStateFilter ()
+    				{
+    					public boolean isAccepting
+    						(CartesianUtils.CartesianState cstate)
+    					{
+    						return (cstate.getState1 ().isAccepting ()
+    							&& !cstate.getState2 ().isAccepting ());
+    					}
+    				});
+    	}
 
 	private void unifyAcceptingStates (NFAState starting_state,
 		NFAState new_reached_state)
@@ -248,28 +284,35 @@ import PCTMCCompilerPrototype;
 		}
 	}
 
-    private void removeAnyTransitions
-    	(Set<ITransition> alphabet, NFAState startingState)
-    {
+	private void removeAnyTransitions
+		(Set<ITransition> alphabet, NFAState startingState)
+	{
 		Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
+		Set<NFAState> statesWithAny = new HashSet<NFAState> ();
 		for (NFAState state : states)
 		{
-        	Map<ITransition, NFAState> transitions = state.getRawTransitions ();
-        	for (ITransition transition : transitions.keySet ())
-        	{
-        		if (transition instanceof AnyTransition)
-        		{
-        			NFAState other = transitions.get (transition);
-        			for (ITransition newTransition : alphabet)
-        			{
-        				state.addTransitionIfNotExisting
-        					(newTransition.getSimpleTransition (), other);
-        			}
-        			transitions.remove (transition);
-        		}
-        	}
+			Map<ITransition, NFAState> transitions = state.getRawTransitions ();
+			for (ITransition transition : transitions.keySet ())
+			{
+				if (transition instanceof AnyTransition)
+				{
+					statesWithAny.add(state);
+				}
+			}
 		}
-    }
+
+		ITransition any = new AnyTransition ();
+		for (NFAState state : statesWithAny)
+		{
+			NFAState other = state.advanceWithTransition (any);
+			for (ITransition newTransition : alphabet)
+			{
+				state.addTransitionIfNotExisting
+					(newTransition.getSimpleTransition (), other);
+			}
+			state.getRawTransitions().remove (any);
+		}
+	}
 
     private void extendStatesWithSelfLoops
         	(Set<ITransition> alphabet, NFAState startingState)
@@ -553,7 +596,6 @@ extensions
 probel [String name]
 	:	^(PROBEL proberl=rl_signal rp=REPETITION?)
 			{
-				NFAPrinter.printNFA ($proberl.starting_state);
 				NFAState starting_state = NFAtoDFA.convertToDFA
 					($proberl.starting_state, t);
 				NFAState accepting = NFAtoDFA.detectSingleAcceptingState
@@ -682,12 +724,9 @@ rl_bin_operators [NFAState starting_state1,
 	NFAState current_state1, NFAState starting_state2,
 	NFAState current_state2]
 	returns [NFAState starting_state, NFAState reached_state]
-@init
-{
-	$starting_state = new NFAState (t);
-}
 	:	^(BINARY_OP COMMA)
 			{
+				$starting_state = new NFAState (t);
 				$starting_state.addTransition (new EmptyTransition (),
 					$starting_state1);
 				current_state1.addTransition (new EmptyTransition (),
@@ -697,6 +736,7 @@ rl_bin_operators [NFAState starting_state1,
 			}
 		| ^(BINARY_OP PAR)
 			{
+				$starting_state = new NFAState (t);
 				$current_state1.setAccepting (false);
 				$current_state2.setAccepting (false);
 				$starting_state.addTransition (new EmptyTransition (),
@@ -717,10 +757,10 @@ rl_bin_operators [NFAState starting_state1,
 
 				List<CartesianUtils.CartesianState> list
 					= CartesianUtils.getCompleteCartesianDFA (dfa1, dfa2);
-				CartesianUtils.CartesianState comb_sarting_state
+				CartesianUtils.CartesianState comb_starting_state
 					= CartesianUtils.getCartesianState (dfa1, dfa2, list);
 				$starting_state = getBothCombination
-					(comb_sarting_state, list, t);
+					(comb_starting_state, list, t);
 				$reached_state = new NFAState (t);
 
 				unifyAcceptingStates ($starting_state, $reached_state);
@@ -732,16 +772,27 @@ rl_bin_operators [NFAState starting_state1,
 
 				List<CartesianUtils.CartesianState> list
 					= CartesianUtils.getCompleteCartesianDFA (dfa1, dfa2);
-				CartesianUtils.CartesianState comb_sarting_state
+				CartesianUtils.CartesianState comb_starting_state
 					= CartesianUtils.getCartesianState (dfa1, dfa2, list);
 				$starting_state = getResetCombination
-					(comb_sarting_state, list, t);
+					(comb_starting_state, list, t);
 				$reached_state = new NFAState (t);
 
 				unifyAcceptingStates ($starting_state, $reached_state);
 			}
 		| ^(BINARY_OP AT)
 			{
+				NFAState dfa1 = NFAtoDFA.convertToDFA (starting_state1, t);
+				NFAState dfa2 = NFAtoDFA.convertToDFA (starting_state2, t);
+
+				List<CartesianUtils.CartesianState> list
+					= CartesianUtils.getCompleteCartesianDFA (dfa1, dfa2);
+				CartesianUtils.CartesianState comb_starting_state
+					= CartesianUtils.getCartesianState (dfa1, dfa2, list);
+				$starting_state = getFailCombination
+					(comb_starting_state, list, t, $probe_spec::allActions);
+				$reached_state = new NFAState (t);
+				unifyAcceptingStates ($starting_state, $reached_state);
 			} ;
 
 rl_un_operators [NFAState sub_starting_state,
@@ -1159,7 +1210,6 @@ scope
 							{
 								$probe_spec::allActions.add
 									(new SignalTransition (signal));
-System.out.println (signal);
 							}
 						}
 			UPPERCASENAME (local_probes locations) probeg ?)

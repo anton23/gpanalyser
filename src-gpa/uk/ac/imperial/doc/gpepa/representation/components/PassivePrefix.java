@@ -73,6 +73,11 @@ public class PassivePrefix extends AbstractPrefix {
         } else {
             continuationString = "(" + continuationString + ")";
         }
-        return "(" + action + ", T)." + continuationString;
+        String immediatesString = "";
+        for (ImmediatePrefix imm : immediates)
+        {
+            immediatesString += ", " + imm.getAction ();
+        }
+        return "(" + action + immediatesString + ", T)." + continuationString;
     }
 }

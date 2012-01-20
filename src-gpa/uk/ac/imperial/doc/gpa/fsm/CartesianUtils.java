@@ -126,11 +126,20 @@ public class CartesianUtils
 			this.state2 = state2;
 		}
 
-		public void addTransition
-			(ITransition transition, CartesianState cstate)
-		{
-			outgoings.put (transition, cstate);
-		}
+        public void addTransition
+                (ITransition transition, CartesianState cstate)
+        {
+            outgoings.put (transition, cstate);
+        }
+
+        public void addTransitionIfNotExisting
+                (ITransition transition, CartesianState cstate)
+        {
+            if (!outgoings.containsKey (transition))
+            {
+                addTransition (transition, cstate);
+            }
+        }
 
 		public NFAState getState1 ()
 		{
