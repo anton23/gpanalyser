@@ -96,10 +96,10 @@ public class PEPAComponentDefinitions {
                 for (Choice otherChoice : choices.keySet()) {
                     List<AbstractPrefix> prefixes = otherChoice.getChoices();
                     for (AbstractPrefix prefix : prefixes) {
-                        if (prefix.getContinuation().equals
-                                (newDefinitions.getShorthand(choice))) {
-                            predecessorExists = newDefinitions.getShorthand(choice)
-                                    .equals(newDefinitions.getShorthand(otherChoice));
+                        PEPAComponent shorthand = newDefinitions.getShorthand(choice);
+                        if (prefix.getContinuation().equals(shorthand)) {
+                            predecessorExists = shorthand.equals
+                                    (newDefinitions.getShorthand(otherChoice));
                             String name = newDefinitions.inverseDefinitions
                                     .remove(otherChoice);
                             List<ImmediatePrefix> immediates
@@ -168,7 +168,7 @@ public class PEPAComponentDefinitions {
             Map<PEPAComponent, ImmediatePrefix> imms,
             List<ImmediatePrefix> immediates) {
         ImmediatePrefix prefix = imms.get(cont);
-        if (prefix == null) {
+        if (prefix == null || immediates.contains(prefix)) {
             return cont;
         }
         PEPAComponent newCont = prefix.getContinuation();

@@ -4,6 +4,8 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
 import java.util.*;
 
+// to avoid loops in a graph, the equality is based on identity. Therefore
+// this class MUST NOT be used, whenever two different instances are compared.
 public class NFAState
 {
 	private Map<ITransition, NFAState> outgoings
@@ -61,7 +63,7 @@ public class NFAState
 
     public NFAState advanceWithTransition (ITransition transition)
     {
-        NFAState next = outgoings.get(transition);
+        NFAState next = outgoings.get (transition);
         // self-loop
         if (next == null)
         {
@@ -133,68 +135,44 @@ public class NFAState
     @Override
     public boolean equals (Object o)
     {
-        List<NFAState> visited = new ArrayList<NFAState> ();
-        return equals (o, visited);
-    }
-
-    public boolean equals (Object o, List<NFAState> visited)
-    {
         if (this == o)
         {
             return true;
         }
-        if (o == null || getClass () != o.getClass ())
-        {
-            return false;
-        }
-
-        NFAState nfaState = (NFAState) o;
-
-        if (accepting != nfaState.accepting)
-        {
-            return false;
-        }
-        for (ITransition transition : outgoings.keySet ())
-        {
-            if (!visited.contains (outgoings.get (transition)))
-            {
-                boolean equal = outgoings.get (transition).equals (this);
-                if (!equal)
-                {
-                    return false;
-                }
-            }
-        }
-        if (predicate != null ? !predicate.equals (nfaState.predicate)
-            : nfaState.predicate != null)
-        {
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     @Override
     public int hashCode ()
     {
-        List<NFAState> visited = new ArrayList<NFAState> ();
-        return hashCode (visited);
+        return hashCode (new ArrayList<NFAState> ());
     }
 
-    public int hashCode (List<NFAState> visited)
+    public int hashCode (Collection<NFAState> visited)
     {
-        int result = 0;
         visited.add (this);
+        int result = 0;
+        int empty = 0;
         for (ITransition transition : outgoings.keySet ())
         {
-            if (!visited.contains (outgoings.get (transition)))
+            NFAState to = outgoings.get (transition);
+            if (!visited.contains (to))
             {
-                result += transition.hashCode ()
-                        * outgoings.get (transition).hashCode (visited);
+                if (transition instanceof EmptyTransition)
+                {
+                    ++empty;
+                    result += to.hashCode(visited);
+                }
+                else
+                {
+                    result += transition.hashCode () * to.hashCode(visited);
+                }
             }
         }
         result = 31 * result + (accepting ? 1 : 0);
-        result = 31 * result + (predicate != null ? predicate.hashCode () : 0);
-        return result;
+        result = 31 * result
+            + ((predicate != null && !(predicate instanceof NFADummyPredicate))
+                ? predicate.hashCode () : 0);
+        return result * empty;
     }
 }
