@@ -89,21 +89,11 @@ public abstract class AbstractPrefix
         newImmediates.addAll(otherAbstractPrefix.getImmediatesRawCopy());
         String action = cooperationAction;
         // new prefix will have the main action as the new action
-        if (thisContains == 2 || otherContains == 2) {
-            if (thisContains == 2) {
-                action = getAction();
-            }
-            if (otherContains == 2) {
-                action = otherAbstractPrefix.getAction();
-            }
-/*
-            for (ImmediatePrefix immediate : newImmediates) {
-                if (immediate.getAction().equals(cooperationAction)) {
-                    newImmediates.remove(immediate);
-                    break;
-                }
-            }
-*/
+        if (thisContains == 2) {
+            action = getAction();
+        }
+        if (otherContains == 2) {
+            action = otherAbstractPrefix.getAction();
         }
 
         return getCooperationImpl(action, otherAbstractPrefix, otherApparentRate,
