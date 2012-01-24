@@ -17,10 +17,6 @@ Server_broken = (reset,rrst).Server;
 
 Clients{Client[n]}<request,data>Servers{Server[m]}
 
-Probe (stopTime=10, stepSize=0.1, density=10) {
-    PM4 = pizda : start, pica : stop
-    observes {LProbe = (request?):chuj, eE:hujer<-},
-    {LProbeSecond = chuj:pizda, hujer: pica<-}
-    where {Clients{Client[n]}
-    => ClientWithProbe{LProbeSecond<chuj, hujer>((Client<request,data,think>LProbe))[n]}}
+Probe (stopTime=40, stepSize=0.1, density=10) {
+    PM4 = request : start, think : stop  <-
 }

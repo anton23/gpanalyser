@@ -1212,7 +1212,7 @@ scope
 									(new SignalTransition (signal));
 							}
 						}
-			UPPERCASENAME (local_probes locations) probeg ?)
+			UPPERCASENAME (local_probes locations)? probeg)
 			{
                 Set<ITransition> countActions = NFAtoDFA.detectAlphabet
                         (gprobe.getStartingState (), true, excluded);
