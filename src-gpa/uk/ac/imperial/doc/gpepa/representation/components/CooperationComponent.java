@@ -112,7 +112,7 @@ public class CooperationComponent extends PEPAComponent {
             boolean immediatesCleared = true;
             for (String action : leftPrefix.getImmediates()) {
                 if (cooperationSet.contains(action)) {
-                    rightActionmap.put(action, leftPrefix);
+                    leftActionmap.put(action, leftPrefix);
                     immediatesCleared = false;
                 }
             }
