@@ -77,7 +77,8 @@ public class PEPAComponentDefinitions {
 	public Map<String, PEPAComponent> getDefinitions() {
 		return definitions;
 	}
-	
+
+    // supports only one immediate action per choice
 	public PEPAComponentDefinitions removeVanishingStates() {
         Cloner deepcloner = new Cloner();
         PEPAComponentDefinitions newDefinitions = deepcloner.deepClone(this);
@@ -86,20 +87,23 @@ public class PEPAComponentDefinitions {
             = getImmediatesMap(newDefinitions);
         List<String> choicesToRemove = new LinkedList<String>();
 
+        // lets check all choices for immediate actions
         for (Choice choice : choices.keySet()) {
             ImmediatePrefix imm = choice.getImmediate();
             if (imm != null) {
-                choicesToRemove.add
-                    (newDefinitions.inverseDefinitions.get(choice));
-
+                PEPAComponent shorthand = newDefinitions.getShorthand(choice);
+                choicesToRemove.add(shorthand.toString());
                 boolean predecessorExists = false;
+
+                // we need to find all predecessors of this choice
                 for (Choice otherChoice : choices.keySet()) {
                     List<AbstractPrefix> prefixes = otherChoice.getChoices();
+
                     for (AbstractPrefix prefix : prefixes) {
-                        PEPAComponent shorthand = newDefinitions.getShorthand(choice);
                         if (prefix.getContinuation().equals(shorthand)) {
                             predecessorExists = shorthand.equals
                                     (newDefinitions.getShorthand(otherChoice));
+                            // refreshing hash - 1
                             String name = newDefinitions.inverseDefinitions
                                     .remove(otherChoice);
                             List<ImmediatePrefix> immediates
@@ -108,16 +112,18 @@ public class PEPAComponentDefinitions {
                                 (prefix.getContinuation(), imms, immediates);
                             prefix.addImmediates(immediates);
                             prefix.setContinuation(newCont);
-                            // refreshing hash
+                            // refreshing hash - 2
                             newDefinitions.inverseDefinitions
                                     .put(otherChoice, name);
                         }
                     }
                 }
 
+                // if this component has no predecessor,
+                // it might be the first one and we will cheat - make its
+                // signal go immediately
                 if (!predecessorExists) {
-                    choicesToRemove.remove
-                        (newDefinitions.inverseDefinitions.get(choice));
+                    choicesToRemove.remove (shorthand.toString());
                     choice.getChoices().remove(imm);
                     choice.getChoices().add(new Prefix(imm.getAction(),
                         new DoubleExpression(250.0),
@@ -134,6 +140,7 @@ public class PEPAComponentDefinitions {
         return new PEPAComponentDefinitions(newDefinitions.getDefinitions());
     }
 
+    // mapping between choices and their component names
     private static Map<Choice, String>
         getChoiceComponents(PEPAComponentDefinitions definitions) {
         Map<Choice, String> choices = new HashMap<Choice, String>();
@@ -147,7 +154,8 @@ public class PEPAComponentDefinitions {
 
         return choices;
     }
-    
+
+    // mapping between choices and their immediate actions (only one)
     private static Map<PEPAComponent, ImmediatePrefix>
         getImmediatesMap(PEPAComponentDefinitions definitions) {
         Map<Choice, String> choices = getChoiceComponents(definitions);
@@ -164,6 +172,7 @@ public class PEPAComponentDefinitions {
         return result;
     }
 
+    // recursively generates the list of ensuing immediate actions
     private PEPAComponent getImmediatesList(PEPAComponent cont,
             Map<PEPAComponent, ImmediatePrefix> imms,
             List<ImmediatePrefix> immediates) {

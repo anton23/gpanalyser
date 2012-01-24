@@ -80,6 +80,8 @@ public abstract class AbstractPrefix
             otherContains = 1;
         }
 
+        // we disallow the cooperation on action, if it isn't called by one
+        // component, or if it is ensuing immediate action on both only
         if ((thisContains == 0 || otherContains == 0)
                 || (thisContains == 2 && otherContains == 2)) {
             return null;
@@ -88,6 +90,7 @@ public abstract class AbstractPrefix
         List<ImmediatePrefix> newImmediates = getImmediatesRawCopy();
         newImmediates.addAll(otherAbstractPrefix.getImmediatesRawCopy());
         String action = cooperationAction;
+
         // new prefix will have the main action as the new action
         if (thisContains == 2) {
             action = getAction();

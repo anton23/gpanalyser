@@ -38,9 +38,9 @@ public class NFAtoDFA
 	private static NFAState minimise (NFAState startingState, String naming)
 	{
         Set<NFAState> acceptingStates
-            = detectAllAcceptingStates (startingState);
+            = NFADetectors.detectAllAcceptingStates(startingState);
         Set<NFAState> nonacceptingStates
-            = detectAllNonAcceptingStates (startingState);
+            = NFADetectors.detectAllNonAcceptingStates(startingState);
         Collection<Set<NFAState>> sets
             = new LinkedList<Set<NFAState>> ();
         sets.add (acceptingStates);
@@ -78,142 +78,7 @@ public class NFAtoDFA
         return newState;
     }
 
-    public static Set<NFAState> detectAllStates (NFAState startingState)
-    {
-        Set<NFAState> states = new HashSet<NFAState> ();
-        detectStates(startingState, states,
-                new HashSet<NFAState> (), new StateFilter ()
-                    {
-                        public boolean accept (NFAState state)
-                        {
-                            return true;
-                        }
-                    }
-        );
-        return states;
-    }
-
-	public static Set<NFAState> detectAllAcceptingStates
-		(NFAState startingState)
-	{
-		Set<NFAState> accepting = new HashSet<NFAState> ();
-        detectStates(startingState, accepting,
-                new HashSet<NFAState> (), new StateFilter ()
-                    {
-                        public boolean accept (NFAState state)
-                        {
-                            return state.isAccepting ();
-                        }
-                    }
-        );
-		return accepting;
-	}
-
-    public static Set<NFAState> detectAllNonAcceptingStates
-            (NFAState startingState)
-    {
-        Set<NFAState> nonaccepting = new HashSet<NFAState> ();
-        detectStates(startingState, nonaccepting,
-                new HashSet<NFAState> (), new StateFilter ()
-                    {
-                        public boolean accept (NFAState state)
-                        {
-                            return !state.isAccepting ();
-                        }
-                    }
-        );
-        return nonaccepting;
-    }
-
-	private static void detectStates (NFAState startingState,
-        Set<NFAState> detected, Set<NFAState> visited, StateFilter filter)
-	{
-		if (filter.accept (startingState))
-		{
-			detected.add (startingState);
-		}
-
-		Map<ITransition, NFAState> transitions
-			= startingState.getTransitions ();
-		for (ITransition transition : transitions.keySet ())
-		{
-			NFAState nextState = transitions.get (transition);
-			if (!visited.contains (nextState))
-			{
-				visited.add (nextState);
-				detectStates(nextState, detected, visited, filter);
-			}
-		}
-	}
-
-	public static NFAState detectSingleAcceptingState
-		(NFAState startingState)
-	{
-		return detectSingleAcceptingStateI (startingState,
-			new HashSet<NFAState> ());
-	}
-
-	private static NFAState detectSingleAcceptingStateI
-		(NFAState startingState, Set<NFAState> visited)
-	{
-		if (startingState.isAccepting ())
-		{
-			return startingState;
-		}
-
-		NFAState result = null;
-		Map<ITransition, NFAState> transitions
-			= startingState.getTransitions ();
-		for (ITransition transition : transitions.keySet ())
-		{
-			NFAState nextState = transitions.get (transition);
-			if (!visited.contains (nextState))
-			{
-				visited.add (nextState);
-				result = detectSingleAcceptingStateI (nextState, visited);
-			}
-			if (result != null)
-			{
-				return result;
-			}
-		}
-		return result;
-	}
-
-	public static Set<ITransition> detectAlphabet
-        (NFAState startingState, boolean includeSignals,
-         Collection<ITransition> excluded)
-	{
-		Set<ITransition> alphabet = new HashSet<ITransition> ();
-		detectAlphabetI (startingState, includeSignals,
-            alphabet, new HashSet<NFAState> ());
-        alphabet.removeAll(excluded);
-		return alphabet;
-	}
-
-	private static void detectAlphabetI
-        (NFAState startingState, boolean includeSignals,
-        Set<ITransition> alphabet, Set<NFAState> visited)
-	{
-		Map<ITransition, NFAState> transitions
-			= startingState.getTransitions ();
-		Set<ITransition> transitionsSet = transitions.keySet ();
-		for (ITransition transition : transitionsSet)
-		{
-			if (includeSignals || !(transition instanceof SignalTransition))
-			{
-				alphabet.add (transition);
-			}
-			NFAState nextState = transitions.get (transition);
-			if (!visited.contains (nextState))
-			{
-				visited.add (nextState);
-				detectAlphabetI (nextState, includeSignals, alphabet, visited);
-			}
-		}
-	}
-
-	private static void findClosuresAndTransitions (NFAState startingState,
+    private static void findClosuresAndTransitions (NFAState startingState,
 		Map<NFAState, Set<NFAState>> closures,
 		Map<NFAState, List<TransitionStatePair>> newTransitions)
 	{
@@ -225,7 +90,7 @@ public class NFAtoDFA
 		closure.add (startingState);
 		closures.put (startingState, closure);
 
-		Map<ITransition, NFAState> transitions = null;
+		Map<ITransition, NFAState> transitions;
 
 		for (NFAState state : closure)
 		{
@@ -264,12 +129,7 @@ public class NFAtoDFA
 		return closure;
 	}
 
-    private static interface StateFilter
-    {
-        public boolean accept (NFAState state);
-    }
-
-	private static class TransitionStatePair
+    private static class TransitionStatePair
 	{
 		private ITransition transition;
 		private NFAState state;
@@ -299,11 +159,6 @@ public class NFAtoDFA
         public Collection<Set<NFAState>> getSets ()
         {
             return sets;
-        }
-
-        public Set<NFAState> getStartingSet ()
-        {
-            return startingSet;
         }
 
         public Collection<NFAState> getStates ()

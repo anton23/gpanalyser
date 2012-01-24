@@ -17,7 +17,6 @@ public class NFAState
 	public NFAState (String name)
 	{
 		this.name = name;
-		System.out.println ("created state " + name);
 	}
 
 	public String toString ()
@@ -43,13 +42,11 @@ public class NFAState
 	public void setAccepting (boolean accepting)
 	{
 		this.accepting = accepting;
-		System.out.println (this + " was set " + (accepting ? "" : "not") + "accepting");
 	}
 
 	public void addTransition (ITransition transition, NFAState state)
 	{
 		outgoings.put (transition.getCopy (), state);
-		System.out.println ("debug: added transition " + transition + " from " + this + " to " + state + ", transition hashCode " + transition.hashCode ());
 	}
 
     public void addTransitionIfNotExisting
@@ -128,18 +125,13 @@ public class NFAState
 
     public void setPredicate (NFAPredicate predicate)
     {
-        System.out.println ("set predicate: " + predicate.getPredicateString());
         this.predicate = predicate;
     }
 
     @Override
     public boolean equals (Object o)
     {
-        if (this == o)
-        {
-            return true;
-        }
-        return false;
+        return (this == o);
     }
 
     @Override

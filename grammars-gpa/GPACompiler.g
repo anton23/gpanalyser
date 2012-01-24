@@ -171,6 +171,7 @@ import PCTMCCompilerPrototype;
     			NFAState state1 = cstate.getState1 ();
     			NFAState state2 = cstate.getState2 ();
 
+    			// these are handled when they are actually reached
     			if (state2.isAccepting ())
     			{
     				continue;
@@ -265,7 +266,7 @@ import PCTMCCompilerPrototype;
 		NFAState new_reached_state)
 	{
 		Set<NFAState> accepting_states
-			= NFAtoDFA.detectAllAcceptingStates (starting_state);
+			= NFADetectors.detectAllAcceptingStates (starting_state);
 		for (NFAState state : accepting_states)
 		{
 			state.setAccepting (false);
@@ -277,7 +278,7 @@ import PCTMCCompilerPrototype;
 
 	private void invertAcceptingStates (NFAState starting_state)
 	{
-		Set<NFAState> states = NFAtoDFA.detectAllStates (starting_state);
+		Set<NFAState> states = NFADetectors.detectAllStates (starting_state);
 		for (NFAState state : states)
 		{
 			state.setAccepting (!state.isAccepting ());
@@ -287,7 +288,7 @@ import PCTMCCompilerPrototype;
 	private void removeAnyTransitions
 		(Set<ITransition> alphabet, NFAState startingState)
 	{
-		Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
+		Set<NFAState> states = NFADetectors.detectAllStates (startingState);
 		Set<NFAState> statesWithAny = new HashSet<NFAState> ();
 		for (NFAState state : states)
 		{
@@ -317,7 +318,7 @@ import PCTMCCompilerPrototype;
     private void extendStatesWithSelfLoops
         	(Set<ITransition> alphabet, NFAState startingState)
     {
-		 Set<NFAState> states = NFAtoDFA.detectAllStates (startingState);
+		 Set<NFAState> states = NFADetectors.detectAllStates (startingState);
          for (NFAState state : states)
          {
 			for (ITransition transition : alphabet)
@@ -415,7 +416,7 @@ System.out.println (pctmc);
 		NumericalPostprocessor postprocessor
 		 = new ODEAnalysisNumericalPostprocessor
 			(stopEval.getResult (), stepEval.getResult (), density);
-       analysis.addPostprocessor (postprocessor);
+        analysis.addPostprocessor (postprocessor);
         analysis.notifyPostprocessors (mainConstants, plotDescriptions);
         return postprocessor;
 	}
@@ -598,7 +599,7 @@ probel [String name]
 			{
 				NFAState starting_state = NFAtoDFA.convertToDFA
 					($proberl.starting_state, t);
-				NFAState accepting = NFAtoDFA.detectSingleAcceptingState
+				NFAState accepting = NFADetectors.detectSingleAcceptingState
 					(starting_state);
 				if (rp == null)
 				{
@@ -616,7 +617,7 @@ probel [String name]
 				starting_state = NFAtoDFA.convertToDFA (starting_state, t);
 				removeAnyTransitions ($probe_spec::allActions, starting_state);
 			    $probe_spec::alphabet.addAll
-			    	(NFAtoDFA.detectAlphabet (starting_state, true, excluded));
+			    	(NFADetectors.detectAlphabet (starting_state, true, excluded));
 				extendStatesWithSelfLoops
 					($probe_spec::allActions, starting_state);
 
@@ -835,7 +836,7 @@ rl_un_operators [NFAState sub_starting_state,
 				$starting_state
 					= NFAtoDFA.convertToDFA ($sub_starting_state, t);
 				Set<NFAState> accepting
-					= NFAtoDFA.detectAllAcceptingStates ($starting_state);
+					= NFADetectors.detectAllAcceptingStates ($starting_state);
 				for (NFAState state : accepting)
 				{
 					for (ITransition transition : $probe_spec::allActions)
@@ -985,9 +986,9 @@ probeg
                 acc_state.addTransition
                     (new SignalTransition ("stop"), final_acc_state);
                 starting_state1 = NFAtoDFA.convertToDFA (starting_state1, t);
-                acc_state
-                	= NFAtoDFA.detectSingleAcceptingState (starting_state1);
-                Set<ITransition> alphabet = NFAtoDFA.detectAlphabet
+                acc_state = NFADetectors.detectSingleAcceptingState
+                	(starting_state1);
+                Set<ITransition> alphabet = NFADetectors.detectAlphabet
 					(starting_state1, false, new LinkedList<ITransition> ());
 				if (rp != null)
 				{
@@ -1214,7 +1215,7 @@ scope
 						}
 			UPPERCASENAME (local_probes locations)? probeg)
 			{
-                Set<ITransition> countActions = NFAtoDFA.detectAlphabet
+                Set<ITransition> countActions = NFADetectors.detectAlphabet
                         (gprobe.getStartingState (), true, excluded);
                 countActions.addAll ($probe_spec::alphabet);
                 Set<String> countActionsStrings
@@ -1233,6 +1234,7 @@ scope
                     (statesCountExpressions, mainConstants);
                 double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
 
+				// observing wih global probe
                 int i = 0;
                 while (i < data.length)
                 {
