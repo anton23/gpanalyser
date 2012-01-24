@@ -10,13 +10,6 @@ public class CartesianUtils
 		return getCartesianDFA (starting1, starting2, new NoFilter ());
 	}
 
-	public static List<CartesianState> isAcceptingCartesianDFA
-		(NFAState starting1, NFAState starting2)
-	{
-		return getCartesianDFA (starting1, starting2,
-			new AcceptingStateFilter ());
-	}
-
 	public static CartesianState getCartesianState
 		(NFAState state1, NFAState state2, List<CartesianState> cartesians)
 	{
@@ -59,14 +52,6 @@ public class CartesianUtils
 		}
 
 		return mappings.get (startingCartesian);
-	}
-
-	public static void printCartesians (List<CartesianState> cartesianStates)
-	{
-		for (CartesianState cartesian : cartesianStates)
-		{
-			System.out.println (cartesian);
-		}
 	}
 
 	private static List<CartesianState> getCartesianDFA
@@ -177,14 +162,6 @@ public class CartesianUtils
 		public boolean accept (NFAState state)
 		{
 			return true;
-		}
-	}
-
-	private static class AcceptingStateFilter implements StateFilter
-	{
-		public boolean accept (NFAState state)
-		{
-			return (state.isAccepting ());
 		}
 	}
 }
