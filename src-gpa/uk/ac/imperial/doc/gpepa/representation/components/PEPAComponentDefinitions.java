@@ -103,15 +103,18 @@ public class PEPAComponentDefinitions {
                         if (prefix.getContinuation().equals(shorthand)) {
                             predecessorExists = shorthand.equals
                                     (newDefinitions.getShorthand(otherChoice));
+
                             // refreshing hash - 1
                             String name = newDefinitions.inverseDefinitions
                                     .remove(otherChoice);
+
                             List<ImmediatePrefix> immediates
                                 = new LinkedList<ImmediatePrefix>();
                             PEPAComponent newCont = getImmediatesList
                                 (prefix.getContinuation(), imms, immediates);
                             prefix.addImmediates(immediates);
                             prefix.setContinuation(newCont);
+
                             // refreshing hash - 2
                             newDefinitions.inverseDefinitions
                                     .put(otherChoice, name);
