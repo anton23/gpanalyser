@@ -125,210 +125,6 @@ import PCTMCCompilerPrototype;
 		excluded.add (new SignalTransition ("stop"));
 	}
 
-	private NFAState getBothCombination
-		(CartesianUtils.CartesianState startingCartesian,
-		List<CartesianUtils.CartesianState> cartesianStates, String naming)
-	{
-		for (CartesianUtils.CartesianState cstate : cartesianStates)
-		{
-			NFAState state1 = cstate.getState1 ();
-			NFAState state2 = cstate.getState2 ();
-			Map<ITransition, NFAState> transitions
-				= new HashMap<ITransition, NFAState> ();
-			transitions.putAll (state1.getTransitions ());
-			transitions.putAll (state2.getTransitions ());
-
-			for (ITransition transition : transitions.keySet ())
-			{
-				NFAState new_state1 = state1.advanceWithTransition (transition);
-				NFAState new_state2 = state2.advanceWithTransition (transition);
-
-				cstate.addTransition (transition,
-					CartesianUtils.getCartesianState
-						(new_state1, new_state2, cartesianStates));
-			}
-		}
-
-		return CartesianUtils.convertCartesianToDFA
-			(startingCartesian, cartesianStates, naming,
-				new CartesianUtils.AcceptingCartesianStateFilter ()
-				{
-					public boolean isAccepting
-						(CartesianUtils.CartesianState cstate)
-					{
-						return (cstate.getState1 ().isAccepting ()
-							&& cstate.getState2 ().isAccepting ());
-					}
-				});
-	}
-
-    	private NFAState getResetCombination
-    		(CartesianUtils.CartesianState startingCartesian,
-    		List<CartesianUtils.CartesianState> cartesianStates, String naming)
-    	{
-    		for (CartesianUtils.CartesianState cstate : cartesianStates)
-    		{
-    			NFAState state1 = cstate.getState1 ();
-    			NFAState state2 = cstate.getState2 ();
-
-    			// these are handled when they are actually reached
-    			if (state2.isAccepting ())
-    			{
-    				continue;
-    			}
-
-    			Map<ITransition, NFAState> transitions
-    				= new HashMap<ITransition, NFAState> ();
-    			transitions.putAll (state1.getTransitions ());
-    			transitions.putAll (state2.getTransitions ());
-
-    			for (ITransition transition : transitions.keySet ())
-    			{
-    				NFAState new_state1 = state1.advanceWithTransition (transition);
-    				NFAState new_state2 = state2.advanceWithTransition (transition);
-
-    				if (new_state2.isAccepting ())
-    				{
-    					cstate.addTransition (transition, startingCartesian);
-    				}
-    				else
-    				{
-    					cstate.addTransition (transition,
-    						CartesianUtils.getCartesianState
-    							(new_state1, new_state2, cartesianStates));
-    				}
-    			}
-    		}
-
-    		return CartesianUtils.convertCartesianToDFA
-    			(startingCartesian, cartesianStates, naming,
-    				new CartesianUtils.AcceptingCartesianStateFilter ()
-    				{
-    					public boolean isAccepting
-    						(CartesianUtils.CartesianState cstate)
-    					{
-    						return (cstate.getState1 ().isAccepting ()
-    							&& !cstate.getState2 ().isAccepting ());
-    					}
-    				});
-    	}
-
-    	private NFAState getFailCombination
-    		(CartesianUtils.CartesianState startingCartesian,
-    		List<CartesianUtils.CartesianState> cartesianStates,
-    		String naming, Set<ITransition> alphabet)
-    	{
-    		for (CartesianUtils.CartesianState cstate : cartesianStates)
-    		{
-                if (cstate.getState2 ().isAccepting ())
-                {
-                    for (ITransition action : alphabet)
-                    {
-                        cstate.addTransitionIfNotExisting
-                                (action.getSimpleTransition (), cstate);
-                    }
-                    continue;
-                }
-
-    			NFAState state1 = cstate.getState1 ();
-    			NFAState state2 = cstate.getState2 ();
-
-    			Map<ITransition, NFAState> transitions
-    				= new HashMap<ITransition, NFAState> ();
-    			transitions.putAll (state1.getTransitions ());
-    			transitions.putAll (state2.getTransitions ());
-
-    			for (ITransition transition : transitions.keySet ())
-    			{
-    				NFAState new_state1 = state1.advanceWithTransition (transition);
-    				NFAState new_state2 = state2.advanceWithTransition (transition);
-
-    				cstate.addTransition (transition,
-    					CartesianUtils.getCartesianState
-    						(new_state1, new_state2, cartesianStates));
-    			}
-    		}
-
-    		return CartesianUtils.convertCartesianToDFA
-    			(startingCartesian, cartesianStates, naming,
-    				new CartesianUtils.AcceptingCartesianStateFilter ()
-    				{
-    					public boolean isAccepting
-    						(CartesianUtils.CartesianState cstate)
-    					{
-    						return (cstate.getState1 ().isAccepting ()
-    							&& !cstate.getState2 ().isAccepting ());
-    					}
-    				});
-    	}
-
-	private void unifyAcceptingStates (NFAState starting_state,
-		NFAState new_reached_state)
-	{
-		Set<NFAState> accepting_states
-			= NFADetectors.detectAllAcceptingStates (starting_state);
-		for (NFAState state : accepting_states)
-		{
-			state.setAccepting (false);
-			state.addTransition
-				(new EmptyTransition (), new_reached_state);
-		}
-		new_reached_state.setAccepting (true);
-	}
-
-	private void invertAcceptingStates (NFAState starting_state)
-	{
-		Set<NFAState> states = NFADetectors.detectAllStates (starting_state);
-		for (NFAState state : states)
-		{
-			state.setAccepting (!state.isAccepting ());
-		}
-	}
-
-	private void removeAnyTransitions
-		(Set<ITransition> alphabet, NFAState startingState)
-	{
-		Set<NFAState> states = NFADetectors.detectAllStates (startingState);
-		Set<NFAState> statesWithAny = new HashSet<NFAState> ();
-		for (NFAState state : states)
-		{
-			Map<ITransition, NFAState> transitions = state.getRawTransitions ();
-			for (ITransition transition : transitions.keySet ())
-			{
-				if (transition instanceof AnyTransition)
-				{
-					statesWithAny.add(state);
-				}
-			}
-		}
-
-		ITransition any = new AnyTransition ();
-		for (NFAState state : statesWithAny)
-		{
-			NFAState other = state.advanceWithTransition (any);
-			for (ITransition newTransition : alphabet)
-			{
-				state.addTransitionIfNotExisting
-					(newTransition.getSimpleTransition (), other);
-			}
-			state.getRawTransitions().remove (any);
-		}
-	}
-
-    private void extendStatesWithSelfLoops
-        	(Set<ITransition> alphabet, NFAState startingState)
-    {
-		 Set<NFAState> states = NFADetectors.detectAllStates (startingState);
-         for (NFAState state : states)
-         {
-			for (ITransition transition : alphabet)
-			{
-				state.addTransitionIfNotExisting
-					(transition.getSimpleTransition (), state);
-			}
-         }
-    }
-
 	private Map<String, PEPAComponent>
 		loadProbe (String probeComp, GPAParser parser) throws Exception
 	{
@@ -345,80 +141,6 @@ import PCTMCCompilerPrototype;
 		Map<String,PEPAComponent> newComponents = this.componentDefinitions ();
 		this.setTreeNodeStream (current);
 		return newComponents;
-	}
-
-    private Set<String> convertObjectsToStrings
-        (Set<? extends Object> objects)
-    {
-        Set<String> objectStrings = new HashSet<String> ();
-        for (Object object : objects)
-        {
-            objectStrings.add (object.toString ());
-        }
-        return objectStrings;
-    }
-
-	private NumericalPostprocessor runTheProbedSystem
-	    (GroupedModel model, Set<String> countActions,
-	    List<GPEPAState> stateObservers,
-	    List<AbstractExpression> statesCountExpressions,
-	    Map<String, AbstractExpression> stateCombPopMapping,
-	    Map<String, PEPAComponent> newComponents,
-	    AbstractExpression stopTime, AbstractExpression stepSize, int density)
-	{
-        PCTMC pctmc = GPEPAToPCTMC.getPCTMC
-            (new PEPAComponentDefinitions (newComponents)
-            	.removeVanishingStates (), model, countActions);
-        List<CombinedPopulationProduct> moments
-            = new ArrayList<CombinedPopulationProduct> ();
-        for (GPEPAState state : stateObservers)
-        {
-            Multiset<State> states = HashMultiset.<State>create();
-            states.add (state);
-            CombinedPopulationProduct combinedActions
-                = new CombinedPopulationProduct
-                    (new PopulationProduct (states));
-            moments.add (combinedActions);
-            AbstractExpression combPop
-                = CombinedProductExpression.create (combinedActions);
-            statesCountExpressions.add (combPop);
-            stateCombPopMapping.put (state.toString (), combPop);
-        }
-System.out.println (pctmc);
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        AbstractPCTMCAnalysis analysis = new PCTMCODEAnalysis
-            (pctmc, parameters);
-        for (String action : countActions)
-        {
-            Multiset<State> cooperationActions = HashMultiset.<State>create();
-            GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
-            cooperationActions.add (gpepaAction);
-            CombinedPopulationProduct combinedActions
-                = new CombinedPopulationProduct
-                    (new PopulationProduct (cooperationActions));
-            moments.add (combinedActions);
-            AbstractExpression combPop
-                = CombinedProductExpression.create (combinedActions);
-            statesCountExpressions.add (combPop);
-            stateCombPopMapping.put (action, combPop);
-        }
-        List<PlotDescription> plotDescriptions
-            = new LinkedList<PlotDescription> ();
-        plotDescriptions.add (new PlotDescription (statesCountExpressions));
-        analysis.setUsedMoments (moments);
-        analysis.prepare (mainConstants);
-		ExpressionEvaluatorWithConstants stopEval
-		 = new ExpressionEvaluatorWithConstants (mainConstants);
-		stopTime.accept (stopEval);
-		ExpressionEvaluatorWithConstants stepEval
-			 = new ExpressionEvaluatorWithConstants (mainConstants);
-		stepSize.accept (stepEval);
-		NumericalPostprocessor postprocessor
-		 = new ODEAnalysisNumericalPostprocessor
-			(stopEval.getResult (), stepEval.getResult (), density);
-        analysis.addPostprocessor (postprocessor);
-        analysis.notifyPostprocessors (mainConstants, plotDescriptions);
-        return postprocessor;
 	}
 }
 
@@ -615,10 +337,12 @@ probel [String name]
                 		(new EmptyTransition (), starting_state);
 				}
 				starting_state = NFAtoDFA.convertToDFA (starting_state, t);
-				removeAnyTransitions ($probe_spec::allActions, starting_state);
+				NFAUtils.removeAnyTransitions
+					($probe_spec::allActions, starting_state);
 			    $probe_spec::alphabet.addAll
-			    	(NFADetectors.detectAlphabet (starting_state, true, excluded));
-				extendStatesWithSelfLoops
+			    	(NFADetectors.detectAlphabet
+			    		(starting_state, true, excluded));
+				NFAUtils.extendStatesWithSelfLoops
 					($probe_spec::allActions, starting_state);
 
 				ByteArrayOutputStream stream = new ByteArrayOutputStream ();
@@ -638,7 +362,7 @@ rl_signal returns [NFAState starting_state]
 				ITransition signal = new SignalTransition ($sig.name);
 				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
 				NFAState acc_state = new NFAState (t);
-				unifyAcceptingStates ($starting_state, acc_state);
+				NFAUtils.unifyAcceptingStates ($starting_state, acc_state);
 				NFAState new_acc_state = new NFAState (t);
 				new_acc_state.setAccepting (next_rl == null);
 				acc_state.addTransition (signal, new_acc_state);
@@ -760,11 +484,11 @@ rl_bin_operators [NFAState starting_state1,
 					= CartesianUtils.getCompleteCartesianDFA (dfa1, dfa2);
 				CartesianUtils.CartesianState comb_starting_state
 					= CartesianUtils.getCartesianState (dfa1, dfa2, list);
-				$starting_state = getBothCombination
+				$starting_state = NFAUtils.getBothCombination
 					(comb_starting_state, list, t);
 				$reached_state = new NFAState (t);
 
-				unifyAcceptingStates ($starting_state, $reached_state);
+				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
 			}
 		| ^(BINARY_OP DIVIDE)
 			{
@@ -775,11 +499,11 @@ rl_bin_operators [NFAState starting_state1,
 					= CartesianUtils.getCompleteCartesianDFA (dfa1, dfa2);
 				CartesianUtils.CartesianState comb_starting_state
 					= CartesianUtils.getCartesianState (dfa1, dfa2, list);
-				$starting_state = getResetCombination
+				$starting_state = NFAUtils.getResetCombination
 					(comb_starting_state, list, t);
 				$reached_state = new NFAState (t);
 
-				unifyAcceptingStates ($starting_state, $reached_state);
+				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
 			}
 		| ^(BINARY_OP AT)
 			{
@@ -790,10 +514,10 @@ rl_bin_operators [NFAState starting_state1,
 					= CartesianUtils.getCompleteCartesianDFA (dfa1, dfa2);
 				CartesianUtils.CartesianState comb_starting_state
 					= CartesianUtils.getCartesianState (dfa1, dfa2, list);
-				$starting_state = getFailCombination
+				$starting_state = NFAUtils.getFailCombination
 					(comb_starting_state, list, t, $probe_spec::allActions);
 				$reached_state = new NFAState (t);
-				unifyAcceptingStates ($starting_state, $reached_state);
+				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
 			} ;
 
 rl_un_operators [NFAState sub_starting_state,
@@ -845,8 +569,8 @@ rl_un_operators [NFAState sub_starting_state,
 							(transition.getSimpleTransition (), state);
 					}
 				}
-				invertAcceptingStates ($starting_state);
-				unifyAcceptingStates ($starting_state, $reached_state);
+				NFAUtils.invertAcceptingStates ($starting_state);
+				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
 			} ;
 
 times [NFAState sub_starting_state, NFAState sub_current_state]
@@ -974,12 +698,12 @@ probeg
 			stop_actions=rg [starting_state2] rp=REPETITION?)
 			{
 				NFAState acc_state = new NFAState (t);
-				unifyAcceptingStates (starting_state1, acc_state);
+				NFAUtils.unifyAcceptingStates (starting_state1, acc_state);
 				acc_state.addTransition
 					(new SignalTransition ("start"), starting_state2);
 				acc_state.setAccepting (false);
 				acc_state = new NFAState (t);
-                unifyAcceptingStates (starting_state2, acc_state);
+                NFAUtils.unifyAcceptingStates (starting_state2, acc_state);
                 acc_state.setAccepting (false);
                 NFAState final_acc_state = new NFAState (t);
                 final_acc_state.setAccepting (true);
@@ -997,7 +721,8 @@ probeg
 					starting_state1 = NFAtoDFA.convertToDFA (starting_state1,
 						$probe_spec::probe.getName ());
 				}
-				removeAnyTransitions ($probe_spec::allActions, starting_state1);
+				NFAUtils.removeAnyTransitions
+					($probe_spec::allActions, starting_state1);
 				$probe_spec::probe.setStartingState (starting_state1);
 			} ;
 
@@ -1192,7 +917,6 @@ scope
 @init
 {
 	GlobalProbe gprobe = new GlobalProbe ();
-	gprobe.setName ("GlobalProbe");
 	$probe_spec::probe = gprobe;
 	$probe_spec::alphabet = new HashSet<ITransition> ();
 	$probe_spec::allActions = new HashSet<ITransition> ();
@@ -1213,48 +937,14 @@ scope
 									(new SignalTransition (signal));
 							}
 						}
-			UPPERCASENAME (local_probes locations)? probeg)
+			globalProbeName=UPPERCASENAME (local_probes locations)? probeg)
 			{
-                Set<ITransition> countActions = NFADetectors.detectAlphabet
-                        (gprobe.getStartingState (), true, excluded);
-                countActions.addAll ($probe_spec::alphabet);
-                Set<String> countActionsStrings
-                    = convertObjectsToStrings (countActions);
-			    List<AbstractExpression> statesCountExpressions
-			        = new LinkedList<AbstractExpression> ();
-			    Map<String, AbstractExpression> mapping
-			        = new HashMap<String, AbstractExpression> ();
-                NumericalPostprocessor postprocessor = runTheProbedSystem
-                    ($probe_def::model, countActionsStrings,
-                        $probe_def::stateObservers, statesCountExpressions,
-                        mapping, $probe_spec::newComponents,
-                        $probe_def::stop_time, $probe_def::step_size,
-                        $probe_def::density);
-                double[][] data = postprocessor.evaluateExpressions
-                    (statesCountExpressions, mainConstants);
-                double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
-
-				// observing wih global probe
-                int i = 0;
-                while (i < data.length)
-                {
-                    Set<ITransition> availableTransitions
-                        = gprobe.getAvailableTransitions ();
-                    for (ITransition transition : availableTransitions)
-                    {
-                        int index = statesCountExpressions.indexOf
-                            (mapping.get (transition.toString ()));
-                        if (Math.floor (actionsExecuted [index])
-                            < Math.floor (data[i][index]))
-                        {
-                            actionsExecuted [index] = data[i][index];
-System.out.println ("gprobe step " + i + ": \n");
-                            gprobe.advanceWithTransition (transition,
-                                statesCountExpressions, mapping, data[i]);
-                        }
-                    }
-                    ++i;
-                }
+				gprobe.setName ($globalProbeName.text);
+				ProbeRunner.executeProbedModel (gprobe, $probe_def::model,
+					$probe_def::stateObservers, $probe_spec::newComponents,
+					mainConstants, $probe_def::stop_time,
+					$probe_def::step_size, $probe_def::density,
+					$probe_spec::alphabet, excluded);
             } ;
 
 local_probes
