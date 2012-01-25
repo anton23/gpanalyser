@@ -13,7 +13,6 @@ public class GlobalProbe implements IProbe
 	private NFAState startingState = null;
     private NFAState currentState = null;
 	private String name;
-	private boolean repeating;
 
 	public String getName ()
 	{
@@ -51,21 +50,12 @@ public class GlobalProbe implements IProbe
         return currentState.getAvailableNonSignalTransitions ();
     }
 
-    public void advanceWithTransition (ITransition transition,
+    public ITransition advanceWithTransition (ITransition transition,
         List<AbstractExpression> statesCountExpressions,
         Map<String, AbstractExpression> mapping, double[] data)
     {
         currentState = currentState.advanceWithTransition
             (transition, statesCountExpressions, mapping, data);
-        System.out.println ("Global probe advanced with " + transition);
-        if (currentState.isAccepting ())
-        {
-            if (repeating)
-            {
-                currentState = startingState;
-            }
-            return;
-        }
 
         // any available signal? (assuming always only one at once)
         Map<ITransition, NFAState> sigs = currentState.getSignalTransitions ();
@@ -82,8 +72,10 @@ public class GlobalProbe implements IProbe
             for (ITransition signal : signals)
             {
                 currentState = currentState.advanceWithTransition (signal);
-                System.out.println ("sent " + signal + " signal");
+                return signal;
             }
         }
+
+        return null;
     }
 }

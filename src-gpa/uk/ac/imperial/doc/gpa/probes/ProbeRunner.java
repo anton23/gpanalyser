@@ -28,12 +28,15 @@ import java.util.*;
 
 public class ProbeRunner
 {
-    public static void executeProbedModel
+    private ProbeGraph graph;
+
+    public Collection<ProbeTime> executeProbedModel
         (GlobalProbe gprobe, GroupedModel model,
          Collection<GPEPAState> stateObservers,
          Map<String, PEPAComponent> newComponents, Constants constants,
          AbstractExpression stopTime, AbstractExpression stepSize, int density,
-         Collection<ITransition> alphabet, Collection<ITransition> excluded)
+         Collection<ITransition> alphabet, Collection<ITransition> excluded,
+         boolean plot)
     {
         Set<ITransition> countActions = NFADetectors.detectAlphabet
             (gprobe.getStartingState(), true, excluded);
@@ -43,13 +46,23 @@ public class ProbeRunner
             = new LinkedList<AbstractExpression> ();
         Map<String, AbstractExpression> mapping
             = new HashMap<String, AbstractExpression> ();
+        ExpressionEvaluatorWithConstants stopEval
+                = new ExpressionEvaluatorWithConstants (constants);
+        stopTime.accept (stopEval);
+        ExpressionEvaluatorWithConstants stepEval
+                = new ExpressionEvaluatorWithConstants (constants);
+        stepSize.accept (stepEval);
+        double stepSizeVal = stepEval.getResult ();
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, countActionStrings, stateObservers, statesCountExpressions,
-            mapping, newComponents, constants, stopTime, stepSize, density);
+            mapping, newComponents, constants,
+            stopEval.getResult (), stepEval.getResult (), density);
         double[][] data = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
         double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
-    
+        Collection<ProbeTime> measuredTimes = new ArrayList<ProbeTime> ();
+        double tempStart = -1;
+
         // observing wih global probe
         int i = 0;
         while (i < data.length)
@@ -64,16 +77,36 @@ public class ProbeRunner
                     < Math.floor (data[i][index]))
                 {
                     actionsExecuted [index] = data[i][index];
-                    System.out.println ("gprobe step " + i + ": \n");
-                    gprobe.advanceWithTransition (transition,
-                        statesCountExpressions, mapping, data[i]);
+                    ITransition lastExecuted =
+                        gprobe.advanceWithTransition (transition,
+                            statesCountExpressions, mapping, data[i]);
+                    if (lastExecuted != null)
+                    {
+                        if (lastExecuted.toString ().equals ("start"))
+                        {
+                            tempStart = i;
+                        }
+                        else if (lastExecuted.toString ().equals ("stop"))
+                        {
+                            measuredTimes.add (new ProbeTime (tempStart, i));
+                        }
+                    }
                 }
             }
             ++i;
         }
+
+        if (plot)
+        {
+            stopTime.accept (stopEval);
+            plotGraph (gprobe.getName (), measuredTimes,
+                    stopEval.getResult () / stepSizeVal);
+        }
+
+        return measuredTimes;
     }
 
-    private static Set<String> convertObjectsToStrings (Set<?> objects)
+    private Set<String> convertObjectsToStrings (Set<?> objects)
     {
         Set<String> objectStrings = new HashSet<String> ();
         for (Object object : objects)
@@ -83,13 +116,13 @@ public class ProbeRunner
         return objectStrings;
     }
 
-    private static NumericalPostprocessor runTheProbedSystem
+    private NumericalPostprocessor runTheProbedSystem
         (GroupedModel model, Set<String> countActions,
          Collection<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> stateCombPopMapping,
          Map<String, PEPAComponent> newComponents, Constants constants,
-         AbstractExpression stopTime, AbstractExpression stepSize, int density)
+         double stopTime, double stepSize, int density)
     {
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC
             (new PEPAComponentDefinitions (newComponents)
@@ -132,17 +165,21 @@ public class ProbeRunner
         plotDescriptions.add (new PlotDescription (statesCountExpressions));
         analysis.setUsedMoments (moments);
         analysis.prepare (constants);
-        ExpressionEvaluatorWithConstants stopEval
-            = new ExpressionEvaluatorWithConstants (constants);
-        stopTime.accept (stopEval);
-        ExpressionEvaluatorWithConstants stepEval
-            = new ExpressionEvaluatorWithConstants (constants);
-        stepSize.accept (stepEval);
         NumericalPostprocessor postprocessor
             = new ODEAnalysisNumericalPostprocessor
-            (stopEval.getResult (), stepEval.getResult (), density);
+                (stopTime, stepSize, density);
         analysis.addPostprocessor (postprocessor);
         analysis.notifyPostprocessors (constants, plotDescriptions);
         return postprocessor;
+    }
+
+    private void plotGraph
+         (String name, Collection<ProbeTime> measuredTimes, double end)
+    {
+        if (graph == null)
+        {
+            graph = new ProbeGraph ();
+        }
+        graph.renderData (measuredTimes, name, end);
     }
 }
