@@ -118,6 +118,7 @@ import PCTMCCompilerPrototype;
 	private Map<String, PEPAComponent> components;
 	private List<ITransition> excluded = new LinkedList<ITransition> ();
 	Cloner deepCloner = new Cloner ();
+	ProbeRunner prunner = new ProbeRunner ();
 
 	private void initExcluded ()
 	{
@@ -310,7 +311,7 @@ extensions
 {
 	initExcluded ();
 }
-	:	^(PROBES probe_def*) ;
+	:	^(PROBES (probe_def [true])*) ;
 
 // Local_And_Global_Probe
 
@@ -880,7 +881,7 @@ concrete_r_expr returns [String predicate]
 
 // Probe_spec
 
-probe_def
+probe_def [boolean plot] returns [Collection<ProbeTime> measured_times]
 scope
 {
 	GPAParser parser;
@@ -904,9 +905,13 @@ scope
 					$probe_def::step_size = $settings.stepSize;
 					$probe_def::density = $settings.density;
 				}
-			probe_spec) ;
+			mt=probe_spec [$plot]
+				{
+					$measured_times = $mt.measured_times;
+				}
+			) ;
 
-probe_spec
+probe_spec [boolean plot] returns [Collection<ProbeTime> measured_times]
 scope
 {
     Set<ITransition> alphabet;
@@ -940,11 +945,12 @@ scope
 			globalProbeName=UPPERCASENAME (local_probes locations)? probeg)
 			{
 				gprobe.setName ($globalProbeName.text);
-				ProbeRunner.executeProbedModel (gprobe, $probe_def::model,
+				$measured_times = prunner.executeProbedModel
+					(gprobe, $probe_def::model,
 					$probe_def::stateObservers, $probe_spec::newComponents,
 					mainConstants, $probe_def::stop_time,
 					$probe_def::step_size, $probe_def::density,
-					$probe_spec::alphabet, excluded);
+					$probe_spec::alphabet, excluded, $plot);
             } ;
 
 local_probes
