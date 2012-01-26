@@ -18,9 +18,7 @@ import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
-import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
@@ -30,11 +28,14 @@ public class ProbeRunner
 {
     private ProbeGraph graph;
 
-    public Collection<ProbeTime> executeProbedModel
+    public
+        <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
+        Collection<ProbeTime> executeProbedModel
         (GlobalProbe gprobe, GroupedModel model,
          Collection<GPEPAState> stateObservers,
          Map<String, PEPAComponent> newComponents, Constants constants,
-         AbstractExpression stopTime, AbstractExpression stepSize, int density,
+         AbstractExpression stopTime, AbstractExpression stepSize,
+         int parameter, Class<A> AClass, Class<NP> NPClass,
          Collection<ITransition> alphabet, Collection<ITransition> excluded,
          boolean plot)
     {
@@ -56,7 +57,7 @@ public class ProbeRunner
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, countActionStrings, stateObservers, statesCountExpressions,
             mapping, newComponents, constants,
-            stopEval.getResult (), stepEval.getResult (), density);
+            stopEval.getResult (), stepSizeVal, parameter, AClass, NPClass);
         double[][] data = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
         double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
@@ -106,6 +107,16 @@ public class ProbeRunner
         return measuredTimes;
     }
 
+    private void plotGraph
+            (String name, Collection<ProbeTime> measuredTimes, double end)
+    {
+        if (graph == null)
+        {
+            graph = new ProbeGraph ();
+        }
+        graph.renderData (measuredTimes, name, end);
+    }
+
     private Set<String> convertObjectsToStrings (Set<?> objects)
     {
         Set<String> objectStrings = new HashSet<String> ();
@@ -116,13 +127,16 @@ public class ProbeRunner
         return objectStrings;
     }
 
-    private NumericalPostprocessor runTheProbedSystem
+    private
+        <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
+        NumericalPostprocessor runTheProbedSystem
         (GroupedModel model, Set<String> countActions,
          Collection<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> stateCombPopMapping,
          Map<String, PEPAComponent> newComponents, Constants constants,
-         double stopTime, double stepSize, int density)
+         double stopTime, double stepSize, int parameter,
+         Class<A> AClass, Class<NP> NPClass)
     {
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC
             (new PEPAComponentDefinitions (newComponents)
@@ -132,33 +146,18 @@ public class ProbeRunner
         for (GPEPAState state : stateObservers)
         {
             Multiset<State> states = HashMultiset.create ();
-            states.add (state);
-            CombinedPopulationProduct combinedActions
-                = new CombinedPopulationProduct
-                    (new PopulationProduct (states));
-            moments.add (combinedActions);
-            AbstractExpression combPop
-                = CombinedProductExpression.create (combinedActions);
-            statesCountExpressions.add (combPop);
-            stateCombPopMapping.put (state.toString (), combPop);
+            setStateObserver (states, state, state.toString (), moments,
+                statesCountExpressions, stateCombPopMapping);
         }
-        System.out.println (pctmc);
-        Map<String, Object> parameters = new HashMap<String, Object> ();
+        //System.out.println (pctmc);
         AbstractPCTMCAnalysis analysis
-            = new PCTMCODEAnalysis (pctmc, parameters);
+            = getAnalysis (pctmc, AClass);
         for (String action : countActions)
         {
-            Multiset<State> cooperationActions = HashMultiset.create ();
             GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
-            cooperationActions.add (gpepaAction);
-            CombinedPopulationProduct combinedActions
-                = new CombinedPopulationProduct
-                    (new PopulationProduct (cooperationActions));
-            moments.add (combinedActions);
-            AbstractExpression combPop
-                = CombinedProductExpression.create (combinedActions);
-            statesCountExpressions.add (combPop);
-            stateCombPopMapping.put (action, combPop);
+            Multiset<State> cooperationActions = HashMultiset.create ();
+            setStateObserver (cooperationActions, gpepaAction, action, moments,
+                    statesCountExpressions, stateCombPopMapping);
         }
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
@@ -166,20 +165,72 @@ public class ProbeRunner
         analysis.setUsedMoments (moments);
         analysis.prepare (constants);
         NumericalPostprocessor postprocessor
-            = new ODEAnalysisNumericalPostprocessor
-                (stopTime, stepSize, density);
+            = getPostprocessor (stopTime, stepSize, parameter, NPClass);
         analysis.addPostprocessor (postprocessor);
         analysis.notifyPostprocessors (constants, plotDescriptions);
         return postprocessor;
     }
 
-    private void plotGraph
-         (String name, Collection<ProbeTime> measuredTimes, double end)
+    private void setStateObserver
+        (Multiset<State> statesSet, State state, String mappingString,
+         List<CombinedPopulationProduct> moments,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> stateCombPopMapping)
     {
-        if (graph == null)
+        statesSet.add (state);
+        CombinedPopulationProduct combinedActions
+            = new CombinedPopulationProduct (new PopulationProduct (statesSet));
+        moments.add (combinedActions);
+        AbstractExpression combPop
+            = CombinedProductExpression.create (combinedActions);
+        statesCountExpressions.add (combPop);
+        stateCombPopMapping.put (mappingString, combPop);
+    }
+
+    private <NP extends NumericalPostprocessor>
+        NumericalPostprocessor getPostprocessor
+        (double stopTime, double stepSize, int parameter, Class<NP> NPClass)
+    {
+        try
         {
-            graph = new ProbeGraph ();
+            return NPClass.getDeclaredConstructor
+                (double.class, double.class, int.class).newInstance
+                (stopTime, stepSize, parameter);
         }
-        graph.renderData (measuredTimes, name, end);
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private <A extends AbstractPCTMCAnalysis>
+        AbstractPCTMCAnalysis getAnalysis (PCTMC pctmc, Class<A> AClass)
+    {
+        try
+        {
+            // Constructor for ODE
+            Map<String, Object> parameters = new HashMap<String, Object> ();
+            return AClass.getDeclaredConstructor
+                    (PCTMC.class, Map.class).newInstance (pctmc, parameters);
+        }
+        catch (NoSuchMethodException e)
+        {
+            try
+            {
+                // Constructor for Simulation
+                return AClass.getDeclaredConstructor
+                    (PCTMC.class).newInstance (pctmc);
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace ();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace ();
+        }
+        return null;
     }
 }

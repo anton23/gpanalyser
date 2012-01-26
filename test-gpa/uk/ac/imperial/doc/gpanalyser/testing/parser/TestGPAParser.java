@@ -275,7 +275,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"A = (a, ra).B + (c,rb).A;\n" +
 				"B = (b, rb).A;\n" +
 				"As{A[n]}\n" + 
-				"odes(stopTime=10.0, stepSize=0.1, density=10){\n"+
+				"ODEs(stopTime=10.0, stepSize=0.1, density=10){\n"+
 				"E[As:A];}"
 				, 
 				Lists.newArrayList(
