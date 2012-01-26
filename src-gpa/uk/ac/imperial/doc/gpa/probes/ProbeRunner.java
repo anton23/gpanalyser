@@ -149,7 +149,7 @@ public class ProbeRunner
             setStateObserver (states, state, state.toString (), moments,
                 statesCountExpressions, stateCombPopMapping);
         }
-        //System.out.println (pctmc);
+        System.out.println (pctmc);
         AbstractPCTMCAnalysis analysis
             = getAnalysis (pctmc, AClass);
         for (String action : countActions)
