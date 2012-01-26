@@ -67,6 +67,7 @@ tokens{
   IN					;
   SUBSTITUTE			;
   PROBE_DEF				;
+  SIM_PROBE_DEF			;
   PROBES				;
   MAIN_MODEL            ;
 }
@@ -258,7 +259,7 @@ extensions
 	:	probe_def*
 			-> ^(PROBES probe_def*) ;
 
-//Local
+// Local
 
 probel
 	:	rl_signal REPETITION?
@@ -336,7 +337,7 @@ rg
 	:	(LBRACE pred RBRACE)? rl_single (rl_bin_operators rg)?
 			-> ^(RG rl_single pred? (rg rl_bin_operators)?) ;
 
-//Predicates for global
+// Predicates for global
 
 pred
 	:	(logical_pred | negation)
@@ -379,11 +380,13 @@ componentCount
 }
 	:	groupComponentPair ;
 
-//Probe_spec
+// Probe_spec
 
 probe_def
 	:	PROBE_DEF odeSettings LBRACE probe_spec RBRACE
-			-> ^(PROBE_DEF odeSettings probe_spec) ;
+			-> ^(PROBE_DEF odeSettings probe_spec)
+		| SIM_PROBE_DEF simulationSettings LBRACE probe_spec RBRACE
+          	-> ^(SIM_PROBE_DEF simulationSettings probe_spec) ;
 
 probe_spec
 scope

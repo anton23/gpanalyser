@@ -889,7 +889,7 @@ scope
 	List<GPEPAState> stateObservers;
 	AbstractExpression stop_time;
 	AbstractExpression step_size;
-	int density;
+	int parameter;
 }
 @init
 {
@@ -898,20 +898,30 @@ scope
 	$probe_def::model = deepCloner.deepClone (mainModel);
 	$probe_def::stateObservers = new LinkedList<GPEPAState> ();
 }
-	:	^(PROBE_DEF
-			settings=odeSettings
+	:	^(PROBE_DEF	odeSettings
 				{
-					$probe_def::stop_time = $settings.stopTime;
-					$probe_def::step_size = $settings.stepSize;
-					$probe_def::density = $settings.density;
+						$probe_def::stop_time = $odeSettings.stopTime;
+						$probe_def::step_size = $odeSettings.stepSize;
+						$probe_def::parameter = $odeSettings.density;
 				}
-			mt=probe_spec [$plot]
+			mt=probe_spec [$plot, false])
+			{
+				$measured_times = $mt.measured_times;
+			}
+		| ^(SIM_PROBE_DEF simulationSettings
 				{
-					$measured_times = $mt.measured_times;
+						$probe_def::stop_time = $simulationSettings.stopTime;
+						$probe_def::step_size = $simulationSettings.stepSize;
+						$probe_def::parameter
+							= $simulationSettings.replications;
 				}
-			) ;
+			mt=probe_spec [$plot, true])
+			{
+				$measured_times = $mt.measured_times;
+			} ;
 
-probe_spec [boolean plot] returns [Collection<ProbeTime> measured_times]
+probe_spec [boolean plot, boolean simulate]
+	returns [Collection<ProbeTime> measured_times]
 scope
 {
     Set<ITransition> alphabet;
@@ -933,24 +943,40 @@ scope
 	$probe_spec::newComponents = deepCloner.deepClone (components);
 }
 	:	^(DEF signalNames=SIGNALS
-						{
-							String signalsString = $signalNames.text;
-							String[] signals = signalsString.split (";");
-							for (String signal : signals)
-							{
-								$probe_spec::allActions.add
-									(new SignalTransition (signal));
-							}
-						}
+				{
+					String signalsString = $signalNames.text;
+					String[] signals = signalsString.split (";");
+					for (String signal : signals)
+					{
+						$probe_spec::allActions.add
+							(new SignalTransition (signal));
+					}
+				}
 			globalProbeName=UPPERCASENAME (local_probes locations)? probeg)
 			{
 				gprobe.setName ($globalProbeName.text);
-				$measured_times = prunner.executeProbedModel
-					(gprobe, $probe_def::model,
-					$probe_def::stateObservers, $probe_spec::newComponents,
-					mainConstants, $probe_def::stop_time,
-					$probe_def::step_size, $probe_def::density,
-					$probe_spec::alphabet, excluded, $plot);
+				if (simulate)
+				{
+					$measured_times = prunner.executeProbedModel
+						(gprobe, $probe_def::model,
+						$probe_def::stateObservers, $probe_spec::newComponents,
+						mainConstants, $probe_def::stop_time,
+						$probe_def::step_size, $probe_def::parameter,
+						PCTMCSimulation.class,
+						SimulationAnalysisNumericalPostprocessor.class,
+						$probe_spec::alphabet, excluded, $plot);
+				}
+				else
+				{
+					$measured_times = prunner.executeProbedModel
+						(gprobe, $probe_def::model,
+						$probe_def::stateObservers, $probe_spec::newComponents,
+						mainConstants, $probe_def::stop_time,
+						$probe_def::step_size, $probe_def::parameter,
+						PCTMCODEAnalysis.class,
+						ODEAnalysisNumericalPostprocessor.class,
+						$probe_spec::alphabet, excluded, $plot);
+				}
             } ;
 
 local_probes

@@ -24,11 +24,6 @@ public class GlobalProbe implements IProbe
 		this.name = name;
 	}
 
-	public void setRepeating (boolean repeating)
-	{
-		this.repeating = repeating;
-	}
-
 	public void setStartingState (NFAState state)
 	{
         if (startingState != null)

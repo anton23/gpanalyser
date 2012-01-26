@@ -77,13 +77,16 @@ fragment WS
 	:	( '\t' | ' ' | '\r' | '\n'| '\u000C' ) ;
 
 WHERE
-	:	WS 'where' WS;
+	:	WS 'where' WS ;
 
 OBSERVES
 	:	WS 'observes' WS ;
 
 PROBE_DEF
-	:	'Probe';
+	:	'Probe' ;
+
+SIM_PROBE_DEF
+	:	'SimProbe' ;
 
 SUBSTITUTE
 	:	'=>' ;
