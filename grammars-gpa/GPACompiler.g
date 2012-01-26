@@ -531,6 +531,48 @@ rl_un_operators [NFAState sub_starting_state,
 	$reached_state.setAccepting (true);
 }
 	:	^(UNARY_OP e1=expression (COMMA e2=expression)?)
+			{
+				ExpressionEvaluatorWithConstants e1eval
+						= new ExpressionEvaluatorWithConstants (mainConstants);
+				$e1.e.accept (e1eval);
+				int e1int = (int) e1eval.getResult ();
+
+				NFAState currentLast = $starting_state;
+				int i = 0;
+				for (; i < e1int; i++)
+				{
+					NFAState sub = deepCloner.deepClone ($sub_starting_state);
+					currentLast.addTransition (new EmptyTransition (), sub);
+					currentLast = NFADetectors.detectSingleAcceptingState (sub);
+					currentLast.setAccepting (false);
+				}
+				if (e2 != null)
+				{
+					ExpressionEvaluatorWithConstants e2eval
+							= new ExpressionEvaluatorWithConstants
+								(mainConstants);
+					$e2.e.accept (e2eval);
+					int e2int = (int) e2eval.getResult ();
+
+					for (; i < e2int; i++)
+					{
+						NFAState sub = deepCloner.deepClone
+							($sub_starting_state);
+						currentLast.addTransition
+							(new EmptyTransition (), sub);
+						currentLast.setAccepting (true);
+						currentLast
+							= NFADetectors.detectSingleAcceptingState (sub);
+					}
+					NFAUtils.unifyAcceptingStates
+						($starting_state, $reached_state);
+				}
+				else
+				{
+					currentLast.addTransition
+						(new EmptyTransition (), $reached_state);
+				}
+			}
 		| ^(UNARY_OP ZERO_ONE)
 			{
 				$starting_state.addTransition (new EmptyTransition (),
