@@ -12,10 +12,12 @@ public class AccumulatedNormalMomentClosure extends NormalMomentClosure {
 	
 	public AccumulatedNormalMomentClosure(int maxOrder) {
 		super(maxOrder);		
+		this.name = NAME;
 	}
 	
 	public AccumulatedNormalMomentClosure(Map<String, Object> parameters) {
 		super(parameters);
+		this.name = NAME;
 	}
 
 	@Override

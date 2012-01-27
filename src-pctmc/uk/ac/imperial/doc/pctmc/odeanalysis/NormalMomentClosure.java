@@ -11,6 +11,8 @@ public class NormalMomentClosure extends MomentClosure {
 
 	public final static String NAME = "NormalClosure";
 	
+	protected String name = NAME;
+	
 	protected int maxOrder;
 	
 	public NormalMomentClosure(int maxOrder) {
@@ -47,7 +49,7 @@ public class NormalMomentClosure extends MomentClosure {
 
 	@Override
 	public String toString() {
-		return MomentClosure.MOMENT_CLOSURE + "=" + NAME + ", " + MomentClosure.MAX_ORDER + "=" + maxOrder;
+		return MomentClosure.MOMENT_CLOSURE + "=" + name + ", " + MomentClosure.MAX_ORDER + "=" + maxOrder;
 	}
 	
 	
