@@ -2,20 +2,31 @@ package uk.ac.imperial.doc.pctmc.odeanalysis;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CentralMomentOfLinearCombinationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.State;
+
+import com.google.common.collect.Lists;
 
 public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClosure {
 
@@ -38,6 +49,71 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 		inserted = oldInserted;
 
 	}*/
+	
+	
+	@Override
+	public void visit(MinExpression e) {
+		if (e.getA() instanceof CombinedProductExpression && e.getB() instanceof CombinedProductExpression) {
+			if (insert) {
+				//if (moment.getOrder() == 0) {
+					AbstractExpression muA = e.getA();
+					AbstractExpression muB = e.getB();
+					CombinedPopulationProduct productA = ((CombinedProductExpression) e.getA())
+							.getProduct();
+					CombinedPopulationProduct productB = ((CombinedProductExpression) e.getB())
+							.getProduct();
+					AbstractExpression eAB = CombinedProductExpression
+							.create(CombinedPopulationProduct.getProductOf(
+									productA,
+									productB));
+
+					AbstractExpression covAB = new MinusExpression(eAB,
+							ProductExpression.create(muA, muB));
+					Map<ExpressionVariable, AbstractExpression> var = new HashMap<ExpressionVariable, AbstractExpression>();
+					AbstractExpression varA = new CentralMomentOfLinearCombinationExpression(
+							e.getA(), 2, var);
+					AbstractExpression varB = new CentralMomentOfLinearCombinationExpression(
+							e.getB(), 2, var);
+					AbstractExpression theta = PowerExpression
+							.create(
+									SumExpression.create(varA, varB,
+											ProductExpression.create(
+													new DoubleExpression(-2.0),
+													covAB)),
+									new DoubleExpression(0.5));
+					
+					
+					AbstractExpression muA2 = e.getA();
+					AbstractExpression muB2 = e.getB();
+					AbstractExpression theta2 = theta;
+					if (moment.getOrder() > 0) {
+						muA2 = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(
+								productA, new CombinedPopulationProduct(moment)));
+						muB2 = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(
+								productB, new CombinedPopulationProduct(moment)));
+						theta2 = ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(moment)), theta);
+					}
+					AbstractExpression arg1 = PEPADivExpression.create(
+							new MinusExpression(muA, muB), theta);
+					AbstractExpression arg2 = PEPADivExpression.create(
+							new MinusExpression(muB, muA), theta);
+					result = SumExpression.create(ProductExpression.create(muA2,
+							FunctionCallExpression.create("phiC", Lists
+									.newArrayList(arg2))), ProductExpression
+							.create(muB2, FunctionCallExpression.create("phiC",
+									Lists.newArrayList(arg1))),
+							ProductExpression.create(
+									new DoubleExpression(-1.0), theta2,
+									FunctionCallExpression.create("phi", Lists
+											.newArrayList(arg2))));
+					inserted = true;
+			} else {
+				result = e;
+			}
+		} else {
+			super.visit(e);
+		}
+	}
 	
 	@Override
 	public void visit(FunctionCallExpression e) {
