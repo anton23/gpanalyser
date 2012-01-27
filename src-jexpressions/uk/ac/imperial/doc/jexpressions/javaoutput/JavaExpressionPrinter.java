@@ -51,6 +51,12 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 							+ ".chebyshev(");
 		} else if (e.getName().equals("div")) {
 			output.append(JExpressionsJavaUtils.class.getName() + ".div(");
+		} else if (e.getName().equals("phi")) {
+			output.append(JExpressionsJavaUtils.class.getName()
+							+ ".phi(");
+		} else if (e.getName().equals("phiC")) {
+			output.append(JExpressionsJavaUtils.class.getName()
+					+ ".Phi(");
 		} else {
 			output.append("Math." + e.getName() + "(");
 		}

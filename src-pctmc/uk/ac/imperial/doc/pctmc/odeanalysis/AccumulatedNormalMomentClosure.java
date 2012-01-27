@@ -32,7 +32,7 @@ public class AccumulatedNormalMomentClosure extends NormalMomentClosure {
 			CombinedPopulationProduct moment) {
 		IntegralInsterterVisitor visitor = new AccumulatedIntegralInsterterVisitor(
 				new CombinedPopulationProduct(null, moment
-						.getAccumulatedProducts()));
+						.getAccumulatedProducts()), maxOrder);
 		derivative.accept(visitor);
 		return visitor.getResult();
 	}

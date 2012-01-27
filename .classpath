@@ -33,5 +33,6 @@
 	<classpathentry kind="lib" path="lib/org.jzy3d-0.8.4.jar"/>
 	<classpathentry kind="lib" path="lib/ejml-0.17-nogui.jar"/>
 	<classpathentry kind="lib" path="lib/simple-xml-2.6.jar"/>
+	<classpathentry kind="lib" path="lib/commons-math-2.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

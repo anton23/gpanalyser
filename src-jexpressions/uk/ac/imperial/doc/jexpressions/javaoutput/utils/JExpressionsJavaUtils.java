@@ -1,5 +1,9 @@
 package uk.ac.imperial.doc.jexpressions.javaoutput.utils;
 
+import org.apache.commons.math.MathException;
+import org.apache.commons.math.distribution.NormalDistributionImpl;
+
+
 public class JExpressionsJavaUtils {
 
 	public static double div(double a, double b) {
@@ -27,6 +31,20 @@ public class JExpressionsJavaUtils {
 
 	public static double chebyshev(double e, double m) {
 		return m / (m + e);
+	}
+	
+	private static NormalDistributionImpl normalDist = new NormalDistributionImpl();
+	
+	public static double phi(double x) {
+		return normalDist.density(x);		
+	}
+	
+	public static double Phi(double x) {
+		try {
+			return normalDist.cumulativeProbability(x);
+		} catch (MathException e) {
+			return Double.NaN;
+		}		
 	}
 
 }
