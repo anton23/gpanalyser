@@ -537,6 +537,10 @@ rl_un_operators [NFAState sub_starting_state,
 				$e1.e.accept (e1eval);
 				int e1int = (int) e1eval.getResult ();
 
+				$sub_starting_state
+					= NFAtoDFA.convertToDFA ($sub_starting_state, t);
+				NFAUtils.unifyAcceptingStates
+					($sub_starting_state, $reached_state);
 				NFAState currentLast = $starting_state;
 				int i = 0;
 				for (; i < e1int; i++)
