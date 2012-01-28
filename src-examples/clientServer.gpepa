@@ -24,11 +24,10 @@ ODEs (stopTime=10, stepSize=0.1, density=10) {
 }
 
 Probe (stopTime=10, stepSize=0.1, density=10) {
-    Probe1 = hujer : start, striga : stop
-    observes {LProbe = request[3,5]:hujer, think:meteleskublesku<-},
-    {LP=hujer:metla, meteleskublesku:striga<-}
+    Probe1 = hujer : start, meteleskublesku : stop
+    observes {LProbe = ((request,think)[2,4], data):hujer, think:meteleskublesku<-}
     where {Clients{Client[n]}
-    => Clients{(LP<hujer, meteleskublesku>(Client<request,think>LProbe))[n]}}
+    => Clients{(Client<request,think,data>LProbe)[n]}}
 }
 
 SimProbe (stopTime=10, stepSize=0.1, replications=100) {

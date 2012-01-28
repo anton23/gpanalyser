@@ -42,7 +42,7 @@ public class NFAtoDFA
         Set<NFAState> nonacceptingStates
             = NFADetectors.detectAllNonAcceptingStates(startingState);
         Collection<Set<NFAState>> sets
-            = new LinkedList<Set<NFAState>> ();
+            = new HashSet<Set<NFAState>> ();
         sets.add (acceptingStates);
         sets.add (nonacceptingStates);
         Partition partition = new Partition (sets, null);
@@ -232,7 +232,7 @@ public class NFAtoDFA
             for (NFAState state : set)
             {
                 Map<ITransition, Set<NFAState>> setTransitions
-                        = new HashMap<ITransition, Set<NFAState>> ();
+                    = new HashMap<ITransition, Set<NFAState>> ();
                 setToSet.put (state, setTransitions);
 
                 Map<ITransition, NFAState>
@@ -267,7 +267,7 @@ public class NFAtoDFA
         }
 
         // create new sets
-        Collection<Set<NFAState>> newSets = new LinkedList<Set<NFAState>> ();
+        Collection<Set<NFAState>> newSets = new HashSet<Set<NFAState>> ();
         Set<NFAState> startingSet = null;
         for (NFAState state : mappings.keySet ())
         {

@@ -140,7 +140,7 @@ public class NFAState
         return hashCode (new ArrayList<NFAState> ());
     }
 
-    public int hashCode (Collection<NFAState> visited)
+    private int hashCode (Collection<NFAState> visited)
     {
         visited.add (this);
         int result = 0;
@@ -153,11 +153,11 @@ public class NFAState
                 if (transition instanceof EmptyTransition)
                 {
                     ++empty;
-                    result += to.hashCode(visited);
+                    result += to.hashCode (visited);
                 }
                 else
                 {
-                    result += transition.hashCode () * to.hashCode(visited);
+                    result += transition.hashCode () * to.hashCode (visited);
                 }
             }
         }

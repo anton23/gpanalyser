@@ -9,7 +9,7 @@ public class AnyTransition implements ITransition
     
     public String toPEPAString ()
     {
-        throw new Error("AnyTransition cannot be converted to PEPA String.");
+        throw new Error ("AnyTransition cannot be converted to PEPA String.");
     }
 
 	@Override
@@ -31,6 +31,6 @@ public class AnyTransition implements ITransition
 
     public ITransition getSimpleTransition ()
     {
-        throw new Error("AnyTransition cannot create a simple transition.");
+        throw new Error ("AnyTransition cannot create a simple transition.");
     }
 }
