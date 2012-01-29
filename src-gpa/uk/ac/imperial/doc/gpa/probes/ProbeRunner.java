@@ -37,7 +37,7 @@ public class ProbeRunner
          AbstractExpression stopTime, AbstractExpression stepSize,
          int parameter, Class<A> AClass, Class<NP> NPClass,
          Collection<ITransition> alphabet, Collection<ITransition> excluded,
-         boolean plot)
+         int mode, boolean plot)
     {
         Set<ITransition> countActions = NFADetectors.detectAlphabet
             (gprobe.getStartingState(), true, excluded);
@@ -60,6 +60,38 @@ public class ProbeRunner
             stopEval.getResult (), stepSizeVal, parameter, AClass, NPClass);
         double[][] data = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
+        Collection<ProbeTime> measuredTimes = dispatchEvaluation
+                (data, gprobe, statesCountExpressions, mapping, mode);
+
+        if (plot)
+        {
+            stopTime.accept (stopEval);
+            plotGraph (gprobe.getName (), measuredTimes,
+                    stopEval.getResult () / stepSizeVal);
+        }
+
+        return measuredTimes;
+    }
+
+    private Collection<ProbeTime> dispatchEvaluation
+            (double[][] data, GlobalProbe gprobe,
+             List<AbstractExpression> statesCountExpressions,
+             Map<String, AbstractExpression> mapping, int mode)
+    {
+        System.out.println ("chosen mode: " + mode);
+        if (mode == 3)
+        {
+            return globalPassages
+                (data, gprobe, statesCountExpressions, mapping);
+        }
+        return null;
+    }
+
+    private Collection<ProbeTime> globalPassages
+            (double[][] data, GlobalProbe gprobe,
+             List<AbstractExpression> statesCountExpressions,
+             Map<String, AbstractExpression> mapping)
+    {
         double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
         Collection<ProbeTime> measuredTimes = new ArrayList<ProbeTime> ();
         double tempStart = -1;
@@ -69,18 +101,18 @@ public class ProbeRunner
         while (i < data.length)
         {
             Set<ITransition> availableTransitions
-                = gprobe.getAvailableTransitions ();
+                    = gprobe.getAvailableTransitions ();
             for (ITransition transition : availableTransitions)
             {
                 int index = statesCountExpressions.indexOf
-                    (mapping.get (transition.toString ()));
+                        (mapping.get (transition.toString ()));
                 if (Math.floor (actionsExecuted [index])
-                    < Math.floor (data[i][index]))
+                        < Math.floor (data[i][index]))
                 {
                     actionsExecuted [index] = data[i][index];
                     ITransition lastExecuted =
-                        gprobe.advanceWithTransition (transition,
-                            statesCountExpressions, mapping, data[i]);
+                            gprobe.advanceWithTransition (transition,
+                                    statesCountExpressions, mapping, data[i]);
                     if (lastExecuted != null)
                     {
                         if (lastExecuted.toString ().equals ("start"))
@@ -96,14 +128,6 @@ public class ProbeRunner
             }
             ++i;
         }
-
-        if (plot)
-        {
-            stopTime.accept (stopEval);
-            plotGraph (gprobe.getName (), measuredTimes,
-                    stopEval.getResult () / stepSizeVal);
-        }
-
         return measuredTimes;
     }
 

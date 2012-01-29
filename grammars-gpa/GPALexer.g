@@ -88,6 +88,12 @@ PROBE_DEF
 SIM_PROBE_DEF
 	:	'SimProbe' ;
 
+STEADY
+	:	'steady' ;
+
+TRANSIENT
+	:	'transient';
+
 SUBSTITUTE
 	:	'=>' ;
 

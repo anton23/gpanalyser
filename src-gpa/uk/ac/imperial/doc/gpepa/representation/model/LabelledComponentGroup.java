@@ -83,8 +83,22 @@ public class LabelledComponentGroup extends GroupedModel {
 		return SumExpression.create(summands);
 	}
 
+    @Override
+    public AbstractExpression getComponentRateExpression
+            (String action, PEPAComponentDefinitions definitions,
+             GroupComponentPair groupComponentPair) {
+        if (groupComponentPair.getGroup().equals(label)) {
+            AbstractExpression rate = definitions.getApparentRateExpression(
+                    action, groupComponentPair.getComponent());
+            return ProductExpression.create(new PopulationExpression(
+                    new GPEPAState(groupComponentPair)), rate);
+        }
+        else {
+            return DoubleExpression.ZERO;
+        }
+    }
 
-	public LabelledComponentGroup(String label, Group group) {
+    public LabelledComponentGroup(String label, Group group) {
 		super();
 		this.label = label;
 		this.group = group;

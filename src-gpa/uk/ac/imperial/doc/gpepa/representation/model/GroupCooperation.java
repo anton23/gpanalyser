@@ -126,7 +126,56 @@ public class GroupCooperation extends GroupedModel {
 		}
 	}
 
-	public GroupCooperation(GroupedModel left, GroupedModel right,
+    @Override
+    public AbstractExpression getComponentRateExpression
+            (String action, PEPAComponentDefinitions definitions,
+             GroupComponentPair groupComponentPair) {
+        boolean countInLeftGroup = true;
+        Map<String, LabelledComponentGroup> groups
+                = left.getComponentGroups();
+        LabelledComponentGroup lgroup
+                = groups.get(groupComponentPair.getGroup());
+        if (lgroup == null) {
+            groups = right.getComponentGroups();
+            lgroup = groups.get(groupComponentPair.getGroup());
+            if (lgroup == null) {
+                return DoubleExpression.ZERO;
+            }
+            countInLeftGroup = false;
+        }
+
+        if (actions.contains(action)) {
+            AbstractExpression leftRate = left.getMomentOrientedRateExpression
+                    (action, definitions);
+            AbstractExpression rightRate = right.getMomentOrientedRateExpression
+                    (action, definitions);
+            AbstractExpression denominator;
+            if (countInLeftGroup) {
+                denominator = leftRate;
+            }
+            else {
+                denominator = rightRate;
+            }
+
+            AbstractExpression min = MinExpression.create(leftRate, rightRate);
+            if (denominator.equals(min)) {
+                return lgroup.getComponentRateExpression
+                        (action,  definitions, groupComponentPair);
+            }
+            else {
+                return ProductExpression.create(DivExpression.create
+                        (lgroup.getComponentRateExpression
+                                (action,  definitions, groupComponentPair),
+                         denominator), min);
+            }
+        }
+        else {
+            return lgroup.getComponentRateExpression
+                    (action,  definitions, groupComponentPair);
+        }
+    }
+
+    public GroupCooperation(GroupedModel left, GroupedModel right,
 			Set<String> actions) {
 		super();
 		this.left = left;
