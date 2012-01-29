@@ -1,39 +1,32 @@
-rr = 2.0;
-rtmt = 0.3;
-rt = 0.27;
-rb = 0.1;
-rd = 1.0;
-rrst = 1.0;
-n = 100.0;
-m = 60.0;
+rt = 0.4;
+rs = 0.15;
+ri = 0.6;
+rf = 0.1;
+rr = 0.35;
+n = 10.0;
+m = 6.0;
 
-Client = (request,rr).Client_waiting; 
-Client_waiting = (data,rd).Client_think; 
-Client_think = (think,rt).Client; 
+Client0 = (fetch, rt).Client1;
+Client1 = (reset, rs).Client0;
 
-Server = (request,rr).Server_get + (break,rb).Server_broken; 
-Server_get = (data,rd).Server; 
-Server_broken = (reset,rrst).Server; 
+Serv0 = (initialise, ri).Serv1;
+Serv1 = (fetch, rt).Serv0 + (fail, rf).Serv2;
+Serv2 = (recover, rr).Serv0;
 
-Clients{Client[n]}<request,data>Servers{Server[m]}
-
-Count think data;
-
-ODEs (stopTime=10, stepSize=0.1, density=10) {
-	E[#think], E[#data];
-}
+Clients{Client0[n]}<request,data>Servers{Serv0[m]}
 
 Probe (stopTime=10, stepSize=0.1, density=10) {
-    Probe1 = hujer : start, meteleskublesku : stop
-    observes {LProbe = ((request,think)[2,4], data):hujer, think:meteleskublesku<-}
-    where {Clients{Client[n]}
-    => Clients{(Client<request,think,data>LProbe)[n]}}
+    PM6 = begin : start, end : stop <-
+    observes {LProbe = recover:begin, (fetch[2]/fail):end <-}
+    where {Servers{Serv0[m]}
+    	=> Servers{(Serv0<recover,fetch,fail>LProbe)<>Serv0[m-1]}
+    }
 }
 
-SimProbe (stopTime=10, stepSize=0.1, replications=100) {
-    SimProbe1 = hujer : start, striga : stop
-    observes {LProbe = (request):hujer, think:meteleskublesku<-},
-    {LP=hujer:metla, meteleskublesku:striga<-}
-    where {Clients{Client[n]}
-    => Clients{(LP<hujer, meteleskublesku>(Client<request,think>LProbe))[n]}}
+SimProbe (stopTime=10, stepSize=0.1, replications=20) {
+    SPM6 = begin : start, end : stop <-
+    observes {SLProbe = recover:begin, (fetch[2]/fail):end <-}
+    where {Servers{Serv0[m]}
+    	=> Servers{(Serv0<recover,fetch,fail>SLProbe)<>Serv0[m-1]}
+    }
 }
