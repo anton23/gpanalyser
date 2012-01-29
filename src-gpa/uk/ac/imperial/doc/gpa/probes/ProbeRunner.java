@@ -209,27 +209,12 @@ public class ProbeRunner
     {
         try
         {
-            // Constructor for ODE
-            Map<String, Object> parameters = new HashMap<String, Object> ();
             return AClass.getDeclaredConstructor
-                    (PCTMC.class, Map.class).newInstance (pctmc, parameters);
-        }
-        catch (NoSuchMethodException e)
-        {
-            try
-            {
-                // Constructor for Simulation
-                return AClass.getDeclaredConstructor
                     (PCTMC.class).newInstance (pctmc);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace ();
-            }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            e.printStackTrace ();
+            ex.printStackTrace ();
         }
         return null;
     }
