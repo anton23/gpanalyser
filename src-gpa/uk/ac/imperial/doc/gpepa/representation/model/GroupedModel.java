@@ -34,9 +34,7 @@ public abstract class GroupedModel {
 	public Set<PEPAComponent> getComponentDerivatives(String group,
 			PEPAComponentDefinitions definitions) {
 		Group g = componentGroups.get(group).getGroup();
-		Set<PEPAComponent> componentDerivatives = g
-				.getComponentDerivatives(definitions);
-		return componentDerivatives;
+		return g.getComponentDerivatives(definitions);
 	}
 
 	public Set<GroupComponentPair> getGroupComponentPairs(
@@ -65,6 +63,10 @@ public abstract class GroupedModel {
 	public abstract AbstractExpression getMomentOrientedRateExpression(
 			String action, 
 			PEPAComponentDefinitions definitions);
+
+    public abstract AbstractExpression getComponentRateExpression(
+            String action, PEPAComponentDefinitions definitions,
+            GroupComponentPair groupComponentPair);
 
 	public abstract List<PEPAEvolutionEvent> getEvolutionEvents(
 			PEPAComponentDefinitions definitions,

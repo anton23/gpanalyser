@@ -950,7 +950,7 @@ scope
 						$probe_def::step_size = $odeSettings.stepSize;
 						$probe_def::parameter = $odeSettings.density;
 				}
-			mt=probe_spec [$plot, false])
+			md=mode mt=probe_spec [false, $md.chosenMode, $plot])
 			{
 				$measured_times = $mt.measured_times;
 			}
@@ -961,12 +961,27 @@ scope
 						$probe_def::parameter
 							= $simulationSettings.replications;
 				}
-			mt=probe_spec [$plot, true])
+			md=mode mt=probe_spec [true, $md.chosenMode, $plot])
 			{
 				$measured_times = $mt.measured_times;
 			} ;
 
-probe_spec [boolean plot, boolean simulate]
+mode returns [int chosenMode]
+	:	^(STEADY STEADY)
+			{
+				$chosenMode = 1;
+			}
+		| ^(TRANSIENT TRANSIENT)
+			{
+				$chosenMode = 2;
+			}
+		| ^(GLOBAL GLOBAL)
+			{
+				$chosenMode = 3;
+			} ;
+
+
+probe_spec [boolean simulate, int mode, boolean plot]
 	returns [Collection<ProbeTime> measured_times]
 scope
 {
@@ -1010,7 +1025,7 @@ scope
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCSimulation.class,
 						SimulationAnalysisNumericalPostprocessor.class,
-						$probe_spec::alphabet, excluded, $plot);
+						$probe_spec::alphabet, excluded, $mode, $plot);
 				}
 				else
 				{
@@ -1021,7 +1036,7 @@ scope
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCODEAnalysis.class,
 						ODEAnalysisNumericalPostprocessor.class,
-						$probe_spec::alphabet, excluded, $plot);
+						$probe_spec::alphabet, excluded, $mode, $plot);
 				}
             } ;
 

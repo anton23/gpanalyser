@@ -61,6 +61,9 @@ tokens{
   
   //Probes
 
+  STEADY				;
+  TRANSIENT				;
+  GLOBAL				;
   SIGNALS				;
   WHERE					;
   OBSERVES				;
@@ -383,10 +386,15 @@ componentCount
 // Probe_spec
 
 probe_def
-	:	PROBE_DEF odeSettings LBRACE probe_spec RBRACE
-			-> ^(PROBE_DEF odeSettings probe_spec)
-		| SIM_PROBE_DEF simulationSettings LBRACE probe_spec RBRACE
-          	-> ^(SIM_PROBE_DEF simulationSettings probe_spec) ;
+	:	PROBE_DEF odeSettings mode? LBRACE probe_spec RBRACE
+			-> ^(PROBE_DEF odeSettings mode? probe_spec)
+		| SIM_PROBE_DEF simulationSettings mode? LBRACE probe_spec RBRACE
+          	-> ^(SIM_PROBE_DEF simulationSettings mode? probe_spec) ;
+
+mode
+	:	STEADY -> ^(STEADY STEADY)
+		| TRANSIENT -> ^(TRANSIENT TRANSIENT)
+		| -> ^(GLOBAL GLOBAL);
 
 probe_spec
 scope
