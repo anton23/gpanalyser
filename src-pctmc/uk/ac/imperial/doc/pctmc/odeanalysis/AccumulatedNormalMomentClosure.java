@@ -23,7 +23,7 @@ public class AccumulatedNormalMomentClosure extends NormalMomentClosure {
 	@Override
 	public AbstractExpression insertProductIntoRate(AbstractExpression rate,
 			PopulationProduct moment) {
-		AccumulatedNormalClosureVisitor visitor = new AccumulatedNormalClosureVisitor(moment, maxOrder);
+		AccumulatedNormalClosureVisitorUniversal visitor = new AccumulatedNormalClosureVisitorUniversal(new CombinedPopulationProduct(moment), maxOrder);
 		rate.accept(visitor);
 		return visitor.getResult();
 	}
@@ -32,7 +32,7 @@ public class AccumulatedNormalMomentClosure extends NormalMomentClosure {
 	public AbstractExpression insertAccumulations(
 			AbstractExpression derivative,
 			CombinedPopulationProduct moment) {
-		IntegralInsterterVisitor visitor = new AccumulatedIntegralInsterterVisitor(
+		AccumulatedNormalClosureVisitorUniversal visitor = new AccumulatedNormalClosureVisitorUniversal(
 				new CombinedPopulationProduct(null, moment
 						.getAccumulatedProducts()), maxOrder);
 		derivative.accept(visitor);

@@ -51,7 +51,9 @@ public class GPEPAToPCTMC {
 			AbstractExpression rate = event.getRate();
 			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(unfoldedVariables);			
 			rate.accept(setter);
-			events.add(new EvolutionEvent(decreasing, increasing, rate));
+			RatePopulationToMomentTransformer transformer = new RatePopulationToMomentTransformer();
+			rate.accept(transformer);
+			events.add(new EvolutionEvent(decreasing, increasing, transformer.getResult()));
 		}
 		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions); 
 	}

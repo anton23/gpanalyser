@@ -37,7 +37,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 	private BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	private Map<AbstractExpression, Integer> generalExpectationIndex;
 
-	private int methodCharacters = 6000;
+	private int methodCharacters = 10000;
 	public static final String GENERATEDCLASSNAME = "GeneratedODEs";
 	private static final String OLDY = "y";
 	private static final String NEWY = "newy";

@@ -33,7 +33,7 @@ public class JExpressionsJavaUtils {
 		return m / (m + e);
 	}
 	
-	private static NormalDistributionImpl normalDist = new NormalDistributionImpl();
+	private static NormalDistributionImpl normalDist = new NormalDistributionImpl(/*0,1,1.0E-12*/);
 	
 	public static double phi(double x) {
 		return normalDist.density(x);		
@@ -43,7 +43,7 @@ public class JExpressionsJavaUtils {
 		try {
 			return normalDist.cumulativeProbability(x);
 		} catch (MathException e) {
-			return Double.NaN;
+			throw new AssertionError("Math exception!");
 		}		
 	}
 

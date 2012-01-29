@@ -99,7 +99,7 @@ public class AccumulatedIntegralInsterterVisitor extends
 		if (!foundMinimum && !foundMoment) {
 			newTerms.add(CombinedProductExpression.create(toInsert));
 		}
-		foundMinimum = oldFoundMinimum;
+		foundMinimum |= oldFoundMinimum;
 		foundMoment = oldFoundMoment;
 		insert = oldInsert;
 		result = ProductExpression.create(newTerms);

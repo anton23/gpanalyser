@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
@@ -21,6 +20,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CentralMomentOfLinearCombinationExpression;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CovarianceOfLinearCombinationsExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
@@ -53,27 +53,19 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 	
 	@Override
 	public void visit(MinExpression e) {
-		if (e.getA() instanceof CombinedProductExpression && e.getB() instanceof CombinedProductExpression) {
 			if (insert) {
 				//if (moment.getOrder() == 0) {
 					AbstractExpression muA = e.getA();
 					AbstractExpression muB = e.getB();
-					CombinedPopulationProduct productA = ((CombinedProductExpression) e.getA())
-							.getProduct();
-					CombinedPopulationProduct productB = ((CombinedProductExpression) e.getB())
-							.getProduct();
-					AbstractExpression eAB = CombinedProductExpression
-							.create(CombinedPopulationProduct.getProductOf(
-									productA,
-									productB));
+					
 
-					AbstractExpression covAB = new MinusExpression(eAB,
-							ProductExpression.create(muA, muB));
+					
 					Map<ExpressionVariable, AbstractExpression> var = new HashMap<ExpressionVariable, AbstractExpression>();
+					AbstractExpression covAB = new CovarianceOfLinearCombinationsExpression(muA, muB, var);
 					AbstractExpression varA = new CentralMomentOfLinearCombinationExpression(
-							e.getA(), 2, var);
+							muA, 2, var);
 					AbstractExpression varB = new CentralMomentOfLinearCombinationExpression(
-							e.getB(), 2, var);
+							muB, 2, var);
 					AbstractExpression theta = PowerExpression
 							.create(
 									SumExpression.create(varA, varB,
@@ -83,36 +75,42 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 									new DoubleExpression(0.5));
 					
 					
+					if (e.getB().equals(new DoubleExpression(0.0))) {
+						AbstractExpression nonNegative = FunctionCallExpression.create("max", Lists.newArrayList(varA, new DoubleExpression(0.0)));
+						theta = FunctionCallExpression.create("sqrt", Lists.newArrayList(nonNegative));
+					}
+					
+					
 					AbstractExpression muA2 = e.getA();
 					AbstractExpression muB2 = e.getB();
 					AbstractExpression theta2 = theta;
 					if (moment.getOrder() > 0) {
-						muA2 = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(
-								productA, new CombinedPopulationProduct(moment)));
-						muB2 = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(
-								productB, new CombinedPopulationProduct(moment)));
+						muA.accept(this);
+						muA2 = result;
+						inserted = false;
+						muB.accept(this);
+						muB2 = result;						
 						theta2 = ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(moment)), theta);
 					}
+					MinusExpression mAmB = new MinusExpression(muA, muB);
 					AbstractExpression arg1 = PEPADivExpression.create(
-							new MinusExpression(muA, muB), theta);
+							mAmB, theta);
+					MinusExpression mBmA = new MinusExpression(muB, muA);
 					AbstractExpression arg2 = PEPADivExpression.create(
-							new MinusExpression(muB, muA), theta);
+							mBmA, theta);
 					result = SumExpression.create(ProductExpression.create(muA2,
 							FunctionCallExpression.create("phiC", Lists
-									.newArrayList(arg2))), ProductExpression
+									.newArrayList(arg2, mBmA, theta))), ProductExpression
 							.create(muB2, FunctionCallExpression.create("phiC",
-									Lists.newArrayList(arg1))),
+									Lists.newArrayList(arg1, mAmB, theta))),
 							ProductExpression.create(
 									new DoubleExpression(-1.0), theta2,
 									FunctionCallExpression.create("phi", Lists
-											.newArrayList(arg2))));
+											.newArrayList(arg2, mBmA, theta))));
 					inserted = true;
 			} else {
 				result = e;
-			}
-		} else {
-			super.visit(e);
-		}
+			}	
 	}
 	
 	@Override
@@ -136,9 +134,9 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 	@Override
 	public void visit(CombinedProductExpression e) {
 		if (insert) {
-		if (e.getProduct().getAccumulatedProducts().isEmpty()) {
+		/*if (e.getProduct().getAccumulatedProducts().isEmpty()) {
 			super.visit(e);
-		} else {
+		} else {*/
 			int order = moment.getOrder() + e.getProduct().getOrder();
 			if (order <= maxOrder) {
 				result = CombinedProductExpression
@@ -185,7 +183,7 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 					}
 				}
 			
-		}
+//		}
 		} else {
 			result = e;
 		}
@@ -266,53 +264,4 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 		return SumExpression.create(summands);		
 	}
 	
-	
-	
-
-	
-	public void bla(CombinedProductExpression e) {
-		if (insert) {
-			inserted = true;
-		if (e.getProduct().getAccumulatedProducts().size() > 0) {
-			throw new AssertionError("Accumulations not allowed in rates!");
-		}
-		PopulationProduct nakedProduct = e.getProduct().getNakedProduct();
-		int order = moment.getOrder() + nakedProduct.getOrder();
-		if (order <= maxOrder) {
-			result = CombinedProductExpression
-					.create(new CombinedPopulationProduct(PopulationProduct
-							.getProduct(moment, nakedProduct)));
-		} else
-		if (maxOrder == 1) {
-			List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-			for (Entry<State, Integer> entry: moment.getRepresentation().entrySet()) {
-				for (int i = 0; i<entry.getValue(); i++) {
-					terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
-				}
-			}
-			for (Entry<State, Integer> entry: nakedProduct.getRepresentation().entrySet()) {
-				for (int i = 0; i<entry.getValue(); i++) {
-					terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
-				}
-			}
-			result = ProductExpression.create(terms);
-		} else  {
-			State[] x = new State[order];
-			int i = 0;
-			for (State s : PopulationProduct.getProduct(moment, nakedProduct)
-					.asMultiset()) {
-				if (s != null)
-					x[i++] = s;
-			}
-			if (order % 2 == 1) {
-				result = getOddMomentInTermsOfCovariances(x);
-			} else {
-				result = getEventMomentInTermsOfCovariances(x);
-			}
-			
-		} 
-		} else {
-			result = e;
-		}
-	}
 }

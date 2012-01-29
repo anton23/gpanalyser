@@ -79,6 +79,7 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, IConstantEx
 		if (insert) {
 			result = ProductExpression.create(e, CombinedProductExpression
 					.create(toInsert));
+			foundMinimum = true;
 		} else {
 			result = e;
 		}
@@ -198,8 +199,9 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, IConstantEx
 
 	@Override
 	public void visit(PowerExpression e) {
-		throw new AssertionError(
-				"Powers not supported in right hand sides of ODEs");
+		result = e;
+		/*throw new AssertionError(
+				"Powers not supported in right hand sides of ODEs");*/
 	}
 
 	@Override
