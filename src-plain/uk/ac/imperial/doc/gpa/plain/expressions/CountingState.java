@@ -25,7 +25,7 @@ public class CountingState extends State {
 
 	@Override
 	public String toString() {
-		return "#" + component; 
+		return "count_" + component; 
 	}
 
 	@Override

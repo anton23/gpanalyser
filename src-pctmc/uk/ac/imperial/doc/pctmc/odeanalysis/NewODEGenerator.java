@@ -146,8 +146,9 @@ public class NewODEGenerator {
 			generateODEforCombinedMoment(nakedMoment);
 			AbstractExpression diffNakedMoment = rhs.get(nakedMoment);
 			// Need to insert the accumulated moments into the RHS			
-			sum.add(momentClosure.insertAccumulations(diffNakedMoment, new CombinedPopulationProduct(null, combinedProduct
-							.getAccumulatedProducts())));
+			AbstractExpression insertAccumulations = momentClosure.insertAccumulations(diffNakedMoment, new CombinedPopulationProduct(null, combinedProduct
+							.getAccumulatedProducts()));
+			sum.add(insertAccumulations);
 		}
 		return SumExpression.create(sum);
 	}

@@ -24,7 +24,11 @@ public class MeanOfLinearCombinationExpression extends ExpressionWrapper {
 		super(e);
 		AbstractExpression lsum = e;
 		if (e instanceof ExpressionVariable) {
-			lsum = var.get(e);
+			if (((ExpressionVariable) e).getUnfolded() != null) {
+				lsum = ((ExpressionVariable) e).getUnfolded();
+			} else {
+				lsum = var.get(e);
+			}
 		}
 		coefficients = new LinkedList<AbstractExpression>();
 		combinedProducts = new LinkedList<CombinedPopulationProduct>();
@@ -70,6 +74,9 @@ public class MeanOfLinearCombinationExpression extends ExpressionWrapper {
 							+ " is not a linear combination of moments!");
 				}
 				coefficients.add(coefficient);
+				if (product == null) {
+					product = CombinedPopulationProduct.getConstantProduct();
+				}
 				combinedProducts.add(product);
 			}
 		}

@@ -483,6 +483,7 @@ primaryExpression:
      | generalExpectation
      | moment
      | central
+     | cov
      | scentral
      | PATTERN state -> ^(PATTERN state)
      | indicatorFunction
@@ -529,6 +530,13 @@ central:
   RBRACK 
   {insideExpectation = false;}
   -> ^(CENTRAL expression INTEGER["2"])
+;
+
+
+cov:
+  COV LBRACK {insideExpectation = true;}
+    expression COMMA expression RBRACK {insideExpectation = false;}
+   -> ^(COV expression COMMA expression)
 ;
 
 scentral:

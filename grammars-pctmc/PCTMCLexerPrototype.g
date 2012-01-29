@@ -46,6 +46,7 @@ CENTRAL: 'CM';
 SCENTRAL: 'SCM';
 VARIANCE: 'Var';
 MOMENT: 'Moment';
+COV: 'Cov';
 
 ODES: 'ODEs';
 SIMULATION: 'Simulation';

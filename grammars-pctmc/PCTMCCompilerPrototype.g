@@ -333,6 +333,7 @@ primary_expression returns[AbstractExpression e]:
  | m=mean {$e = $m.m;} 
  | eg = generalExpectation {$e = $eg.e;}  
  | cm=central {$e = $cm.c;}
+ | cov = covariance {$e = $cov.c;}
  | mom = moment {$e = $mom.c;}
  | scm=scentral {$e = $scm.c;}
  | ^(MIN exp1=expression COMMA exp2=expression) {$e = MinExpression.create($exp1.e,$exp2.e); }
@@ -365,6 +366,10 @@ mean returns [MeanOfLinearCombinationExpression m]:
 
 central returns [CentralMomentOfLinearCombinationExpression c]:
   ^(CENTRAL e=expression n=integer) {$c = new CentralMomentOfLinearCombinationExpression($e.e,$n.value,vars);}
+;
+
+covariance returns [CovarianceOfLinearCombinationsExpression c]:
+  ^(COV a = expression COMMA b = expression) {$c = new CovarianceOfLinearCombinationsExpression($a.e, $b.e, vars);}  
 ;
 
 
