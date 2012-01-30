@@ -51,6 +51,12 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 		this.inserted = false;
 		this.insert = true;
 	}
+	
+	@Override
+	public void visit(PowerExpression e) {
+		onlyMultiply(e);
+	}
+	
 
 	@Override
 	public void visit(ExpressionVariable e) {
@@ -77,9 +83,8 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 			result = PEPADivExpression.create(newNumerator, result);
 		}
 	}
-
-	@Override
-	public void visit(ConstantExpression e) {
+	
+	protected void onlyMultiply(AbstractExpression e) {
 		if (insert) {
 			result = ProductExpression.create(e, CombinedProductExpression
 					.create(moment));
@@ -90,14 +95,13 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 	}
 
 	@Override
+	public void visit(ConstantExpression e) {
+		onlyMultiply(e);
+	}
+
+	@Override
 	public void visit(DoubleExpression e) {
-		if (insert) {
-			result = ProductExpression.create(e, CombinedProductExpression
-					.create(moment));
-			inserted = true;
-		} else {
-			result = e;
-		}
+		onlyMultiply(e);
 	}
 
 	@Override
@@ -153,17 +157,20 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 				muA, 2, var);
 		AbstractExpression varB = new CentralMomentOfLinearCombinationExpression(
 				muB, 2, var);
-		AbstractExpression theta = PowerExpression.create(SumExpression.create(
+		AbstractExpression theta = PowerExpression.create(
+				FunctionCallExpression.create(
+						"max", Lists.newArrayList(
+				SumExpression.create(
 				varA, varB, ProductExpression.create(
-						new DoubleExpression(-2.0), covAB)),
+						new DoubleExpression(-2.0), covAB)), new DoubleExpression(0.0))),
 				new DoubleExpression(0.5));
-
-		if (e.getB().equals(new DoubleExpression(0.0))) {
-			AbstractExpression nonNegative = FunctionCallExpression.create(
-					"max", Lists.newArrayList(varA, new DoubleExpression(0.0)));
-			theta = FunctionCallExpression.create("sqrt", Lists
-					.newArrayList(nonNegative));
-		}
+		
+//		if (e.getB().equals(new DoubleExpression(0.0))) {
+//			AbstractExpression nonNegative = FunctionCallExpression.create(
+//					"max", Lists.newArrayList(varA, new DoubleExpression(0.0)));
+//			theta = FunctionCallExpression.create("sqrt", Lists
+//					.newArrayList(nonNegative));
+//		}
 
 		AbstractExpression muA2 = e.getA();
 		AbstractExpression muB2 = e.getB();
@@ -182,10 +189,10 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 		MinusExpression mBmA = new MinusExpression(muB, muA);
 		AbstractExpression arg2 = PEPADivExpression.create(mBmA, theta);
 		result = SumExpression.create(ProductExpression.create(muA2,
-				FunctionCallExpression.create("phiC", Lists.newArrayList(arg2))), ProductExpression.create(muB2,
-				FunctionCallExpression.create("phiC", Lists.newArrayList(arg1))), ProductExpression.create(
+				FunctionCallExpression.create("safe_Phi", Lists.newArrayList(mBmA, theta))), ProductExpression.create(muB2,
+				FunctionCallExpression.create("safe_Phi", Lists.newArrayList(mAmB, theta))), ProductExpression.create(
 				new DoubleExpression(-1.0), theta2, FunctionCallExpression
-						.create("phi", Lists.newArrayList(arg2))));
+						.create("safe_phi", Lists.newArrayList(mBmA, theta))));
 		inserted = true;
 
 	}

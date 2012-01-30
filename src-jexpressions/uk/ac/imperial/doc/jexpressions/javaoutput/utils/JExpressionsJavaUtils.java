@@ -33,10 +33,34 @@ public class JExpressionsJavaUtils {
 		return m / (m + e);
 	}
 	
-	private static NormalDistributionImpl normalDist = new NormalDistributionImpl(/*0,1,1.0E-12*/);
+	private static NormalDistributionImpl normalDist = new NormalDistributionImpl(0,1,1.0E-12);
 	
 	public static double phi(double x) {
-		return normalDist.density(x);		
+		double ret = normalDist.density(x);
+		if (Double.isNaN(ret) || Double.isInfinite(ret)) {
+			throw new AssertionError("AAA");
+		}
+		return ret;		
+	}
+	
+	public static double safe_phi(double top, double bottom) {
+		if (bottom == 0.0) {
+			return 0.0;
+		}
+		double ret = normalDist.density(top/bottom);
+		return ret;		
+	}
+	
+	public static double safe_Phi(double top, double bottom) {
+		try {
+			if (bottom == 0.0) {
+				if (top > 0.0) return 1.0;
+				else return 0.0;
+			} else 
+			return normalDist.cumulativeProbability(top / bottom);
+		} catch (MathException e) {
+			throw new AssertionError("Math exception!");
+		}		
 	}
 	
 	public static double Phi(double x) {
