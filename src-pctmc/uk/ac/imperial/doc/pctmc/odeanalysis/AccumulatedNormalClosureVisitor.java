@@ -35,22 +35,6 @@ public class AccumulatedNormalClosureVisitor extends GetVVersionVisitorMomentClo
 		super(moment, maxOrder);
 	}
 	
-	
-	
-/*	
-	@Override
-	public void visit(IndicatorFunction e) {
-		boolean oldInserted = inserted;
-		e.getCondition().getLeft().accept(this);
-		AbstractExpression left = result;
-		e.getCondition().getRight().accept(this);
-		AbstractExpression right = result;
-		result = new IndicatorFunction(new ExpressionCondition(left, e.getCondition().getOperator(), right));
-		inserted = oldInserted;
-
-	}*/
-	
-	
 	@Override
 	public void visit(MinExpression e) {
 			if (insert) {
