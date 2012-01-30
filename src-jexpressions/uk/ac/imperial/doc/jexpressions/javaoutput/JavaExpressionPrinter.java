@@ -57,6 +57,12 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 		} else if (e.getName().equals("phiC")) {
 			output.append(JExpressionsJavaUtils.class.getName()
 					+ ".Phi(");
+		} else if (e.getName().equals("safe_phi")) {
+			output.append(JExpressionsJavaUtils.class.getName()
+					+ ".safe_phi(");
+		} else if (e.getName().equals("safe_Phi")) {
+			output.append(JExpressionsJavaUtils.class.getName()
+			+ ".safe_Phi(");
 		} else {
 			output.append("Math." + e.getName() + "(");
 		}
