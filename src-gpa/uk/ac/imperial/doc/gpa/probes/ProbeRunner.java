@@ -19,7 +19,6 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.*;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
-import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -42,8 +41,7 @@ public class ProbeRunner
              Set<GPEPAState> stateObservers,
              PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-             ComponentId accepting, Constants constants, Map<ExpressionVariable,
-             AbstractExpression> unfoldedVariables,
+             ComponentId accepting, Constants constants,
              AbstractExpression stopTime, AbstractExpression stepSize,
              int parameter, Class<A> AClass, Class<NP> NPClass,
              Collection<ITransition> alphabet, Collection<ITransition> excluded,
@@ -69,8 +67,7 @@ public class ProbeRunner
         CDF cdf = dispatchEvaluation (gprobe,
                 statesCountExpressions, mapping, countActionStrings, model,
                 stateObservers, mainDef, altDef, definitionsMap, accepting,
-                constants, unfoldedVariables,
-                stopTimeVal, stepSizeVal, parameter,
+                constants, stopTimeVal, stepSizeVal, parameter,
                 AClass, NPClass, 0, mode);
 
         if (plot)
@@ -92,7 +89,6 @@ public class ProbeRunner
              PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              ComponentId accepting, Constants constants,
-             Map<ExpressionVariable, AbstractExpression> unfoldedVariables,
              double stopTime, double stepSize, int parameter,
              Class<A> AClass, Class<NP> NPClass,
              int start_time, int mode)
@@ -104,22 +100,22 @@ public class ProbeRunner
                     (statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, altDef, definitionsMap, accepting,
-                            constants, unfoldedVariables, stopTime, stepSize,
-                        parameter, AClass, NPClass);
+                        constants, stopTime, stepSize, parameter,
+                        AClass, NPClass);
             case 2:
                 return transientIndividual
                     (gprobe, statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, definitionsMap, accepting,
-                        constants, unfoldedVariables, stopTime, stepSize,
-                        parameter, AClass, NPClass, start_time);
+                        constants, stopTime, stepSize, parameter,
+                        AClass, NPClass, start_time);
             case 3:
                 return globalPassages
                     (gprobe, statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, definitionsMap,
-                        constants, unfoldedVariables, stopTime, stepSize,
-                        parameter, AClass, NPClass, start_time);
+                        constants, stopTime, stepSize, parameter,
+                        AClass, NPClass, start_time);
             default:
                 return null;
         }
@@ -135,7 +131,6 @@ public class ProbeRunner
              PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              ComponentId accepting, Constants constants,
-             Map<ExpressionVariable, AbstractExpression> unfoldedVariables,
              double stopTime, double stepSize, int parameter,
              Class<A> AClass, Class<NP> NPClass)
     {
@@ -149,8 +144,8 @@ public class ProbeRunner
             = new LinkedList<AbstractExpression> (crates.values ());
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, countActionStrings, stateObservers, statesCountExpressions,
-                mapping, mainDef, constants, unfoldedVariables,
-                stopTime, stepSize, parameter, AClass, NPClass);
+                mapping, mainDef, constants, stopTime, stepSize, parameter,
+                AClass, NPClass);
 
         AbstractExpressionEvaluator eval
             = postprocessor.getExpressionEvaluator (expressions, constants);
@@ -212,7 +207,7 @@ public class ProbeRunner
         }
         postprocessor = runTheProbedSystem (model, countActionStrings,
                 stateObservers, statesCountExpressions, mapping, altDef,
-                constants, unfoldedVariables, stopTime, stepSize, parameter,
+                constants, stopTime, stepSize, parameter,
                 AClass, NPClass);
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
@@ -246,7 +241,6 @@ public class ProbeRunner
              PEPAComponentDefinitions mainDef,
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              ComponentId accepting, Constants constants,
-             Map<ExpressionVariable, AbstractExpression> unfoldedVariables,
              double stopTime, double stepSize, int parameter,
              Class<A> AClass, Class<NP> NPClass,
              int start_time)
@@ -265,7 +259,6 @@ public class ProbeRunner
              PEPAComponentDefinitions mainDef,
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              Constants constants,
-             Map<ExpressionVariable, AbstractExpression> unfoldedVariables,
              double stopTime, double stepSize, int parameter,
              Class<A> AClass, Class<NP> NPClass,
              int start_time)
@@ -424,7 +417,6 @@ public class ProbeRunner
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
              PEPAComponentDefinitions definitions, Constants constants,
-             Map<ExpressionVariable, AbstractExpression> unfoldedVariables,
              double stopTime, double stepSize, int parameter,
              Class<A> AClass, Class<NP> NPClass)
     {
@@ -446,15 +438,12 @@ public class ProbeRunner
 
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
-        plotDescriptions.add (new PlotDescription (new ArrayList<AbstractExpression>(unfoldedVariables.keySet())));
 
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, countActions);
         System.out.println (pctmc);
 
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc, AClass);
         analysis.setUsedMoments (moments);
-        AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts
-            (analysis, plotDescriptions, unfoldedVariables);
         NumericalPostprocessor postprocessor
             = getPostprocessor (stopTime, stepSize, parameter, NPClass);
         analysis.addPostprocessor (postprocessor);

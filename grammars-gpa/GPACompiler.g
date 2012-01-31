@@ -113,7 +113,6 @@ import PCTMCCompilerPrototype;
 	private String t = "temp";
 	private GroupedModel mainModel;
 	private Constants mainConstants;
-	Map<ExpressionVariable,AbstractExpression> mainUnfoldedVariables;
 	private PEPAComponentDefinitions mainDefinitions;
 	private Map<String, PEPAComponent> components;
 	private List<ITransition> excluded = new LinkedList<ITransition> ();
@@ -203,7 +202,6 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
 @init{
   Set<String> cooperationActions = new HashSet<String>();
   mainConstants = constants;
-  mainUnfoldedVariables = unfoldedVariables;
 }:
   cd = componentDefinitions
   {
@@ -1001,7 +999,6 @@ mode returns [int chosenMode]
 				$chosenMode = 3;
 			} ;
 
-
 probe_spec [boolean simulate, int mode, boolean plot]
 	returns [CDF measured_times]
 scope
@@ -1044,8 +1041,6 @@ scope
 			globalProbeName=UPPERCASENAME (local_probes locations)? probeg)
 			{
 				gprobe.setName ($globalProbeName.text);
-				Map<ExpressionVariable, AbstractExpression> uv
-					= deepCloner.deepClone (mainUnfoldedVariables);
 				Map<PEPAComponentDefinitions, Set<ComponentId>> defMap
 					= new HashMap<PEPAComponentDefinitions,Set<ComponentId>> ();
 				Set<ComponentId> newComps = new HashSet<ComponentId> ();
@@ -1071,13 +1066,13 @@ scope
 						(newDef).removeVanishingStates ();
 					defMap.put ($probe_spec::altDef, newComps);
 				}
-				if (simulate)
+				if ($simulate)
 				{
 					$measured_times = prunner.executeProbedModel
 						(gprobe, $probe_def::model, $probe_def::stateObservers,
 						$probe_spec::definitions, $probe_spec::altDef, defMap,
 						$probe_spec::localAcceptingState,
-						mainConstants, uv, $probe_def::stop_time,
+						mainConstants, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCSimulation.class,
 						SimulationAnalysisNumericalPostprocessor.class,
@@ -1089,7 +1084,7 @@ scope
 						(gprobe, $probe_def::model, $probe_def::stateObservers,
 						$probe_spec::definitions, $probe_spec::altDef, defMap,
 						$probe_spec::localAcceptingState,
-						mainConstants, uv, $probe_def::stop_time,
+						mainConstants, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCODEAnalysis.class,
 						ODEAnalysisNumericalPostprocessor.class,
