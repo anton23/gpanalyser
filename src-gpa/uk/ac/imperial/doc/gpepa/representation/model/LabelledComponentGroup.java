@@ -11,6 +11,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 
 import java.util.*;
@@ -90,8 +91,9 @@ public class LabelledComponentGroup extends GroupedModel {
         if (groupComponentPair.getGroup().equals(label)) {
             AbstractExpression rate = definitions.getApparentRateExpression(
                     action, groupComponentPair.getComponent());
-            return ProductExpression.create(new PopulationExpression(
-                    new GPEPAState(groupComponentPair)), rate);
+            return ProductExpression.create(CombinedProductExpression
+                    .createMeanExpression (new GPEPAState(groupComponentPair)),
+                    rate);
         }
         else {
             return DoubleExpression.ZERO;

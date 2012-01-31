@@ -13,20 +13,21 @@ Serv0 = (initialise, ri).Serv1;
 Serv1 = (fetch, rt).Serv0 + (fail, rf).Serv2;
 Serv2 = (recover, rr).Serv0;
 
-Clients{Client0[n]}<request,data>Servers{Serv0[m]}
+Clients{Client0[n]}<fetch>Servers{Serv0[m]}
 
-Probe (stopTime=10, stepSize=0.1, density=10) {
+Probe (stopTime=50, stepSize=0.1, density=10) steady {
     PM6 = begin : start, end : stop <-
     observes {LProbe = recover:begin, (fetch[2]/fail):end <-}
     where {Servers{Serv0[m]}
-    	=> Servers{(Serv0<recover,fetch,fail>LProbe)<>Serv0[m-1]}
+    	=> Servers{Serv0<recover,fetch,fail>LProbe|Serv0[m-1]}
     }
 }
-
-SimProbe (stopTime=10, stepSize=0.1, replications=20) {
-    SPM6 = begin : start, end : stop <-
-    observes {SLProbe = recover:begin, (fetch[2]/fail):end <-}
+/*
+SimProbe (stopTime=50, stepSize=0.1, replications=100) steady {
+    PM6 = begin : start, end : stop <-
+    observes {LProbe = recover:begin, (fetch[2]/fail):end <-}
     where {Servers{Serv0[m]}
-    	=> Servers{(Serv0<recover,fetch,fail>SLProbe)<>Serv0[m-1]}
+    	=> Servers{Serv0<recover,fetch,fail>LProbe|Serv0[m-1]}
     }
 }
+*/
