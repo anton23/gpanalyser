@@ -18,6 +18,11 @@ public class Stop extends PEPAComponent {
         return pattern instanceof AnyComponent || this.equals(pattern);
 	}
 
+    @Override
+    public boolean containsComponent(ComponentId component) {
+        return component.getName ().equals ("Stop");
+    }
+
 	@Override
 	public boolean equals(Object o) {
 		return (o == this) || (o instanceof Stop);

@@ -13,6 +13,8 @@ public abstract class PEPAComponent {
 
 	public abstract boolean matchPattern(PEPAComponent pattern);
 
+    public abstract boolean containsComponent(ComponentId component);
+
 	/**
 	 * Returns the derivative states of this component. Given a set of known
 	 * states to avoid infinite recursion.

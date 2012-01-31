@@ -59,7 +59,7 @@ public abstract class GroupedModel {
 	public AbstractExpression getCountExpression(GroupComponentPair pair) {
 		return componentGroups.get(pair.getGroup()).getGroup().getCountExpression(pair.getComponent());
 	}
-	
+
 	public abstract AbstractExpression getMomentOrientedRateExpression(
 			String action, 
 			PEPAComponentDefinitions definitions);

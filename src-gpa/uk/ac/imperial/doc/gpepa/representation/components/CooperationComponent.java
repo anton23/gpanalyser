@@ -26,7 +26,13 @@ public class CooperationComponent extends PEPAComponent {
 				&& right.matchPattern(asCoop.getRight());
 	}
 
-	protected PEPAComponent left;
+    @Override
+    public boolean containsComponent(ComponentId component) {
+        return (left.containsComponent(component)
+                    || right.containsComponent(component));
+    }
+
+    protected PEPAComponent left;
 	protected PEPAComponent right;
 	protected Set<String> cooperationSet;
 
@@ -75,7 +81,7 @@ public class CooperationComponent extends PEPAComponent {
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(left.getActions(definitions));
 		ret.addAll(right.getActions(definitions));
-		return null;
+		return ret;
 	}
 
 	@Override

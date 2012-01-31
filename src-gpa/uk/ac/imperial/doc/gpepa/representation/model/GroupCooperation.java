@@ -27,7 +27,6 @@ public class GroupCooperation extends GroupedModel {
 
 
 	@Override
-
 	public List<PEPAEvolutionEvent> getEvolutionEvents(
 			final PEPAComponentDefinitions definitions,
 			Set<String> restrictedActions) {

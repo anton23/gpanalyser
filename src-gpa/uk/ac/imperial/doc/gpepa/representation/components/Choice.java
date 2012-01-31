@@ -24,7 +24,12 @@ public class Choice extends PEPAComponent {
 		return (pattern instanceof AnyComponent) || equals(pattern);
 	}
 
-	@Override
+    @Override
+    public boolean containsComponent(ComponentId component) {
+        return false;
+    }
+
+    @Override
 	public Set<String> getActions(PEPAComponentDefinitions definitions) {
 		return getActions();
 	}

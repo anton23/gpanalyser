@@ -112,8 +112,8 @@ import PCTMCCompilerPrototype;
 
 	private String t = "temp";
 	private GroupedModel mainModel;
-	private Map<ExpressionVariable, AbstractExpression> mainUnfoldedVariables;
 	private Constants mainConstants;
+	Map<ExpressionVariable,AbstractExpression> mainUnfoldedVariables;
 	private PEPAComponentDefinitions mainDefinitions;
 	private Map<String, PEPAComponent> components;
 	private List<ITransition> excluded = new LinkedList<ITransition> ();
@@ -142,6 +142,43 @@ import PCTMCCompilerPrototype;
 		Map<String,PEPAComponent> newComponents = this.componentDefinitions ();
 		this.setTreeNodeStream (current);
 		return newComponents;
+	}
+
+	private Map<String, PEPAComponent> generateProbeComponent
+		(String name, NFAState startingState, boolean repeating,
+		boolean setAcceptingComp) throws Exception
+	{
+		NFAState accepting = NFADetectors.detectSingleAcceptingState
+			(startingState);
+		if (repeating)
+		{
+			accepting.addTransition (new EmptyTransition (), startingState);
+		}
+		else
+		{
+			for (ITransition transition : $probe_spec::allActions)
+			{
+				accepting.addTransitionIfNotExisting
+					(transition.getSimpleTransition (), accepting);
+			}
+		}
+		startingState = NFAtoDFA.convertToDFA (startingState, t);
+		NFAUtils.removeAnyTransitions ($probe_spec::allActions, startingState);
+		$probe_spec::alphabet.addAll (NFADetectors.detectAlphabet
+				(startingState, true, excluded));
+		NFAUtils.extendStatesWithSelfLoops
+			($probe_spec::allActions, startingState);
+
+		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
+		NFAStateToPEPA.HybridDFAtoPEPA
+			(startingState, name, 0, new PrintStream (stream));
+		accepting = NFADetectors.detectSingleAcceptingState (startingState);
+		if (setAcceptingComp)
+		{
+			$probe_spec::localAcceptingState
+				= new ComponentId (accepting.getName ());
+		}
+		return loadProbe (stream.toString (), $probe_def::parser);
 	}
 }
 
@@ -322,35 +359,16 @@ probel [String name]
 			{
 				NFAState starting_state = NFAtoDFA.convertToDFA
 					($proberl.starting_state, t);
-				NFAState accepting = NFADetectors.detectSingleAcceptingState
-					(starting_state);
-				if (rp == null)
+				boolean setAcceptingComp = !$probe_def::steady;
+				if ($probe_def::steady)
 				{
-					for (ITransition transition : $probe_spec::allActions)
-					{
-						accepting.addTransitionIfNotExisting
-							(transition.getSimpleTransition (), accepting);
-					}
+					NFAState nonrepeating = deepCloner.deepClone
+						($proberl.starting_state);
+					$probe_spec::altComponents.putAll (generateProbeComponent
+							($name, nonrepeating, false, true));
 				}
-				else
-				{
-                	accepting.addTransition
-                		(new EmptyTransition (), starting_state);
-				}
-				starting_state = NFAtoDFA.convertToDFA (starting_state, t);
-				NFAUtils.removeAnyTransitions
-					($probe_spec::allActions, starting_state);
-			    $probe_spec::alphabet.addAll
-			    	(NFADetectors.detectAlphabet
-			    		(starting_state, true, excluded));
-				NFAUtils.extendStatesWithSelfLoops
-					($probe_spec::allActions, starting_state);
-
-				ByteArrayOutputStream stream = new ByteArrayOutputStream ();
-				NFAStateToPEPA.HybridDFAtoPEPA
-					(starting_state, $name, 0, new PrintStream (stream));
-				$probe_spec::newComponents.putAll
-					(loadProbe (stream.toString (), $probe_def::parser));
+				$probe_spec::newComponents.putAll (generateProbeComponent
+						($name, starting_state, rp != null, setAcceptingComp));
 			} ;
 
 rl_signal returns [NFAState starting_state]
@@ -916,7 +934,6 @@ concrete_r_expr returns [String predicate]
 	:	gp=groupComponentPair
 	        {
 	            GPEPAState gps = new GPEPAState ($gp.gp);
-	            $probe_def::stateObservers.add (gps);
                 $predicate = "data [statesCountExpressions.indexOf"
                     + "(mapping.get (\"" + gps.toString () + "\"))]";
 	        }
@@ -927,22 +944,23 @@ concrete_r_expr returns [String predicate]
 
 // Probe_spec
 
-probe_def [boolean plot] returns [Collection<ProbeTime> measured_times]
+probe_def [boolean plot] returns [CDF measured_times]
 scope
 {
 	GPAParser parser;
 	GroupedModel model;
-	List<GPEPAState> stateObservers;
+	Set<GPEPAState> stateObservers;
 	AbstractExpression stop_time;
 	AbstractExpression step_size;
 	int parameter;
+	boolean steady;
 }
 @init
 {
 	$probe_def::parser = new GPAParser (null);
 	$probe_def::parser.setErrorReporter (new ErrorReporter ());
 	$probe_def::model = deepCloner.deepClone (mainModel);
-	$probe_def::stateObservers = new LinkedList<GPEPAState> ();
+	$probe_def::stateObservers = new HashSet<GPEPAState> ();
 }
 	:	^(PROBE_DEF	odeSettings
 				{
@@ -969,26 +987,34 @@ scope
 mode returns [int chosenMode]
 	:	^(STEADY STEADY)
 			{
+				$probe_def::steady = true;
 				$chosenMode = 1;
 			}
 		| ^(TRANSIENT TRANSIENT)
 			{
+				$probe_def::steady = false;
 				$chosenMode = 2;
 			}
 		| ^(GLOBAL GLOBAL)
 			{
+				$probe_def::steady = false;
 				$chosenMode = 3;
 			} ;
 
 
 probe_spec [boolean simulate, int mode, boolean plot]
-	returns [Collection<ProbeTime> measured_times]
+	returns [CDF measured_times]
 scope
 {
     Set<ITransition> alphabet;
     Set<ITransition> allActions;
     IProbe probe;
+    PEPAComponentDefinitions definitions;
+    PEPAComponentDefinitions altDef;
+    Map<String, PEPAComponent> origComponents;
     Map<String, PEPAComponent> newComponents;
+    Map<String, PEPAComponent> altComponents;
+    ComponentId localAcceptingState;
 }
 @init
 {
@@ -1001,7 +1027,9 @@ scope
 	{
 		$probe_spec::allActions.add (new Transition (action));
 	}
-	$probe_spec::newComponents = deepCloner.deepClone (components);
+	$probe_spec::origComponents = deepCloner.deepClone (components);
+	$probe_spec::newComponents = new HashMap<String, PEPAComponent> ();
+	$probe_spec::altComponents = new HashMap<String, PEPAComponent> ();
 }
 	:	^(DEF signalNames=SIGNALS
 				{
@@ -1016,12 +1044,40 @@ scope
 			globalProbeName=UPPERCASENAME (local_probes locations)? probeg)
 			{
 				gprobe.setName ($globalProbeName.text);
+				Map<ExpressionVariable, AbstractExpression> uv
+					= deepCloner.deepClone (mainUnfoldedVariables);
+				Map<PEPAComponentDefinitions, Set<ComponentId>> defMap
+					= new HashMap<PEPAComponentDefinitions,Set<ComponentId>> ();
+				Set<ComponentId> newComps = new HashSet<ComponentId> ();
+				for (String name : $probe_spec::newComponents.keySet ())
+				{
+					newComps.add (new ComponentId (name));
+				}
+				defMap.put ($probe_spec::definitions, newComps);
+				if ($probe_def::steady)
+				{
+					newComps = new HashSet<ComponentId> ();
+					$probe_spec::altComponents.putAll
+						($probe_spec::origComponents);
+					for (String name : $probe_spec::altComponents.keySet ())
+					{
+						newComps.add (new ComponentId (name));
+					}
+					Map<String, PEPAComponent> newDef =
+						new HashMap<String, PEPAComponent>
+						($probe_spec::altComponents);
+					newDef.putAll ($probe_spec::origComponents);
+					$probe_spec::altDef = new PEPAComponentDefinitions
+						(newDef).removeVanishingStates ();
+					defMap.put ($probe_spec::altDef, newComps);
+				}
 				if (simulate)
 				{
 					$measured_times = prunner.executeProbedModel
-						(gprobe, $probe_def::model,
-						$probe_def::stateObservers, $probe_spec::newComponents,
-						mainConstants, $probe_def::stop_time,
+						(gprobe, $probe_def::model, $probe_def::stateObservers,
+						$probe_spec::definitions, $probe_spec::altDef, defMap,
+						$probe_spec::localAcceptingState,
+						mainConstants, uv, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCSimulation.class,
 						SimulationAnalysisNumericalPostprocessor.class,
@@ -1030,9 +1086,10 @@ scope
 				else
 				{
 					$measured_times = prunner.executeProbedModel
-						(gprobe, $probe_def::model,
-						$probe_def::stateObservers, $probe_spec::newComponents,
-						mainConstants, $probe_def::stop_time,
+						(gprobe, $probe_def::model, $probe_def::stateObservers,
+						$probe_spec::definitions, $probe_spec::altDef, defMap,
+						$probe_spec::localAcceptingState,
+						mainConstants, uv, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCODEAnalysis.class,
 						ODEAnalysisNumericalPostprocessor.class,
@@ -1041,13 +1098,31 @@ scope
             } ;
 
 local_probes
-	:	local_probe_ass (COMMA local_probe_ass)* ;
+	:	local_probe_ass (COMMA local_probe_ass)*
+			{
+				Map<String, PEPAComponent> newDef =
+					new HashMap<String, PEPAComponent>
+					($probe_spec::newComponents);
+				newDef.putAll ($probe_spec::origComponents);
+				$probe_spec::definitions
+					= new PEPAComponentDefinitions
+						(newDef).removeVanishingStates ();
+			} ;
 
 local_probe_ass
 	:	^(DEF name=UPPERCASENAME probel [$name.text]) ;
 
 locations
-	:	location (COMMA location)* ;
+	:	location (COMMA location)*
+			{
+				Set<GroupComponentPair> pairs
+					= $probe_def::model.getGroupComponentPairs
+						($probe_spec::definitions);
+				for (GroupComponentPair g : pairs)
+				{
+					$probe_def::stateObservers.add (new GPEPAState (g));
+				}
+			} ;
 
 location
 	:	^(SUBSTITUTE m1=model m2=model)

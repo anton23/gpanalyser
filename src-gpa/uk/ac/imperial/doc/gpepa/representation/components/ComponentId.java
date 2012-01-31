@@ -17,6 +17,11 @@ public class ComponentId extends PEPAComponent {
 		return (pattern instanceof AnyComponent) || equals(pattern);
 	}
 
+    @Override
+    public boolean containsComponent(ComponentId component) {
+        return name.equals (component.getName ());
+    }
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)

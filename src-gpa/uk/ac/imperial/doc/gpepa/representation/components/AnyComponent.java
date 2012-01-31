@@ -41,7 +41,12 @@ public class AnyComponent extends PEPAComponent {
 		return true;
 	}
 
-	@Override
+    @Override
+    public boolean containsComponent(ComponentId component) {
+        return true;
+    }
+
+    @Override
 	public String toString() {
 		return "_";
 	}

@@ -229,7 +229,8 @@ cooperationSet:
   |LANGLE RANGLE -> LOWERCASENAME[""]; 
    
 group:
-  groupComponent (PAR {hint.push("group definition has to be of the form G{A[n]|B[m]|...|Z[k]}");} groupComponent {hint.pop();})* -> groupComponent+;
+  groupComponent (PAR {hint.push("group definition has to be of the form G{A[n]|B[m]|...|Z[k]}");}
+  	groupComponent {hint.pop();})* -> groupComponent+;
  
 groupComponent:
   component (LBRACK expression RBRACK) -> ^(MULT component expression)

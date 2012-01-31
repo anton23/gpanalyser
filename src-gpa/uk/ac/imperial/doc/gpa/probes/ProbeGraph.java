@@ -3,20 +3,18 @@ package uk.ac.imperial.doc.gpa.probes;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.data.gantt.Task;
-import org.jfree.data.gantt.TaskSeries;
-import org.jfree.data.gantt.TaskSeriesCollection;
-import org.jfree.data.time.SimpleTimePeriod;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 public class ProbeGraph extends JFrame
 {
-    private final static String title = "Global probes measurements";
-    private TaskSeries measurements = new TaskSeries ("Measurements");
+    private final static String title = "CDF";
+    private XYSeriesCollection times = new XYSeriesCollection ();
 
     public ProbeGraph ()
     {
@@ -29,32 +27,27 @@ public class ProbeGraph extends JFrame
         setVisible (true);
     }
 
-    public void renderData
-            (Collection<ProbeTime> times, String name, double end)
+    public void renderData (CDF cdf, String name, double stepSize)
     {
-        Task newTask = new Task
-            (name, new SimpleTimePeriod(0, (long) end));
+        XYSeries measurements = new XYSeries (name);
 
-        for (ProbeTime time : times)
+        double[] data = cdf.getValues ();
+        for (int i = 0; i < data.length; ++i)
         {
-            newTask.addSubtask(new Task
-                    ("", new SimpleTimePeriod
-                            ((long) time.getStartTime (),
-                             (long) time.getStopTime ())));
+            measurements.add (i * stepSize, data[i]);
         }
 
-        measurements.add (newTask);
+        times.addSeries (measurements);
     }
 
     private ChartPanel createDemoPanel ()
     {
-        TaskSeriesCollection times = new TaskSeriesCollection ();
-        times.add (measurements);
-        JFreeChart jfreechart = ChartFactory.createGanttChart
-            (null, null, "Time", times, false, false, false);
-        CategoryPlot categoryPlot = (CategoryPlot) jfreechart.getPlot ();
-        categoryPlot.setDomainCrosshairVisible (true);
-        categoryPlot.setRangeCrosshairVisible(true);
+        JFreeChart jfreechart = ChartFactory.createXYLineChart
+                ("CDF", "Time", "Probability", times, PlotOrientation.VERTICAL,
+                        false, false, false);
+        XYPlot xyPlot = (XYPlot) jfreechart.getPlot ();
+        xyPlot.setDomainCrosshairVisible (true);
+        xyPlot.setRangeCrosshairVisible(true);
         return new ChartPanel (jfreechart);
     }
 }
