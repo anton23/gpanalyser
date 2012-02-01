@@ -35,6 +35,21 @@ public class PEPAComponentDefinitions {
 		return SumExpression.create(summands);
 	}
 
+    public AbstractExpression getApparentWeightExpression(final String action,
+            PEPAComponent from) {
+        List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
+        for (AbstractPrefix p : from.getPrefixes(this)) {
+            if (p.getAction().equals(action)) {
+                summands.add(p.getParameter());
+            }
+        }
+
+        if (summands.size() == 0) {
+            return DoubleExpression.ZERO;
+        }
+        return SumExpression.create(summands);
+    }
+
 	public PEPAComponentDefinitions(Map<String, PEPAComponent> definitions) {
 		super();
 		this.definitions = definitions;

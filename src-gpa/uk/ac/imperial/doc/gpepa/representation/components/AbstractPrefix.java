@@ -64,7 +64,9 @@ public abstract class AbstractPrefix
     public AbstractPrefix getCooperation(String cooperationAction,
                                          AbstractPrefix otherAbstractPrefix,
                                          AbstractExpression otherApparentRate,
+                                         AbstractExpression otherApparentWeight,
                                          AbstractExpression thisApparentRate,
+                                         AbstractExpression thisApparentWeight,
                                          PEPAComponent newContinuation) {
         int thisContains = 0;
         int otherContains = 0;
@@ -100,14 +102,18 @@ public abstract class AbstractPrefix
             action = otherAbstractPrefix.getAction();
         }
 
-        return getCooperationImpl(action, otherAbstractPrefix, otherApparentRate,
-            thisApparentRate, newContinuation, newImmediates);
+        return getCooperationImpl(action, otherAbstractPrefix,
+                otherApparentRate, otherApparentWeight,
+                thisApparentRate, thisApparentWeight,
+                newContinuation, newImmediates);
     }
 
     protected abstract AbstractPrefix getCooperationImpl(String newAction,
                                                          AbstractPrefix otherAbstractPrefix,
                                                          AbstractExpression otherApparentRate,
+                                                         AbstractExpression otherApparentWeight,
                                                          AbstractExpression thisApparentRate,
+                                                         AbstractExpression thisApparentWeight,
                                                          PEPAComponent newContinuation,
                                                          List<ImmediatePrefix> newImmediates);
 }

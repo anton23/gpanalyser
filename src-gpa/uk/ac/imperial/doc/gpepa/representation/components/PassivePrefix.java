@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 
@@ -43,13 +44,16 @@ public class PassivePrefix extends AbstractPrefix {
     public AbstractPrefix getCooperationImpl(String newAction,
                                              AbstractPrefix otherAbstractPrefix,
                                              AbstractExpression otherApparentRate,
+                                             AbstractExpression otherApparentWeight,
                                              AbstractExpression thisApparentRate,
+                                             AbstractExpression thisApparentWeight,
                                              PEPAComponent newContinuation,
                                              List<ImmediatePrefix> newImmediates) {
         if (otherAbstractPrefix instanceof Prefix)
         {
             return new Prefix(newAction,
-                    ProductExpression.create(otherApparentRate, weight),
+                    ProductExpression.create(otherApparentRate,
+                        DivExpression.create(weight, otherApparentWeight)),
                     newContinuation, newImmediates);
         }
         return null;

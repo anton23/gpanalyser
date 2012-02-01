@@ -188,12 +188,19 @@ public class CooperationComponent extends PEPAComponent {
                     AbstractExpression leftApparentRate = definitions
                             .getApparentRateExpression
                                     (leftPrefix.getAction(), left);
+                    AbstractExpression leftApparentWeight = definitions
+                            .getApparentWeightExpression
+                                    (leftPrefix.getAction(), left);
                     AbstractExpression rightApparentRate = definitions
                             .getApparentRateExpression
                                     (rightPrefix.getAction(), right);
+                    AbstractExpression rightApparentWeight = definitions
+                            .getApparentWeightExpression
+                                    (leftPrefix.getAction(), right);
                     AbstractPrefix newPrefix = leftPrefix.getCooperation
                             (action, rightPrefix, rightApparentRate,
-                                leftApparentRate, newContinuation);
+                                rightApparentWeight, leftApparentRate,
+                                leftApparentWeight, newContinuation);
                     if (newPrefix != null)
                     {
                         ret.add(newPrefix);

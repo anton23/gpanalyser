@@ -37,7 +37,9 @@ public class ImmediatePrefix extends AbstractPrefix {
     public AbstractPrefix getCooperationImpl(String newAction,
                                              AbstractPrefix otherAbstractPrefix,
                                              AbstractExpression otherApparentRate,
+                                             AbstractExpression otherApparentWeight,
                                              AbstractExpression thisApparentRate,
+                                             AbstractExpression thisApparentWeight,
                                              PEPAComponent newContinuation,
                                              List<ImmediatePrefix> newImmediates) {
         throw new Error("Unsupported cooperation between ImmediatePrefix" +
