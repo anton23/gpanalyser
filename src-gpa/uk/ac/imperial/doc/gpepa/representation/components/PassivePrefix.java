@@ -2,17 +2,23 @@ package uk.ac.imperial.doc.gpepa.representation.components;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 
 import java.util.List;
 
 /**
- * Class representing a (action, T).continuation triple.
+ * Class representing a (action, n x T).continuation triple.
  *
  * @author Matej Kohut
  *
  */
 public class PassivePrefix extends AbstractPrefix {
+
+    private AbstractExpression weight;
+
+    public AbstractExpression getRate() {
+        return ProductExpression.create(DoubleExpression.MAX, weight);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -30,8 +36,8 @@ public class PassivePrefix extends AbstractPrefix {
         return toString().hashCode() + 2;
     }
 
-    public AbstractExpression getRate() {
-        return DoubleExpression.ZERO;
+    public AbstractExpression getParameter() {
+        return weight;
     }
 
     public AbstractPrefix getCooperationImpl(String newAction,
@@ -42,25 +48,21 @@ public class PassivePrefix extends AbstractPrefix {
                                              List<ImmediatePrefix> newImmediates) {
         if (otherAbstractPrefix instanceof Prefix)
         {
-            return new Prefix(newAction,otherApparentRate,
+            return new Prefix(newAction,
+                    ProductExpression.create(otherApparentRate, weight),
                     newContinuation, newImmediates);
         }
         return null;
     }
 
-    // dummy compatible constructor
     public PassivePrefix(String action, AbstractExpression rate,
                          PEPAComponent continuation,
                          List<ImmediatePrefix> immediates)
     {
-        this(action, continuation, immediates);
-    }
-
-    public PassivePrefix(String action, PEPAComponent continuation,
-                         List<ImmediatePrefix> immediates) {
         super();
         this.action = action;
         this.continuation = continuation;
+        this.weight = rate;
         addImmediates(immediates);
     }
 
@@ -78,6 +80,6 @@ public class PassivePrefix extends AbstractPrefix {
         {
             immediatesString += ", " + imm.getAction ();
         }
-        return "(" + action + immediatesString + ", T)." + continuationString;
+        return "(" + action + immediatesString + ", T, " + weight + ")." + continuationString;
     }
 }

@@ -17,7 +17,7 @@ public class ImmediatePrefix extends AbstractPrefix {
             return false;
         ImmediatePrefix asPrefix = (ImmediatePrefix) o;
         return action.equals(asPrefix.getAction())
-                && weight.equals(asPrefix.getWeight())
+                && weight.equals(asPrefix.getParameter())
                 && continuation.equals(asPrefix.getContinuation());
     }
 
@@ -30,7 +30,7 @@ public class ImmediatePrefix extends AbstractPrefix {
         return DoubleExpression.ZERO;
     }
 
-    public AbstractExpression getWeight() {
+    public AbstractExpression getParameter() {
         return weight;
     }
 

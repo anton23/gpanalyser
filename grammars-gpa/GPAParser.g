@@ -197,7 +197,7 @@ prefix:
   
 properPrefix:
   LPAR LOWERCASENAME COMMA expression RPAR DOT prefix -> ^(PREFIX expression LOWERCASENAME prefix)
-  | LPAR LOWERCASENAME COMMA PASSIVE RPAR DOT prefix -> ^(PREFIX PASSIVE LOWERCASENAME prefix)
+  | LPAR LOWERCASENAME COMMA PASSIVE (COMMA expression)? RPAR DOT prefix -> ^(PREFIX PASSIVE expression? LOWERCASENAME prefix)
   | LOWERCASENAME DOT prefix -> ^(PREFIX LOWERCASENAME prefix);
   
 primaryComponent:
