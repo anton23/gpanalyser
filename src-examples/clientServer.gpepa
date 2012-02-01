@@ -16,22 +16,13 @@ Serv2 = (recover, rr).Serv0;
 Clients{Client0[n]}<fetch>Servers{Serv0[m]}
 
 Probe (stopTime=50, stepSize=0.5, density=10) transient {
-    PM6 = begin : start, end : stop <-
-    observes {LProbe = recover:begin, (fetch[2]/fail):end <-}
+    PM6 = begin : start, end : stop
+    observes {LProbe = recover:begin, (fetch[2]/fail):end}
     where {Servers{Serv0[m]}
     	=> Servers{Serv0<recover,fetch,fail>LProbe|Serv0[m-1]}
     }
 }
 /*
-Probe (stopTime=50, stepSize=0.1, density=10) transient {
-    PM7 = begin : start, end : stop <-
-    observes {LProb = recover:begin, (fetch[2]/fail):end <-}
-    where {Servers{Serv0[m]}
-    	=> Servers{Serv0<recover,fetch,fail>LProb|Serv0[m-1]}
-    }
-}
-
-
 
 SimProbe (stopTime=50, stepSize=0.1, replications=100) steady {
     PM6 = begin : start, end : stop <-
