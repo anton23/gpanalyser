@@ -189,8 +189,8 @@ public class ProbeRunner
                     AClass, NPClass);
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs(mainDef);
 
-        List<AbstractExpression> afterBegins
-                = new ArrayList<AbstractExpression> ();
+        Set<AbstractExpression> afterBegins
+                = new HashSet<AbstractExpression> ();
         double[][] K = getProbabilitiesComponentStateAfterBegin
                 (pairs, mainDef, postprocessor, constants, afterBegins);
 
@@ -198,16 +198,16 @@ public class ProbeRunner
                 = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         AbstractExpressionEvaluator eval = postprocessor.getExpressionEvaluator
                 (statesCountExpressions, constants);
-        int indices = (int) Math.ceil (stopTime / stepSize) - 1;
+        int indices = (int) Math.ceil (stopTime / stepSize);
         int i = 0;
         double[][] cdf = new double[indices][];
 
-        for (double time = stepSize; time < stopTime; time += stepSize)
+        for (double s = 0; s < stopTime; s += stepSize)
         {
             double[] matchval = getStartingStates (model,  mainDef, constants,
-                    postprocessor, time, crates);
+                    postprocessor, s, crates);
             double[] times = new double[statesCountExpressions.size ()];
-            Arrays.fill(times, time);
+            Arrays.fill (times, s);
             double[] val = postprocessor.evaluateExpressionsAtTimes
                     (eval, times, constants);
 
@@ -230,10 +230,17 @@ public class ProbeRunner
         // now integration, possible directly on obtained values
         for (int s = 1; s < indices; ++s)
         {
+            double derivK = (K[s][0] - K[s - 1][0])/stepSize;
+            System.out.println(derivK);
             for (int t = 0; t < indices; ++t)
             {
-                uncCdf[t] += cdf[s][t] * (K[s][0] - K[s-1][0]);
+                uncCdf[t] += cdf[s][t] * derivK;
             }
+        }
+
+        for (int t = 0; t < indices; ++t)
+        {
+            uncCdf[t] *= stepSize;
         }
 
         return new CDF (uncCdf);
@@ -400,9 +407,10 @@ public class ProbeRunner
     private double[][] getProbabilitiesComponentStateAfterBegin
         (Set<GroupComponentPair> pairs, PEPAComponentDefinitions definitions,
          NumericalPostprocessor postprocessor, Constants constants,
-         List<AbstractExpression> afterBegins)
+         Set<AbstractExpression> afterBegins)
     {
-        afterBegins = new ArrayList<AbstractExpression> ();
+        afterBegins = new HashSet<AbstractExpression> ();
+        Set<PEPAComponent> afterBeginsC = new HashSet<PEPAComponent> ();
         for (GroupComponentPair q : pairs)
         {
             for (GroupComponentPair hq : pairs)
@@ -413,13 +421,26 @@ public class ProbeRunner
                 {
                     if (prefix.getImmediates ().contains ("begin")
                             && prefix.getContinuation ()
-                                .equals(q.getComponent()))
+                            .equals(q.getComponent()))
                     {
                         afterBegins.add
-                            (CombinedProductExpression.createMeanExpression
-                                (new GPEPAState(q)));
+                                (CombinedProductExpression.createMeanExpression
+                                        (new GPEPAState(q)));
+                        afterBeginsC.add (q.getComponent ());
                     }
                 }
+            }
+        }
+
+        findClosureOnAnyActions
+            (afterBeginsC, definitions, new HashSet<PEPAComponent> ());
+        for (GroupComponentPair hq : pairs)
+        {
+            if (afterBeginsC.contains(hq.getComponent()))
+            {
+                afterBegins.add
+                        (CombinedProductExpression.createMeanExpression
+                                (new GPEPAState (hq)));
             }
         }
 
@@ -498,6 +519,41 @@ public class ProbeRunner
                     (SumExpression.create (summands), totalBeginRate));
         }
     }
+
+    private void findClosureOnAnyActions
+        (Set<PEPAComponent> found, PEPAComponentDefinitions definitions,
+            Set<PEPAComponent> visited)
+    {
+        Set<PEPAComponent> newFound = new HashSet<PEPAComponent> ();
+        for (PEPAComponent c : found)
+        {
+            if (!visited.contains(c))
+            {
+                newFound.addAll
+                    (findClosureOnAnyActionsI (c, found, definitions, visited));
+            }
+        }
+        found.addAll (newFound);
+        if (newFound.size () > 0)
+        {
+            findClosureOnAnyActions (found, definitions, visited);
+        }
+    }
+
+    private Set<PEPAComponent> findClosureOnAnyActionsI
+        (PEPAComponent c, Set<PEPAComponent> found,
+             PEPAComponentDefinitions definitions, Set<PEPAComponent> visited)
+    {
+        Set<PEPAComponent> newFound = new HashSet<PEPAComponent> ();
+        visited.add (c);
+        List<AbstractPrefix> prefices = c.getPrefixes (definitions);
+        for (AbstractPrefix p : prefices)
+        {
+            newFound.add (p.getContinuation());
+        }
+        return newFound;
+    }
+
     private void plotGraph (String name, CDF cdf, double stepSize)
     {
         if (graph == null)
