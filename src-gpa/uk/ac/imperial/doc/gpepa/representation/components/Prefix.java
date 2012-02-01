@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.gpepa.representation.components;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 
 import java.util.List;
@@ -48,7 +49,9 @@ public class Prefix extends AbstractPrefix {
     public AbstractPrefix getCooperationImpl(String newAction,
                                              AbstractPrefix otherAbstractPrefix,
                                              AbstractExpression otherApparentRate,
+                                             AbstractExpression otherApparentWeight,
                                              AbstractExpression thisApparentRate,
+                                             AbstractExpression thisApparentWeight,
                                              PEPAComponent newContinuation,
                                              List<ImmediatePrefix> newImmediates) {
         if (otherAbstractPrefix instanceof Prefix)
@@ -64,7 +67,8 @@ public class Prefix extends AbstractPrefix {
             PassivePrefix pp = (PassivePrefix) otherAbstractPrefix;
             return new Prefix(newAction,
                     ProductExpression.create
-                            (thisApparentRate, pp.getParameter()),
+                        (thisApparentRate, DivExpression.create
+                            (pp.getParameter(), otherApparentWeight)),
                     newContinuation, newImmediates);
         }
         throw new Error("Unsupported cooperation between Prefix and "
