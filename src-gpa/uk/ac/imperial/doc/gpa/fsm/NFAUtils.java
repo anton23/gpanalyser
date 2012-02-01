@@ -194,6 +194,42 @@ public class NFAUtils
         }
     }
 
+    public static void removeSurplusSelfLoops (NFAState startingState)
+    {
+        Set<NFAState> states = NFADetectors.detectAllStates (startingState);
+        Map<ITransition, Boolean> usedTransitions
+            = new HashMap<ITransition, Boolean> ();
+        for (NFAState state : states)
+        {
+            Map<ITransition, NFAState> transitions = state.getRawTransitions ();
+            for (ITransition transition : transitions.keySet ())
+            {
+                Boolean used = usedTransitions.get (transition); 
+                if (!(used != null && used)
+                    && transitions.get (transition).equals (state))
+                {
+                    usedTransitions.put (transition, false);
+                }
+                else
+                {
+                    usedTransitions.put (transition, true);
+                }
+            }
+        }
+
+        for (ITransition transition : usedTransitions.keySet())
+        {
+            if (!usedTransitions.get (transition))
+            {
+                for (NFAState state : states)
+                {
+                    state.getRawTransitions ().remove (transition);
+                }
+            }
+        }
+
+    }
+
     public static void extendStatesWithSelfLoops
             (Set<ITransition> alphabet, NFAState startingState)
     {

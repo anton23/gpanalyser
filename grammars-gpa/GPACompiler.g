@@ -167,6 +167,7 @@ import PCTMCCompilerPrototype;
 				(startingState, true, excluded));
 		NFAUtils.extendStatesWithSelfLoops
 			($probe_spec::allActions, startingState);
+		NFAUtils.removeSurplusSelfLoops (startingState);
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 		NFAStateToPEPA.HybridDFAtoPEPA
