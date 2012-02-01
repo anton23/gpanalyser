@@ -5,13 +5,19 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
+import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
+import uk.ac.imperial.doc.jexpressions.statements.Assignment;
+import uk.ac.imperial.doc.jexpressions.statements.Increment;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.javaoutput.analysis.JavaPrinterCombinedProductBased;
@@ -57,46 +63,85 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 	@Override
 	public void visit(ODEMethod s) {
 
-		String[] javaMomentODEs = new String[s.getBody().length + 1];
+		ArrayList<String> javaMomentODEs = new ArrayList<String>(s.getBody().length + 1);
+		javaMomentODEs.ensureCapacity(s.getBody().length + 1);
 		Set<ExpressionVariable> variables = new HashSet<ExpressionVariable>();
+		
+		int additionalLines = 0;
 		for (int i = 0; i < s.getBody().length; i++) {
-			JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
+			JavaStatementPrinterCombinedProductBased printer = new JavaStatementPrinterCombinedProductBased(
 					constants, combinedMomentsIndex, generalExpectationIndex,
 					OLDY, NEWY, false);
-			s.getBody()[i].accept(tmp);
-			javaMomentODEs[i] = tmp.toString() + "\n";
-			variables.addAll(tmp.getRhsVariables());
+			s.getBody()[i].accept(printer);
+			
+			String nextLine = printer.toString();
+			if (nextLine.length() > methodCharacters) {
+				if (s.getBody()[i] instanceof Assignment) {
+					int statementLength = methodCharacters / 2;
+					int nSplit = nextLine.length() / statementLength + 1;
+					AbstractExpression rhs = ((Assignment)s.getBody()[i]).getRhs();	
+					AbstractExpression lhs = ((Assignment)s.getBody()[i]).getLhs();
+					if (rhs instanceof SumExpression) {						
+						SumExpression sRhs = (SumExpression) rhs;
+						int nSummands = Math.max(sRhs.getSummands().size() / nSplit,1);
+						javaMomentODEs.ensureCapacity(s.getBody().length + 2 + additionalLines + nSplit);
+						int nPortions = sRhs.getSummands().size()/nSummands;
+						for (int j = 0; j < nPortions; j++) {
+							int fromIndex = j*nSummands;
+							int toIndex = (j == nPortions - 1)?sRhs.getSummands().size():(j+1)*nSummands;
+							List<AbstractExpression> portion = ((SumExpression) rhs).getSummands().subList(fromIndex, toIndex);
+							AbstractStatement newS;
+							if (j==0) {
+								newS =  new Assignment(lhs, SumExpression.create(portion));
+							} else {
+								newS =  new Increment(lhs, SumExpression.create(portion));
+								additionalLines++;
+							}
+							printer = new JavaStatementPrinterCombinedProductBased(
+									constants, combinedMomentsIndex, generalExpectationIndex,
+									OLDY, NEWY, false);
+							newS.accept(printer);
+							javaMomentODEs.add(i+additionalLines, printer.toString() + "\n");
+						}						
+					}
+				} else {
+					throw new AssertionError("Cannot split the statement " + printer.toString() + " into multiple shorter statements!");
+				}
+			} else {
+				javaMomentODEs.add(i+additionalLines, nextLine + "\n");
+			}
+			variables.addAll(printer.getRhsVariables());
 		}
 		JavaStatementPrinterCombinedProductBased tmp = new JavaStatementPrinterCombinedProductBased(
 				constants, combinedMomentsIndex, generalExpectationIndex, OLDY,
 				NEWY, false);
-		javaMomentODEs[s.getBody().length] = tmp.toString();
+		javaMomentODEs.add(s.getBody().length+additionalLines, tmp.toString());
 
 		StringBuilder header = new StringBuilder();
 		StringBuilder code = new StringBuilder();
 		header.append("import " + SystemOfODEs.class.getName() + ";\n"
 				+ "public class " + GENERATEDCLASSNAME + " extends "
 				+ SystemOfODEs.class.getName() + "{\n");
-		header.append(javaMomentODEs[javaMomentODEs.length - 1]);
+		header.append(javaMomentODEs.get(javaMomentODEs.size() - 1));
 		for (ExpressionVariable v:variables) {
 			header.append("double " + JavaExpressionPrinterWithVariables.escapeName(v.getName()) + ";\n");
 		}
 		int line = 0;
 		int method = 0;
-		int nODEs = javaMomentODEs.length;
-		int[] remainingCharacters = new int[nODEs + 1];
-		remainingCharacters[nODEs - 1] = 0;
-		for (int l = nODEs - 2; l >= 0; l--) {
-			int lineLength = javaMomentODEs[l].length();
-			if (lineLength > methodCharacters) {
+		int totalLines = javaMomentODEs.size();
+		int[] remainingCharacters = new int[totalLines + 1];
+		remainingCharacters[totalLines - 1] = 0;
+		for (int l = totalLines - 2; l >= 0; l--) {
+			int lineLength = javaMomentODEs.get(l).length();
+			/*if (lineLength > methodCharacters) {
 				methodCharacters = lineLength + 1;
-			}
+			}*/
 			remainingCharacters[l] = remainingCharacters[l + 1] + lineLength;
 		}
 		PCTMCLogging.debug("Total characters of the generated code "
 				+ remainingCharacters[0]);
 		PCTMCLogging.debug("Splitting code into methods.");
-		while (line < nODEs - 1) {
+		while (line < totalLines - 1) {
 			if (method == 0) {
 				header
 						.append("public double[] derivn(double x, double[] y) {\n");
@@ -116,16 +161,19 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 						+ "(double[] newy,double x, double[] y) {\n");
 			}
 			int charactersUsed = 0;
-			while (line < nODEs - 1
-					&& charactersUsed + javaMomentODEs[line].length() < methodCharacters) {
-				charactersUsed += javaMomentODEs[line].length();
+			while (line < totalLines - 1
+					&& charactersUsed + javaMomentODEs.get(line).length() < methodCharacters || javaMomentODEs.get(line).length() > methodCharacters) {
+				if (javaMomentODEs.get(line).length() > methodCharacters && charactersUsed > 0) break;
+				charactersUsed += javaMomentODEs.get(line).length();
 				if (method == 0) {
-					header.append(javaMomentODEs[line]);
+					header.append(javaMomentODEs.get(line));
 				} else {
-					code.append(javaMomentODEs[line]);
+					code.append(javaMomentODEs.get(line));
 				}
 				line++;
+				
 			}
+			System.out.println("Method " + method + " length: " + charactersUsed);
 			if (method != 0) {
 				code.append("\n}");
 			}
