@@ -261,6 +261,11 @@ public class ProbeRunner
              Class<A> AClass, Class<NP> NPClass,
              int start_time)
     {
+        NumericalPostprocessor postprocessor = runTheProbedSystem
+            (model, countActionStrings, stateObservers, statesCountExpressions,
+                    mapping, mainDef, constants, stopTime, stepSize, parameter,
+                    AClass, NPClass);
+
         return new CDF (null);
     }
 /*
@@ -604,7 +609,8 @@ public class ProbeRunner
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
 
-        PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, new HashSet<String>());
+        PCTMC pctmc = GPEPAToPCTMC.getPCTMC
+            (definitions, model, new HashSet<String> ());
         System.out.println (pctmc);
 
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc, AClass);
