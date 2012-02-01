@@ -173,7 +173,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 				line++;
 				
 			}
-			System.out.println("Method " + method + " length: " + charactersUsed);
+
 			if (method != 0) {
 				code.append("\n}");
 			}
