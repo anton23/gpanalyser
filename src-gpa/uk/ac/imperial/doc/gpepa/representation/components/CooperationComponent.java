@@ -132,7 +132,7 @@ public class CooperationComponent extends PEPAComponent {
                             (String.class, AbstractExpression.class,
                                     PEPAComponent.class, List.class)
                                 .newInstance(leftPrefix.getAction(),
-                                        leftPrefix.getRate(),
+                                        leftPrefix.getParameter(),
                                         newContinuation,
                                         leftPrefix.getImmediatesRaw()));
                 } catch (Exception e) {
@@ -161,7 +161,7 @@ public class CooperationComponent extends PEPAComponent {
                             (String.class, AbstractExpression.class,
                                     PEPAComponent.class, List.class)
                                 .newInstance(rightPrefix.getAction(),
-                                        rightPrefix.getRate(),
+                                        rightPrefix.getParameter(),
                                         newContinuation,
                                         rightPrefix.getImmediatesRaw()));
                 } catch (Exception e) {

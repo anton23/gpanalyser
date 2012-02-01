@@ -59,7 +59,7 @@ public class Choice extends PEPAComponent {
 			    ret.add(p.getClass().getDeclaredConstructor
                         (String.class, AbstractExpression.class, PEPAComponent.class,
                                 List.class)
-                        .newInstance(p.getAction(), p.getRate(),
+                        .newInstance(p.getAction(), p.getParameter(),
                                 newContinuation, p.getImmediatesRaw()));
             }
             catch (Exception ex) {

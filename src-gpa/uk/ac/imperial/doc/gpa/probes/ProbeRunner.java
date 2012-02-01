@@ -13,7 +13,6 @@ import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.representation.model.LabelledComponentGroup;
-import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
@@ -104,11 +103,11 @@ public class ProbeRunner
                         AClass, NPClass);
             case 2:
                 return transientIndividual
-                    (gprobe, statesCountExpressions, mapping,
+                    (statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, definitionsMap, accepting,
                         constants, stopTime, stepSize, parameter,
-                        AClass, NPClass, start_time);
+                        AClass, NPClass);
             case 3:
                 return globalPassages
                     (gprobe, statesCountExpressions, mapping,
@@ -134,69 +133,20 @@ public class ProbeRunner
              double stopTime, double stepSize, int parameter,
              Class<A> AClass, Class<NP> NPClass)
     {
-        // obtaining ratios for steady state component distribution
-        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
-            = getProbabilitiesAfterBegin (model, mainDef);
-        Map<String, LabelledComponentGroup> lgs = model.getComponentGroups ();
-
-        // obtaining steady-state probabilities (user set stop-time)
-        List<AbstractExpression> expressions
-            = new LinkedList<AbstractExpression> (crates.values ());
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, stateObservers, statesCountExpressions,
-                mapping, mainDef, constants, stopTime, stepSize, parameter,
-                AClass, NPClass);
-
-        AbstractExpressionEvaluator eval
-            = postprocessor.getExpressionEvaluator (expressions, constants);
-        double[] times = new double[expressions.size ()];
+                (model, countActionStrings, stateObservers, statesCountExpressions,
+                        mapping, mainDef, constants, stopTime, stepSize, parameter,
+                        AClass, NPClass);
+        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
+            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         double maxTime = stopTime * stepSize - stepSize;
-        for (int i = 0; i < times.length; ++i)
-        {
-            times[i] = maxTime;
-        }
-        double[] val = postprocessor.evaluateExpressionsAtTimes
-            (eval, times, constants);
+        double[] val = getStartingStates
+            (model,  mainDef, constants, postprocessor, maxTime, crates);
         double[][] steadyval = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
 
-        int i = 0;
-        for (GroupComponentPair gc : crates.keySet ())
-        {
-            boolean containsComp = false;
-            for (ComponentId comp : definitionsMap.get (mainDef))
-            {
-                if (gc.getComponent ().containsComponent (comp))
-                {
-                    containsComp = true;
-                    break;
-                }
-            }
-
-            if (containsComp)
-            {
-                crates.put (gc, new DoubleExpression (val[i]));
-            }
-            else
-            {
-                crates.put (gc, new DoubleExpression
-                    (steadyval[(int)(stopTime * stepSize - stepSize)]
-                        [statesCountExpressions.indexOf
-                            (mapping.get (gc.toString ()))]));
-            }
-            ++i;
-        }
-
-        // setting initial number of components for next analysis
-        for (LabelledComponentGroup lg : lgs.values ())
-        {
-            Group g = lg.getGroup ();
-            for (PEPAComponent c : g.getComponentDerivatives (mainDef))
-            {
-                g.setCountExpression (c, crates.get
-                        (new GroupComponentPair (lg.getLabel (), c)));
-            }
-        }
+        assignNewCounts (crates, definitionsMap, mainDef, model,
+                statesCountExpressions, mapping, val, steadyval[(int) maxTime]);
         statesCountExpressions = new LinkedList<AbstractExpression> ();
         mapping = new HashMap<String, AbstractExpression> ();
         stateObservers = new HashSet<GPEPAState> ();
@@ -214,18 +164,8 @@ public class ProbeRunner
             (statesCountExpressions, constants);
         double[] cdf = new double[obtainedMeasurements.length];
 
-        for (int j = 0; j < obtainedMeasurements.length; j++)
-        {
-            for (GroupComponentPair gp : pairs)
-            {
-                if (gp.getComponent ().containsComponent (accepting))
-                {
-                    cdf[j] += obtainedMeasurements[j]
-                        [statesCountExpressions.indexOf
-                            (mapping.get (gp.toString ()))];
-                }
-            }
-        }
+        passageTimeCDF (obtainedMeasurements, pairs, accepting,
+                cdf, statesCountExpressions, mapping);
 
         return new CDF (cdf);
     }
@@ -233,8 +173,7 @@ public class ProbeRunner
     private
     <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
     CDF transientIndividual
-            (GlobalProbe gprobe,
-             List<AbstractExpression> statesCountExpressions,
+            (List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> mapping,
              Set<String> countActionStrings,
              GroupedModel model, Set<GPEPAState> stateObservers,
@@ -242,10 +181,62 @@ public class ProbeRunner
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              ComponentId accepting, Constants constants,
              double stopTime, double stepSize, int parameter,
-             Class<A> AClass, Class<NP> NPClass,
-             int start_time)
+             Class<A> AClass, Class<NP> NPClass)
     {
-        return new CDF (null);
+        NumericalPostprocessor postprocessor = runTheProbedSystem
+            (model, countActionStrings, stateObservers, statesCountExpressions,
+                    mapping, mainDef, constants, stopTime, stepSize, parameter,
+                    AClass, NPClass);
+        Set<GroupComponentPair> pairs = model.getGroupComponentPairs(mainDef);
+
+        List<AbstractExpression> afterBegins
+                = new ArrayList<AbstractExpression> ();
+        double[][] K = getProbabilitiesComponentStateAfterBegin
+                (pairs, mainDef, postprocessor, constants, afterBegins);
+
+        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
+                = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+        AbstractExpressionEvaluator eval = postprocessor.getExpressionEvaluator
+                (statesCountExpressions, constants);
+        int indices = (int) Math.ceil (stopTime / stepSize) - 1;
+        int i = 0;
+        double[][] cdf = new double[indices][];
+
+        for (double time = stepSize; time < stopTime; time += stepSize)
+        {
+            double[] matchval = getStartingStates (model,  mainDef, constants,
+                    postprocessor, time, crates);
+            double[] times = new double[statesCountExpressions.size ()];
+            Arrays.fill(times, time);
+            double[] val = postprocessor.evaluateExpressionsAtTimes
+                    (eval, times, constants);
+
+            assignNewCounts (crates, definitionsMap, mainDef, model,
+                    statesCountExpressions, mapping, matchval, val);
+            postprocessor = runTheProbedSystem (model, countActionStrings,
+                    stateObservers, statesCountExpressions, mapping, mainDef,
+                    constants, stopTime, stepSize, parameter,
+                    AClass, NPClass);
+            double[][] obtainedMeasurements = postprocessor.evaluateExpressions
+                    (statesCountExpressions, constants);
+            cdf[i] = new double[obtainedMeasurements.length];
+
+            passageTimeCDF (obtainedMeasurements, pairs, accepting,
+                    cdf[i], statesCountExpressions, mapping);
+            ++i;
+        }
+
+        double[] uncCdf = new double[indices];
+        // now integration, possible directly on obtained values
+        for (int s = 1; s < indices; ++s)
+        {
+            for (int t = 0; t < indices; ++t)
+            {
+                uncCdf[t] += cdf[s][t] * (K[s][0] - K[s-1][0]);
+            }
+        }
+
+        return new CDF (uncCdf);
     }
 
     private
@@ -316,12 +307,131 @@ public class ProbeRunner
         return i;
     }
 */
-    private LinkedHashMap<GroupComponentPair, AbstractExpression>
-        getProbabilitiesAfterBegin
-            (GroupedModel model, PEPAComponentDefinitions definitions)
+    private double[] getStartingStates
+        (GroupedModel model, PEPAComponentDefinitions definitions,
+         Constants constants, NumericalPostprocessor postprocessor, double time,
+         LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
     {
-        LinkedHashMap<GroupComponentPair, AbstractExpression> result
-            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+        // obtaining ratios for steady state component distribution
+        getProbabilitiesAfterBegin (model, definitions, crates);
+
+        // obtaining steady-state probabilities (user set stop-time)
+        List<AbstractExpression> expressions
+                = new LinkedList<AbstractExpression> (crates.values ());
+
+        AbstractExpressionEvaluator eval
+                = postprocessor.getExpressionEvaluator (expressions, constants);
+        double[] times = new double[expressions.size ()];
+        for (int i = 0; i < times.length; ++i)
+        {
+            times[i] = time;
+        }
+        return postprocessor.evaluateExpressionsAtTimes
+            (eval, times, constants);
+    }
+
+    private void assignNewCounts
+        (LinkedHashMap<GroupComponentPair, AbstractExpression> crates,
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+         PEPAComponentDefinitions definitions, GroupedModel model,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping,
+         double[] matchval, double[] val)
+    {
+        int i = 0;
+        for (GroupComponentPair gc : crates.keySet ())
+        {
+            boolean containsComp = false;
+            for (ComponentId comp : definitionsMap.get (definitions))
+            {
+                if (gc.getComponent ().containsComponent (comp))
+                {
+                    containsComp = true;
+                    break;
+                }
+            }
+
+            if (containsComp)
+            {
+                crates.put (gc, new DoubleExpression (matchval[i]));
+            }
+            else
+            {
+                crates.put (gc, new DoubleExpression
+                        (val[statesCountExpressions.indexOf
+                                (mapping.get (gc.toString ()))]));
+            }
+            ++i;
+        }
+
+        // setting initial number of components for next analysis
+        Map<String, LabelledComponentGroup> lgs = model.getComponentGroups ();
+        for (LabelledComponentGroup lg : lgs.values ())
+        {
+            Group g = lg.getGroup ();
+            for (PEPAComponent c : g.getComponentDerivatives (definitions))
+            {
+                g.setCountExpression (c, crates.get
+                        (new GroupComponentPair (lg.getLabel (), c)));
+            }
+        }
+    }
+
+    private void passageTimeCDF
+        (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
+         ComponentId accepting, double[] cdf,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping)
+    {
+        for (int j = 0; j < obtainedMeasurements.length; j++)
+        {
+            for (GroupComponentPair gp : pairs)
+            {
+                if (gp.getComponent ().containsComponent (accepting))
+                {
+                    cdf[j] += obtainedMeasurements[j]
+                            [statesCountExpressions.indexOf
+                            (mapping.get (gp.toString ()))];
+                }
+            }
+        }
+    }
+
+    private double[][] getProbabilitiesComponentStateAfterBegin
+        (Set<GroupComponentPair> pairs, PEPAComponentDefinitions definitions,
+         NumericalPostprocessor postprocessor, Constants constants,
+         List<AbstractExpression> afterBegins)
+    {
+        afterBegins = new ArrayList<AbstractExpression> ();
+        for (GroupComponentPair q : pairs)
+        {
+            for (GroupComponentPair hq : pairs)
+            {
+                Collection<AbstractPrefix> prefices
+                        = hq.getComponent ().getPrefixes (definitions);
+                for (AbstractPrefix prefix : prefices)
+                {
+                    if (prefix.getImmediates ().contains ("begin")
+                            && prefix.getContinuation ()
+                                .equals(q.getComponent()))
+                    {
+                        afterBegins.add
+                            (CombinedProductExpression.createMeanExpression
+                                (new GPEPAState(q)));
+                    }
+                }
+            }
+        }
+
+        List<AbstractExpression> sum = new ArrayList<AbstractExpression> ();
+        sum.add (SumExpression.create (afterBegins));
+        return postprocessor.evaluateExpressions (sum, constants);
+    }
+
+    private void getProbabilitiesAfterBegin
+            (GroupedModel model, PEPAComponentDefinitions definitions,
+             LinkedHashMap<GroupComponentPair, AbstractExpression> result)
+    {
         Set<GroupComponentPair> pairs
             = model.getGroupComponentPairs (definitions);
 
@@ -333,7 +443,7 @@ public class ProbeRunner
             Collection<String> actions = hc.getComponent ()
                 .getActions (definitions);
             Collection<AbstractPrefix> prefices
-                = hc.getComponent ().getPrefixes (definitions);
+                = hc.getComponent ().getPrefixes(definitions);
             for (String action : actions)
             {
                 for (AbstractPrefix prefix : prefices)
@@ -387,8 +497,6 @@ public class ProbeRunner
             result.put (q, DivExpression.create
                     (SumExpression.create (summands), totalBeginRate));
         }
-
-        return result;
     }
     private void plotGraph (String name, CDF cdf, double stepSize)
     {
@@ -428,6 +536,7 @@ public class ProbeRunner
             setStateObserver (states, state, state.toString (), moments,
                 statesCountExpressions, stateCombPopMapping);
         }
+        /*
         for (String action : countActions)
         {
             GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
@@ -435,11 +544,11 @@ public class ProbeRunner
             setStateObserver (cooperationActions, gpepaAction, action, moments,
                     statesCountExpressions, stateCombPopMapping);
         }
-
+        */
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
 
-        PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, countActions);
+        PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, new HashSet<String>());
         System.out.println (pctmc);
 
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc, AClass);

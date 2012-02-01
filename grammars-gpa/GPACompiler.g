@@ -308,8 +308,9 @@ prefix returns [AbstractPrefix c]:
       	new LinkedList<ImmediatePrefix>());
       $c=prefix; 
    }
-   | ^(PREFIX PASSIVE a=LOWERCASENAME s=component){
-      AbstractPrefix prefix = new PassivePrefix($a.text,$s.c,
+   | ^(PREFIX PASSIVE w=expression? a=LOWERCASENAME s=component){
+      AbstractExpression tw = (w == null) ? DoubleExpression.ONE : $w.e;
+      AbstractPrefix prefix = new PassivePrefix($a.text,tw,$s.c,
       	new LinkedList<ImmediatePrefix>());
       $c=prefix; 
    }

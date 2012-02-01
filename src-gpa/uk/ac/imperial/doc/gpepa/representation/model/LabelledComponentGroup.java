@@ -12,7 +12,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 
 import java.util.*;
 
@@ -38,17 +37,15 @@ public class LabelledComponentGroup extends GroupedModel {
 		List<PEPAEvolutionEvent> events = new LinkedList<PEPAEvolutionEvent>();
 		for (final PEPAComponent derivative : group
 				.getComponentDerivatives(definitions)) {
-			/*
-			 * PEPAComponent s = definitions
-			 * .getComponentDefinition(derivative);
-			 */
 			for (final AbstractPrefix prefix : derivative.getPrefixes(definitions)) {
 				if (!restrictedActions.contains(prefix.getAction())) {
 
+
 					AbstractExpression rate
-                        = ProductExpression.create(new PopulationExpression(
-                            new GPEPAState(new GroupComponentPair(label, derivative))),
-                            prefix.getRate());
+                        = ProductExpression.create(CombinedProductExpression
+                            .createMeanExpression (new GPEPAState
+                                    (new GroupComponentPair(label, derivative))),
+                            prefix.getParameter());
 
 					List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
 					PEPAComponent continuation = prefix.getContinuation();
@@ -77,8 +74,9 @@ public class LabelledComponentGroup extends GroupedModel {
 			AbstractExpression rate = definitions.getApparentRateExpression(
 					action, p);
 			if (!(rate.equals(DoubleExpression.ZERO))) {
-				summands.add(ProductExpression.create(new PopulationExpression(
-						new GPEPAState(new GroupComponentPair(label, p))), rate));
+				summands.add(ProductExpression.create(CombinedProductExpression
+                        .createMeanExpression(new GPEPAState
+                                (new GroupComponentPair(label, p))), rate));
 			}
 		}
 		return SumExpression.create(summands);
@@ -92,7 +90,7 @@ public class LabelledComponentGroup extends GroupedModel {
             AbstractExpression rate = definitions.getApparentRateExpression(
                     action, groupComponentPair.getComponent());
             return ProductExpression.create(CombinedProductExpression
-                    .createMeanExpression (new GPEPAState(groupComponentPair)),
+                    .createMeanExpression(new GPEPAState(groupComponentPair)),
                     rate);
         }
         else {

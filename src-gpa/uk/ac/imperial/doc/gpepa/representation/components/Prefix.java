@@ -2,7 +2,6 @@ package uk.ac.imperial.doc.gpepa.representation.components;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class Prefix extends AbstractPrefix {
 			return false;
 		Prefix asPrefix = (Prefix) o;
 		return action.equals(asPrefix.getAction())
-				&& rate.equals(asPrefix.getRate())
+				&& rate.equals(asPrefix.getParameter())
 				&& continuation.equals(asPrefix.getContinuation());
 	}
 
@@ -42,6 +41,10 @@ public class Prefix extends AbstractPrefix {
         return rate;
 	}
 
+    public AbstractExpression getParameter() {
+        return getRate();
+    }
+
     public AbstractPrefix getCooperationImpl(String newAction,
                                              AbstractPrefix otherAbstractPrefix,
                                              AbstractExpression otherApparentRate,
@@ -51,14 +54,17 @@ public class Prefix extends AbstractPrefix {
         if (otherAbstractPrefix instanceof Prefix)
         {
             AbstractExpression coopRate = DivDivMinExpression.create(
-                    getRate(), otherAbstractPrefix.getRate(),
+                    getParameter(), otherAbstractPrefix.getParameter(),
                     thisApparentRate, otherApparentRate);
             return new Prefix(newAction, coopRate,
                     newContinuation, newImmediates);
         }
         if (otherAbstractPrefix instanceof PassivePrefix)
         {
-            return new Prefix(newAction, thisApparentRate,
+            PassivePrefix pp = (PassivePrefix) otherAbstractPrefix;
+            return new Prefix(newAction,
+                    ProductExpression.create
+                            (thisApparentRate, pp.getParameter()),
                     newContinuation, newImmediates);
         }
         throw new Error("Unsupported cooperation between Prefix and "
