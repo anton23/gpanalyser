@@ -1089,7 +1089,7 @@ scope
 						mainConstants, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCODEAnalysis.class,
-						ODEAnalysisNumericalPostprocessor.class,
+						CPPODEAnalysisNumericalPostprocessor.class,
 						$probe_spec::alphabet, excluded, $mode, $plot);
 				}
             } ;
