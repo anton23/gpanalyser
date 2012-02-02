@@ -395,13 +395,14 @@ public class ProbeRunner
          List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping)
     {
-        for (int j = 0; j < obtainedMeasurements.length; j++)
+
+        for (GroupComponentPair gp : pairs)
         {
-            for (GroupComponentPair gp : pairs)
+            if (gp.getComponent ().containsComponent (accepting))
             {
-                if (gp.getComponent ().containsComponent (accepting))
-                {
-                    cdf[j] += obtainedMeasurements[j]
+                 for (int i = 0; i < obtainedMeasurements.length; i++)
+                  {
+                    cdf[i] += obtainedMeasurements[i]
                             [statesCountExpressions.indexOf
                             (mapping.get (gp.toString ()))];
                 }

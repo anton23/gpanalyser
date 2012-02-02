@@ -63,8 +63,9 @@ public class PCTMCCPPImplementationProvider implements
 		String javaCode = printer.toClassString();
         String nativeCode = printer.toString();
 		SystemOfODEs ret = (NativeSystemOfODEs)
-                CPPClassCompiler.getInstance(javaCode, className,
-                        nativeCode, printer.getNativeFileName ());
+                CPPClassCompiler.getInstance(javaCode,
+                        printer.getNativeClassName (),
+                        nativeCode, printer.getNativeClassName ());
 		return ret;
 	}
 
