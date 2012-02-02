@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 import java.io.*;
 
 public class ExecProcess {
+
     static class StreamGobbler extends Thread
     {
         InputStream is;
@@ -22,7 +23,7 @@ public class ExecProcess {
                 BufferedReader br = new BufferedReader(isr);
                 String line;
                 while ( (line = br.readLine()) != null)
-                    System.out.println(type + ">" + line);
+                    System.out.println(type + " > " + line);
             } catch (IOException ioe)
             {
                 ioe.printStackTrace();
@@ -30,24 +31,35 @@ public class ExecProcess {
         }
     }
 
-    public static void main(String command)
+    public static void main(String command, int i)
     {
         try
         {
-            String[] cmd = new String[3];
-            cmd[0] = "cmd" ;
-            cmd[1] = "/C" ;
-            cmd[2] = command;
+            String[] cmd;
+            if (System.getProperty("os.name").toLowerCase().contains("win"))
+            {
+                cmd = new String[3];
+                cmd[0] = "cmd" ;
+                cmd[1] = "/C" ;
+                cmd[2] = command;
+            }
+            else
+            {
+                cmd = new String[3];
+                cmd[0] = "/bin/bash";
+                cmd[1] = "-c";
+                cmd[2] = command;
+            }
 
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec(cmd);
             // any error message?
             StreamGobbler errorGobbler = new
-                    StreamGobbler(proc.getErrorStream(), "ERROR");
+                    StreamGobbler(proc.getErrorStream(), "ERROR" + i);
 
             // any output?
             StreamGobbler outputGobbler = new
-                    StreamGobbler(proc.getInputStream(), "OUTPUT");
+                    StreamGobbler(proc.getInputStream(), "OUTPUT" + i);
 
             // kick them off
             errorGobbler.start();

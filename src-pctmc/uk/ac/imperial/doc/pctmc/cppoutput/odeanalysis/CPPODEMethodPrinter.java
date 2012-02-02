@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis;
 
 import com.google.common.collect.BiMap;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.cppoutput.analysis.CPPStatementPrinterCombinedProductBased;
@@ -14,6 +15,7 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.io.*;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * CPP ODE method printer.
@@ -31,7 +33,8 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
     public static final String PACKAGE = "uk.ac.imperial.doc.pctmc.odeanalysis.utils";
     private static final String OLDY = "y";
     private static final String NEWY = "newy";
-    private String nativeFileName;
+    private String nativeClassName;
+    private UUID uuid;
 
     private StringBuilder output, classOutput;
 
@@ -44,10 +47,12 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         this.generalExpectationIndex = generalExpectationIndex;
         output = new StringBuilder();
         classOutput = new StringBuilder();
+        uuid = UUID.randomUUID();
+        nativeClassName = GENERATEDCLASSNAME + uuid.toString().replace("-","");
     }
 
-    public String getNativeFileName() {
-        return nativeFileName;
+    public String getNativeClassName() {
+        return nativeClassName;
     }
 
     public String toClassString() {
@@ -79,17 +84,18 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         StringBuilder code = new StringBuilder();
         StringBuilder jniCode = new StringBuilder();
         StringBuilder main = new StringBuilder();
-        nativeFileName = GENERATEDCLASSNAME + "lib";
         classOutput.append("package uk.ac.imperial.doc.pctmc.odeanalysis.utils;\n");
-        classOutput.append("import " + NativeSystemOfODEs.class.getName() + ";\n"
-                + "public class " + GENERATEDCLASSNAME + " extends "
-                + NativeSystemOfODEs.class.getName() + "{\n");
+        //classOutput.append("import " + NativeSystemOfODEs.class.getName() + ";\n"
+        //        + "public class " + nativeClassName + " extends "
+        //        + NativeSystemOfODEs.class.getName() + "{\n");
+        classOutput.append("public class " + nativeClassName + " extends "
+                + NativeSystemOfODEs.class.getSimpleName() + " {\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[] derivnI" +
-                "(double x, double[] y, double[] r);");
+                "(double x, double[] y, double[] r);\n");
         classOutput.append("}");
         header.append("#include <cmath>\n");
-        header.append("#include \"" + PACKAGE.replace(".", "_") + "_" + GENERATEDCLASSNAME + ".h\"\n");
+        header.append("#include \"uk_ac_imperial_doc_pctmc_odeanalysis_utils_" + nativeClassName + ".h\"\n");
         header.append("#include \"src-jexpressions/uk/ac/imperial/doc/jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
         header.append(cppMomentODEs[cppMomentODEs.length - 1]);
         int line = 0;
@@ -110,31 +116,33 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         while (line < nODEs - 1) {
             if (method == 0) {
                 jniCode.append("JNIEXPORT jdoubleArray JNICALL " +
-                        "Java_uk_ac_imperial_doc_pctmc_odeanalysis_utils_GeneratedODEs_derivnI\n" +
-                        "  (JNIEnv *env, jobject, jdouble x, jdoubleArray arr_y, jdoubleArray arr_r) {\n");
+                        "Java_uk_ac_imperial_doc_pctmc_odeanalysis_utils_"
+                        + nativeClassName + "_derivnI\n" +
+                        "  (JNIEnv *env, jobject, jdouble x, jdoubleArray arr_y," +
+                        " jdoubleArray arr_r) {\n");
                 jniCode.append("jboolean isCopy = false;\n");
-                jniCode.append("jdouble *y = env->GetDoubleArrayElements(arr_y, 0);\n");
+                jniCode.append("jdouble *" + OLDY + " = env -> GetDoubleArrayElements(arr_y, 0);\n");
                 jniCode.append("jint n = env -> GetArrayLength(arr_y);\n");
-                jniCode.append("jdouble *r = env->GetDoubleArrayElements(arr_r, 0);\n");
+                jniCode.append("jdouble *r = env -> GetDoubleArrayElements(arr_r, 0);\n");
                 jniCode.append("jdoubleArray result = env -> NewDoubleArray(n);\n");
-                jniCode.append("jdouble *newy " +
+                jniCode.append("jdouble *" + NEWY +
                         "= env -> GetDoubleArrayElements(result, &isCopy);\n");
-                jniCode.append("derivn(y, x, newy, r);\n");
-                jniCode.append("env->ReleaseDoubleArrayElements" +
+                jniCode.append("derivn(" + OLDY + ", x, " + NEWY + ", r);\n");
+                jniCode.append("env -> ReleaseDoubleArrayElements" +
                         "(arr_r, r, JNI_ABORT);\n");
-                jniCode.append("env->ReleaseDoubleArrayElements" +
-                        "(arr_y, y, JNI_ABORT);\n");
+                jniCode.append("env -> ReleaseDoubleArrayElements" +
+                        "(arr_y, " + OLDY + ", JNI_ABORT);\n");
                 jniCode.append("if (isCopy == JNI_TRUE) {\n");
-                jniCode.append("env->ReleaseDoubleArrayElements(result, newy, 0);\n");
+                jniCode.append("env -> ReleaseDoubleArrayElements(result, " + NEWY + ", 0);\n");
                 jniCode.append("}\n");
                 jniCode.append("printf (\"from JNI\\n\");\n");
                 jniCode.append("return result;\n");
                 jniCode.append("}\n");
-                main.append("void derivn(double *y, double x, double *newy, double *r) {\n");
+                main.append("void derivn (double *" + OLDY + ", double x, double *" + NEWY + ", double *r) {\n");
                 int nOdes = combinedMomentsIndex.size();
             } else {
                 code.append("void derivn" + method
-                        + "(double *y, double x, double *newy, double *r) {\n");
+                        + " (double *" + OLDY + ", double x, double *" + NEWY + ", double *r) {\n");
             }
             int charactersUsed = 0;
             while (line < nODEs - 1
@@ -148,13 +156,13 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
                 line++;
             }
             if (method != 0) {
-                code.append("\n}");
+                code.append("\n}\n");
             }
             method++;
         }
 
         for (int i = 1; i < method; i++) {
-            main.append("derivn" + i + "(y,x,newy,r);\n");
+            main.append("derivn" + i + " (" + OLDY + ", x, " + NEWY + ", r);\n");
         }
         main.append("\n}\n");
 
@@ -176,7 +184,7 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            file = new File(PCTMCOptions.debugFolder + "/" + nativeFileName);
+            file = new File(PCTMCOptions.debugFolder + "/" + nativeClassName);
             try {
                 Writer out = new BufferedWriter(new FileWriter(file));
                 out.write(output.toString());
