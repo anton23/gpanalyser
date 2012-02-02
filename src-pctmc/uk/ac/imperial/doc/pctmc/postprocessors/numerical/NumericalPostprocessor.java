@@ -130,7 +130,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	
 	public abstract void calculateDataPoints(Constants constants);
 
-	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
+	protected static String evaluatorClassName = "GeneratedExpressionEvaluator";
 	
 	/**
 	 * Returns an object providing updates to expressions from moment data. 
@@ -141,10 +141,9 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	public AbstractExpressionEvaluator getExpressionEvaluator(
 			final List<AbstractExpression> plotExpressions, Constants constants) {
 		EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
-		AbstractExpressionEvaluator evaluator = new PCTMCJavaImplementationProvider()
+		return new PCTMCJavaImplementationProvider()
 				.getEvaluatorImplementation(updaterMethod, evaluatorClassName,
 						constants, momentIndex,generalExpectationIndex);
-		return evaluator;
 	}
 
 	/**
