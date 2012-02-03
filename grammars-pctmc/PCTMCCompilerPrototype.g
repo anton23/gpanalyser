@@ -131,7 +131,7 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
   ^(ITERATE (r=rangeSpecification {ranges.add($r.range);})*
     (MINIMISE m=plotAtSpecification[$constants]  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
    (WHERE 
-       ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
+       ((c=constant rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
   
     a=analysis[$pctmc,$constants, null]   
     (p=plotAtSpecification[$constants] {plots.add($p.p);})*
@@ -139,7 +139,7 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
   {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,$a.postprocessor,plots,$unfoldedVariables);}
 | ^(TRANSIENT_ITERATE (r=rangeSpecification {ranges.add($r.range);})+
    (WHERE 
-       ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
+       ((c=constant rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
       a=analysis[$pctmc,$constants, null]
       ps=plotDescriptions
   {$iterate = new PCTMCTransientIterate(ranges,reEvaluation,$a.analysis, $a.postprocessor,$ps.p, $unfoldedVariables);}
