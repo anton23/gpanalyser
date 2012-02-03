@@ -5,16 +5,15 @@ public abstract class NativeSystemOfODEs extends SystemOfODEs {
     public abstract double[] derivnI(double x, double[] y, double[] r);
 
     @Override
-    public double[] derivn(double x, double[] y)
-    {
+    public double[] derivn(double x, double[] y) {
         return derivnI(x, y, r);
     }
 
     // Load the library
-    public void loadLib (String libName) {
+    public void loadLib(String libName) {
         try
         {
-            System.loadLibrary (libName);
+            System.loadLibrary(libName);
         }
         catch (Exception ex)
         {

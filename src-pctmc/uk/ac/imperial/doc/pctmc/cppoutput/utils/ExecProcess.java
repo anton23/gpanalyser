@@ -51,6 +51,7 @@ public class ExecProcess {
                 cmd[2] = command;
             }
 
+            System.out.println("executing: " + command);
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec(cmd);
             // any error message?
