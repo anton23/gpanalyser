@@ -1,7 +1,6 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis;
 
 import com.google.common.collect.BiMap;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.cppoutput.analysis.CPPStatementPrinterCombinedProductBased;
@@ -85,17 +84,15 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         StringBuilder jniCode = new StringBuilder();
         StringBuilder main = new StringBuilder();
         classOutput.append("package uk.ac.imperial.doc.pctmc.odeanalysis.utils;\n");
-        //classOutput.append("import " + NativeSystemOfODEs.class.getName() + ";\n"
-        //        + "public class " + nativeClassName + " extends "
-        //        + NativeSystemOfODEs.class.getName() + "{\n");
-        classOutput.append("public class " + nativeClassName + " extends "
-                + NativeSystemOfODEs.class.getSimpleName() + " {\n");
+        classOutput.append("import " + NativeSystemOfODEs.class.getName() + ";\n"
+                + "public class " + nativeClassName + " extends "
+                + NativeSystemOfODEs.class.getName() + "{\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[] derivnI" +
                 "(double x, double[] y, double[] r);\n");
         classOutput.append("}");
-        header.append("#include <cmath>\n");
         header.append("#include \"uk_ac_imperial_doc_pctmc_odeanalysis_utils_" + nativeClassName + ".h\"\n");
+        header.append("#include <cmath>\n");
         header.append("#include \"src-jexpressions/uk/ac/imperial/doc/jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
         header.append(cppMomentODEs[cppMomentODEs.length - 1]);
         int line = 0;
@@ -116,7 +113,7 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         while (line < nODEs - 1) {
             if (method == 0) {
                 jniCode.append("JNIEXPORT jdoubleArray JNICALL " +
-                        "Java_uk_ac_imperial_doc_pctmc_odeanalysis_utils_"
+                        "Java_" + PACKAGE.replace(".", "_") + "_"
                         + nativeClassName + "_derivnI\n" +
                         "  (JNIEnv *env, jobject, jdouble x, jdoubleArray arr_y," +
                         " jdoubleArray arr_r) {\n");
@@ -135,7 +132,6 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
                 jniCode.append("if (isCopy == JNI_TRUE) {\n");
                 jniCode.append("env -> ReleaseDoubleArrayElements(result, " + NEWY + ", 0);\n");
                 jniCode.append("}\n");
-                jniCode.append("printf (\"from JNI\\n\");\n");
                 jniCode.append("return result;\n");
                 jniCode.append("}\n");
                 main.append("void derivn (double *" + OLDY + ", double x, double *" + NEWY + ", double *r) {\n");

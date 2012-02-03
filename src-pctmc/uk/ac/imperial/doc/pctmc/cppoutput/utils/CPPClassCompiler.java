@@ -31,8 +31,7 @@ public class CPPClassCompiler {
 	}
 
     private static void winCompile
-            (String libName, String nativeFile, String javaInclude)
-    {
+            (String libName, String nativeFile, String javaInclude) {
         String command = "gcc -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -shared -o "
             + libName + " " + nativeFile + ".cpp "
             + " -I\"" + javaInclude + "include\""
@@ -41,15 +40,13 @@ public class CPPClassCompiler {
     }
 
     private static void linuxCompile
-            (String libName, String nativeFile, String javaInclude)
-    {
-        String command = "gcc -fPIC "
+            (String libName, String nativeFile, String javaInclude) {
+        String command = "gcc -shared -fPIC -o " + libName
+                + " " + nativeFile + ".cpp"
                 + " -I\"" + javaInclude + "include\""
-                + " -I\"" + javaInclude + "include/linux\""
-                + " -shared -o " + libName + " " + nativeFile + ".cpp";
+                + " -I\"" + javaInclude + "include/linux\"";
         ExecProcess.main(command, 3);
     }
-
 
 	private Object getInstancePrivate (String javaCode, String className,
              String nativeCode, String nativeFile) {
@@ -76,14 +73,10 @@ public class CPPClassCompiler {
         options.add(outputDir);
 		compiler.getTask(null, fileManager, null, options, null, files).call();
 		try {
-            URL url = f.toURL();
+            URL url = f.toURI().toURL();
             URLClassLoader loader = new URLClassLoader(new URL[] {url});
 			Object c = loader.loadClass(fullClassName).newInstance();
-            String command = "javah -jni -classpath " + outputDir + " " + fullClassName;
-            ExecProcess.main(command, 1);
-            NativeSystemOfODEs n = (NativeSystemOfODEs) c;
-            FileUtils.writeGeneralFile(nativeCode, nativeFile + ".cpp");
-            String libName = System.mapLibraryName(nativeFile);
+
             String javaHome = System.getProperty("java.home");
             int indexJre = javaHome.lastIndexOf("jre");
             String javaInclude = javaHome;
@@ -91,6 +84,11 @@ public class CPPClassCompiler {
             {
                 javaInclude = javaHome.substring(0, indexJre);
             }
+
+            String command = "javah -jni -classpath " + outputDir + " " + fullClassName;
+            ExecProcess.main(command, 1);
+            FileUtils.writeGeneralFile(nativeCode, nativeFile + ".cpp");
+            String libName = System.mapLibraryName(nativeFile);
 
             if (System.getProperty("os.name").toLowerCase().contains("win"))
             {
@@ -101,7 +99,7 @@ public class CPPClassCompiler {
                 linuxCompile(libName, nativeFile, javaInclude);
             }
 
-            n.loadLib (nativeFile);
+            ((NativeSystemOfODEs) c).loadLib (nativeFile);
             return c;
 		} catch (InstantiationException e) {
 			e.printStackTrace();
