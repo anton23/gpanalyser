@@ -4,25 +4,19 @@ import uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis.CPPODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
-import javax.naming.spi.DirectoryManager;
 import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CPPClassCompiler {
 
-    private static final String tmp = "tmp";
+    private static final String srcpctmc = "src-pctmc";
 
 	public static Object getInstance(String javaCode, String className,
              String nativeCode, String nativeFile) {
@@ -32,19 +26,27 @@ public class CPPClassCompiler {
 
     private static void winCompile
             (String libName, String nativeFile, String javaInclude) {
-        String command = "gcc -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -shared -o "
+        String command = "gcc -D_JNI_IMPLEMENTATION_ "
+            + "-Wl,--kill-at -shared -Wall -o "
             + libName + " " + nativeFile + ".cpp "
             + " -I\"" + javaInclude + "include\""
             + " -I\"" + javaInclude + "include/win32\"";
+/*
+        String command = "cmd /K \"c:\\Program Files (x86)\\Microsoft Visual "
+            + "Studio 10.0\\VC\\bin\\vcvars32.bat\" & cl.exe /Fo "
+            + libName + " " + nativeFile + ".cpp "
+            + " /I\"" + javaInclude + "include\""
+            + " /I\"" + javaInclude + "include/win32\"";
+*/
         ExecProcess.main(command, 2);
     }
 
     private static void linuxCompile
             (String libName, String nativeFile, String javaInclude) {
-        String command = "gcc -shared -fPIC -o " + libName
-                + " " + nativeFile + ".cpp"
-                + " -I\"" + javaInclude + "include\""
-                + " -I\"" + javaInclude + "include/linux\"";
+        String command = "gcc -Wall -shared -fPIC -o " + libName
+            + " " + nativeFile + ".cpp"
+            + " -I\"" + javaInclude + "include\""
+            + " -I\"" + javaInclude + "include/linux\"";
         ExecProcess.main(command, 3);
     }
 
@@ -58,24 +60,17 @@ public class CPPClassCompiler {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 		List<JavaFileObject> files = new ArrayList<JavaFileObject>(1);
-        JavaFileManager fileManager
-            = compiler.getStandardFileManager(null, null, null);
+        JavaFileManager fileManager = new ClassFileManager
+                (compiler.getStandardFileManager(null, null, null));
         String filePath = CPPODEMethodPrinter.PACKAGE.replace(".", "/") ;
         String file = filePath + "/" + className;
         String fullClassName = CPPODEMethodPrinter.PACKAGE + "." + className;
-		files.add(new CharSequenceJavaFileObject("src-pctmc/" + file, src));
+		files.add(new CharSequenceJavaFileObject(srcpctmc + "/" + file, src));
 
-        String outputDir = System.getProperty("user.dir") + "/" + tmp;
-        File f = new File(outputDir);
-        f.mkdir();
-        List<String> options = new ArrayList<String>();
-        options.add("-d");
-        options.add(outputDir);
-		compiler.getTask(null, fileManager, null, options, null, files).call();
+		compiler.getTask(null, fileManager, null, null, null, files).call();
 		try {
-            URL url = f.toURI().toURL();
-            URLClassLoader loader = new URLClassLoader(new URL[] {url});
-			Object c = loader.loadClass(fullClassName).newInstance();
+            Object c = fileManager.getClassLoader(null)
+                    .loadClass(fullClassName).newInstance();
 
             String javaHome = System.getProperty("java.home");
             int indexJre = javaHome.lastIndexOf("jre");
@@ -85,7 +80,7 @@ public class CPPClassCompiler {
                 javaInclude = javaHome.substring(0, indexJre);
             }
 
-            String command = "javah -jni -classpath " + outputDir + " " + fullClassName;
+            String command = "javah -jni -classpath " + srcpctmc + " " + fullClassName;
             ExecProcess.main(command, 1);
             FileUtils.writeGeneralFile(nativeCode, nativeFile + ".cpp");
             String libName = System.mapLibraryName(nativeFile);
@@ -106,8 +101,6 @@ public class CPPClassCompiler {
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
