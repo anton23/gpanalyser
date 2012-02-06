@@ -1,7 +1,6 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 
 import uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis.CPPODEMethodPrinter;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import javax.tools.*;
@@ -69,9 +68,6 @@ public class CPPClassCompiler {
 
 		compiler.getTask(null, fileManager, null, null, null, files).call();
 		try {
-            Object c = fileManager.getClassLoader(null)
-                    .loadClass(fullClassName).newInstance();
-
             String javaHome = System.getProperty("java.home");
             int indexJre = javaHome.lastIndexOf("jre");
             String javaInclude = javaHome;
@@ -94,8 +90,8 @@ public class CPPClassCompiler {
                 linuxCompile(libName, nativeFile, javaInclude);
             }
 
-            ((NativeSystemOfODEs) c).loadLib (nativeFile);
-            return c;
+            return fileManager.getClassLoader(null)
+                    .loadClass(fullClassName).newInstance();
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
