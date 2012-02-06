@@ -69,6 +69,8 @@ tokens{
   OBSERVES				;
   IN					;
   SUBSTITUTE			;
+  LPROBES_DEF			;
+  LOCATIONS				;
   PROBE_DEF				;
   SIM_PROBE_DEF			;
   PROBES				;
@@ -420,23 +422,25 @@ scope
 					UPPERCASENAME (local_probes locations)? probeg) ;
 
 local_probes
-	:	local_probe_ass (COMMA local_probe_ass)* ;
+	:	LBRACE m=local_probe_ass (COMMA local_probe_ass)* RBRACE
+			-> ^(LPROBES_DEF $m local_probe_ass*) ;
 
 local_probe_ass
-	:	LBRACE UPPERCASENAME DEF probel RBRACE
+	:	UPPERCASENAME DEF probel
 			-> ^(DEF UPPERCASENAME probel) ;
 
 locations
-	:	location (COMMA location)* ;
+	:	LBRACE l=location (COMMA location)* RBRACE
+			-> ^(LOCATIONS $l location*) ;
 
 location
 	:
-		LBRACE model1=model
+		model1=model
 		{
 			checkComponentNames = false;
 		}
 		SUBSTITUTE
-		model2=model RBRACE
+		model2=model
 		{
 			checkComponentNames = true;
 		}

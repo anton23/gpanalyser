@@ -1103,7 +1103,7 @@ scope
             } ;
 
 local_probes
-	:	local_probe_ass (COMMA local_probe_ass)*
+	:	^(LPROBES_DEF local_probe_ass+)
 			{
 				Map<String, PEPAComponent> newDef =
 					new HashMap<String, PEPAComponent>
@@ -1118,7 +1118,7 @@ local_probe_ass
 	:	^(DEF name=UPPERCASENAME probel [$name.text]) ;
 
 locations
-	:	location (COMMA location)*
+	:	^(LOCATIONS location+)
 			{
 				Set<GroupComponentPair> pairs
 					= $probe_def::model.getGroupComponentPairs
