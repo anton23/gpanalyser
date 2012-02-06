@@ -53,7 +53,7 @@ public class PassivePrefix extends AbstractPrefix {
         {
             return new Prefix(newAction,
                     ProductExpression.create(otherApparentRate,
-                        DivExpression.create(weight, otherApparentWeight)),
+                        DivExpression.create(weight, thisApparentWeight)),
                     newContinuation, newImmediates);
         }
         return null;

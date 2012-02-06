@@ -17,24 +17,15 @@ Clients{Client0[n]}<fetch>Servers{Serv0[m]}
 
 Count fuck;
 
-Probe (stopTime=50, stepSize=0.5, density=10) steady {
-    PM6 = begin : start, end : stop<-
-    observes {LProbe = recover:begin, (fetch[2]/fail):end<-}
+Probe (stopTime=50, stepSize=0.5, density=10) transient {
+    PM6 = begin : start, end : stop
+    observes {LProbe = recover:begin, (fetch[2]/fail):end}
     where {Servers{Serv0[m]}
     	=> Servers{Serv0<recover,fetch,fail>LProbe|Serv0[m-1]}
     }
 }
 
 /*
-Probe (stopTime=50, stepSize=0.5, density=10) steady {
-    PM6 = begin : start, end : stop<-
-    observes {LProbe = recover:begin, (fetch[2]/fail):end<-}
-    where {Servers{Serv0[m]}
-    	=> Servers{Serv0<recover,fetch,fail>LProbe|Serv0[m-1]}
-    }
-}
-
-
 SimProbe (stopTime=50, stepSize=0.1, replications=100) steady {
     PM6 = begin : start, end : stop <-
     observes {LProbe = recover:begin, (fetch[2]/fail):end <-}
