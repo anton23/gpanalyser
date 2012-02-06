@@ -84,9 +84,11 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         StringBuilder jniCode = new StringBuilder();
         StringBuilder main = new StringBuilder();
         classOutput.append("package uk.ac.imperial.doc.pctmc.odeanalysis.utils;\n");
-        classOutput.append("import " + NativeSystemOfODEs.class.getName() + ";\n"
-                + "public class " + nativeClassName + " extends "
-                + NativeSystemOfODEs.class.getName() + "{\n");
+        classOutput.append("public class " + nativeClassName + " extends "
+                + NativeSystemOfODEs.class.getSimpleName() + "\n{\n");
+        classOutput.append("public " + nativeClassName + "() {}\n");
+        classOutput.append("private static String libName = \"" + nativeClassName + "\";\n");
+        classOutput.append("static { System.loadLibrary (libName); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[] derivnI" +
                 "(double x, double[] y, double[] r);\n");
@@ -115,22 +117,22 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
                 jniCode.append("JNIEXPORT jdoubleArray JNICALL " +
                         "Java_" + PACKAGE.replace(".", "_") + "_"
                         + nativeClassName + "_derivnI\n" +
-                        "  (JNIEnv *env, jobject, jdouble x, jdoubleArray arr_y," +
+                        " (JNIEnv *env, jobject, jdouble x, jdoubleArray arr_y," +
                         " jdoubleArray arr_r) {\n");
                 jniCode.append("jboolean isCopy = false;\n");
-                jniCode.append("jdouble *" + OLDY + " = env -> GetDoubleArrayElements(arr_y, 0);\n");
-                jniCode.append("jint n = env -> GetArrayLength(arr_y);\n");
-                jniCode.append("jdouble *r = env -> GetDoubleArrayElements(arr_r, 0);\n");
-                jniCode.append("jdoubleArray result = env -> NewDoubleArray(n);\n");
+                jniCode.append("jdouble *" + OLDY + " = env -> GetDoubleArrayElements (arr_y, 0);\n");
+                jniCode.append("jint n = env -> GetArrayLength (arr_y);\n");
+                jniCode.append("jdouble *r = env -> GetDoubleArrayElements (arr_r, 0);\n");
+                jniCode.append("jdoubleArray result = env -> NewDoubleArray (n);\n");
                 jniCode.append("jdouble *" + NEWY +
-                        "= env -> GetDoubleArrayElements(result, &isCopy);\n");
-                jniCode.append("derivn(" + OLDY + ", x, " + NEWY + ", r);\n");
+                        " = env -> GetDoubleArrayElements (result, &isCopy);\n");
+                jniCode.append("derivn (" + OLDY + ", x, " + NEWY + ", r);\n");
                 jniCode.append("env -> ReleaseDoubleArrayElements" +
-                        "(arr_r, r, JNI_ABORT);\n");
+                        " (arr_r, r, JNI_ABORT);\n");
                 jniCode.append("env -> ReleaseDoubleArrayElements" +
-                        "(arr_y, " + OLDY + ", JNI_ABORT);\n");
+                        " (arr_y, " + OLDY + ", JNI_ABORT);\n");
                 jniCode.append("if (isCopy == JNI_TRUE) {\n");
-                jniCode.append("env -> ReleaseDoubleArrayElements(result, " + NEWY + ", 0);\n");
+                jniCode.append("env -> ReleaseDoubleArrayElements (result, " + NEWY + ", 0);\n");
                 jniCode.append("}\n");
                 jniCode.append("return result;\n");
                 jniCode.append("}\n");
@@ -160,7 +162,7 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         for (int i = 1; i < method; i++) {
             main.append("derivn" + i + " (" + OLDY + ", x, " + NEWY + ", r);\n");
         }
-        main.append("\n}\n");
+        main.append("}\n\n");
 
         header.append(code);
         header.append(main);

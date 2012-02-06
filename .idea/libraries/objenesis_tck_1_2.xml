@@ -2,8 +2,11 @@
   <library name="objenesis-tck-1.2">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/objenesis-tck-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/tools.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/tools.jar!/" />
+    </SOURCES>
   </library>
 </component>
