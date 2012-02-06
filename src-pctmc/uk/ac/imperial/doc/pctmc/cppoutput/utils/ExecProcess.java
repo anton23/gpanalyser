@@ -1,32 +1,35 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+
 import java.io.*;
 
-public class ExecProcess {
-
+public class ExecProcess
+{
     static class StreamGobbler extends Thread
     {
         InputStream is;
         String type;
 
-        StreamGobbler(InputStream is, String type)
+        StreamGobbler (InputStream is, String type)
         {
             this.is = is;
             this.type = type;
         }
 
-        public void run()
+        public void run ()
         {
             try
             {
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
+                InputStreamReader isr = new InputStreamReader (is);
+                BufferedReader br = new BufferedReader (isr);
                 String line;
-                while ( (line = br.readLine()) != null)
-                    System.out.println(type + " > " + line);
-            } catch (IOException ioe)
+                while ((line = br.readLine ()) != null)
+                    PCTMCLogging.info (type + " > " + line);
+            }
+            catch (IOException ioe)
             {
-                ioe.printStackTrace();
+                ioe.printStackTrace ();
             }
         }
     }
@@ -36,7 +39,7 @@ public class ExecProcess {
         try
         {
             String[] cmd;
-            if (System.getProperty("os.name").toLowerCase().contains("win"))
+            if (System.getProperty ("os.name").toLowerCase ().contains ("win"))
             {
                 cmd = new String[3];
                 cmd[0] = "cmd" ;
@@ -51,27 +54,27 @@ public class ExecProcess {
                 cmd[2] = command;
             }
 
-            System.out.println("executing: " + command);
-            Runtime rt = Runtime.getRuntime();
-            Process proc = rt.exec(cmd);
+            PCTMCLogging.info ("executing: " + command);
+            Runtime rt = Runtime.getRuntime ();
+            Process proc = rt.exec (cmd);
             // any error message?
             StreamGobbler errorGobbler = new
-                    StreamGobbler(proc.getErrorStream(), "ERROR" + i);
+                    StreamGobbler (proc.getErrorStream (), "ERROR" + i);
 
             // any output?
             StreamGobbler outputGobbler = new
-                    StreamGobbler(proc.getInputStream(), "OUTPUT" + i);
+                    StreamGobbler(proc.getInputStream (), "OUTPUT" + i);
 
             // kick them off
-            errorGobbler.start();
-            outputGobbler.start();
+            errorGobbler.start ();
+            outputGobbler.start ();
 
             // any error???
-            proc.waitFor();
+            proc.waitFor ();
         }
         catch (Throwable t)
         {
-            t.printStackTrace();
+            t.printStackTrace ();
         }
     }
 }

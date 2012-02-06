@@ -968,7 +968,7 @@ scope
 						$probe_def::step_size = $odeSettings.stepSize;
 						$probe_def::parameter = $odeSettings.density;
 				}
-			md=mode mt=probe_spec [false, $md.chosenMode, $plot])
+			md=mode mt=probe_spec [false, $md.chosenMode, $md.par, $plot])
 			{
 				$measured_times = $mt.measured_times;
 			}
@@ -979,29 +979,35 @@ scope
 						$probe_def::parameter
 							= $simulationSettings.replications;
 				}
-			md=mode mt=probe_spec [true, $md.chosenMode, $plot])
+			md=mode mt=probe_spec [true, $md.chosenMode, $md.par, $plot])
 			{
 				$measured_times = $mt.measured_times;
 			} ;
 
-mode returns [int chosenMode]
-	:	^(STEADY STEADY)
+mode returns [int chosenMode, double par]
+	:	^(STEADY limitTime=expression STEADY)
 			{
 				$probe_def::steady = true;
+				ExpressionEvaluatorWithConstants parEval
+					= new ExpressionEvaluatorWithConstants (mainConstants);
+				$limitTime.e.accept (parEval);
+				$par = parEval.getResult ();
 				$chosenMode = 1;
 			}
 		| ^(TRANSIENT TRANSIENT)
 			{
 				$probe_def::steady = false;
+				$par = 0;
 				$chosenMode = 2;
 			}
 		| ^(GLOBAL GLOBAL)
 			{
 				$probe_def::steady = false;
+				$par = 0;
 				$chosenMode = 3;
 			} ;
 
-probe_spec [boolean simulate, int mode, boolean plot]
+probe_spec [boolean simulate, int mode, double modePar, boolean plot]
 	returns [CDF measured_times]
 scope
 {
@@ -1078,7 +1084,8 @@ scope
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCSimulation.class,
 						SimulationAnalysisNumericalPostprocessor.class,
-						$probe_spec::alphabet, excluded, $mode, $plot);
+						$probe_spec::alphabet, excluded,
+						$mode, $modePar, $plot);
 				}
 				else
 				{
@@ -1090,7 +1097,8 @@ scope
 						$probe_def::step_size, $probe_def::parameter,
 						PCTMCODEAnalysis.class,
 						CPPODEAnalysisNumericalPostprocessor.class,
-						$probe_spec::alphabet, excluded, $mode, $plot);
+						$probe_spec::alphabet, excluded,
+						$mode, $modePar, $plot);
 				}
             } ;
 

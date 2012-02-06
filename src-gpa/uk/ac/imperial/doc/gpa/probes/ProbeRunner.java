@@ -44,7 +44,7 @@ public class ProbeRunner
              AbstractExpression stopTime, AbstractExpression stepSize,
              int parameter, Class<A> AClass, Class<NP> NPClass,
              Collection<ITransition> alphabet, Collection<ITransition> excluded,
-             int mode, boolean plot)
+             int mode, double modePar, boolean plot)
     {
         Set<ITransition> countActions = NFADetectors.detectAlphabet
             (gprobe.getStartingState(), true, excluded);
@@ -67,7 +67,7 @@ public class ProbeRunner
                 statesCountExpressions, mapping, countActionStrings, model,
                 stateObservers, mainDef, altDef, definitionsMap, accepting,
                 constants, stopTimeVal, stepSizeVal, parameter,
-                AClass, NPClass, 0, mode);
+                AClass, NPClass, 0, mode, modePar);
 
         if (plot)
         {
@@ -90,7 +90,7 @@ public class ProbeRunner
              ComponentId accepting, Constants constants,
              double stopTime, double stepSize, int parameter,
              Class<A> AClass, Class<NP> NPClass,
-             int start_time, int mode)
+             int start_time, int mode, double modePar)
     {
         switch (mode)
         {
@@ -100,7 +100,7 @@ public class ProbeRunner
                         countActionStrings, model, stateObservers,
                         mainDef, altDef, definitionsMap, accepting,
                         constants, stopTime, stepSize, parameter,
-                        AClass, NPClass);
+                        AClass, NPClass, modePar);
             case 2:
                 return transientIndividual
                     (statesCountExpressions, mapping,
@@ -131,15 +131,15 @@ public class ProbeRunner
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              ComponentId accepting, Constants constants,
              double stopTime, double stepSize, int parameter,
-             Class<A> AClass, Class<NP> NPClass)
+             Class<A> AClass, Class<NP> NPClass, double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-                (model, countActionStrings, stateObservers, statesCountExpressions,
-                        mapping, mainDef, constants, stopTime, stepSize, parameter,
-                        AClass, NPClass);
+            (model, countActionStrings, stateObservers, statesCountExpressions,
+                mapping, mainDef, constants, steadyStateTime, stepSize,
+                parameter, AClass, NPClass);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        double maxTime = stopTime * stepSize - stepSize;
+        double maxTime = steadyStateTime * stepSize - stepSize;
         double[] val = getStartingStates
             (model,  mainDef, constants, postprocessor, maxTime, crates);
         double[][] steadyval = postprocessor.evaluateExpressions

@@ -393,7 +393,7 @@ probe_def
           	-> ^(SIM_PROBE_DEF simulationSettings mode? probe_spec) ;
 
 mode
-	:	STEADY -> ^(STEADY STEADY)
+	:	STEADY expression -> ^(STEADY expression STEADY)
 		| TRANSIENT -> ^(TRANSIENT TRANSIENT)
 		| -> ^(GLOBAL GLOBAL);
 

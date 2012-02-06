@@ -86,7 +86,9 @@ public class LabelledComponentGroup extends GroupedModel {
     public AbstractExpression getComponentRateExpression
             (String action, PEPAComponentDefinitions definitions,
              GroupComponentPair groupComponentPair) {
-        if (groupComponentPair.getGroup().equals(label)) {
+        if (groupComponentPair.getGroup().equals(label)
+                && group.getComponentDerivatives(definitions)
+                    .contains(groupComponentPair.getComponent())) {
             AbstractExpression rate = definitions.getApparentRateExpression(
                     action, groupComponentPair.getComponent());
             return ProductExpression.create(CombinedProductExpression
