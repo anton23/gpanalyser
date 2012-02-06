@@ -25,10 +25,11 @@ public class CPPStatementPrinter implements IStatementVisitor {
 		IExpressionVisitor sizePrinter = expressionPrinterFactory
 				.createPrinter();
 		s.getSize().accept(sizePrinter);
-		output.append("double " + s.getArray() + " [" + sizePrinter + "]");
-        output.append("for (int i = 0; i < " + sizePrinter + "; ++i) {");
-        output.append(s.getArray() + "[i] = 0;");
-        output.append("}");
+		output.append("double *" + s.getArray()
+                + " = new double [" + sizePrinter + "];\n");
+        //output.append("for (int i = 0; i < " + sizePrinter + "; ++i) {\n");
+        //output.append(s.getArray() + "[i] = 0;\n");
+        //output.append("}\n");
 	}
 
 	@Override
@@ -41,7 +42,7 @@ public class CPPStatementPrinter implements IStatementVisitor {
 				.createPrinter();
 		s.getIndex().accept(indexPrinter);
 		output.append(s.getArray() + "[" + indexPrinter.toString() + "] = "
-				+ rhsString + ";");
+				+ rhsString + ";\n");
 	}
 
 	@Override
@@ -66,9 +67,10 @@ public class CPPStatementPrinter implements IStatementVisitor {
 
 	@Override
 	public void visit(VariableDeclaration s) {
-        output.append("double " + s.getName() + " [" + s.getN() + "]");
-        output.append("for (int i = 0; i < " + s.getN() + "; ++i) {");
-        output.append(s.getName() + "[i] = 0;");
-        output.append("}");
+        output.append("double *" + s.getName()
+                + " = new double [" + s.getN() + "];\n");
+        //output.append("for (int i = 0; i < " + s.getN() + "; ++i) {\n");
+        //output.append(s.getName() + "[i] = 0;\n");
+        //output.append("}\n");
 	}
 }

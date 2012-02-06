@@ -87,15 +87,18 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         classOutput.append("public class " + nativeClassName + " extends "
                 + NativeSystemOfODEs.class.getSimpleName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
-        classOutput.append("private static String libName = \"" + nativeClassName + "\";\n");
+        classOutput.append("private static String libName = \""
+                + nativeClassName + "\";\n");
         classOutput.append("static { System.loadLibrary (libName); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[] derivnI" +
                 "(double x, double[] y, double[] r);\n");
         classOutput.append("}");
-        header.append("#include \"uk_ac_imperial_doc_pctmc_odeanalysis_utils_" + nativeClassName + ".h\"\n");
+        header.append("#include \"" + PACKAGE.replace(".", "_") + "_"
+                + nativeClassName + ".h\"\n");
         header.append("#include <cmath>\n");
-        header.append("#include \"src-jexpressions/uk/ac/imperial/doc/jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
+        header.append("#include \"src-jexpressions/uk/ac/imperial/doc/" +
+                "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
         header.append(cppMomentODEs[cppMomentODEs.length - 1]);
         int line = 0;
         int method = 0;
@@ -128,16 +131,16 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
                         " = env -> GetDoubleArrayElements (result, &isCopy);\n");
                 jniCode.append("derivn (" + OLDY + ", x, " + NEWY + ", r);\n");
                 jniCode.append("env -> ReleaseDoubleArrayElements" +
-                        " (arr_r, r, JNI_ABORT);\n");
-                jniCode.append("env -> ReleaseDoubleArrayElements" +
                         " (arr_y, " + OLDY + ", JNI_ABORT);\n");
+                jniCode.append("env -> ReleaseDoubleArrayElements" +
+                        " (arr_r, r, JNI_ABORT);\n");
                 jniCode.append("if (isCopy == JNI_TRUE) {\n");
                 jniCode.append("env -> ReleaseDoubleArrayElements (result, " + NEWY + ", 0);\n");
                 jniCode.append("}\n");
                 jniCode.append("return result;\n");
                 jniCode.append("}\n");
                 main.append("void derivn (double *" + OLDY + ", double x, double *" + NEWY + ", double *r) {\n");
-                int nOdes = combinedMomentsIndex.size();
+                //int nOdes = combinedMomentsIndex.size();
             } else {
                 code.append("void derivn" + method
                         + " (double *" + OLDY + ", double x, double *" + NEWY + ", double *r) {\n");
