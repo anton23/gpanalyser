@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 
-import uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis.CPPODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import javax.tools.*;
@@ -18,14 +17,14 @@ public class CPPClassCompiler {
     private static final String srcpctmc = "src-pctmc";
 
 	public static Object getInstance(String javaCode, String className,
-             String nativeCode, String nativeFile) {
+             String nativeCode, String nativeFile, String packageName) {
 		return new CPPClassCompiler().getInstancePrivate
-                (javaCode, className, nativeCode, nativeFile);
+                (javaCode, className, nativeCode, nativeFile, packageName);
 	}
 
     private static void winCompile
             (String libName, String nativeFile, String javaInclude) {
-        String command = "gcc -D_JNI_IMPLEMENTATION_ "
+        String command = "g++ -D_JNI_IMPLEMENTATION_ "
             + "-Wl,--kill-at -shared -Wall -o "
             + libName + " " + nativeFile + ".cpp "
             + " -I\"" + javaInclude + "include\""
@@ -50,7 +49,7 @@ public class CPPClassCompiler {
     }
 
 	private Object getInstancePrivate (String javaCode, String className,
-             String nativeCode, String nativeFile) {
+             String nativeCode, String nativeFile, String packageName) {
 		
 		StringBuilder src = new StringBuilder();
 		src.append(javaCode);
@@ -61,9 +60,9 @@ public class CPPClassCompiler {
 		List<JavaFileObject> files = new ArrayList<JavaFileObject>(1);
         JavaFileManager fileManager = new ClassFileManager
                 (compiler.getStandardFileManager(null, null, null));
-        String filePath = CPPODEMethodPrinter.PACKAGE.replace(".", "/") ;
+        String filePath = packageName.replace(".", "/") ;
         String file = filePath + "/" + className;
-        String fullClassName = CPPODEMethodPrinter.PACKAGE + "." + className;
+        String fullClassName = packageName + "." + className;
 		files.add(new CharSequenceJavaFileObject(srcpctmc + "/" + file, src));
 
 		compiler.getTask(null, fileManager, null, null, null, files).call();

@@ -4,13 +4,12 @@ import com.google.common.collect.BiMap;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.cppoutput.analysis.CPPMethodPrinter;
 import uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis.CPPODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
-import uk.ac.imperial.doc.pctmc.javaoutput.analysis.JavaMethodPrinter;
-import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKutta;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
@@ -35,13 +34,13 @@ public class PCTMCCPPImplementationProvider implements
 			EvaluatorMethod method, String className, Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			BiMap<AbstractExpression, Integer> generalExpectationIndex) {
-        // we need JavaMethodPrinter for this
-		JavaMethodPrinter printer = new JavaMethodPrinter(constants,
+		CPPMethodPrinter printer = new CPPMethodPrinter(constants,
 				combinedMomentsIndex, generalExpectationIndex);
-		String code = printer.printEvaluatorMethod(method, className);
-		AbstractExpressionEvaluator updater = (AbstractExpressionEvaluator) ClassCompiler
-				.getInstance(code, className);
-		return updater;
+		String newClassName = printer.printEvaluatorMethod(method, className);
+		return (AbstractExpressionEvaluator)
+                CPPClassCompiler.getInstance(printer.flushClassCode(),
+                        newClassName, printer.flushNativeCode(),
+                        newClassName, CPPMethodPrinter.PACKAGE);
 	}
 
 	public CPPODEsPreprocessed getPreprocessedODEImplementation(
@@ -62,11 +61,11 @@ public class PCTMCCPPImplementationProvider implements
 		method.accept(printer);
 		String javaCode = printer.toClassString();
         String nativeCode = printer.toString();
-		SystemOfODEs ret = (NativeSystemOfODEs)
+		return (SystemOfODEs)
                 CPPClassCompiler.getInstance(javaCode,
                         printer.getNativeClassName (),
-                        nativeCode, printer.getNativeClassName ());
-		return ret;
+                        nativeCode, printer.getNativeClassName (),
+                        CPPODEMethodPrinter.PACKAGE);
 	}
 
 	public double[][] runODEAnalysis(
@@ -75,8 +74,7 @@ public class PCTMCCPPImplementationProvider implements
 		SystemOfODEs odes = ((CPPODEsPreprocessed) preprocessed).getOdes();
 		odes.setRates(constants.getFlatConstants());
 		PCTMCLogging.info("Running Runge-Kutta solver.");
-		double[][] dataPoints = RungeKutta.rungeKutta(odes, initial, stopTime,
+		return RungeKutta.rungeKutta(odes, initial, stopTime,
 				stepSize, density);
-		return dataPoints;
 	}
 }
