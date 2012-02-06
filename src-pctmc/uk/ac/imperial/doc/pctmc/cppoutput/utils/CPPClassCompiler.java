@@ -5,6 +5,7 @@ import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class CPPClassCompiler {
 
-    private static final String srcpctmc = "src-pctmc";
+    private static final String tmp = "tmp";
 
 	public static Object getInstance(String javaCode, String className,
              String nativeCode, String nativeFile, String packageName) {
@@ -63,9 +64,10 @@ public class CPPClassCompiler {
         String filePath = packageName.replace(".", "/") ;
         String file = filePath + "/" + className;
         String fullClassName = packageName + "." + className;
-		files.add(new CharSequenceJavaFileObject(srcpctmc + "/" + file, src));
+		files.add(new CharSequenceJavaFileObject(tmp + "/" + file, src));
 
 		compiler.getTask(null, fileManager, null, null, null, files).call();
+       
 		try {
             String javaHome = System.getProperty("java.home");
             int indexJre = javaHome.lastIndexOf("jre");
@@ -75,11 +77,13 @@ public class CPPClassCompiler {
                 javaInclude = javaHome.substring(0, indexJre);
             }
 
-            String command = "javah -jni -classpath " + srcpctmc + " " + fullClassName;
+            String command = "javah -jni -classpath " + tmp + " " + fullClassName;
             ExecProcess.main(command, 1);
-            FileUtils.writeGeneralFile(nativeCode, nativeFile + ".cpp");
+            
+            File nativeFileObj =  new File(nativeFile + ".cpp");
+            
+            FileUtils.writeGeneralFile(nativeCode, nativeFileObj.getAbsolutePath());
             String libName = System.mapLibraryName(nativeFile);
-
             if (System.getProperty("os.name").toLowerCase().contains("win"))
             {
                 winCompile(libName, nativeFile, javaInclude);
@@ -88,6 +92,11 @@ public class CPPClassCompiler {
             {
                 linuxCompile(libName, nativeFile, javaInclude);
             }
+
+            // cleanup
+            nativeFileObj.delete();
+            File headerFileObj = new File(fullClassName.replace(".","_") + ".h");
+            headerFileObj.delete();
 
             return fileManager.getClassLoader(null)
                     .loadClass(fullClassName).newInstance();
