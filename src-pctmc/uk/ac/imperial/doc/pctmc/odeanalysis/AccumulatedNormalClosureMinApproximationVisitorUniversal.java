@@ -7,8 +7,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
@@ -95,9 +93,9 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 				phiC2), ProductExpression.create(
 				new DoubleExpression(-1.0), theta2, phi));*/
 				
-		result = FunctionCallExpression.create("normalMin",
+		result = considerVariable(FunctionCallExpression.create("normalMin",
 				Lists.newArrayList(muA, muB, theta)	
-			);
+			));
 		}
 		inserted = true;
 	}

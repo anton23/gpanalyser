@@ -3,7 +3,12 @@ package uk.ac.imperial.doc.jexpressions.variables;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 
-public class ExpressionVariable extends AbstractExpression {
+public class ExpressionVariable extends AbstractExpression implements Comparable<ExpressionVariable> {
+	@Override
+	public int compareTo(ExpressionVariable o) {
+		return this.toString().compareTo(o.toString());
+	}
+
 	protected String name;
 
 	protected AbstractExpression unfolded;
