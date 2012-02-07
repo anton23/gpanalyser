@@ -108,10 +108,10 @@ public class CooperationComponent extends PEPAComponent {
 		List<AbstractPrefix> ret = new LinkedList<AbstractPrefix>();
 
 		Multimap<String, AbstractPrefix> leftActionmap = LinkedHashMultimap
-				.<String, AbstractPrefix> create();
+				.create();
 
 		Multimap<String, AbstractPrefix> rightActionmap = LinkedHashMultimap
-				.<String, AbstractPrefix> create();
+				.create();
 
 		// only left evolves
 		for (AbstractPrefix leftPrefix : leftPrefixes) {
@@ -196,13 +196,12 @@ public class CooperationComponent extends PEPAComponent {
                                     (rightPrefix.getAction(), right);
                     AbstractExpression rightApparentWeight = definitions
                             .getApparentWeightExpression
-                                    (leftPrefix.getAction(), right);
+                                    (rightPrefix.getAction(), right);
                     AbstractPrefix newPrefix = leftPrefix.getCooperation
                             (action, rightPrefix, rightApparentRate,
                                 rightApparentWeight, leftApparentRate,
                                 leftApparentWeight, newContinuation);
-                    if (newPrefix != null)
-                    {
+                    if (newPrefix != null) {
                         ret.add(newPrefix);
                     }
 				}
