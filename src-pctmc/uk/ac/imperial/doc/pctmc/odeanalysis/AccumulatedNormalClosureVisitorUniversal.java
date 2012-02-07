@@ -54,7 +54,7 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 
 	@Override
 	public void visit(ExpressionVariable e) {
-		if (moment.getOrder() == 0) {
+		if (moment.getOrder() == 0 ) {
 			result = e;
 		} else {
 			e.getUnfolded().accept(this);

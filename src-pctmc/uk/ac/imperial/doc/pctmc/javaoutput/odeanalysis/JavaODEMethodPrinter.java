@@ -6,10 +6,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -64,8 +64,8 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 	@Override
 	public void visit(ODEMethod s) {
 
-
-		Set<ExpressionVariable> variables = new HashSet<ExpressionVariable>();
+		// TODO properly topologically sort the variables
+		Set<ExpressionVariable> variables = new TreeSet<ExpressionVariable>();
 		
 		int additionalLines = 0;
 		for (int i = 0; i < s.getBody().length; i++) {
@@ -85,7 +85,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 			tmp.append(JavaExpressionPrinterWithVariables.escapeName(v.getName()) + " = ");
 			JavaPrinterCombinedProductBased printer = new JavaPrinterCombinedProductBased(
 					constants, combinedMomentsIndex, generalExpectationIndex,
-					OLDY, true);
+					OLDY, false);//true); see the above TODO
 			v.getUnfolded().accept(printer);
 			tmp.append(printer.toString());
 			tmp.append(";\n");
