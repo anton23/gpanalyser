@@ -28,6 +28,14 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
  * 
  */
 public class JavaExpressionPrinter implements IExpressionVisitor {
+	public static String utilsClassName;
+	{
+		utilsClassName = JExpressionsJavaUtils.class.getName();
+		String[] packagePath = utilsClassName.split("\\.");
+		utilsClassName = packagePath[packagePath.length - 1];
+		
+	}
+	
 	@Override
 	public void visit(IntegerExpression e) {
 		output.append(e.getValue());
@@ -42,27 +50,33 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 	}
 
 	@Override
-	public void visit(FunctionCallExpression e) {
+	public void visit(FunctionCallExpression e) {		
 		if (e.getName().equals("ifpos")) {
-			output.append(JExpressionsJavaUtils.class.getName() + ".ifpos(");
+			output.append(utilsClassName + ".ifpos(");
 		} else if (e.getName().equals("chebyshev")) {
 			output
-					.append(JExpressionsJavaUtils.class.getName()
+					.append(utilsClassName
 							+ ".chebyshev(");
 		} else if (e.getName().equals("div")) {
-			output.append(JExpressionsJavaUtils.class.getName() + ".div(");
+			output.append(utilsClassName + ".div(");
 		} else if (e.getName().equals("phi")) {
-			output.append(JExpressionsJavaUtils.class.getName()
+			output.append(utilsClassName
 							+ ".phi(");
 		} else if (e.getName().equals("phiC")) {
-			output.append(JExpressionsJavaUtils.class.getName()
+			output.append(utilsClassName
 					+ ".Phi(");
 		} else if (e.getName().equals("safe_phi")) {
-			output.append(JExpressionsJavaUtils.class.getName()
+			output.append(utilsClassName
 					+ ".safe_phi(");
 		} else if (e.getName().equals("safe_Phi")) {
-			output.append(JExpressionsJavaUtils.class.getName()
+			output.append(utilsClassName
 			+ ".safe_Phi(");
+		} else if (e.getName().equals("normalMin")) {
+			output.append(utilsClassName
+					+ ".normalMin(");
+		} else if (e.getName().equals("normalMinProduct")) {
+			output.append(utilsClassName
+					+ ".normalMinProduct(");
 		} else {
 			output.append("Math." + e.getName() + "(");
 		}
@@ -133,7 +147,7 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(PEPADivExpression e) {
-		output.append(JExpressionsJavaUtils.class.getName() + ".div(");
+		output.append(utilsClassName + ".div(");
 		e.getNumerator().accept(this);
 		output.append(",");
 		e.getDenominator().accept(this);
@@ -160,7 +174,7 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivMinExpression e) {
-		output.append(JExpressionsJavaUtils.class.getName() + ".divmin(");
+		output.append(utilsClassName + ".divmin(");
 		e.getA().accept(this);
 		output.append(",");
 		e.getB().accept(this);
@@ -171,7 +185,7 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivDivMinExpression e) {
-		output.append(JExpressionsJavaUtils.class.getName() + ".divdivmin(");
+		output.append(utilsClassName + ".divdivmin(");
 		e.getA().accept(this);
 		output.append(",");
 		e.getB().accept(this);
@@ -225,7 +239,4 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 		e.getCondition().getRight().accept(this);
 		output.append(") ? 1.0 : 0.0 )");
 	}
-	
-	
-
 }

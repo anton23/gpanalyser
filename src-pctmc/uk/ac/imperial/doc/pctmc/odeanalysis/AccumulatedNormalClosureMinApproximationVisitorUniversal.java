@@ -20,11 +20,31 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import com.google.common.collect.Lists;
 
 public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends AccumulatedNormalClosureVisitorUniversal {
+	
+	Map<AbstractExpression, ExpressionVariable> usedVariables;
+	int variableIndex;
 
 	
 	public AccumulatedNormalClosureMinApproximationVisitorUniversal(
-			CombinedPopulationProduct moment, int maxOrder) {
+			CombinedPopulationProduct moment, int maxOrder, Map<AbstractExpression, ExpressionVariable> usedVariables, int variableIndex) {
 		super(moment, maxOrder);
+		this.usedVariables = usedVariables;
+		this.variableIndex = variableIndex;
+	}
+	
+	public int getVariableIndex() {
+		return variableIndex;
+	}
+	
+	protected AbstractExpression considerVariable(AbstractExpression a) {
+		if (usedVariables.containsKey(a)) {
+			return usedVariables.get(a);
+		} else {
+			ExpressionVariable var = new ExpressionVariable("var" + (variableIndex++));
+			var.setUnfolded(a);
+			usedVariables.put(a, var);
+			return var;
+		}		
 	}
 	
 	@Override
@@ -40,44 +60,88 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 				muA, 2, var);
 		AbstractExpression varB = new CentralMomentOfLinearCombinationExpression(
 				muB, 2, var);
-		AbstractExpression theta = PowerExpression.create(
-				FunctionCallExpression.create(
-						"max", Lists.newArrayList(
+		AbstractExpression theta = 
 				SumExpression.create(
 				varA, varB, ProductExpression.create(
-						new DoubleExpression(-2.0), covAB)), new DoubleExpression(0.0))),
-				new DoubleExpression(0.5));
+						new DoubleExpression(-2.0), covAB));
 		
-//		if (e.getB().equals(new DoubleExpression(0.0))) {
-//			AbstractExpression nonNegative = FunctionCallExpression.create(
-//					"max", Lists.newArrayList(varA, new DoubleExpression(0.0)));
-//			theta = FunctionCallExpression.create("sqrt", Lists
-//					.newArrayList(nonNegative));
-//		}
-
 		AbstractExpression muA2 = e.getA();
 		AbstractExpression muB2 = e.getB();
-		AbstractExpression theta2 = theta;
+		theta = considerVariable(theta);
+
 		if (moment.getOrder() > 0 && insert) {
+			inserted = false;
 			muA.accept(this);
 			muA2 = result;
 			inserted = false;
 			muB.accept(this);
 			muB2 = result;
-			theta2 = ProductExpression.create(CombinedProductExpression
-					.create(moment), theta);
-		}
-		MinusExpression mAmB = new MinusExpression(muA, muB);
 
-		MinusExpression mBmA = new MinusExpression(muB, muA);
+			result = FunctionCallExpression.create("normalMinProduct",
+				Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression
+						.create(moment))	
+			);
+		} else { 
+		
+  	 /*  MinusExpression mAmB = new MinusExpression(muA, muB);
 
+	   MinusExpression mBmA = new MinusExpression(muB, muA);
+
+		AbstractExpression phiC1 = (FunctionCallExpression.create("safe_Phi", Lists.newArrayList(mBmA, theta)));
+		AbstractExpression phiC2 = (FunctionCallExpression.create("safe_Phi", Lists.newArrayList(mAmB, theta)));
+		AbstractExpression phi   = (FunctionCallExpression.create("safe_phi", Lists.newArrayList(mBmA, theta)));
 		result = SumExpression.create(ProductExpression.create(muA2,
-				FunctionCallExpression.create("safe_Phi", Lists.newArrayList(mBmA, theta))), ProductExpression.create(muB2,
-				FunctionCallExpression.create("safe_Phi", Lists.newArrayList(mAmB, theta))), ProductExpression.create(
-				new DoubleExpression(-1.0), theta2, FunctionCallExpression
-						.create("safe_phi", Lists.newArrayList(mBmA, theta))));
+				phiC1), ProductExpression.create(muB2,
+				phiC2), ProductExpression.create(
+				new DoubleExpression(-1.0), theta2, phi));*/
+				
+		result = FunctionCallExpression.create("normalMin",
+				Lists.newArrayList(muA, muB, theta)	
+			);
+		}
 		inserted = true;
+	}
+	
+	@Override
+	public void visit(FunctionCallExpression e) {
+		if (e.getName().equals("normalMin") && insert) {
+			AbstractExpression muA = e.getArguments().get(0);
+			AbstractExpression muB = e.getArguments().get(1);
+			AbstractExpression theta = e.getArguments().get(2);
+			inserted = false;
+			muA.accept(this);
+			AbstractExpression muA2 = result;
+			inserted = false;
+			muB.accept(this);
+			AbstractExpression muB2 = result;
 
+			result = FunctionCallExpression.create("normalMinProduct",
+				Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression
+						.create(moment))	
+			);
+		} else if (e.getName().equals("normalMinProduct") && insert) {
+			throw new AssertionError("This should not happen!");
+/*			AbstractExpression muA = e.getArguments().get(0);
+			AbstractExpression muB = e.getArguments().get(1);
+			AbstractExpression theta = e.getArguments().get(2);
+			AbstractExpression muA2 = e.getArguments().get(3);
+			AbstractExpression muB2 = e.getArguments().get(4);
+			AbstractExpression theta2 = e.getArguments().get(5);
+			
+			inserted = false;
+			muA2.accept(this);
+			muA2 = result;
+			inserted = false;
+			muB2.accept(this);
+			muB2 = result;
+			theta2 = (ProductExpression.create(CombinedProductExpression
+					.create(moment), theta2));
+			result = FunctionCallExpression.create("normalMinProduct",
+				Lists.newArrayList(muA, muB, theta, muA2, muB2, theta2)	
+			);*/
+		}  else {
+			super.visit(e);
+		}
 	}
 
 }
