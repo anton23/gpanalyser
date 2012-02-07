@@ -305,13 +305,13 @@ choice returns [PEPAComponent c]
 
 prefix returns [AbstractPrefix c]:
   ^(PREFIX r=expression a=LOWERCASENAME s=component){
-      AbstractPrefix prefix = new Prefix($a.text,$r.e,$s.c,
+      AbstractPrefix prefix = new Prefix($a.text,$r.e,null,$s.c,
       	new LinkedList<ImmediatePrefix>());
       $c=prefix; 
    }
    | ^(PREFIX PASSIVE w=expression? a=LOWERCASENAME s=component){
       AbstractExpression tw = (w == null) ? DoubleExpression.ONE : $w.e;
-      AbstractPrefix prefix = new PassivePrefix($a.text,tw,$s.c,
+      AbstractPrefix prefix = new PassivePrefix($a.text,null,tw,$s.c,
       	new LinkedList<ImmediatePrefix>());
       $c=prefix; 
    }

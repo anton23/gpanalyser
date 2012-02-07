@@ -130,9 +130,10 @@ public class CooperationComponent extends PEPAComponent {
                 try {
                     ret.add(leftPrefix.getClass().getDeclaredConstructor
                             (String.class, AbstractExpression.class,
+                                    AbstractExpression.class,
                                     PEPAComponent.class, List.class)
                                 .newInstance(leftPrefix.getAction(),
-                                        leftPrefix.getParameter(),
+                                        leftPrefix.getRate(), leftPrefix.getWeight(),
                                         newContinuation,
                                         leftPrefix.getImmediatesRaw()));
                 } catch (Exception e) {
@@ -159,9 +160,10 @@ public class CooperationComponent extends PEPAComponent {
                 try {
                     ret.add(rightPrefix.getClass().getDeclaredConstructor
                             (String.class, AbstractExpression.class,
+                                    AbstractExpression.class,
                                     PEPAComponent.class, List.class)
                                 .newInstance(rightPrefix.getAction(),
-                                        rightPrefix.getParameter(),
+                                        rightPrefix.getRate(), rightPrefix.getWeight(),
                                         newContinuation,
                                         rightPrefix.getImmediatesRaw()));
                 } catch (Exception e) {
