@@ -15,10 +15,10 @@ import java.util.List;
  */
 public class PassivePrefix extends AbstractPrefix {
 
-    private AbstractExpression weight;
+    private AbstractExpression weight;      //T
 
     public AbstractExpression getRate() {
-        return ProductExpression.create(DoubleExpression.MAX, weight);
+        return DoubleExpression.ZERO;
     }
 
     @Override
@@ -37,7 +37,10 @@ public class PassivePrefix extends AbstractPrefix {
         return toString().hashCode() + 2;
     }
 
-    public AbstractExpression getParameter() {
+    public AbstractExpression getWeight() {
+        if (immediates.size() > 0) {
+            return ProductExpression.create(weight, immediateSum);
+        }
         return weight;
     }
 
@@ -52,21 +55,21 @@ public class PassivePrefix extends AbstractPrefix {
         if (otherAbstractPrefix instanceof Prefix)
         {
             return new Prefix(newAction,
-                    ProductExpression.create(otherApparentRate,
+                    ProductExpression.create(otherAbstractPrefix.getRate(),
                         DivExpression.create(weight, thisApparentWeight)),
-                    newContinuation, newImmediates);
+                    null, newContinuation, newImmediates);
         }
         return null;
     }
 
     public PassivePrefix(String action, AbstractExpression rate,
-                         PEPAComponent continuation,
+                         AbstractExpression weight, PEPAComponent continuation,
                          List<ImmediatePrefix> immediates)
     {
         super();
         this.action = action;
         this.continuation = continuation;
-        this.weight = rate;
+        this.weight = weight;
         addImmediates(immediates);
     }
 
@@ -84,6 +87,7 @@ public class PassivePrefix extends AbstractPrefix {
         {
             immediatesString += ", " + imm.getAction ();
         }
-        return "(" + action + immediatesString + ", T, " + weight + ")." + continuationString;
+        return "(" + action + immediatesString + ", T, "
+            + weight + ")." + continuationString;
     }
 }

@@ -50,8 +50,8 @@ public class TestCompilerSimpleInput extends BaseCompilerTest {
 	public void testComponentDefinitions() {
 		Map<String, PEPAComponent> definitions = pctmc.getComponentDefinitions().getDefinitions();
 		Map<String, PEPAComponent> definitionsExpected = new HashMap<String, PEPAComponent>();
-		definitionsExpected.put("A", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("a", new ConstantExpression("ra"), new ComponentId("B"), new LinkedList<ImmediatePrefix>()))));
-		definitionsExpected.put("B", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("b", new ConstantExpression("rb"), new ComponentId("A"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("A", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("a", new ConstantExpression("ra"), null, new ComponentId("B"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("B", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("b", new ConstantExpression("rb"), null, new ComponentId("A"), new LinkedList<ImmediatePrefix>()))));
 		assertEquals(definitionsExpected, definitions);
 	}
 	

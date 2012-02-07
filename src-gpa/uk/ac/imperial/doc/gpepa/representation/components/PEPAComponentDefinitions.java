@@ -40,7 +40,7 @@ public class PEPAComponentDefinitions {
         List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
         for (AbstractPrefix p : from.getPrefixes(this)) {
             if (p.getAction().equals(action)) {
-                summands.add(p.getParameter());
+                summands.add(p.getWeight());
             }
         }
 
@@ -144,7 +144,7 @@ public class PEPAComponentDefinitions {
                     choicesToRemove.remove (shorthand.toString());
                     choice.getChoices().remove(imm);
                     choice.getChoices().add(new Prefix(imm.getAction(),
-                        new DoubleExpression(250.0),
+                        new DoubleExpression(250.0), null,
                         imm.getContinuation(), imm.getImmediatesRaw()));
                 }
             }

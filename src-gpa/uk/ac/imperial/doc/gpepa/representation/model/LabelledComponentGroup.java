@@ -45,7 +45,7 @@ public class LabelledComponentGroup extends GroupedModel {
                         = ProductExpression.create(CombinedProductExpression
                             .createMeanExpression (new GPEPAState
                                     (new GroupComponentPair(label, derivative))),
-                            prefix.getParameter());
+                            prefix.getRate());
 
 					List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
 					PEPAComponent continuation = prefix.getContinuation();

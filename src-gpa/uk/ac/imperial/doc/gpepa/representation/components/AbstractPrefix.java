@@ -48,7 +48,7 @@ public abstract class AbstractPrefix
     }
 
     public void addImmediate(ImmediatePrefix imm) {
-        immediateSum = SumExpression.create (immediateSum, imm.getParameter());
+        immediateSum = SumExpression.create (immediateSum, imm.getWeight());
         immediates.add(imm);
     }
     
@@ -59,7 +59,7 @@ public abstract class AbstractPrefix
     }
 
     public abstract AbstractExpression getRate();
-    public abstract AbstractExpression getParameter();
+    public abstract AbstractExpression getWeight();
 
     public AbstractPrefix getCooperation(String cooperationAction,
                                          AbstractPrefix otherAbstractPrefix,

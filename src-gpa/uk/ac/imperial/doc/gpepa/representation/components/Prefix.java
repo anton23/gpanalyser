@@ -1,9 +1,6 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.*;
 
 import java.util.List;
 
@@ -23,7 +20,7 @@ public class Prefix extends AbstractPrefix {
 			return false;
 		Prefix asPrefix = (Prefix) o;
 		return action.equals(asPrefix.getAction())
-				&& rate.equals(asPrefix.getParameter())
+				&& rate.equals(asPrefix.getRate())
 				&& continuation.equals(asPrefix.getContinuation());
 	}
 
@@ -43,8 +40,8 @@ public class Prefix extends AbstractPrefix {
 	}
 
     // dummy function
-    public AbstractExpression getParameter() {
-        return getRate();
+    public AbstractExpression getWeight() {
+        return DoubleExpression.ZERO;
     }
 
     public AbstractPrefix getCooperationImpl(String newAction,
@@ -60,24 +57,25 @@ public class Prefix extends AbstractPrefix {
             AbstractExpression coopRate = DivDivMinExpression.create(
                     getRate(), otherAbstractPrefix.getRate(),
                     thisApparentRate, otherApparentRate);
-            return new Prefix(newAction, coopRate,
+            return new Prefix(newAction, coopRate, null,
                     newContinuation, newImmediates);
         }
         if (otherAbstractPrefix instanceof PassivePrefix)
         {
-            PassivePrefix pp = (PassivePrefix) otherAbstractPrefix;
             return new Prefix(newAction,
                     ProductExpression.create
-                        (thisApparentRate, DivExpression.create
-                            (pp.getParameter(), otherApparentWeight)),
-                    newContinuation, newImmediates);
+                        (getRate(), DivExpression.create
+                            (otherAbstractPrefix.getWeight(),
+                            otherApparentWeight)),
+                    null, newContinuation, newImmediates);
         }
         throw new Error("Unsupported cooperation between Prefix and "
             + otherAbstractPrefix.getClass().getName());
     }
 
 	public Prefix(String action, AbstractExpression rate,
-			PEPAComponent continuation, List<ImmediatePrefix> immediates) {
+            AbstractExpression weight, PEPAComponent continuation,
+            List<ImmediatePrefix> immediates) {
 		super();
 		this.action = action;
 		this.rate = rate;
