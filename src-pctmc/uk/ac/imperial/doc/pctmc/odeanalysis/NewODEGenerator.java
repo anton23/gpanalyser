@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import uk.ac.imperial.doc.jexpressions.expanded.ContractingExpressionTransformer;
+import uk.ac.imperial.doc.jexpressions.expanded.DoubleConstantCoefficients;
+import uk.ac.imperial.doc.jexpressions.expanded.ExpandingExpressionTransformerWithMoments;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -150,7 +153,9 @@ public class NewODEGenerator {
 							.getAccumulatedProducts()));
 			sum.add(insertAccumulations);
 		}
-		return SumExpression.create(sum);
+		AbstractExpression result = SumExpression.create(sum);
+		
+		return result;
 	}
 
 	protected AbstractExpression getDerivativeOfMoment(PopulationProduct moment) {		

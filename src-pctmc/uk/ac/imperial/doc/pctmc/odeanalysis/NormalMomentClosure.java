@@ -3,6 +3,9 @@ package uk.ac.imperial.doc.pctmc.odeanalysis;
 import java.util.HashMap;
 import java.util.Map;
 
+import uk.ac.imperial.doc.jexpressions.expanded.ContractingExpressionTransformer;
+import uk.ac.imperial.doc.jexpressions.expanded.DoubleConstantCoefficients;
+import uk.ac.imperial.doc.jexpressions.expanded.ExpandingExpressionTransformerWithMoments;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
@@ -43,7 +46,7 @@ public class NormalMomentClosure extends MomentClosure {
 		IntegralInsterterVisitor visitor = new IntegralInsterterVisitor(
 				new CombinedPopulationProduct(null, moment
 						.getAccumulatedProducts()));
-		derivative.accept(visitor);
+		derivative.accept(visitor);		
 		return visitor.getResult();
 	}
 
