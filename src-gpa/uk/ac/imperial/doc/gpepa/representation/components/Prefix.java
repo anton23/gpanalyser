@@ -42,6 +42,7 @@ public class Prefix extends AbstractPrefix {
         return rate;
 	}
 
+    // dummy function
     public AbstractExpression getParameter() {
         return getRate();
     }
@@ -57,7 +58,7 @@ public class Prefix extends AbstractPrefix {
         if (otherAbstractPrefix instanceof Prefix)
         {
             AbstractExpression coopRate = DivDivMinExpression.create(
-                    getParameter(), otherAbstractPrefix.getParameter(),
+                    getRate(), otherAbstractPrefix.getRate(),
                     thisApparentRate, otherApparentRate);
             return new Prefix(newAction, coopRate,
                     newContinuation, newImmediates);
