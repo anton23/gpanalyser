@@ -63,6 +63,20 @@ public class JExpressionsJavaUtils {
 		}		
 	}
 	
+	public static double normalMin(double mA, double mB, double thetaSq) {
+		double theta = Math.sqrt(Math.max(thetaSq, 0.0));
+		double safePhi = safe_Phi(mB - mA, theta);
+		return 
+		mA * safePhi + mB * (1.0 - safePhi) - theta * safe_phi(mB - mA, theta);
+	}
+	
+	public static double normalMinProduct(double mA, double mB, double thetaSq, double mA2, double mB2, double add) {
+		double theta = Math.sqrt(Math.max(thetaSq, 0.0));
+		double safePhi = safe_Phi(mB - mA, theta);
+		return 
+		mA2 * safePhi + mB2 * (1.0 - safePhi) - theta * add * safe_phi(mB - mA, theta);		
+	}
+	
 	public static double Phi(double x) {
 		try {
 			return normalDist.cumulativeProbability(x);

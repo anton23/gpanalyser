@@ -14,6 +14,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
+import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
@@ -182,6 +183,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	private String getProductUpdaterCode(Constants variables) {
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + SimulationUpdater.class.getName() + ";\n");
+		ret.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");
 		ret.append("public class " + updaterClassName + " extends "
 				+ SimulationUpdater.class.getName() + "{\n");
 		ret.append("double[] newValues = new double[" + 
@@ -221,6 +223,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + AccumulatorUpdater.class.getName() + ";\n");
+		ret.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");		
 		ret.append("public class " + accumulatorUpdaterName + " extends "
 				+ AccumulatorUpdater.class.getName() + "{\n");
 		ret.append( "       {n = " + simulation.getAccumulatedMomentIndex().size() + " ;}\n");
@@ -247,6 +250,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	private String getEventGeneratorCode(Constants constants) {
 		StringBuilder code = new StringBuilder();
 		code.append("import " + AggregatedStateNextEventGenerator.class.getName() + "; \n");
+		code.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");		
 		code.append("import java.util.ArrayList; \n");
 		code.append("public class " + generatorName + " extends "
 				+ AggregatedStateNextEventGenerator.class.getName() + "{\n");
