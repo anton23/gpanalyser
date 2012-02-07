@@ -103,6 +103,7 @@ tokens{
   protected Set<String> componentNames = new HashSet<String>();
   private boolean checkComponentNames;
   private boolean checkGroupNames;
+  private List<String> signals = new ArrayList<String>();
     
   protected Stack<String> hint;
   
@@ -315,7 +316,7 @@ rl_bracketed
 signal
 	:	LOWERCASENAME
 			{
-            	$probe_spec::signals.add ($LOWERCASENAME.text);
+            	signals.add ($LOWERCASENAME.text);
 			}
 			-> ^(SIGNAL LOWERCASENAME) ;
 
@@ -402,17 +403,16 @@ mode
 probe_spec
 scope
 {
-	List<String> signals;
 	StringBuilder signalsString;
 }
 @init
 {
-	$probe_spec::signals = new ArrayList<String> ();
+	signals = new ArrayList<String> ();
 	$probe_spec::signalsString = new StringBuilder ();
 }
 	:	UPPERCASENAME DEF probeg (OBSERVES local_probes WHERE locations)?
 				{
-					for (String signal :$probe_spec::signals)
+					for (String signal : signals)
 					{
 						$probe_spec::signalsString.append (signal);
 						$probe_spec::signalsString.append (";");

@@ -143,9 +143,11 @@ import PCTMCCompilerPrototype;
 		return newComponents;
 	}
 
-	private Map<String, PEPAComponent> generateProbeComponent
+	private ComponentId generateProbeComponent
 		(String name, NFAState startingState, boolean repeating,
-		boolean setAcceptingComp) throws Exception
+		Set<ITransition> allActions, Set<ITransition> alphabet,
+		Map<String, PEPAComponent> probeComponents, GPAParser parser)
+		throws Exception
 	{
 		NFAState accepting = NFADetectors.detectSingleAcceptingState
 			(startingState);
@@ -155,30 +157,26 @@ import PCTMCCompilerPrototype;
 		}
 		else
 		{
-			for (ITransition transition : $probe_spec::allActions)
+			for (ITransition transition : allActions)
 			{
 				accepting.addTransitionIfNotExisting
 					(transition.getSimpleTransition (), accepting);
 			}
 		}
 		startingState = NFAtoDFA.convertToDFA (startingState, t);
-		NFAUtils.removeAnyTransitions ($probe_spec::allActions, startingState);
-		$probe_spec::alphabet.addAll (NFADetectors.detectAlphabet
+		NFAUtils.removeAnyTransitions (allActions, startingState);
+		alphabet.addAll (NFADetectors.detectAlphabet
 				(startingState, true, excluded));
 		NFAUtils.extendStatesWithSelfLoops
-			($probe_spec::allActions, startingState);
+			(allActions, startingState);
 		NFAUtils.removeSurplusSelfLoops (startingState);
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 		NFAStateToPEPA.HybridDFAtoPEPA
 			(startingState, name, 0, new PrintStream (stream));
 		accepting = NFADetectors.detectSingleAcceptingState (startingState);
-		if (setAcceptingComp)
-		{
-			$probe_spec::localAcceptingState
-				= new ComponentId (accepting.getName ());
-		}
-		return loadProbe (stream.toString (), $probe_def::parser);
+		probeComponents.putAll (loadProbe (stream.toString (), parser));
+		return new ComponentId (accepting.getName ());
 	}
 }
 
@@ -354,21 +352,32 @@ extensions
 
 // Local
 
-probel [String name]
+probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
+		boolean steady, GPAParser parser]
+		returns [Map<String, PEPAComponent> probeComponents,
+				 Map<String, PEPAComponent> altProbeComponents,
+				 ComponentId acceptingComponent]
 	:	^(PROBEL proberl=rl_signal rp=REPETITION?)
 			{
 				NFAState starting_state = NFAtoDFA.convertToDFA
 					($proberl.starting_state, t);
-				boolean setAcceptingComp = !$probe_def::steady;
-				if ($probe_def::steady)
+				if (steady)
 				{
 					NFAState nonrepeating = deepCloner.deepClone
 						($proberl.starting_state);
-					$probe_spec::altComponents.putAll (generateProbeComponent
-							($name, nonrepeating, false, true));
+					$altProbeComponents = new HashMap<String, PEPAComponent> ();
+					$acceptingComponent = generateProbeComponent
+						($name, nonrepeating, false, allActions, alphabet,
+							$altProbeComponents, parser);
 				}
-				$probe_spec::newComponents.putAll (generateProbeComponent
-						($name, starting_state, rp != null, setAcceptingComp));
+				$probeComponents = new HashMap<String, PEPAComponent> ();
+				ComponentId thisAccepting = generateProbeComponent
+					($name, starting_state, rp != null, allActions, alphabet,
+						$probeComponents, parser);
+				if (!steady)
+				{
+					$acceptingComponent = thisAccepting;
+				}
 			} ;
 
 rl_signal returns [NFAState starting_state]
@@ -1115,7 +1124,14 @@ local_probes
 			} ;
 
 local_probe_ass
-	:	^(DEF name=UPPERCASENAME probel [$name.text]) ;
+	:	^(DEF name=UPPERCASENAME probe=probel
+			[$name.text, $probe_spec::allActions,
+			 $probe_spec::alphabet, $probe_def::steady, $probe_def::parser])
+			 {
+			 	$probe_spec::newComponents.putAll ($probe.probeComponents);
+			 	$probe_spec::altComponents.putAll ($probe.altProbeComponents);
+			 	$probe_spec::localAcceptingState = ($probe.acceptingComponent);
+			 };
 
 locations
 	:	^(LOCATIONS location+)
