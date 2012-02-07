@@ -38,7 +38,7 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 		if (usedVariables.containsKey(a)) {
 			return usedVariables.get(a);
 		} else {
-			ExpressionVariable var = new ExpressionVariable("var" + (variableIndex++));
+			ExpressionVariable var = new ExpressionVariable("var" + String.format("%05d", variableIndex++));
 			var.setUnfolded(a);
 			usedVariables.put(a, var);
 			return var;
