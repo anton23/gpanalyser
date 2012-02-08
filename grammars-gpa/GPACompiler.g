@@ -357,7 +357,7 @@ probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
 		returns [Map<String, PEPAComponent> probeComponents,
 				 Map<String, PEPAComponent> altProbeComponents,
 				 ComponentId acceptingComponent]
-	:	^(PROBEL proberl=rl_signal rp=REPETITION?)
+	:	^(PROBEL proberl=rl_signal [allActions] rp=REPETITION?)
 			{
 				NFAState starting_state = NFAtoDFA.convertToDFA
 					($proberl.starting_state, t);
@@ -380,12 +380,13 @@ probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
 				}
 			} ;
 
-rl_signal returns [NFAState starting_state]
+rl_signal [Set<ITransition> allActions] returns [NFAState starting_state]
 @init
 {
 	$starting_state = new NFAState (t);
 }
-	:	^(RLS rl_single [$starting_state] sig=signal next_rl=rl_signal?)
+	:	^(RLS rl_single [$starting_state, $allActions] sig=signal
+				next_rl=rl_signal [$allActions]?)
 			{
 				ITransition signal = new SignalTransition ($sig.name);
 				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
@@ -402,15 +403,16 @@ rl_signal returns [NFAState starting_state]
 				}
 			} ;
 
-rl_single [NFAState current_state]
+rl_single [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state]
 @init
 {
 	NFAState starting_state = new NFAState (t);
 }
-	:	^(RL_SINGLE (^(RL_SINGLE_BRACKETED rs=rl_bracketed [starting_state]
-						(op=rl_un_operators
-							[starting_state, $rs.reached_state])?)))
+	:	^(RL_SINGLE (^(RL_SINGLE_BRACKETED
+			rs=rl_bracketed [starting_state, $allActions]
+			(op=rl_un_operators
+				[starting_state, $rs.reached_state, $allActions])?)))
 			{
 				if (op != null)
 				{
@@ -428,7 +430,8 @@ rl_single [NFAState current_state]
 			}
 		| ^(RL_SINGLE (^(ACTION rs=immediateActions [starting_state]
 						(op=rl_un_operators
-							[starting_state, $rs.reached_state])?)))
+							[starting_state, $rs.reached_state,
+								$allActions])?)))
 			{
 				if (op != null)
 				{
@@ -445,17 +448,17 @@ rl_single [NFAState current_state]
 				$current_state.setAccepting (false);
 			} ;
 
-rl [NFAState current_state]
+rl [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state]
 @init
 {
 	NFAState new_starting_state1 = new NFAState (t);
 	NFAState new_starting_state2 = new NFAState (t);
 }
-	:	^(RL rl_single [new_starting_state1]
-		(rl2=rl [new_starting_state2] op=rl_bin_operators
+	:	^(RL rl_single [new_starting_state1, $allActions]
+		(rl2=rl [new_starting_state2, $allActions] op=rl_bin_operators
 				[new_starting_state1, $rl_single.reached_state,
-				new_starting_state2, $rl2.reached_state])?)
+				new_starting_state2, $rl2.reached_state, $allActions])?)
 			{
 				if (op != null)
 				{
@@ -475,7 +478,7 @@ rl [NFAState current_state]
 
 rl_bin_operators [NFAState starting_state1,
 	NFAState current_state1, NFAState starting_state2,
-	NFAState current_state2]
+	NFAState current_state2, Set<ITransition> allActions]
 	returns [NFAState starting_state, NFAState reached_state]
 	:	^(BINARY_OP COMMA)
 			{
@@ -543,13 +546,13 @@ rl_bin_operators [NFAState starting_state1,
 				CartesianUtils.CartesianState comb_starting_state
 					= CartesianUtils.getCartesianState (dfa1, dfa2, list);
 				$starting_state = NFAUtils.getFailCombination
-					(comb_starting_state, list, t, $probe_spec::allActions);
+					(comb_starting_state, list, t, $allActions);
 				$reached_state = new NFAState (t);
 				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
 			} ;
 
 rl_un_operators [NFAState sub_starting_state,
-	NFAState sub_current_state]
+	NFAState sub_current_state, Set<ITransition> allActions]
 	returns [NFAState starting_state, NFAState reached_state]
 @init
 {
@@ -637,7 +640,7 @@ rl_un_operators [NFAState sub_starting_state,
 					= NFADetectors.detectAllAcceptingStates ($starting_state);
 				for (NFAState state : accepting)
 				{
-					for (ITransition transition : $probe_spec::allActions)
+					for (ITransition transition : $allActions)
 					{
 						state.addTransitionIfNotExisting
 							(transition.getSimpleTransition (), state);
@@ -666,9 +669,9 @@ times [NFAState sub_starting_state, NFAState sub_current_state]
 				$sub_current_state.setAccepting (false);
 			} ;
 
-rl_bracketed  [NFAState current_state]
+rl_bracketed  [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state]
-	:	^(RL_BRACKETED rl [$current_state])
+	:	^(RL_BRACKETED rl [$current_state, $allActions])
 			{
 				$reached_state = $rl.reached_state;
 			} ;
@@ -762,14 +765,14 @@ empty_action [NFAState current_state]
 
 // Global
 
-probeg
+probeg [Set<ITransition> allActions]
 @init
 {
 	NFAState starting_state1 = new NFAState (t);
 	NFAState starting_state2 = new NFAState (t);
 }
-	:	^(PROBEG start_actions=rg [starting_state1]
-			stop_actions=rg [starting_state2] rp=REPETITION?)
+	:	^(PROBEG start_actions=rg [starting_state1, $allActions]
+			stop_actions=rg [starting_state2, $allActions] rp=REPETITION?)
 			{
 				NFAState acc_state = new NFAState (t);
 				NFAUtils.unifyAcceptingStates (starting_state1, acc_state);
@@ -800,22 +803,23 @@ probeg
 				$probe_spec::probe.setStartingState (starting_state1);
 			} ;
 
-rg [NFAState current_state] returns [NFAState reached_state]
+rg [NFAState current_state, Set<ITransition> allActions]
+	returns [NFAState reached_state]
 @init
 {
 	NFAState new_starting_state1 = new NFAState (t);
 	NFAState new_starting_state2 = new NFAState (t);
 }
-	:	^(RG rl_single [new_starting_state1] pred1=main_pred?
+	:	^(RG rl_single [new_starting_state1, $allActions] pred1=main_pred?
 	        {
 	            if (pred1 != null)
 	            {
 	                new_starting_state1.setPredicate ($pred1.predicate);
 	            }
 	        }
-		(rg2=rg [new_starting_state2] op=rl_bin_operators
+		(rg2=rg [new_starting_state2, $allActions] op=rl_bin_operators
 				[new_starting_state1, $rl_single.reached_state,
-				new_starting_state2, $rg2.reached_state])?)
+				new_starting_state2, $rg2.reached_state, $allActions])?)
 			{
 				if (op != null)
 				{
@@ -1055,7 +1059,8 @@ scope
 							(new SignalTransition (signal));
 					}
 				}
-			globalProbeName=UPPERCASENAME (local_probes locations)? probeg)
+			globalProbeName=UPPERCASENAME (local_probes locations)?
+			probeg [$probe_spec::allActions])
 			{
 				gprobe.setName ($globalProbeName.text);
 				Map<PEPAComponentDefinitions, Set<ComponentId>> defMap
