@@ -6,6 +6,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.JavaStatementPrinter;
+import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
@@ -35,6 +36,8 @@ public class JavaMethodPrinter {
 	public String printEvaluatorMethod(EvaluatorMethod method, String className) {
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + AbstractExpressionEvaluator.class.getName()
+				+ ";\n");
+		ret.append("import " + JExpressionsJavaUtils.class.getName()
 				+ ";\n");
 		ret.append("public class " + className + " extends "
 				+ AbstractExpressionEvaluator.class.getName() + "{\n");
