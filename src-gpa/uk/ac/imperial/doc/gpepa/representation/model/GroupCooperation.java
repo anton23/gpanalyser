@@ -156,6 +156,10 @@ public class GroupCooperation extends GroupedModel {
                 denominator = rightRate;
             }
 
+            if (denominator.equals(DoubleExpression.ZERO)) {
+                return DoubleExpression.ZERO;
+            }
+
             AbstractExpression min = MinExpression.create(leftRate, rightRate);
             if (denominator.equals(min)) {
                 return lgroup.getComponentRateExpression

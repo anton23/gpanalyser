@@ -44,14 +44,15 @@ public class Prefix extends AbstractPrefix {
         return DoubleExpression.ZERO;
     }
 
-    public AbstractPrefix getCooperationImpl(String newAction,
-                                             AbstractPrefix otherAbstractPrefix,
-                                             AbstractExpression otherApparentRate,
-                                             AbstractExpression otherApparentWeight,
-                                             AbstractExpression thisApparentRate,
-                                             AbstractExpression thisApparentWeight,
-                                             PEPAComponent newContinuation,
-                                             List<ImmediatePrefix> newImmediates) {
+    public AbstractPrefix getCooperationImpl
+            (String newAction,
+             AbstractPrefix otherAbstractPrefix,
+             AbstractExpression otherApparentRate,
+             AbstractExpression otherApparentWeight,
+             AbstractExpression thisApparentRate,
+             AbstractExpression thisApparentWeight,
+             PEPAComponent newContinuation,
+             List<ImmediatePrefix> newImmediates) {
         if (otherAbstractPrefix instanceof Prefix)
         {
             AbstractExpression coopRate = DivDivMinExpression.create(
