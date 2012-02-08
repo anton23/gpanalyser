@@ -21,6 +21,7 @@
 	<property name="plain.test" value="test-plain"/>
 	<property name="masspa.test" value="test-masspa"/>
 	<property name="gpa.test" value="test-gpa"/>
+    <property name="probes.test" value="test-probes"/>
     
 	<property name="lib" value="lib"/>
     <property name="examples" value="inputs"/>
@@ -372,6 +373,7 @@
 		        	<src path="${plain.test}"/>
 		        	<src path="${masspa.test}"/>
 			        <src path="${gpa.test}"/>
+                    <src path="${probes.test}"/>
 		        	<include name="**/*.java"/> 
 		        	<include name="**/*.class"/>
 		         	<exclude name="**/package-info.java"/> 
