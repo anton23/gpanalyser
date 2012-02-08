@@ -15,7 +15,7 @@ Serv2 = (recover, rr).Serv0;
 
 Clients{Client0[n]}<fetch>Servers{Serv0[m]}
 
-Probe (stopTime=50, stepSize=0.5, density=10) steady 50
+Probe (stopTime=50, stepSize=0.1, density=10) steady 1000
 {
     PM6 = begin : start, end : stop <-
     observes
