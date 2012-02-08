@@ -187,22 +187,17 @@ public class CooperationComponent extends PEPAComponent {
 							.getShorthand(new CooperationComponent(leftPrefix
 									.getContinuation(), rightPrefix
 									.getContinuation(), cooperationSet));
-                    AbstractExpression leftApparentRate = definitions
-                            .getApparentRateExpression
-                                    (leftPrefix.getAction(), left);
-                    AbstractExpression leftApparentWeight = definitions
-                            .getApparentWeightExpression
-                                    (leftPrefix.getAction(), left);
-                    AbstractExpression rightApparentRate = definitions
-                            .getApparentRateExpression
-                                    (rightPrefix.getAction(), right);
-                    AbstractExpression rightApparentWeight = definitions
-                            .getApparentWeightExpression
-                                    (rightPrefix.getAction(), right);
+                    PEPAComponentDefinitions.RateWeightPair leftRateWeight
+                            = definitions.getApparentRateWeightExpressions
+                            (leftPrefix.getAction(), left);
+                    PEPAComponentDefinitions.RateWeightPair rightRateWeight
+                            = definitions.getApparentRateWeightExpressions
+                            (rightPrefix.getAction(), right);
                     AbstractPrefix newPrefix = leftPrefix.getCooperation
-                            (action, rightPrefix, rightApparentRate,
-                                rightApparentWeight, leftApparentRate,
-                                leftApparentWeight, newContinuation);
+                            (action, rightPrefix, rightRateWeight.getRate(),
+                                rightRateWeight.getWeight(),
+                                leftRateWeight.getRate(),
+                                leftRateWeight.getWeight(), newContinuation);
                     if (newPrefix != null) {
                         ret.add(newPrefix);
                     }

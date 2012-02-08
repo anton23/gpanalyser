@@ -20,27 +20,12 @@ public class PEPAComponentDefinitions {
 		return c;
 	}
 
-	public AbstractExpression getApparentRateExpression(final String action,
-			PEPAComponent from) {
-		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
-		for (AbstractPrefix p : from.getPrefixes(this)) {
-			if (p.getAction().equals(action)) {
-				summands.add(p.getRate());
-			}
-		}
-
-		if (summands.size() == 0) {
-			return DoubleExpression.ZERO;
-		}
-		return SumExpression.create(summands);
-	}
-
-    public AbstractExpression getApparentWeightExpression(final String action,
-            PEPAComponent from) {
+    public AbstractExpression getApparentRateExpression
+            (final String action, PEPAComponent from) {
         List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
         for (AbstractPrefix p : from.getPrefixes(this)) {
             if (p.getAction().equals(action)) {
-                summands.add(p.getWeight());
+                summands.add(p.getRate());
             }
         }
 
@@ -49,6 +34,26 @@ public class PEPAComponentDefinitions {
         }
         return SumExpression.create(summands);
     }
+
+	public RateWeightPair getApparentRateWeightExpressions
+            (final String action, PEPAComponent from) {
+		List<AbstractExpression> summandsRates = new LinkedList<AbstractExpression>();
+        List<AbstractExpression> summandsWeights = new LinkedList<AbstractExpression>();
+		for (AbstractPrefix p : from.getPrefixes(this)) {
+			if (p.getAction().equals(action)) {
+				summandsRates.add(p.getRate());
+                summandsWeights.add(p.getWeight());
+			}
+		}
+
+		if (summandsRates.size() == 0) {
+			return new RateWeightPair
+                    (DoubleExpression.ZERO, DoubleExpression.ZERO);
+		}
+		return new RateWeightPair
+                (SumExpression.create(summandsRates),
+                        SumExpression.create(summandsWeights));
+	}
 
 	public PEPAComponentDefinitions(Map<String, PEPAComponent> definitions) {
 		super();
@@ -204,6 +209,25 @@ public class PEPAComponentDefinitions {
         newCont = getImmediatesList(newCont, imms, immediates);
 
         return newCont;
+    }
+
+    public class RateWeightPair {
+
+        public AbstractExpression getRate() {
+            return rate;
+        }
+
+        public AbstractExpression getWeight() {
+            return weight;
+        }
+
+        private AbstractExpression rate, weight;
+
+        public RateWeightPair(
+                AbstractExpression rate, AbstractExpression weight) {
+            this.rate = rate;
+            this.weight = weight;
+        }
     }
 }
 

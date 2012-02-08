@@ -13,6 +13,7 @@ import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.representation.model.LabelledComponentGroup;
+import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
@@ -134,9 +135,9 @@ public class ProbeRunner
              Class<A> AClass, Class<NP> NPClass, double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, stateObservers, statesCountExpressions,
-                mapping, mainDef, constants, steadyStateTime, stepSize,
-                parameter, AClass, NPClass);
+            (model, countActionStrings, false, stateObservers,
+                statesCountExpressions, mapping, mainDef, constants,
+                steadyStateTime, stepSize, parameter, AClass, NPClass);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         double maxTime = steadyStateTime * stepSize - stepSize;
@@ -155,7 +156,7 @@ public class ProbeRunner
         {
             stateObservers.add (new GPEPAState (g));
         }
-        postprocessor = runTheProbedSystem (model, countActionStrings,
+        postprocessor = runTheProbedSystem (model, countActionStrings, false,
                 stateObservers, statesCountExpressions, mapping, altDef,
                 constants, stopTime, stepSize, parameter,
                 AClass, NPClass);
@@ -184,9 +185,9 @@ public class ProbeRunner
              Class<A> AClass, Class<NP> NPClass)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, stateObservers, statesCountExpressions,
-                    mapping, mainDef, constants, stopTime, stepSize, parameter,
-                    AClass, NPClass);
+            (model, countActionStrings, false, stateObservers,
+                    statesCountExpressions, mapping, mainDef, constants,
+                    stopTime, stepSize, parameter, AClass, NPClass);
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs(mainDef);
 
         Set<AbstractExpression> afterBegins
@@ -214,8 +215,8 @@ public class ProbeRunner
             assignNewCounts (crates, definitionsMap, mainDef, model,
                     statesCountExpressions, mapping, matchval, val);
             postprocessor = runTheProbedSystem (model, countActionStrings,
-                    stateObservers, statesCountExpressions, mapping, mainDef,
-                    constants, stopTime, stepSize, parameter,
+                    false, stateObservers, statesCountExpressions, mapping,
+                    mainDef, constants, stopTime, stepSize, parameter,
                     AClass, NPClass);
             double[][] obtainedMeasurements = postprocessor.evaluateExpressions
                     (statesCountExpressions, constants);
@@ -262,9 +263,9 @@ public class ProbeRunner
              int start_time)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, stateObservers, statesCountExpressions,
-                    mapping, mainDef, constants, stopTime, stepSize, parameter,
-                    AClass, NPClass);
+            (model, countActionStrings, false, stateObservers,
+                    statesCountExpressions, mapping, mainDef, constants,
+                    stopTime, stepSize, parameter, AClass, NPClass);
 
         return new CDF (null);
     }
@@ -512,7 +513,7 @@ public class ProbeRunner
                         {
                             AbstractExpression arate
                                 = definitions.getApparentRateExpression
-                                    (action, hc.getComponent ());
+                                    (action, hc.getComponent());
                             AbstractExpression crate
                                 = model.getComponentRateExpression
                                     (action, definitions, hc);
@@ -582,8 +583,8 @@ public class ProbeRunner
     private
         <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
         NumericalPostprocessor runTheProbedSystem
-            (GroupedModel model, Set<String> countActions,
-             Collection<GPEPAState> stateObservers,
+            (GroupedModel model, Set<String> countActionsSet,
+             boolean countActions, Collection<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
              PEPAComponentDefinitions definitions, Constants constants,
@@ -598,20 +599,26 @@ public class ProbeRunner
             setStateObserver (states, state, state.toString (), moments,
                 statesCountExpressions, stateCombPopMapping);
         }
-        /*
-        for (String action : countActions)
+
+        Set<String> initActions = countActionsSet;
+        if (countActions)
         {
-            GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
-            Multiset<State> cooperationActions = HashMultiset.create ();
-            setStateObserver (cooperationActions, gpepaAction, action, moments,
-                    statesCountExpressions, stateCombPopMapping);
+            for (String action : countActionsSet)
+            {
+                GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
+                Multiset<State> cooperationActions = HashMultiset.create ();
+                setStateObserver (cooperationActions, gpepaAction, action, moments,
+                        statesCountExpressions, stateCombPopMapping);
+            }
         }
-        */
+        else
+        {
+            initActions = new HashSet<String> ();
+        }
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
 
-        PCTMC pctmc = GPEPAToPCTMC.getPCTMC
-            (definitions, model, new HashSet<String> ());
+        PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
         System.out.println (pctmc);
 
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc, AClass);

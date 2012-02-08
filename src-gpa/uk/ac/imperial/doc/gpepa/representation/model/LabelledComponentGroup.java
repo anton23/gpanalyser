@@ -72,7 +72,7 @@ public class LabelledComponentGroup extends GroupedModel {
 		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
 		for (PEPAComponent p : componentDerivatives) {
 			AbstractExpression rate = definitions.getApparentRateExpression(
-					action, p);
+                    action, p);
 			if (!(rate.equals(DoubleExpression.ZERO))) {
 				summands.add(ProductExpression.create(CombinedProductExpression
                         .createMeanExpression(new GPEPAState
