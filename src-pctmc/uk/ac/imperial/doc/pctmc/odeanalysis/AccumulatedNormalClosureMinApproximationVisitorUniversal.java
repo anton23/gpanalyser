@@ -1,9 +1,12 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
@@ -46,10 +49,15 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 	}
 	
 	@Override
+	public void visit(DivMinExpression e) {
+		e.getFullExpression().accept(this);
+	}
+	
+	@Override
 	public void visit(MinExpression e) {
 
-		AbstractExpression muA = e.getA();
-		AbstractExpression muB = e.getB();
+		AbstractExpression muA = considerVariable(e.getA());
+		AbstractExpression muB = considerVariable(e.getB());
 
 		Map<ExpressionVariable, AbstractExpression> var = new HashMap<ExpressionVariable, AbstractExpression>();
 		AbstractExpression covAB = new CovarianceOfLinearCombinationsExpression(
@@ -70,15 +78,15 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 		if (moment.getOrder() > 0 && insert) {
 			inserted = false;
 			muA.accept(this);
-			muA2 = result;
+			muA2 = considerVariable(result);
 			inserted = false;
 			muB.accept(this);
-			muB2 = result;
+			muB2 = considerVariable(result);
 
-			result = FunctionCallExpression.create("normalMinProduct",
+			result = considerVariable(FunctionCallExpression.create("normalMinProduct",
 				Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression
 						.create(moment))	
-			);
+			));
 		} else { 
 		
   	 /*  MinusExpression mAmB = new MinusExpression(muA, muB);
@@ -101,6 +109,44 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 	}
 	
 	@Override
+	public void visit(ProductExpression e) {
+		List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
+		boolean oldInsert = insert;
+		boolean oldInserted = inserted;
+		boolean isInserted = false;
+		AbstractExpression minTerm = null;
+		for (AbstractExpression t: e.getTerms()) {
+			if (t instanceof MinExpression) {
+				minTerm = t;
+			}
+		}
+		List<AbstractExpression> orderedTerms = new LinkedList<AbstractExpression>();
+		if (minTerm != null) {
+			orderedTerms.add(minTerm);
+			for (AbstractExpression t:e.getTerms()) {
+				if (t != minTerm) {
+					orderedTerms.add(t);
+				}
+			}
+		} else {
+			orderedTerms = e.getTerms();
+		}
+		for (AbstractExpression t : orderedTerms) {
+			inserted = false;
+			t.accept(this);
+			isInserted |= inserted;
+			if (isInserted) {
+				insert = false;
+			}
+			terms.add(result);
+		}
+		insert = oldInsert;
+		inserted = oldInserted | isInserted;
+		result = ProductExpression.create(terms);
+	}
+	
+	
+	@Override
 	public void visit(FunctionCallExpression e) {
 		if (e.getName().equals("normalMin") && insert) {
 			AbstractExpression muA = e.getArguments().get(0);
@@ -108,10 +154,10 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 			AbstractExpression theta = e.getArguments().get(2);
 			inserted = false;
 			muA.accept(this);
-			AbstractExpression muA2 = result;
+			AbstractExpression muA2 = considerVariable(result);
 			inserted = false;
 			muB.accept(this);
-			AbstractExpression muB2 = result;
+			AbstractExpression muB2 = considerVariable(result);
 
 			result = FunctionCallExpression.create("normalMinProduct",
 				Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression

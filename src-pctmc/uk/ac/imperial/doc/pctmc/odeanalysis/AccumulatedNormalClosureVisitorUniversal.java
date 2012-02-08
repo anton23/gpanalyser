@@ -10,9 +10,11 @@ import java.util.Map.Entry;
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
+import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -102,7 +104,12 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 	public void visit(IndicatorFunction e) {
 		result = e;
 	}
-
+	
+	@Override
+	public void visit(DivMinExpression e) {
+		e.getFullExpression().accept(this);
+	}
+	
 	@Override
 	public void visit(PopulationExpression e) {
 		CombinedPopulationProduct product;
@@ -124,7 +131,24 @@ public class AccumulatedNormalClosureVisitorUniversal extends
 		boolean oldInsert = insert;
 		boolean oldInserted = inserted;
 		boolean isInserted = false;
-		for (AbstractExpression t : e.getTerms()) {
+		AbstractExpression momentTerm = null;
+		for (AbstractExpression t: e.getTerms()) {
+			if (t instanceof CombinedProductExpression) {
+				momentTerm = t;
+			}
+		}
+		List<AbstractExpression> orderedTerms = new LinkedList<AbstractExpression>();
+		if (momentTerm != null) {
+			orderedTerms.add(momentTerm);
+			for (AbstractExpression t:e.getTerms()) {
+				if (t != momentTerm) {
+					orderedTerms.add(t);
+				}
+			}
+		} else {
+			orderedTerms = e.getTerms();
+		}
+		for (AbstractExpression t : orderedTerms) {
 			inserted = false;
 			t.accept(this);
 			isInserted |= inserted;

@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,15 +67,33 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 
 		// TODO properly topologically sort the variables
 		Set<ExpressionVariable> variables = new TreeSet<ExpressionVariable>();
-		
+		Set<ExpressionVariable> allVariables = new HashSet<ExpressionVariable>();
 		int additionalLines = 0;
 		for (int i = 0; i < s.getBody().length; i++) {
 			JavaStatementPrinterCombinedProductBased printer = new JavaStatementPrinterCombinedProductBased(
 					constants, combinedMomentsIndex, generalExpectationIndex,
 					OLDY, NEWY, false);
 			s.getBody()[i].accept(printer);
-			variables.addAll(printer.getRhsVariables());
+			allVariables.addAll(printer.getRhsVariables());
 		}
+		while (!allVariables.isEmpty()) {
+			ExpressionVariable var = allVariables.iterator().next();
+			allVariables.remove(var);
+			if (!variables.contains(var)) {
+				variables.add(var);
+				JavaPrinterCombinedProductBased printer = new JavaPrinterCombinedProductBased(
+						constants, combinedMomentsIndex, generalExpectationIndex, OLDY,
+						 false);
+				var.getUnfolded().accept(printer);
+				for (ExpressionVariable newVar : printer.getVariables()) {
+					if (!variables.contains(newVar)) {
+						allVariables.add(newVar);
+					}
+				}
+
+			}
+		}
+		
 		additionalLines += variables.size();
 		
 		ArrayList<String> javaMomentODEs = new ArrayList<String>(s.getBody().length + 1 + additionalLines);
