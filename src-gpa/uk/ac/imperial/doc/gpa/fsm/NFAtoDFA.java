@@ -247,8 +247,8 @@ public class NFAtoDFA
                     = HashMultimap.create();
                 setToSet.put (state, setTransitions);
 
-                Multimap<ITransition, NFAState>
-                    transitions = state.getTransitions ();
+                Multimap<ITransition, NFAState> transitions
+                    = state.getTransitions ();
                 for (ITransition transition : transitions.keySet ())
                 {
                     for (NFAState s : transitions.get (transition))
@@ -261,20 +261,17 @@ public class NFAtoDFA
         }
 
         // find equal states
-        Map<NFAState, List<NFAState>> mappings
-            = new HashMap<NFAState, List<NFAState>> ();
+        Multimap<NFAState, NFAState> mappings = HashMultimap.create ();
         Collection<NFAState> visited = new HashSet<NFAState> ();
         for (NFAState state : partition.getStates ())
         {
             if (!(visited.contains (state)))
             {
-                List<NFAState> list = new ArrayList<NFAState> ();
-                mappings.put (state, list);
                 for (NFAState state2 : partition.getStates ())
                 {
                     if (setToSet.get (state).equals (setToSet.get (state2)))
                     {
-                        list.add (state2);
+                        mappings.put (state, state2);
                         visited.add (state2);
                     }
                 }
