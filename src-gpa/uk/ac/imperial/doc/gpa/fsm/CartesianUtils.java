@@ -1,5 +1,7 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import com.google.common.collect.Multimap;
+
 import java.util.*;
 
 public class CartesianUtils
@@ -90,11 +92,13 @@ public class CartesianUtils
 			results.add (state);
 		}
 
-		Map<ITransition, NFAState> transitions = state.getTransitions ();
+		Multimap<ITransition, NFAState> transitions = state.getTransitions ();
 		for (ITransition transition : transitions.keySet ())
 		{
-			getAllStatesDFA (transitions.get (transition), results,
-				visited, filter);
+            for (NFAState s : transitions.get (transition))
+            {
+			    getAllStatesDFA (s, results, visited, filter);
+            }
 		}
 	}
 

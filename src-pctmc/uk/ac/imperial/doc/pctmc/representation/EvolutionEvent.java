@@ -67,7 +67,7 @@ public class EvolutionEvent {
 	public String toString() {
 		return ToStringUtils.iterableToSSV(decreasing, "+")+"->"
 		           +  ToStringUtils.iterableToSSV(increasing, "+")+" @ "+
-		        rate.toString();
+		        rate.toString() + "\n";
 	}
 	@Override
 	public int hashCode() {

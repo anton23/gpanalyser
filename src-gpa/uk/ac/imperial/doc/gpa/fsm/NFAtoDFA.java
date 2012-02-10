@@ -1,5 +1,8 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import java.util.*;
 
 public class NFAtoDFA
@@ -90,7 +93,7 @@ public class NFAtoDFA
 		closure.add (startingState);
 		closures.put (startingState, closure);
 
-		Map<ITransition, NFAState> transitions;
+		Multimap<ITransition, NFAState> transitions;
 
 		for (NFAState state : closure)
 		{
@@ -99,14 +102,19 @@ public class NFAtoDFA
 			{
 				if (!(transition instanceof EmptyTransition))
 				{
-					NFAState reachedState = transitions.get (transition);
-					transitionsToStates.add
-						(new TransitionStatePair (transition, reachedState));
-					if (!closures.containsKey (reachedState))
-					{
-						findClosuresAndTransitions (reachedState,
-							closures, newTransitions);
-					}
+					Collection<NFAState> reachedStates
+                        = transitions.get (transition);
+                    for (NFAState reachedState : reachedStates)
+                    {
+                        transitionsToStates.add
+                            (new TransitionStatePair
+                                (transition, reachedState));
+                        if (!closures.containsKey (reachedState))
+                        {
+                            findClosuresAndTransitions (reachedState,
+                                closures, newTransitions);
+                        }
+                    }
 				}
 			}
 		}
@@ -115,15 +123,19 @@ public class NFAtoDFA
 	private static Set<NFAState> getEmptyClosure (NFAState startingState)
 	{
 		Set<NFAState> closure = new HashSet<NFAState> ();
-		Map<ITransition, NFAState> transitions
+		Multimap<ITransition, NFAState> transitions
 			= startingState.getTransitions ();
 		for (ITransition transition : transitions.keySet ())
 		{
 			if (transition instanceof EmptyTransition)
 			{
-				NFAState reachedState = transitions.get (transition);
-				closure.add (reachedState);
-				closure.addAll (getEmptyClosure (reachedState));
+                Collection<NFAState> reachedStates
+                        = transitions.get (transition);
+                for (NFAState reachedState : reachedStates)
+                {
+                    closure.add (reachedState);
+	    			closure.addAll (getEmptyClosure (reachedState));
+                }
 			}
 		}
 		return closure;
@@ -224,23 +236,26 @@ public class NFAtoDFA
         (Partition partition, NFAState startingState)
     {
         // find all transitions for all sets
-        Map<NFAState, Map<ITransition, Set<NFAState>>> setToSet
-            = new HashMap<NFAState, Map<ITransition, Set<NFAState>>> ();
+        Map<NFAState, Multimap<ITransition, NFAState>> setToSet
+            = new HashMap<NFAState, Multimap<ITransition, NFAState>> ();
 
         for (Set<NFAState> set : partition.getSets ())
         {
             for (NFAState state : set)
             {
-                Map<ITransition, Set<NFAState>> setTransitions
-                    = new HashMap<ITransition, Set<NFAState>> ();
+                Multimap<ITransition, NFAState> setTransitions
+                    = HashMultimap.create();
                 setToSet.put (state, setTransitions);
 
-                Map<ITransition, NFAState>
+                Multimap<ITransition, NFAState>
                     transitions = state.getTransitions ();
                 for (ITransition transition : transitions.keySet ())
                 {
-                    setTransitions.put (transition,
-                        partition.getSetOfState (transitions.get (transition)));
+                    for (NFAState s : transitions.get (transition))
+                    {
+                        setTransitions.putAll
+                            (transition, partition.getSetOfState (s));
+                    }
                 }
             }
         }
@@ -312,13 +327,15 @@ public class NFAtoDFA
         {
             for (NFAState state : set)
             {
-                Map<ITransition, NFAState> transitions
+                Multimap<ITransition, NFAState> transitions
                     = state.getTransitions ();
                 for (ITransition transition : transitions.keySet ())
                 {
-                    newStates.get (set).addTransition (transition,
-                        newStates.get (partition.getSetOfState
-                            (transitions.get (transition))));
+                    for (NFAState s : transitions.get (transition))
+                    {
+                        newStates.get (set).addTransition (transition,
+                            newStates.get (partition.getSetOfState (s)));
+                    }
                 }
             }
         }

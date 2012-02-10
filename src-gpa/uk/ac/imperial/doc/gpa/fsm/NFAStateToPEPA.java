@@ -1,5 +1,7 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import com.google.common.collect.Multimap;
+
 import java.io.PrintStream;
 import java.util.*;
 
@@ -32,7 +34,7 @@ public class NFAStateToPEPA
 		visited.add (startingState);
 
 		Collection<NFAState> derivedStates = new HashSet<NFAState> ();
-		Map<ITransition, NFAState> transitions
+		Multimap<ITransition, NFAState> transitions
 			= startingState.getTransitions ();
 
 		for (ITransition transition : transitions.keySet ())
@@ -41,15 +43,18 @@ public class NFAStateToPEPA
 			{
 				out.print (" + ");
 			}
-			NFAState nextState = transitions.get (transition);
-			if (!renamed.contains (nextState))
-			{
-				nextState.setName (naming + ++counter);
-				renamed.add (nextState);
-			}
+			Collection<NFAState> nextStates = transitions.get (transition);
+            for (NFAState nextState : nextStates)
+            {
+                if (!renamed.contains (nextState))
+                {
+                    nextState.setName (naming + ++counter);
+                    renamed.add (nextState);
+                }
 
-            out.print (transition.toPEPAString () + nextState);
-			derivedStates.add (nextState);
+                out.print (transition.toPEPAString () + nextState);
+                derivedStates.add (nextState);
+            }
 		}
 
 		out.println (";");

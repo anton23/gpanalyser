@@ -1,5 +1,8 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+
 import java.util.*;
 
 public class NFAUtils
@@ -12,8 +15,8 @@ public class NFAUtils
         {
             NFAState state1 = cstate.getState1 ();
             NFAState state2 = cstate.getState2 ();
-            Map<ITransition, NFAState> transitions
-                    = new HashMap<ITransition, NFAState> ();
+            Multimap<ITransition, NFAState> transitions
+                = HashMultimap.<ITransition, NFAState>create ();
             transitions.putAll (state1.getTransitions ());
             transitions.putAll (state2.getTransitions ());
 
@@ -56,8 +59,8 @@ public class NFAUtils
                 continue;
             }
 
-            Map<ITransition, NFAState> transitions
-                    = new HashMap<ITransition, NFAState> ();
+            Multimap<ITransition, NFAState> transitions
+                    = HashMultimap.<ITransition, NFAState>create ();
             transitions.putAll (state1.getTransitions ());
             transitions.putAll (state2.getTransitions ());
 
@@ -112,8 +115,8 @@ public class NFAUtils
             NFAState state1 = cstate.getState1 ();
             NFAState state2 = cstate.getState2 ();
 
-            Map<ITransition, NFAState> transitions
-                    = new HashMap<ITransition, NFAState>();
+            Multimap<ITransition, NFAState> transitions
+                    = HashMultimap.<ITransition, NFAState>create ();
             transitions.putAll (state1.getTransitions ());
             transitions.putAll (state2.getTransitions ());
 
@@ -171,7 +174,8 @@ public class NFAUtils
         Set<NFAState> statesWithAny = new HashSet<NFAState>();
         for (NFAState state : states)
         {
-            Map<ITransition, NFAState> transitions = state.getRawTransitions ();
+            Multimap<ITransition, NFAState> transitions
+                = state.getRawTransitions ();
             for (ITransition transition : transitions.keySet ())
             {
                 if (transition instanceof AnyTransition)
@@ -190,7 +194,7 @@ public class NFAUtils
                 state.addTransitionIfNotExisting
                         (newTransition.getSimpleTransition (), other);
             }
-            state.getRawTransitions().remove (any);
+            state.getRawTransitions().removeAll (any);
         }
     }
 
@@ -201,12 +205,14 @@ public class NFAUtils
             = new HashMap<ITransition, Boolean> ();
         for (NFAState state : states)
         {
-            Map<ITransition, NFAState> transitions = state.getRawTransitions ();
+            Multimap<ITransition, NFAState> transitions
+                = state.getRawTransitions ();
             for (ITransition transition : transitions.keySet ())
             {
-                Boolean used = usedTransitions.get (transition); 
+                Boolean used = usedTransitions.get (transition);
+                Collection<NFAState> reached = transitions.get (transition);
                 if (!(used != null && used)
-                    && transitions.get (transition).equals (state))
+                    && ((reached.size() == 1) && reached.contains (state)))
                 {
                     usedTransitions.put (transition, false);
                 }
@@ -223,7 +229,7 @@ public class NFAUtils
             {
                 for (NFAState state : states)
                 {
-                    state.getRawTransitions ().remove (transition);
+                    state.getRawTransitions ().removeAll (transition);
                 }
             }
         }
