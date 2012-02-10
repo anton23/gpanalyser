@@ -1,5 +1,8 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
 import java.util.*;
@@ -8,8 +11,7 @@ import java.util.*;
 // this class MUST NOT be used, whenever two different instances are compared.
 public class NFAState
 {
-	private Map<ITransition, NFAState> outgoings
-		= new HashMap<ITransition, NFAState> ();
+	private Multimap<ITransition, NFAState> outgoings = HashMultimap.create ();
 	private boolean accepting = false;
     private NFAPredicate predicate = null;
 	private String name;
@@ -60,13 +62,14 @@ public class NFAState
 
     public NFAState advanceWithTransition (ITransition transition)
     {
-        NFAState next = outgoings.get (transition);
-        // self-loop
-        if (next == null)
+        Collection<NFAState> next = outgoings.get (transition);
+        for (NFAState s : next)
         {
-            next = this;
+            return s;
         }
-        return next;
+
+        // self-loop
+        return this;
     }
 
 	public NFAState advanceWithTransition (ITransition transition,
@@ -81,39 +84,39 @@ public class NFAState
         return this;
 	}
 
-    public Map<ITransition, NFAState> getSignalTransitions ()
+    public Multimap<ITransition, NFAState> getSignalTransitions ()
     {
-        Map<ITransition, NFAState> signalTransitions
-            = new HashMap<ITransition, NFAState> ();
-        for (ITransition transition : outgoings.keySet())
+        Multimap<ITransition, NFAState> signalTransitions
+            = HashMultimap.create ();
+        for (ITransition transition : outgoings.keySet ())
         {
             if (transition instanceof SignalTransition)
             {
-                signalTransitions.put (transition, outgoings.get (transition));
+                signalTransitions.putAll
+                        (transition, outgoings.get (transition));
             }
         }
-        return Collections.unmodifiableMap (signalTransitions);
+        return Multimaps.unmodifiableMultimap (signalTransitions);
     }
 
     public Set<ITransition> getAvailableNonSignalTransitions ()
     {
-        Map<ITransition, NFAState> transitions
-            = new HashMap<ITransition, NFAState> ();
+        Multimap<ITransition, NFAState> transitions = HashMultimap.create ();
         transitions.putAll (outgoings);
-        Map<ITransition, NFAState> signals = getSignalTransitions ();
+        Multimap<ITransition, NFAState> signals = getSignalTransitions ();
         for (ITransition signal : signals.keySet ())
         {
-            transitions.remove (signal);
+            transitions.removeAll (signal);
         }
-        return Collections.unmodifiableMap (transitions).keySet ();
+        return transitions.keySet ();
     }
     
-	public Map<ITransition, NFAState> getTransitions ()
+	public Multimap<ITransition, NFAState> getTransitions ()
 	{
-		return Collections.unmodifiableMap (outgoings);
+		return Multimaps.unmodifiableMultimap (outgoings);
 	}
 
-    public Map<ITransition, NFAState> getRawTransitions ()
+    public Multimap<ITransition, NFAState> getRawTransitions ()
     {
         return outgoings;
     }
@@ -145,19 +148,31 @@ public class NFAState
         visited.add (this);
         int result = 0;
         int empty = 0;
+
+        // dirty hack for deep clone library
+        // - otherwise outgoings would be null during deep copying
+        if (outgoings == null)
+        {
+            outgoings = HashMultimap.create ();
+        }
+
         for (ITransition transition : outgoings.keySet ())
         {
-            NFAState to = outgoings.get (transition);
-            if (!visited.contains (to))
+            Collection<NFAState> to = outgoings.get (transition);
+            for (NFAState s : to)
             {
-                if (transition instanceof EmptyTransition)
+                if (!visited.contains (s))
                 {
-                    ++empty;
-                    result += to.hashCode (visited);
-                }
-                else
-                {
-                    result += transition.hashCode () * to.hashCode (visited);
+                    if (transition instanceof EmptyTransition)
+                    {
+                        ++empty;
+                        result += s.hashCode (visited);
+                    }
+                    else
+                    {
+                        result += transition.hashCode ()
+                                * s.hashCode (visited);
+                    }
                 }
             }
         }

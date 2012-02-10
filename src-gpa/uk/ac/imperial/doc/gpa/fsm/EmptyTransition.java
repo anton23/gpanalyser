@@ -1,16 +1,7 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
-import java.util.UUID;
-
 public class EmptyTransition implements ITransition
 {
-    private int hashCode;
-    
-    public EmptyTransition ()
-    {
-        hashCode = UUID.randomUUID().hashCode();
-    }
-    
 	public String toString ()
 	{
 		return "empty_transition";
@@ -32,19 +23,14 @@ public class EmptyTransition implements ITransition
     }
 
     @Override
-    public boolean equals (Object o)
+    public boolean equals (Object transition)
     {
-        if (this == o) return true;
-        if (o == null || getClass () != o.getClass ()) return false;
-
-        EmptyTransition that = (EmptyTransition) o;
-
-        return (hashCode == that.hashCode);
+        return (transition instanceof EmptyTransition);
     }
 
     @Override
     public int hashCode ()
     {
-        return hashCode;
+        return toString ().hashCode ();
     }
 }

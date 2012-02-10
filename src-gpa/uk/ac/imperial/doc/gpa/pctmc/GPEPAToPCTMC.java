@@ -13,6 +13,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 public class GPEPAToPCTMC {
 	
@@ -59,6 +60,7 @@ public class GPEPAToPCTMC {
         events.clear();
         events.addAll(hs);
 
+        FileUtils.writeGeneralFile(events.toString(), "hujer");
 		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions);
 	}
 }

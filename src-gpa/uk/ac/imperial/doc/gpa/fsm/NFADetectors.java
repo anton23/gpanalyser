@@ -1,8 +1,9 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import com.google.common.collect.Multimap;
+
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class NFADetectors
@@ -62,16 +63,19 @@ public class NFADetectors
 			detected.add (startingState);
 		}
 
-		Map<ITransition, NFAState> transitions
+		Multimap<ITransition, NFAState> transitions
 			= startingState.getTransitions ();
 		for (ITransition transition : transitions.keySet ())
 		{
-			NFAState nextState = transitions.get (transition);
-			if (!visited.contains (nextState))
-			{
-				visited.add (nextState);
-				detectStates(nextState, detected, visited, filter);
-			}
+			Collection<NFAState> nextStates = transitions.get (transition);
+            for (NFAState nextState : nextStates)
+            {
+                if (!visited.contains (nextState))
+                {
+                    visited.add (nextState);
+                    detectStates(nextState, detected, visited, filter);
+                }
+            }
 		}
 	}
 
@@ -91,20 +95,23 @@ public class NFADetectors
 		}
 
 		NFAState result = null;
-		Map<ITransition, NFAState> transitions
+		Multimap<ITransition, NFAState> transitions
 			= startingState.getTransitions ();
 		for (ITransition transition : transitions.keySet ())
 		{
-			NFAState nextState = transitions.get (transition);
-			if (!visited.contains (nextState))
-			{
-				visited.add (nextState);
-				result = detectSingleAcceptingStateI (nextState, visited);
-			}
-			if (result != null)
-			{
-				return result;
-			}
+            Collection<NFAState> nextStates = transitions.get (transition);
+            for (NFAState nextState : nextStates)
+            {
+                if (!visited.contains (nextState))
+                {
+                    visited.add (nextState);
+                    result = detectSingleAcceptingStateI (nextState, visited);
+                }
+                if (result != null)
+                {
+                    return result;
+                }
+            }
 		}
 		return result;
 	}
@@ -124,7 +131,7 @@ public class NFADetectors
             (NFAState startingState, boolean includeSignals,
              Set<ITransition> alphabet, Set<NFAState> visited)
 	{
-		Map<ITransition, NFAState> transitions
+		Multimap<ITransition, NFAState> transitions
 			= startingState.getTransitions ();
 		Set<ITransition> transitionsSet = transitions.keySet ();
 		for (ITransition transition : transitionsSet)
@@ -133,12 +140,15 @@ public class NFADetectors
 			{
 				alphabet.add (transition);
 			}
-			NFAState nextState = transitions.get (transition);
-			if (!visited.contains (nextState))
-			{
-				visited.add (nextState);
-				detectAlphabetI (nextState, includeSignals, alphabet, visited);
-			}
+            Collection<NFAState> nextStates = transitions.get (transition);
+            for (NFAState nextState : nextStates)
+            {
+                if (!visited.contains (nextState))
+                {
+                    visited.add (nextState);
+                    detectAlphabetI (nextState, includeSignals, alphabet, visited);
+                }
+            }
 		}
 	}
 

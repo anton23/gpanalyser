@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.gpa.probes;
 
+import com.google.common.collect.Multimap;
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
 import uk.ac.imperial.doc.gpa.fsm.NFAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -53,7 +54,8 @@ public class GlobalProbe implements IProbe
             (transition, statesCountExpressions, mapping, data);
 
         // any available signal? (assuming always only one at once)
-        Map<ITransition, NFAState> sigs = currentState.getSignalTransitions ();
+        Multimap<ITransition, NFAState> sigs
+            = currentState.getSignalTransitions ();
         
         if (sigs.size () > 1)
         {
