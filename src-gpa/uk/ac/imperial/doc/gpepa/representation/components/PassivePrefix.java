@@ -19,7 +19,7 @@ public class PassivePrefix extends AbstractPrefix {
 
     // the return value of this function should not matter
     // MAX is used for check, that this function
-    // really is unused in the final model. It ould be used,
+    // really is unused in the final model. It would be used,
     // if a Choice offered both a passive and an active prefix
     // for the same action.
     public AbstractExpression getRate() {

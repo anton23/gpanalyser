@@ -140,14 +140,18 @@ public class ProbeRunner
                 steadyStateTime, stepSize, parameter, AClass, NPClass);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        double maxTime = steadyStateTime * stepSize - stepSize;
+        double maxTime = steadyStateTime - stepSize;
         double[] val = getStartingStates
             (model,  mainDef, constants, postprocessor, maxTime, crates);
-        double[][] steadyval = postprocessor.evaluateExpressions
-            (statesCountExpressions, constants);
+        double[] times = new double[statesCountExpressions.size ()];
+        Arrays.fill (times, maxTime);
+        AbstractExpressionEvaluator evaluator = postprocessor
+            .getExpressionEvaluator(statesCountExpressions, constants);
+        double[] steadyval = postprocessor.evaluateExpressionsAtTimes
+            (evaluator, times, constants);
 
         assignNewCounts (crates, definitionsMap, mainDef, model,
-                statesCountExpressions, mapping, val, steadyval[(int) maxTime]);
+                statesCountExpressions, mapping, steadyval, val);
         statesCountExpressions = new LinkedList<AbstractExpression> ();
         mapping = new HashMap<String, AbstractExpression> ();
         stateObservers = new HashSet<GPEPAState> ();
@@ -188,7 +192,7 @@ public class ProbeRunner
             (model, countActionStrings, false, stateObservers,
                     statesCountExpressions, mapping, mainDef, constants,
                     stopTime, stepSize, parameter, AClass, NPClass);
-        Set<GroupComponentPair> pairs = model.getGroupComponentPairs(mainDef);
+        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
 
         Set<AbstractExpression> afterBegins
                 = new HashSet<AbstractExpression> ();
@@ -330,15 +334,13 @@ public class ProbeRunner
 
         // obtaining steady-state probabilities (user set stop-time)
         List<AbstractExpression> expressions
-                = new LinkedList<AbstractExpression> (crates.values ());
+            = new LinkedList<AbstractExpression> (crates.values ());
 
-        AbstractExpressionEvaluator eval
-                = postprocessor.getExpressionEvaluator (expressions, constants);
+        AbstractExpressionEvaluator eval = postprocessor
+            .getExpressionEvaluator(expressions, constants);
         double[] times = new double[expressions.size ()];
-        for (int i = 0; i < times.length; ++i)
-        {
-            times[i] = time;
-        }
+        Arrays.fill (times, time);
+
         return postprocessor.evaluateExpressionsAtTimes
             (eval, times, constants);
     }
@@ -352,6 +354,9 @@ public class ProbeRunner
          double[] matchval, double[] val)
     {
         int i = 0;
+        double sum1 = 0, sum2 = 0, ssum = 0, ssum1 = 0;
+        List<GroupComponentPair> ggg= new LinkedList<GroupComponentPair>();
+        List<GroupComponentPair> ggg2= new LinkedList<GroupComponentPair>();
         for (GroupComponentPair gc : crates.keySet ())
         {
             boolean containsComp = false;
@@ -364,15 +369,21 @@ public class ProbeRunner
                 }
             }
 
+            ssum += matchval[i];
             if (containsComp)
             {
-                crates.put (gc, new DoubleExpression (matchval[i]));
-            }
-            else
-            {
+                ggg.add (gc);
+                sum1 += val[i];
+                ssum1 += matchval[i];
                 crates.put (gc, new DoubleExpression
                         (val[statesCountExpressions.indexOf
                                 (mapping.get (gc.toString ()))]));
+            }
+            else
+            {
+                ggg2.add(gc);
+                sum2 += matchval[i];
+                crates.put (gc, new DoubleExpression (matchval[i]));
             }
             ++i;
         }
@@ -405,7 +416,7 @@ public class ProbeRunner
                   {
                     cdf[i] += obtainedMeasurements[i]
                             [statesCountExpressions.indexOf
-                            (mapping.get (gp.toString ()))];
+                            (mapping.get (gp.toString()))];
                 }
             }
         }
@@ -495,35 +506,44 @@ public class ProbeRunner
         // probability for each Q
         for (GroupComponentPair q : pairs)
         {
-            summands = new ArrayList<AbstractExpression> ();
-            for (GroupComponentPair hc : pairs)
+            if (totalBeginRate.equals (DoubleExpression.ZERO))
             {
-                Collection<String> actions
-                    = hc.getComponent ().getActions (definitions);
-                Collection<AbstractPrefix> prefices
-                        = hc.getComponent ().getPrefixes (definitions);
-                for (String action : actions)
+                result.put (q, DoubleExpression.ZERO);
+            }
+            else
+            {
+                summands = new ArrayList<AbstractExpression> ();
+                for (GroupComponentPair hc : pairs)
                 {
-                    for (AbstractPrefix prefix : prefices)
+                    Collection<String> actions
+                        = hc.getComponent ().getActions (definitions);
+                    Collection<AbstractPrefix> prefices
+                            = hc.getComponent ().getPrefixes (definitions);
+                    for (String action : actions)
                     {
-                        if (prefix.getAction ().equals (action)
-                                && prefix.getContinuation ()
-                                    .equals (q.getComponent ())
-                                && prefix.getImmediates ().contains ("begin"))
+                        for (AbstractPrefix prefix : prefices)
                         {
-                            AbstractExpression arate
-                                = definitions.getApparentRateExpression
-                                    (action, hc.getComponent());
-                            AbstractExpression crate
-                                = model.getComponentRateExpression
-                                    (action, definitions, hc);
-                            summands.add (DivExpression.create (crate, arate));
+                            if (prefix.getAction ().equals (action)
+                                    && prefix.getContinuation ()
+                                        .equals(q.getComponent())
+                                    && prefix.getImmediates ()
+                                        .contains("begin"))
+                            {
+                                AbstractExpression arate
+                                    = definitions.getApparentRateExpression
+                                        (action, hc.getComponent());
+                                AbstractExpression crate
+                                    = model.getComponentRateExpression
+                                        (action, definitions, hc);
+                                summands.add
+                                    (DivExpression.create (crate, arate));
+                            }
                         }
                     }
                 }
+                result.put (q, DivExpression.create
+                        (SumExpression.create (summands), totalBeginRate));
             }
-            result.put (q, DivExpression.create
-                    (SumExpression.create (summands), totalBeginRate));
         }
     }
 

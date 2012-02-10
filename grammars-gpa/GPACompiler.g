@@ -636,18 +636,25 @@ rl_un_operators [NFAState sub_starting_state,
 			{
 				$starting_state
 					= NFAtoDFA.convertToDFA ($sub_starting_state, t);
-				Set<NFAState> accepting
-					= NFADetectors.detectAllAcceptingStates ($starting_state);
-				for (NFAState state : accepting)
+				NFAState failure = new NFAState (t);
+				NFAUtils.unifyAcceptingStates ($starting_state, failure);
+				for (ITransition transition : $allActions)
 				{
-					for (ITransition transition : $allActions)
-					{
-						state.addTransitionIfNotExisting
-							(transition.getSimpleTransition (), state);
-					}
+					failure.addTransition
+						(transition.getSimpleTransition (), failure);
 				}
+				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
 				NFAUtils.invertAcceptingStates ($starting_state);
-				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
+				NFAState permitted = new NFAState (t);
+				NFAUtils.unifyAcceptingStates ($starting_state, permitted);
+				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
+				permitted = NFADetectors.detectSingleAcceptingState
+					($starting_state);
+				for (ITransition transition : $allActions)
+				{
+					permitted.addTransitionIfNotExisting
+						(transition.getSimpleTransition (), $reached_state);
+				}
 			} ;
 
 times [NFAState sub_starting_state, NFAState sub_current_state]
@@ -765,7 +772,7 @@ empty_action [NFAState current_state]
 
 // Global
 
-probeg [Set<ITransition> allActions]
+probeg [GlobalProbe gprobe, Set<ITransition> allActions]
 @init
 {
 	NFAState starting_state1 = new NFAState (t);
@@ -796,11 +803,11 @@ probeg [Set<ITransition> allActions]
 					acc_state.addTransition
 						(new EmptyTransition (), starting_state1);
 					starting_state1 = NFAtoDFA.convertToDFA (starting_state1,
-						$probe_spec::probe.getName ());
+						$gprobe.getName ());
 				}
 				NFAUtils.removeAnyTransitions
 					($probe_spec::allActions, starting_state1);
-				$probe_spec::probe.setStartingState (starting_state1);
+				$gprobe.setStartingState (starting_state1);
 			} ;
 
 rg [NFAState current_state, Set<ITransition> allActions]
@@ -962,7 +969,6 @@ scope
 {
 	GPAParser parser;
 	GroupedModel model;
-	Set<GPEPAState> stateObservers;
 	AbstractExpression stop_time;
 	AbstractExpression step_size;
 	int parameter;
@@ -973,7 +979,6 @@ scope
 	$probe_def::parser = new GPAParser (null);
 	$probe_def::parser.setErrorReporter (new ErrorReporter ());
 	$probe_def::model = deepCloner.deepClone (mainModel);
-	$probe_def::stateObservers = new HashSet<GPEPAState> ();
 }
 	:	^(PROBE_DEF	odeSettings
 				{
@@ -1026,18 +1031,12 @@ scope
 {
     Set<ITransition> alphabet;
     Set<ITransition> allActions;
-    IProbe probe;
-    PEPAComponentDefinitions definitions;
-    PEPAComponentDefinitions altDef;
     Map<String, PEPAComponent> origComponents;
-    Map<String, PEPAComponent> newComponents;
-    Map<String, PEPAComponent> altComponents;
     ComponentId localAcceptingState;
 }
 @init
 {
 	GlobalProbe gprobe = new GlobalProbe ();
-	$probe_spec::probe = gprobe;
 	$probe_spec::alphabet = new HashSet<ITransition> ();
 	$probe_spec::allActions = new HashSet<ITransition> ();
 	Set<String> actions = mainDefinitions.getActions ();
@@ -1046,8 +1045,8 @@ scope
 		$probe_spec::allActions.add (new Transition (action));
 	}
 	$probe_spec::origComponents = deepCloner.deepClone (components);
-	$probe_spec::newComponents = new HashMap<String, PEPAComponent> ();
-	$probe_spec::altComponents = new HashMap<String, PEPAComponent> ();
+	Map<String, PEPAComponent> newComp = new HashMap<String, PEPAComponent> ();
+	Map<String, PEPAComponent> altComp = new HashMap<String, PEPAComponent> ();
 }
 	:	^(DEF signalNames=SIGNALS
 				{
@@ -1059,40 +1058,46 @@ scope
 							(new SignalTransition (signal));
 					}
 				}
-			globalProbeName=UPPERCASENAME (local_probes locations)?
-			probeg [$probe_spec::allActions])
+			globalProbeName=UPPERCASENAME (local_probes [newComp, altComp]
+			locations)?	probeg [gprobe, $probe_spec::allActions])
 			{
 				gprobe.setName ($globalProbeName.text);
+				Map<String, PEPAComponent> newDef
+					= new HashMap<String, PEPAComponent> (newComp);
+				newDef.putAll ($probe_spec::origComponents);
+				PEPAComponentDefinitions definitions
+					= new PEPAComponentDefinitions (newDef)
+					.removeVanishingStates ();
+
+				Set<GPEPAState> stateObservers = new HashSet<GPEPAState> ();
+				Set<GroupComponentPair> pairs
+					= $probe_def::model.getGroupComponentPairs (definitions);
+				for (GroupComponentPair g : pairs)
+				{
+					stateObservers.add (new GPEPAState (g));
+				}
+
 				Map<PEPAComponentDefinitions, Set<ComponentId>> defMap
 					= new HashMap<PEPAComponentDefinitions,Set<ComponentId>> ();
 				Set<ComponentId> newComps = new HashSet<ComponentId> ();
-				for (String name : $probe_spec::newComponents.keySet ())
+				for (String name : newComp.keySet ())
 				{
 					newComps.add (new ComponentId (name));
 				}
-				defMap.put ($probe_spec::definitions, newComps);
+				defMap.put (definitions, newComps);
+				PEPAComponentDefinitions altDef = null;
 				if ($probe_def::steady)
 				{
-					newComps = new HashSet<ComponentId> ();
-					$probe_spec::altComponents.putAll
-						($probe_spec::origComponents);
-					for (String name : $probe_spec::altComponents.keySet ())
-					{
-						newComps.add (new ComponentId (name));
-					}
-					Map<String, PEPAComponent> newDef =
-						new HashMap<String, PEPAComponent>
-						($probe_spec::altComponents);
-					newDef.putAll ($probe_spec::origComponents);
-					$probe_spec::altDef = new PEPAComponentDefinitions
-						(newDef).removeVanishingStates ();
-					defMap.put ($probe_spec::altDef, newComps);
+					// we can reuse altComp now
+					altComp.putAll ($probe_spec::origComponents);
+					altDef = new PEPAComponentDefinitions
+						(altComp).removeVanishingStates ();
 				}
 				if ($simulate)
 				{
 					$measured_times = prunner.executeProbedModel
-						(gprobe, $probe_def::model, $probe_def::stateObservers,
-						$probe_spec::definitions, $probe_spec::altDef, defMap,
+						(gprobe, $probe_def::model, stateObservers,
+						definitions, altDef, defMap,
 						$probe_spec::localAcceptingState,
 						mainConstants, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
@@ -1104,8 +1109,8 @@ scope
 				else
 				{
 					$measured_times = prunner.executeProbedModel
-						(gprobe, $probe_def::model, $probe_def::stateObservers,
-						$probe_spec::definitions, $probe_spec::altDef, defMap,
+						(gprobe, $probe_def::model, stateObservers,
+						definitions, altDef, defMap,
 						$probe_spec::localAcceptingState,
 						mainConstants, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
@@ -1116,39 +1121,23 @@ scope
 				}
             } ;
 
-local_probes
-	:	^(LPROBES_DEF local_probe_ass+)
-			{
-				Map<String, PEPAComponent> newDef =
-					new HashMap<String, PEPAComponent>
-					($probe_spec::newComponents);
-				newDef.putAll ($probe_spec::origComponents);
-				$probe_spec::definitions
-					= new PEPAComponentDefinitions
-						(newDef).removeVanishingStates ();
-			} ;
+local_probes [Map<String, PEPAComponent> newComp,
+	Map<String, PEPAComponent> altComp]
+	:	^(LPROBES_DEF (local_probe_ass [$newComp, $altComp])+) ;
 
-local_probe_ass
+local_probe_ass [Map<String, PEPAComponent> newComp,
+	Map<String, PEPAComponent> altComp]
 	:	^(DEF name=UPPERCASENAME probe=probel
 			[$name.text, $probe_spec::allActions,
 			 $probe_spec::alphabet, $probe_def::steady, $probe_def::parser])
 			 {
-			 	$probe_spec::newComponents.putAll ($probe.probeComponents);
-			 	$probe_spec::altComponents.putAll ($probe.altProbeComponents);
+			 	$newComp.putAll ($probe.probeComponents);
+			 	$altComp.putAll ($probe.altProbeComponents);
 			 	$probe_spec::localAcceptingState = ($probe.acceptingComponent);
 			 };
 
 locations
-	:	^(LOCATIONS location+)
-			{
-				Set<GroupComponentPair> pairs
-					= $probe_def::model.getGroupComponentPairs
-						($probe_spec::definitions);
-				for (GroupComponentPair g : pairs)
-				{
-					$probe_def::stateObservers.add (new GPEPAState (g));
-				}
-			} ;
+	:	^(LOCATIONS location+) ;
 
 location
 	:	^(SUBSTITUTE m1=model m2=model)
