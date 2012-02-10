@@ -117,7 +117,6 @@ import PCTMCCompilerPrototype;
 	private Map<String, PEPAComponent> components;
 	private List<ITransition> excluded = new LinkedList<ITransition> ();
 	Cloner deepCloner = new Cloner ();
-	ProbeRunner prunner = new ProbeRunner ();
 
 	private void initExcluded ()
 	{
@@ -1095,27 +1094,23 @@ scope
 				}
 				if ($simulate)
 				{
-					$measured_times = prunner.executeProbedModel
+					$measured_times = new SimProbeRunner ().executeProbedModel
 						(gprobe, $probe_def::model, stateObservers,
 						definitions, altDef, defMap,
 						$probe_spec::localAcceptingState,
 						mainConstants, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
-						PCTMCSimulation.class,
-						SimulationAnalysisNumericalPostprocessor.class,
 						$probe_spec::alphabet, excluded,
 						$mode, $modePar, $plot);
 				}
 				else
 				{
-					$measured_times = prunner.executeProbedModel
+					$measured_times = new ODEProbeRunner ().executeProbedModel
 						(gprobe, $probe_def::model, stateObservers,
 						definitions, altDef, defMap,
 						$probe_spec::localAcceptingState,
 						mainConstants, $probe_def::stop_time,
 						$probe_def::step_size, $probe_def::parameter,
-						PCTMCODEAnalysis.class,
-						CPPODEAnalysisNumericalPostprocessor.class,
 						$probe_spec::alphabet, excluded,
 						$mode, $modePar, $plot);
 				}
@@ -1132,7 +1127,10 @@ local_probe_ass [Map<String, PEPAComponent> newComp,
 			 $probe_spec::alphabet, $probe_def::steady, $probe_def::parser])
 			 {
 			 	$newComp.putAll ($probe.probeComponents);
-			 	$altComp.putAll ($probe.altProbeComponents);
+			 	if ($probe_def::steady)
+			 	{
+			 		$altComp.putAll ($probe.altProbeComponents);
+			 	}
 			 	$probe_spec::localAcceptingState = ($probe.acceptingComponent);
 			 };
 
