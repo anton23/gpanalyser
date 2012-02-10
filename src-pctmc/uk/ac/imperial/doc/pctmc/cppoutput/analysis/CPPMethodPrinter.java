@@ -61,9 +61,8 @@ public class CPPMethodPrinter {
 
         classOutput.append("    public native double[] update(double[] r, " +
                 "double[] values, double t);\n");
-        classOutput.append("private static String libName = \""
-                + nativeClassName + "\";\n");
-        classOutput.append("static { System.loadLibrary (libName); }\n");
+        classOutput.append("static { System.loadLibrary (\""
+                + nativeClassName + "\"); }\n");
         classOutput.append("}\n");
 
         jniCode.append("#include \"" + PACKAGE.replace(".", "_") + "_"

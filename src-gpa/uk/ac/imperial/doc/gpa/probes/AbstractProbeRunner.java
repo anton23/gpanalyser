@@ -5,10 +5,7 @@ import com.google.common.collect.Multiset;
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
 import uk.ac.imperial.doc.gpa.fsm.NFADetectors;
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
-import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
-import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
+import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
@@ -30,22 +27,43 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 
 import java.util.*;
 
-public class ProbeRunner
+public abstract class AbstractProbeRunner
 {
     private ProbeGraph graph;
+    protected Class<? extends AbstractPCTMCAnalysis> analysisType;
+    protected Class<? extends NumericalPostprocessor> postprocType;
 
-    public
-        <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
-        CDF executeProbedModel
-            (GlobalProbe gprobe, GroupedModel model,
-             Set<GPEPAState> stateObservers,
-             PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
-             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-             ComponentId accepting, Constants constants,
-             AbstractExpression stopTime, AbstractExpression stepSize,
-             int parameter, Class<A> AClass, Class<NP> NPClass,
-             Collection<ITransition> alphabet, Collection<ITransition> excluded,
-             int mode, double modePar, boolean plot)
+    protected abstract CDF steadyIndividual
+        (List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping,
+         Set<String> countActionStrings,
+         GroupedModel model, Set<GPEPAState> stateObservers,
+         PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+         ComponentId accepting, Constants constants,
+         double stopTime, double stepSize, int parameter,
+         double steadyStateTime);
+
+    protected abstract CDF transientIndividual
+        (List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping,
+         Set<String> countActionStrings,
+         GroupedModel model, Set<GPEPAState> stateObservers,
+         PEPAComponentDefinitions mainDef,
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+         ComponentId accepting, Constants constants,
+         double stopTime, double stepSize, int parameter);
+    
+    public CDF executeProbedModel
+        (GlobalProbe gprobe, GroupedModel model,
+         Set<GPEPAState> stateObservers,
+         PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+         ComponentId accepting, Constants constants,
+         AbstractExpression stopTime, AbstractExpression stepSize,
+         int parameter, Collection<ITransition> alphabet,
+         Collection<ITransition> excluded, int mode, double modePar,
+         boolean plot)
     {
         Set<ITransition> countActions = NFADetectors.detectAlphabet
             (gprobe.getStartingState(), true, excluded);
@@ -68,7 +86,7 @@ public class ProbeRunner
                 statesCountExpressions, mapping, countActionStrings, model,
                 stateObservers, mainDef, altDef, definitionsMap, accepting,
                 constants, stopTimeVal, stepSizeVal, parameter,
-                AClass, NPClass, 0, mode, modePar);
+                0, mode, modePar);
 
         if (plot)
         {
@@ -78,20 +96,17 @@ public class ProbeRunner
         return cdf;
     }
 
-    private
-        <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
-        CDF dispatchEvaluation
-            (GlobalProbe gprobe,
-             List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> mapping,
-             Set<String> countActionStrings,
-             GroupedModel model, Set<GPEPAState> stateObservers,
-             PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
-             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-             ComponentId accepting, Constants constants,
-             double stopTime, double stepSize, int parameter,
-             Class<A> AClass, Class<NP> NPClass,
-             int start_time, int mode, double modePar)
+    private CDF dispatchEvaluation
+        (GlobalProbe gprobe,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping,
+         Set<String> countActionStrings,
+         GroupedModel model, Set<GPEPAState> stateObservers,
+         PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+         ComponentId accepting, Constants constants,
+         double stopTime, double stepSize, int parameter,
+         int start_time, int mode, double modePar)
     {
         switch (mode)
         {
@@ -100,176 +115,40 @@ public class ProbeRunner
                     (statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, altDef, definitionsMap, accepting,
-                        constants, stopTime, stepSize, parameter,
-                        AClass, NPClass, modePar);
+                        constants, stopTime, stepSize, parameter, modePar);
             case 2:
                 return transientIndividual
                     (statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, definitionsMap, accepting,
-                        constants, stopTime, stepSize, parameter,
-                        AClass, NPClass);
+                        constants, stopTime, stepSize, parameter);
             case 3:
                 return globalPassages
                     (gprobe, statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, definitionsMap,
-                        constants, stopTime, stepSize, parameter,
-                        AClass, NPClass, start_time);
+                        constants, stopTime, stepSize, parameter, start_time);
             default:
                 return null;
         }
     }
 
-    private
-        <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
-        CDF steadyIndividual
-            (List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> mapping,
-             Set<String> countActionStrings,
-             GroupedModel model, Set<GPEPAState> stateObservers,
-             PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
-             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-             ComponentId accepting, Constants constants,
-             double stopTime, double stepSize, int parameter,
-             Class<A> AClass, Class<NP> NPClass, double steadyStateTime)
-    {
-        NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, false, stateObservers,
-                statesCountExpressions, mapping, mainDef, constants,
-                steadyStateTime, stepSize, parameter, AClass, NPClass);
-        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
-            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        double maxTime = steadyStateTime - stepSize;
-        double[] val = getStartingStates
-            (model,  mainDef, constants, postprocessor, maxTime, crates);
-        double[] times = new double[statesCountExpressions.size ()];
-        Arrays.fill (times, maxTime);
-        AbstractExpressionEvaluator evaluator = postprocessor
-            .getExpressionEvaluator(statesCountExpressions, constants);
-        double[] steadyval = postprocessor.evaluateExpressionsAtTimes
-            (evaluator, times, constants);
-
-        assignNewCounts (crates, definitionsMap, mainDef, model,
-                statesCountExpressions, mapping, steadyval, val);
-        statesCountExpressions = new LinkedList<AbstractExpression> ();
-        mapping = new HashMap<String, AbstractExpression> ();
-        stateObservers = new HashSet<GPEPAState> ();
-        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (altDef);
-        for (GroupComponentPair g : pairs)
-        {
-            stateObservers.add (new GPEPAState (g));
-        }
-        postprocessor = runTheProbedSystem (model, countActionStrings, false,
-                stateObservers, statesCountExpressions, mapping, altDef,
-                constants, stopTime, stepSize, parameter,
-                AClass, NPClass);
-
-        double[][] obtainedMeasurements = postprocessor.evaluateExpressions
-            (statesCountExpressions, constants);
-        double[] cdf = new double[obtainedMeasurements.length];
-
-        passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                cdf, statesCountExpressions, mapping);
-
-        return new CDF (cdf);
-    }
-
-    private
-    <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
-    CDF transientIndividual
-            (List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> mapping,
-             Set<String> countActionStrings,
-             GroupedModel model, Set<GPEPAState> stateObservers,
-             PEPAComponentDefinitions mainDef,
-             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-             ComponentId accepting, Constants constants,
-             double stopTime, double stepSize, int parameter,
-             Class<A> AClass, Class<NP> NPClass)
+    private CDF globalPassages
+        (GlobalProbe gprobe,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping,
+         Set<String> countActionStrings,
+         GroupedModel model, Set<GPEPAState> stateObservers,
+         PEPAComponentDefinitions mainDef,
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+         Constants constants,
+         double stopTime, double stepSize, int parameter,
+         int start_time)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, countActionStrings, false, stateObservers,
                     statesCountExpressions, mapping, mainDef, constants,
-                    stopTime, stepSize, parameter, AClass, NPClass);
-        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
-
-        Set<AbstractExpression> afterBegins
-                = new HashSet<AbstractExpression> ();
-        double[][] K = getProbabilitiesComponentStateAfterBegin
-                (pairs, mainDef, postprocessor, constants, afterBegins);
-
-        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
-                = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        AbstractExpressionEvaluator eval = postprocessor.getExpressionEvaluator
-                (statesCountExpressions, constants);
-        int indices = (int) Math.ceil (stopTime / stepSize);
-        int i = 0;
-        double[][] cdf = new double[indices][];
-
-        for (double s = 0; s < stopTime; s += stepSize)
-        {
-            double[] matchval = getStartingStates (model,  mainDef, constants,
-                    postprocessor, s, crates);
-            double[] times = new double[statesCountExpressions.size ()];
-            Arrays.fill (times, s);
-            double[] val = postprocessor.evaluateExpressionsAtTimes
-                    (eval, times, constants);
-
-            assignNewCounts (crates, definitionsMap, mainDef, model,
-                    statesCountExpressions, mapping, matchval, val);
-            postprocessor = runTheProbedSystem (model, countActionStrings,
-                    false, stateObservers, statesCountExpressions, mapping,
-                    mainDef, constants, stopTime, stepSize, parameter,
-                    AClass, NPClass);
-            double[][] obtainedMeasurements = postprocessor.evaluateExpressions
-                    (statesCountExpressions, constants);
-            cdf[i] = new double[obtainedMeasurements.length];
-
-            passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                    cdf[i], statesCountExpressions, mapping);
-            ++i;
-        }
-
-        double[] uncCdf = new double[indices];
-        // now integration, possible directly on obtained values
-        for (int s = 1; s < indices; ++s)
-        {
-            double derivK = (K[s][0] - K[s - 1][0])/stepSize;
-            System.out.println(derivK);
-            for (int t = 0; t < indices; ++t)
-            {
-                uncCdf[t] += cdf[s][t] * derivK;
-            }
-        }
-
-        for (int t = 0; t < indices; ++t)
-        {
-            uncCdf[t] *= stepSize;
-        }
-
-        return new CDF (uncCdf);
-    }
-
-    private
-    <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
-    CDF globalPassages
-            (GlobalProbe gprobe,
-             List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> mapping,
-             Set<String> countActionStrings,
-             GroupedModel model, Set<GPEPAState> stateObservers,
-             PEPAComponentDefinitions mainDef,
-             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-             Constants constants,
-             double stopTime, double stepSize, int parameter,
-             Class<A> AClass, Class<NP> NPClass,
-             int start_time)
-    {
-        NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, false, stateObservers,
-                    statesCountExpressions, mapping, mainDef, constants,
-                    stopTime, stepSize, parameter, AClass, NPClass);
+                    stopTime, stepSize, parameter);
 
         return new CDF (null);
     }
@@ -324,7 +203,7 @@ public class ProbeRunner
         return i;
     }
 */
-    private double[] getStartingStates
+    protected double[] getStartingStates
         (GroupedModel model, PEPAComponentDefinitions definitions,
          Constants constants, NumericalPostprocessor postprocessor, double time,
          LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
@@ -345,7 +224,7 @@ public class ProbeRunner
             (eval, times, constants);
     }
 
-    private void assignNewCounts
+    protected void assignNewCounts
         (LinkedHashMap<GroupComponentPair, AbstractExpression> crates,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          PEPAComponentDefinitions definitions, GroupedModel model,
@@ -401,7 +280,7 @@ public class ProbeRunner
         }
     }
 
-    private void passageTimeCDF
+    protected void passageTimeCDF
         (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
          ComponentId accepting, double[] cdf,
          List<AbstractExpression> statesCountExpressions,
@@ -412,17 +291,17 @@ public class ProbeRunner
         {
             if (gp.getComponent ().containsComponent (accepting))
             {
-                 for (int i = 0; i < obtainedMeasurements.length; i++)
-                  {
+                for (int i = 0; i < obtainedMeasurements.length; ++i)
+                {
                     cdf[i] += obtainedMeasurements[i]
                             [statesCountExpressions.indexOf
-                            (mapping.get (gp.toString()))];
+                            (mapping.get (gp.toString ()))];
                 }
             }
         }
     }
 
-    private double[][] getProbabilitiesComponentStateAfterBegin
+    protected double[][] getProbabilitiesComponentStateAfterBegin
         (Set<GroupComponentPair> pairs, PEPAComponentDefinitions definitions,
          NumericalPostprocessor postprocessor, Constants constants,
          Set<AbstractExpression> afterBegins)
@@ -467,7 +346,7 @@ public class ProbeRunner
         return postprocessor.evaluateExpressions (sum, constants);
     }
 
-    private void getProbabilitiesAfterBegin
+    protected void getProbabilitiesAfterBegin
             (GroupedModel model, PEPAComponentDefinitions definitions,
              LinkedHashMap<GroupComponentPair, AbstractExpression> result)
     {
@@ -547,7 +426,7 @@ public class ProbeRunner
         }
     }
 
-    private void findClosureOnAnyActions
+    protected void findClosureOnAnyActions
         (Set<PEPAComponent> found, PEPAComponentDefinitions definitions,
             Set<PEPAComponent> visited)
     {
@@ -600,16 +479,13 @@ public class ProbeRunner
         return objectStrings;
     }
 
-    private
-        <A extends AbstractPCTMCAnalysis, NP extends NumericalPostprocessor>
-        NumericalPostprocessor runTheProbedSystem
+    protected NumericalPostprocessor runTheProbedSystem
             (GroupedModel model, Set<String> countActionsSet,
              boolean countActions, Collection<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
              PEPAComponentDefinitions definitions, Constants constants,
-             double stopTime, double stepSize, int parameter,
-             Class<A> AClass, Class<NP> NPClass)
+             double stopTime, double stepSize, int parameter)
     {
         List<CombinedPopulationProduct> moments
                 = new ArrayList<CombinedPopulationProduct> ();
@@ -637,14 +513,13 @@ public class ProbeRunner
         }
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
-
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
         System.out.println (pctmc);
 
-        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc, AClass);
+        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
         analysis.setUsedMoments (moments);
         NumericalPostprocessor postprocessor
-            = getPostprocessor (stopTime, stepSize, parameter, NPClass);
+            = getPostprocessor (stopTime, stepSize, parameter);
         analysis.addPostprocessor (postprocessor);
         analysis.prepare (constants);
         analysis.notifyPostprocessors (constants, plotDescriptions);
@@ -667,13 +542,12 @@ public class ProbeRunner
         stateCombPopMapping.put (mappingString, combProd);
     }
 
-    private <NP extends NumericalPostprocessor>
-        NumericalPostprocessor getPostprocessor
-        (double stopTime, double stepSize, int parameter, Class<NP> NPClass)
+    private NumericalPostprocessor getPostprocessor
+        (double stopTime, double stepSize, int parameter)
     {
         try
         {
-          return NPClass.getDeclaredConstructor
+          return postprocType.getDeclaredConstructor
             (double.class, double.class, int.class).newInstance
                 (stopTime, stepSize, parameter);
         }
@@ -684,12 +558,11 @@ public class ProbeRunner
         return null;
     }
 
-    private <A extends AbstractPCTMCAnalysis>
-        AbstractPCTMCAnalysis getAnalysis (PCTMC pctmc, Class<A> AClass)
+    private AbstractPCTMCAnalysis getAnalysis (PCTMC pctmc)
     {
         try
         {
-            return AClass.getDeclaredConstructor
+            return analysisType.getDeclaredConstructor
                     (PCTMC.class).newInstance (pctmc);
         }
         catch (Exception ex)

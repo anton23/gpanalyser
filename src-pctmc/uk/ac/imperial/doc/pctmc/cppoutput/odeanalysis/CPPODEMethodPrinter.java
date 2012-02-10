@@ -89,9 +89,8 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         classOutput.append("public class " + nativeClassName + " extends "
                 + NativeSystemOfODEs.class.getSimpleName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
-        classOutput.append("private static String libName = \""
-                + nativeClassName + "\";\n");
-        classOutput.append("static { System.loadLibrary (libName); }\n");
+        classOutput.append("static { System.loadLibrary (\""
+                + nativeClassName + "\"); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[] derivnI" +
                 "(double x, double[] y, double[] r);\n");
