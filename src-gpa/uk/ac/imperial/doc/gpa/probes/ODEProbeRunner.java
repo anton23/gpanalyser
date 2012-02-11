@@ -35,14 +35,14 @@ public class ODEProbeRunner extends AbstractProbeRunner
          double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-                (model, countActionStrings, false, stateObservers,
-                        statesCountExpressions, mapping, mainDef, constants,
-                        steadyStateTime, stepSize, parameter);
+            (model, countActionStrings, false, stateObservers,
+                statesCountExpressions, mapping, mainDef, constants,
+                steadyStateTime, stepSize, parameter);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         double maxTime = steadyStateTime - stepSize;
         double[] cratesVal = getStartingStates
-            (model,  mainDef, constants, postprocessor, maxTime, crates);
+            (model, mainDef, constants, postprocessor, maxTime, crates);
         double[] times = new double[statesCountExpressions.size ()];
         Arrays.fill (times, maxTime);
         AbstractExpressionEvaluator evaluator = postprocessor
