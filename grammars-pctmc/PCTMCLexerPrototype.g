@@ -81,5 +81,5 @@ WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+  { $channel = HIDDEN; } ;
 COMMENT : '//' (~('\n' | '\r'))* ('\r'|'\n')?  { $channel=HIDDEN;} ;
 
 
-MULTI_COMMENT options { greedy = false; }
-  : '/*' .* '*/' ('\n')? { skip(); };
+MULTI_COMMENT
+  : '/*' (options {greedy=false;} : . )* '*/' ('\n')? { skip(); };

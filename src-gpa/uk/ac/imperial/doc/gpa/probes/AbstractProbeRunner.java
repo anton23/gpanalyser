@@ -216,7 +216,7 @@ public abstract class AbstractProbeRunner
             = new LinkedList<AbstractExpression> (crates.values ());
 
         AbstractExpressionEvaluator eval = postprocessor
-            .getExpressionEvaluator(expressions, constants);
+            .getExpressionEvaluator (expressions, constants);
         double[] times = new double[expressions.size ()];
         Arrays.fill (times, time);
 
@@ -230,12 +230,10 @@ public abstract class AbstractProbeRunner
          PEPAComponentDefinitions definitions, GroupedModel model,
          List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping,
-         double[] matchval, double[] val)
+         double[] matchVal, double[] origVal)
     {
         int i = 0;
-        double sum1 = 0, sum2 = 0, ssum = 0, ssum1 = 0;
-        List<GroupComponentPair> ggg= new LinkedList<GroupComponentPair>();
-        List<GroupComponentPair> ggg2= new LinkedList<GroupComponentPair>();
+        double csumOrig = 0, sumMatch = 0, sumOrig = 0, sumOrigMatch = 0;
         for (GroupComponentPair gc : crates.keySet ())
         {
             boolean containsComp = false;
@@ -248,21 +246,19 @@ public abstract class AbstractProbeRunner
                 }
             }
 
-            ssum += matchval[i];
+            csumOrig += origVal[i];
             if (containsComp)
             {
-                ggg.add (gc);
-                sum1 += val[i];
-                ssum1 += matchval[i];
+                sumOrigMatch += origVal[i];
+                sumMatch += matchVal[i];
                 crates.put (gc, new DoubleExpression
-                        (val[statesCountExpressions.indexOf
+                        (matchVal[statesCountExpressions.indexOf
                                 (mapping.get (gc.toString ()))]));
             }
             else
             {
-                ggg2.add(gc);
-                sum2 += matchval[i];
-                crates.put (gc, new DoubleExpression (matchval[i]));
+                sumOrig += origVal[i];
+                crates.put (gc, new DoubleExpression (origVal[i]));
             }
             ++i;
         }
@@ -455,7 +451,7 @@ public abstract class AbstractProbeRunner
         List<AbstractPrefix> prefices = c.getPrefixes (definitions);
         for (AbstractPrefix p : prefices)
         {
-            newFound.add (p.getContinuation());
+            newFound.add (p.getContinuation ());
         }
         return newFound;
     }
@@ -514,7 +510,7 @@ public abstract class AbstractProbeRunner
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
-        System.out.println (pctmc);
+        //System.out.println (pctmc);
 
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
         analysis.setUsedMoments (moments);
