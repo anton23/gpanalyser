@@ -204,8 +204,9 @@ public abstract class AbstractProbeRunner
     }
 */
     protected double[] getStartingStates
-        (GroupedModel model, PEPAComponentDefinitions definitions,
-         Constants constants, NumericalPostprocessor postprocessor, double time,
+        (GroupedModel model,
+         PEPAComponentDefinitions definitions, Constants constants,
+         NumericalPostprocessor postprocessor, double time,
          LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
     {
         // obtaining ratios for steady state component distribution
@@ -233,7 +234,7 @@ public abstract class AbstractProbeRunner
          double[] matchVal, double[] origVal)
     {
         int i = 0;
-        double csumOrig = 0, sumMatch = 0, sumOrig = 0, sumOrigMatch = 0;
+        double csum = 0, sumOrig = 0, sumMatch = 0, sumMatchOrig = 0;
         for (GroupComponentPair gc : crates.keySet ())
         {
             boolean containsComp = false;
@@ -246,11 +247,11 @@ public abstract class AbstractProbeRunner
                 }
             }
 
-            csumOrig += origVal[i];
+            csum += origVal[i];
             if (containsComp)
             {
-                sumOrigMatch += origVal[i];
                 sumMatch += matchVal[i];
+                sumMatchOrig += origVal[i];
                 crates.put (gc, new DoubleExpression
                         (matchVal[statesCountExpressions.indexOf
                                 (mapping.get (gc.toString ()))]));
@@ -371,7 +372,9 @@ public abstract class AbstractProbeRunner
                         AbstractExpression crate
                             = model.getComponentRateExpression
                                 (action, definitions, hc);
-                        summands.add (DivExpression.create (crate, arate));
+                        summands.add (ProductExpression.create
+                                (prefix.getRate (),
+                                 DivExpression.create (crate, arate)));
                     }
                 }
             }
@@ -410,8 +413,9 @@ public abstract class AbstractProbeRunner
                                 AbstractExpression crate
                                     = model.getComponentRateExpression
                                         (action, definitions, hc);
-                                summands.add
-                                    (DivExpression.create (crate, arate));
+                                summands.add (ProductExpression.create
+                                        (prefix.getRate (),
+                                         DivExpression.create (crate, arate)));
                             }
                         }
                     }
@@ -510,7 +514,7 @@ public abstract class AbstractProbeRunner
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
-        //System.out.println (pctmc);
+        System.out.println (pctmc);
 
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
         analysis.setUsedMoments (moments);
