@@ -39,19 +39,19 @@ public class ODEProbeRunner extends AbstractProbeRunner
                         statesCountExpressions, mapping, mainDef, constants,
                         steadyStateTime, stepSize, parameter);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
-                = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         double maxTime = steadyStateTime - stepSize;
-        double[] val = getStartingStates
-                (model,  mainDef, constants, postprocessor, maxTime, crates);
+        double[] cratesVal = getStartingStates
+            (model,  mainDef, constants, postprocessor, maxTime, crates);
         double[] times = new double[statesCountExpressions.size ()];
         Arrays.fill (times, maxTime);
         AbstractExpressionEvaluator evaluator = postprocessor
-                .getExpressionEvaluator (statesCountExpressions, constants);
-        double[] steadyval = postprocessor.evaluateExpressionsAtTimes
-                (evaluator, times, constants);
+            .getExpressionEvaluator (statesCountExpressions, constants);
+        double[] steadyVal = postprocessor.evaluateExpressionsAtTimes
+            (evaluator, times, constants);
 
         assignNewCounts (crates, definitionsMap, mainDef, model,
-                statesCountExpressions, mapping, steadyval, val);
+                statesCountExpressions, mapping, cratesVal, steadyVal);
         statesCountExpressions = new LinkedList<AbstractExpression> ();
         mapping = new HashMap<String, AbstractExpression> ();
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (altDef);
@@ -65,7 +65,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
                 constants, stopTime, stepSize, parameter);
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
-                (statesCountExpressions, constants);
+            (statesCountExpressions, constants);
         double[] cdf = new double[obtainedMeasurements.length];
 
         passageTimeCDF (obtainedMeasurements, pairs, accepting,
@@ -86,20 +86,20 @@ public class ODEProbeRunner extends AbstractProbeRunner
          double stopTime, double stepSize, int parameter)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-                (model, countActionStrings, false, stateObservers,
-                        statesCountExpressions, mapping, mainDef, constants,
-                        stopTime, stepSize, parameter);
+            (model, countActionStrings, false, stateObservers,
+                    statesCountExpressions, mapping, mainDef, constants,
+                    stopTime, stepSize, parameter);
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
 
         Set<AbstractExpression> afterBegins
-                = new HashSet<AbstractExpression> ();
+            = new HashSet<AbstractExpression> ();
         double[][] K = getProbabilitiesComponentStateAfterBegin
-                (pairs, mainDef, postprocessor, constants, afterBegins);
+            (pairs, mainDef, postprocessor, constants, afterBegins);
 
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
-                = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         AbstractExpressionEvaluator eval = postprocessor.getExpressionEvaluator
-                (statesCountExpressions, constants);
+            (statesCountExpressions, constants);
         int indices = (int) Math.ceil (stopTime / stepSize);
         int i = 0;
         double[][] cdf = new double[indices][];
@@ -111,7 +111,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             double[] times = new double[statesCountExpressions.size ()];
             Arrays.fill (times, s);
             double[] val = postprocessor.evaluateExpressionsAtTimes
-                    (eval, times, constants);
+                (eval, times, constants);
 
             assignNewCounts (crates, definitionsMap, mainDef, model,
                     statesCountExpressions, mapping, matchval, val);
@@ -119,7 +119,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
                     false, stateObservers, statesCountExpressions, mapping,
                     mainDef, constants, stopTime, stepSize, parameter);
             double[][] obtainedMeasurements = postprocessor.evaluateExpressions
-                    (statesCountExpressions, constants);
+                (statesCountExpressions, constants);
             cdf[i] = new double[obtainedMeasurements.length];
 
             passageTimeCDF (obtainedMeasurements, pairs, accepting,
@@ -132,7 +132,6 @@ public class ODEProbeRunner extends AbstractProbeRunner
         for (int s = 1; s < indices; ++s)
         {
             double derivK = (K[s][0] - K[s - 1][0])/stepSize;
-            System.out.println(derivK);
             for (int t = 0; t < indices; ++t)
             {
                 uncCdf[t] += cdf[s][t] * derivK;

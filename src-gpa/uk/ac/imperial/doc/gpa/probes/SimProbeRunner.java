@@ -59,17 +59,17 @@ public class SimProbeRunner extends AbstractProbeRunner
                         steadyStateTime, stepSize, 1);
             LinkedHashMap<GroupComponentPair, AbstractExpression> crates
                 = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-            double[] val = getStartingStates (model,  mainDef, constants,
+            double[] cratesVal = getStartingStates (model,  mainDef, constants,
                     postprocessor, maxTime, crates);
             double[] times = new double[statesCountExpressions.size ()];
             Arrays.fill (times, maxTime);
             AbstractExpressionEvaluator evaluator = postprocessor
                 .getExpressionEvaluator (statesCountExpressions, constants);
-            double[] steadyval = postprocessor.evaluateExpressionsAtTimes
+            double[] steadyVal = postprocessor.evaluateExpressionsAtTimes
                 (evaluator, times, constants);
 
             assignNewCounts (crates, definitionsMap, mainDef, model,
-                statesCountExpressions, mapping, steadyval, val);
+                statesCountExpressions, mapping, cratesVal, steadyVal);
             altStatesCountExpressions = new LinkedList<AbstractExpression> ();
             altMapping = new HashMap<String, AbstractExpression> ();
             postprocessor = runTheProbedSystem (model, countActionStrings,
@@ -120,65 +120,77 @@ public class SimProbeRunner extends AbstractProbeRunner
          ComponentId accepting, Constants constants,
          double stopTime, double stepSize, int parameter)
     {
-        NumericalPostprocessor postprocessor = runTheProbedSystem
-                (model, countActionStrings, false, stateObservers,
-                        statesCountExpressions, mapping, mainDef, constants,
-                        stopTime, stepSize, parameter);
-        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
-
-        Set<AbstractExpression> afterBegins
-                = new HashSet<AbstractExpression> ();
-        double[][] K = getProbabilitiesComponentStateAfterBegin
-                (pairs, mainDef, postprocessor, constants, afterBegins);
-
-        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
-                = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        AbstractExpressionEvaluator eval = postprocessor.getExpressionEvaluator
-                (statesCountExpressions, constants);
         int indices = (int) Math.ceil (stopTime / stepSize);
-        int i = 0;
-        double[][] cdf = new double[indices][];
-
-        for (double s = 0; s < stopTime; s += stepSize)
+        double[] mainCdf = new double[indices];
+        for (int p = 0; p < parameter; ++p)
         {
-            double[] matchval = getStartingStates (model,  mainDef, constants,
-                    postprocessor, s, crates);
-            double[] times = new double[statesCountExpressions.size ()];
-            Arrays.fill (times, s);
-            double[] val = postprocessor.evaluateExpressionsAtTimes
-                    (eval, times, constants);
-
-            assignNewCounts (crates, definitionsMap, mainDef, model,
-                    statesCountExpressions, mapping, matchval, val);
-            postprocessor = runTheProbedSystem (model, countActionStrings,
-                    false, stateObservers, statesCountExpressions, mapping,
-                    mainDef, constants, stopTime, stepSize, parameter);
-            double[][] obtainedMeasurements = postprocessor.evaluateExpressions
+            NumericalPostprocessor postprocessor = runTheProbedSystem
+                    (model, countActionStrings, false, stateObservers,
+                            statesCountExpressions, mapping, mainDef, constants,
+                            stopTime, stepSize, 1);
+            Set<GroupComponentPair> pairs
+                = model.getGroupComponentPairs (mainDef);
+    
+            Set<AbstractExpression> afterBegins
+                    = new HashSet<AbstractExpression> ();
+            double[][] K = getProbabilitiesComponentStateAfterBegin
+                    (pairs, mainDef, postprocessor, constants, afterBegins);
+    
+            LinkedHashMap<GroupComponentPair, AbstractExpression> crates = new
+                    LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+            AbstractExpressionEvaluator eval
+                = postprocessor.getExpressionEvaluator
                     (statesCountExpressions, constants);
-            cdf[i] = new double[obtainedMeasurements.length];
-
-            passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                    cdf[i], statesCountExpressions, mapping);
-            ++i;
-        }
-
-        double[] uncCdf = new double[indices];
-        // now integration, possible directly on obtained values
-        for (int s = 1; s < indices; ++s)
-        {
-            double derivK = (K[s][0] - K[s - 1][0])/stepSize;
-            System.out.println(derivK);
+            int i = 0;
+            double[][] cdf = new double[indices][];
+    
+            for (double s = 0; s < stopTime; s += stepSize)
+            {
+                double[] matchval = getStartingStates (model,  mainDef,
+                        constants, postprocessor, s, crates);
+                double[] times = new double[statesCountExpressions.size ()];
+                Arrays.fill (times, s);
+                double[] val = postprocessor.evaluateExpressionsAtTimes
+                        (eval, times, constants);
+    
+                assignNewCounts (crates, definitionsMap, mainDef, model,
+                        statesCountExpressions, mapping, matchval, val);
+                postprocessor = runTheProbedSystem (model, countActionStrings,
+                        false, stateObservers, statesCountExpressions, mapping,
+                        mainDef, constants, stopTime, stepSize, 1);
+                double[][] obtainedMeasurements
+                    = postprocessor.evaluateExpressions
+                    (statesCountExpressions, constants);
+                cdf[i] = new double[obtainedMeasurements.length];
+    
+                passageTimeCDF (obtainedMeasurements, pairs, accepting,
+                        cdf[i], statesCountExpressions, mapping);
+                ++i;
+            }
+    
+            double[] uncCdf = new double[indices];
+            // now integration, possible directly on obtained values
+            for (int s = 1; s < indices; ++s)
+            {
+                double derivK = (K[s][0] - K[s - 1][0])/stepSize;
+                System.out.println(derivK);
+                for (int t = 0; t < indices; ++t)
+                {
+                    uncCdf[t] += cdf[s][t] * derivK;
+                }
+            }
+    
             for (int t = 0; t < indices; ++t)
             {
-                uncCdf[t] += cdf[s][t] * derivK;
+                mainCdf[t] += uncCdf[t] * stepSize;
             }
         }
 
         for (int t = 0; t < indices; ++t)
         {
-            uncCdf[t] *= stepSize;
+            mainCdf[t] /= parameter;
         }
 
-        return new CDF (uncCdf);
+        return new CDF (mainCdf);
     }
 }

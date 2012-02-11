@@ -4,7 +4,7 @@ namespace JExpressionsCPPUtils
 {
 	inline double div (double a, double b)
 	{
-		if (b == 0.0)
+		if (!b)
 		{
 			return 0.0;
 		}
