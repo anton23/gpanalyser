@@ -18,9 +18,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.*;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.*;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -147,8 +145,8 @@ public abstract class AbstractProbeRunner
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, countActionStrings, false, stateObservers,
-                    statesCountExpressions, mapping, mainDef, constants,
-                    stopTime, stepSize, parameter);
+                statesCountExpressions, mapping, mainDef, constants,
+                stopTime, stepSize, parameter);
 
         return new CDF (null);
     }
@@ -318,8 +316,8 @@ public abstract class AbstractProbeRunner
                             .equals(q.getComponent()))
                     {
                         afterBegins.add
-                                (CombinedProductExpression.createMeanExpression
-                                        (new GPEPAState(q)));
+                            (CombinedProductExpression.createMeanExpression
+                                (new GPEPAState(q)));
                         afterBeginsC.add (q.getComponent ());
                     }
                 }
@@ -333,8 +331,8 @@ public abstract class AbstractProbeRunner
             if (afterBeginsC.contains(hq.getComponent()))
             {
                 afterBegins.add
-                        (CombinedProductExpression.createMeanExpression
-                                (new GPEPAState (hq)));
+                    (CombinedProductExpression.createMeanExpression
+                        (new GPEPAState (hq)));
             }
         }
 
@@ -480,7 +478,7 @@ public abstract class AbstractProbeRunner
     }
 
     protected NumericalPostprocessor runTheProbedSystem
-            (GroupedModel model, Set<String> countActionsSet,
+        (GroupedModel model, Set<String> countActionsSet,
              boolean countActions, Collection<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
@@ -503,19 +501,20 @@ public abstract class AbstractProbeRunner
             {
                 GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
                 Multiset<State> cooperationActions = HashMultiset.create ();
-                setStateObserver (cooperationActions, gpepaAction, action, moments,
-                        statesCountExpressions, stateCombPopMapping);
+                setStateObserver (cooperationActions, gpepaAction, action,
+                        moments, statesCountExpressions, stateCombPopMapping);
             }
         }
         else
         {
             initActions = new HashSet<String> ();
         }
-        List<PlotDescription> plotDescriptions
-            = new LinkedList<PlotDescription> ();
+
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
         System.out.println (pctmc);
 
+        List<PlotDescription> plotDescriptions
+                = new LinkedList<PlotDescription> ();
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
         analysis.setUsedMoments (moments);
         NumericalPostprocessor postprocessor

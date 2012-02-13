@@ -60,6 +60,12 @@ public class NFAState
         }
     }
 
+    public void replaceTransition (ITransition transition, NFAState state)
+    {
+        outgoings.removeAll (transition);
+        addTransition (transition, state);
+    }
+
     public NFAState advanceWithTransition (ITransition transition)
     {
         Collection<NFAState> next = outgoings.get (transition);
