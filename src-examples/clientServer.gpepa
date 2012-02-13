@@ -3,8 +3,8 @@ rs = 0.15;
 ri = 0.6;
 rf = 0.1;
 rr = 0.35;
-n = 10.0;
-m = 6.0;
+n = 1000.0;
+m = 600.0;
 
 Client0 = (fetch, rt).Client1;
 Client1 = (reset, rs).Client0;

@@ -393,7 +393,7 @@ rl_signal [Set<ITransition> allActions] returns [NFAState starting_state]
 				NFAUtils.unifyAcceptingStates ($starting_state, acc_state);
 				NFAState new_acc_state = new NFAState (t);
 				new_acc_state.setAccepting (next_rl == null);
-				acc_state.addTransition (signal, new_acc_state);
+				acc_state.replaceTransition (signal, new_acc_state);
 				acc_state.setAccepting (false);
 				if (next_rl != null)
 				{
@@ -639,7 +639,7 @@ rl_un_operators [NFAState sub_starting_state,
 				NFAUtils.unifyAcceptingStates ($starting_state, failure);
 				for (ITransition transition : $allActions)
 				{
-					failure.addTransition
+					failure.replaceTransition
 						(transition.getSimpleTransition (), failure);
 				}
 				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
@@ -654,6 +654,7 @@ rl_un_operators [NFAState sub_starting_state,
 					permitted.addTransitionIfNotExisting
 						(transition.getSimpleTransition (), $reached_state);
 				}
+				permitted.setAccepting (false);
 			} ;
 
 times [NFAState sub_starting_state, NFAState sub_current_state]
@@ -782,7 +783,7 @@ probeg [GlobalProbe gprobe, Set<ITransition> allActions]
 			{
 				NFAState acc_state = new NFAState (t);
 				NFAUtils.unifyAcceptingStates (starting_state1, acc_state);
-				acc_state.addTransition
+				acc_state.replaceTransition
 					(new SignalTransition ("start"), starting_state2);
 				acc_state.setAccepting (false);
 				acc_state = new NFAState (t);
@@ -790,7 +791,7 @@ probeg [GlobalProbe gprobe, Set<ITransition> allActions]
                 acc_state.setAccepting (false);
                 NFAState final_acc_state = new NFAState (t);
                 final_acc_state.setAccepting (true);
-                acc_state.addTransition
+                acc_state.replaceTransition
                     (new SignalTransition ("stop"), final_acc_state);
                 starting_state1 = NFAtoDFA.convertToDFA (starting_state1, t);
                 acc_state = NFADetectors.detectSingleAcceptingState
