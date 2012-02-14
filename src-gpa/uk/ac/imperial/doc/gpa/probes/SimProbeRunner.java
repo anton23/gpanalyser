@@ -135,26 +135,21 @@ public class SimProbeRunner extends AbstractProbeRunner
                     = new HashSet<AbstractExpression> ();
             double[][] K = getProbabilitiesComponentStateAfterBegin
                     (pairs, mainDef, postprocessor, constants, afterBegins);
+            double[][] origVal = postprocessor.evaluateExpressions
+                    (statesCountExpressions, constants);
     
             LinkedHashMap<GroupComponentPair, AbstractExpression> crates = new
                     LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-            AbstractExpressionEvaluator eval
-                = postprocessor.getExpressionEvaluator
-                    (statesCountExpressions, constants);
             int i = 0;
             double[][] cdf = new double[indices][];
     
             for (double s = 0; s < stopTime; s += stepSize)
             {
-                double[] matchval = getStartingStates (model,  mainDef,
+                double[] matchVal = getStartingStates (model,  mainDef,
                         constants, postprocessor, s, crates);
-                double[] times = new double[statesCountExpressions.size ()];
-                Arrays.fill (times, s);
-                double[] val = postprocessor.evaluateExpressionsAtTimes
-                        (eval, times, constants);
-    
+
                 assignNewCounts (crates, definitionsMap, mainDef, model,
-                        statesCountExpressions, mapping, matchval, val);
+                        statesCountExpressions, mapping, matchVal, origVal[i]);
                 postprocessor = runTheProbedSystem (model, countActionStrings,
                         false, stateObservers, statesCountExpressions, mapping,
                         mainDef, constants, stopTime, stepSize, 1);
