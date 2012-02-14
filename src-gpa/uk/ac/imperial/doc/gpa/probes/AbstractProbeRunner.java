@@ -201,11 +201,10 @@ public abstract class AbstractProbeRunner
         return i;
     }
 */
-    protected double[] getStartingStates
-        (GroupedModel model,
-         PEPAComponentDefinitions definitions, Constants constants,
-         NumericalPostprocessor postprocessor, double time,
-         LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
+    protected double[] getStartingStates (GroupedModel model,
+             PEPAComponentDefinitions definitions, Constants constants,
+             NumericalPostprocessor postprocessor, double time,
+             LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
     {
         // obtaining ratios for steady state component distribution
         getProbabilitiesAfterBegin (model, definitions, crates);
@@ -232,7 +231,6 @@ public abstract class AbstractProbeRunner
          double[] matchVal, double[] origVal)
     {
         int i = 0;
-        double csum = 0, sumOrig = 0, sumMatch = 0, sumMatchOrig = 0;
         for (GroupComponentPair gc : crates.keySet ())
         {
             boolean containsComp = false;
@@ -245,19 +243,15 @@ public abstract class AbstractProbeRunner
                 }
             }
 
-            csum += origVal[i];
             if (containsComp)
             {
-                sumMatch += matchVal[i];
-                sumMatchOrig += origVal[i];
-                crates.put (gc, new DoubleExpression
-                        (matchVal[statesCountExpressions.indexOf
-                                (mapping.get (gc.toString ()))]));
+                crates.put (gc, new DoubleExpression (matchVal[i]));
             }
             else
             {
-                sumOrig += origVal[i];
-                crates.put (gc, new DoubleExpression (origVal[i]));
+                crates.put (gc, new DoubleExpression
+                    (origVal[statesCountExpressions.indexOf
+                            (mapping.get (gc.toString ()))]));
             }
             ++i;
         }
@@ -486,7 +480,7 @@ public abstract class AbstractProbeRunner
              double stopTime, double stepSize, int parameter)
     {
         List<CombinedPopulationProduct> moments
-                = new ArrayList<CombinedPopulationProduct> ();
+            = new ArrayList<CombinedPopulationProduct> ();
         for (GPEPAState state : stateObservers)
         {
             Multiset<State> states = HashMultiset.create ();
@@ -514,9 +508,24 @@ public abstract class AbstractProbeRunner
         System.out.println (pctmc);
 
         List<PlotDescription> plotDescriptions
-                = new LinkedList<PlotDescription> ();
+            = new LinkedList<PlotDescription> ();
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
         analysis.setUsedMoments (moments);
+
+        /*
+            Set<String> cooperation = new HashSet<String> ();
+            cooperation.add ("cont_tfr");
+            cooperation.add ("data_tfr");
+            cooperation.add ("clt_shutdown");
+            AbstractExpression ge = new PatternPopulationExpression (new GPEPAState (new GroupComponentPair ("Clients", new CooperationComponent (new AnyComponent (), new AnyComponent (), cooperation))));
+            List<AbstractExpression> listGE = new ArrayList<AbstractExpression> ();
+            plotDescriptions.add (new PlotDescription (listGE));
+
+            PatternSetterVisitor.unfoldPatterns (ge, new GPEPAPatternMatcher (pctmc));
+            listGE.add (ge);
+            AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts (analysis, plotDescriptions, new HashMap<ExpressionVariable, AbstractExpression> ());
+        */
+
         NumericalPostprocessor postprocessor
             = getPostprocessor (stopTime, stepSize, parameter);
         analysis.addPostprocessor (postprocessor);

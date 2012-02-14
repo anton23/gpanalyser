@@ -31,17 +31,13 @@ public class LabelledComponentGroup extends GroupedModel {
 
 	@Override
 	public List<PEPAEvolutionEvent> getEvolutionEvents(
-
 			final PEPAComponentDefinitions definitions,
 			Set<String> restrictedActions) {
 		List<PEPAEvolutionEvent> events = new LinkedList<PEPAEvolutionEvent>();
 		for (final PEPAComponent derivative : group
 				.getComponentDerivatives(definitions)) {
-            //System.out.println (derivative + " = \n" + derivative.getPrefixes(definitions) + "\n\n");
 			for (final AbstractPrefix prefix : derivative.getPrefixes(definitions)) {
 				if (!restrictedActions.contains(prefix.getAction())) {
-
-
 					AbstractExpression rate
                         = ProductExpression.create(CombinedProductExpression
                             .createMeanExpression (new GPEPAState
