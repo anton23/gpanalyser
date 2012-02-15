@@ -10,6 +10,7 @@ import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
+import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -24,7 +25,7 @@ import java.util.HashMap;
  * @author Anton Stefanek
  * 
  */
-public class PCTMCCPPImplementationProvider {
+public class PCTMCCPPImplementationProvider implements PCTMCImplementationProvider {
 
 	public AbstractExpressionEvaluator getEvaluatorImplementation(
 			EvaluatorMethod method, String className, Constants constants,
