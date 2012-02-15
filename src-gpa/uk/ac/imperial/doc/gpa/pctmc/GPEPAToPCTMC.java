@@ -13,7 +13,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
-import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 public class GPEPAToPCTMC {
 	
@@ -55,12 +54,10 @@ public class GPEPAToPCTMC {
 		}
 
         // remove duplicate events
-        Set<EvolutionEvent> hs = new LinkedHashSet<EvolutionEvent>();
-        hs.addAll(events);
+        Set<EvolutionEvent> hs = new LinkedHashSet<EvolutionEvent>(events);
         events.clear();
         events.addAll(hs);
 
-        FileUtils.writeGeneralFile(events.toString(), "hujer");
-		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions);
+		return new GPEPAPCTMC(initCounts, events, componentDefinitions, model, countActions);
 	}
 }

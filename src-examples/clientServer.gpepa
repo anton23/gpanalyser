@@ -15,12 +15,12 @@ Serv2 = (recover, rr).Serv0;
 
 Clients{Client0[n]}<fetch>Servers{Serv0[m]}
 
-Probe (stopTime=50, stepSize=1, density=10) transient
+Probe (stopTime=50, stepSize=1, density=10) steady 100
 {
-    PM6 = begin : start, end : stop
+    PM6 = begin : start, end : stop <-
     observes
     {
-        LProbe = recover : begin, (fetch[2] / fail) : end
+        LProbe = recover : begin, (fetch[2] / fail) : end <-
     }
     where
     {

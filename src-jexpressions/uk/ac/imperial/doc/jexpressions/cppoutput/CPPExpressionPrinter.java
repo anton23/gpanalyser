@@ -57,9 +57,9 @@ public class CPPExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivExpression e) {
-		output.append("(");
+		output.append("JExpressionsCPPUtils::div(");
 		e.getNumerator().accept(this);
-		output.append(")/(");
+		output.append(", ");
 		e.getDenominator().accept(this);
 		output.append(")");
 	}
