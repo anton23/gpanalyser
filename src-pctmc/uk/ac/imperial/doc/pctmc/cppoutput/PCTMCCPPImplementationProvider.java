@@ -7,12 +7,9 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionE
 import uk.ac.imperial.doc.pctmc.cppoutput.analysis.CPPMethodPrinter;
 import uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis.CPPODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
-import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.NativeSystemOfODEs;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKutta;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -27,8 +24,7 @@ import java.util.HashMap;
  * @author Anton Stefanek
  * 
  */
-public class PCTMCCPPImplementationProvider implements
-		PCTMCImplementationProvider {
+public class PCTMCCPPImplementationProvider {
 
 	public AbstractExpressionEvaluator getEvaluatorImplementation(
 			EvaluatorMethod method, String className, Constants constants,
@@ -46,14 +42,14 @@ public class PCTMCCPPImplementationProvider implements
 	public CPPODEsPreprocessed getPreprocessedODEImplementation(
 			ODEMethod method, Constants constants,
 			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
-		SystemOfODEs odes = getSystemOfODEsImplementation(method,
+		NativeSystemOfODEs odes = getSystemOfODEsImplementation(method,
 				"GeneratedODEs", constants, combinedMomentsIndex);
 		return new CPPODEsPreprocessed(odes);
 	}
 
-	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method,
-			String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
+	public NativeSystemOfODEs getSystemOfODEsImplementation
+            (ODEMethod method, String className, Constants constants,
+             BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
 
 		CPPODEMethodPrinter printer = new CPPODEMethodPrinter(constants,
 				combinedMomentsIndex,
@@ -61,20 +57,19 @@ public class PCTMCCPPImplementationProvider implements
 		method.accept(printer);
 		String javaCode = printer.toClassString();
         String nativeCode = printer.toString();
-		return (SystemOfODEs)
+		return (NativeSystemOfODEs)
                 CPPClassCompiler.getInstance(javaCode,
-                        printer.getNativeClassName (),
-                        nativeCode, printer.getNativeClassName (),
+                        printer.getNativeClassName(),
+                        nativeCode, printer.getNativeClassName(),
                         CPPODEMethodPrinter.PACKAGE);
 	}
 
 	public double[][] runODEAnalysis(
 			PCTMCImplementationPreprocessed preprocessed, double[] initial,
 			double stopTime, double stepSize, int density, Constants constants) {
-		SystemOfODEs odes = ((CPPODEsPreprocessed) preprocessed).getOdes();
-		odes.setRates(constants.getFlatConstants());
-		PCTMCLogging.info("Running Runge-Kutta solver.");
-		return RungeKutta.rungeKutta(odes, initial, stopTime,
-				stepSize, density);
+		NativeSystemOfODEs odes = ((CPPODEsPreprocessed) preprocessed).getOdes();
+		PCTMCLogging.info("Running CPP Runge-Kutta solver.");
+		return odes.solve(initial, stopTime, stepSize,
+                density, constants.getFlatConstants());
 	}
 }
