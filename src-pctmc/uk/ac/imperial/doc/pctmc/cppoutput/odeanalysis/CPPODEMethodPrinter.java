@@ -98,10 +98,10 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         header.append("#include \"" + PACKAGE.replace(".", "_") + "_"
                 + nativeClassName + ".h\"\n");
         header.append("#include <cmath>\n");
-        header.append("#include \"src-jexpressions/uk/ac/imperial/doc/" +
-                "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
-        header.append("#include \"src-pctmc/uk/ac/imperial/doc/" +
-                "pctmc/cppoutput/utils/RungeKutta.h\"\n");
+        header.append("#include \"src-jexpressions/uk/ac/imperial/doc/"
+                + "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
+        header.append("#include \"src-pctmc/uk/ac/imperial/doc/"
+                + "pctmc/cppoutput/utils/RungeKutta.h\"\n");
         header.append(cppMomentODEs[cppMomentODEs.length - 1]);
         int line = 0;
         int method = 0;
