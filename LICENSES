@@ -1,0 +1,13 @@
+gpanalyser license - MIT License
+
+Libraries used:
+
+ANTLR - BSD License
+Gluegen - BSD License
+guava-libraries - Apache License 2.0
+JCommon - LGPL
+JFreeChart - LGPL
+Jogl - BSD License
+jopt-simple - MIT License  
+log4j - Apache License 2.0
+jzy3d - New BSD License
