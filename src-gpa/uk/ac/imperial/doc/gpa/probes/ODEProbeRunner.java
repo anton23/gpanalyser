@@ -40,18 +40,21 @@ public class ODEProbeRunner extends AbstractProbeRunner
                 steadyStateTime, stepSize, parameter);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        double maxTime = steadyStateTime - stepSize;
-        double[] cratesVal = getStartingStates
-            (model, mainDef, constants, postprocessor, maxTime, crates);
+
+        // obtaining ratios for steady state component distribution
+        double[][] cratesVal = getStartingStates
+            (model, mainDef, constants, postprocessor, crates);
         double[] times = new double[statesCountExpressions.size ()];
+        double maxTime = steadyStateTime - stepSize;
         Arrays.fill (times, maxTime);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
         double[] steadyVal = postprocessor.evaluateExpressionsAtTimes
             (evaluator, times, constants);
 
+        int sindex = (int) (maxTime / stepSize) - 1;
         assignNewCounts (crates, definitionsMap, mainDef, model,
-                statesCountExpressions, mapping, cratesVal, steadyVal);
+                statesCountExpressions, mapping, cratesVal[sindex], steadyVal);
         statesCountExpressions = new LinkedList<AbstractExpression> ();
         mapping = new HashMap<String, AbstractExpression> ();
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (altDef);
@@ -66,10 +69,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
-        double[] cdf = new double[obtainedMeasurements.length];
-
-        passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                cdf, statesCountExpressions, mapping);
+        double[] cdf = passageTimeCDF (obtainedMeasurements, pairs, accepting,
+                statesCountExpressions, mapping);
 
         return new CDF (cdf);
     }
@@ -83,61 +84,64 @@ public class ODEProbeRunner extends AbstractProbeRunner
          PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
-         double stopTime, double stepSize, int parameter)
+         double stopTime, double stepSize, int parameter,
+         double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, countActionStrings, false, stateObservers,
-                    statesCountExpressions, mapping, mainDef, constants,
-                    stopTime, stepSize, parameter);
+                statesCountExpressions, mapping, mainDef, constants,
+                steadyStateTime + stepSize, stepSize, parameter);
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
 
-        Set<AbstractExpression> afterBegins
-            = new HashSet<AbstractExpression> ();
         double[][] K = getProbabilitiesComponentStateAfterBegin
-            (pairs, mainDef, postprocessor, constants, afterBegins);
-
-        double[][] origVal = postprocessor.evaluateExpressions
-                (statesCountExpressions, constants);
+            (pairs, mainDef, postprocessor, constants);
+        double[][] steadyVal = postprocessor.evaluateExpressions
+            (statesCountExpressions, constants);
 
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        int indices = (int) Math.ceil (stopTime / stepSize);
+        // obtaining ratios for steady state component distribution
+        double[][] matchVal = getStartingStates
+            (model, mainDef, constants, postprocessor, crates);
+
+        int times = (int) Math.ceil (stopTime / stepSize);
+        int indices = (int) Math.ceil (steadyStateTime / stepSize);
         int i = 0;
         double[][] cdf = new double[indices][];
 
-        for (double s = 0; s < stopTime; s += stepSize)
+        for (double s = 0; s < steadyStateTime; s += stepSize)
         {
-            double[] matchVal = getStartingStates (model,  mainDef, constants,
-                    postprocessor, s, crates);
-
             assignNewCounts (crates, definitionsMap, mainDef, model,
-                    statesCountExpressions, mapping, matchVal, origVal[i]);
-            statesCountExpressions = new ArrayList<AbstractExpression> ();
-            mapping = new HashMap<String, AbstractExpression> ();
-            postprocessor = runTheProbedSystem (model, countActionStrings,
-                    false, stateObservers, statesCountExpressions, mapping,
-                    mainDef, constants, stopTime, stepSize, parameter);
-            double[][] obtainedMeasurements = postprocessor.evaluateExpressions
-                (statesCountExpressions, constants);
-            cdf[i] = new double[obtainedMeasurements.length];
+                    statesCountExpressions, mapping, matchVal[i], steadyVal[i]);
 
-            passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                    cdf[i], statesCountExpressions, mapping);
+            List<AbstractExpression> statesCountExpressionsS
+                = new ArrayList<AbstractExpression> ();
+            Map<String, AbstractExpression> mappingS
+                = new HashMap<String, AbstractExpression> ();
+            NumericalPostprocessor postprocessorS = runTheProbedSystem
+                (model, countActionStrings, false, stateObservers,
+                    statesCountExpressionsS, mappingS,
+                    mainDef, constants, stopTime, stepSize, parameter);
+            double[][] obtainedMeasurements = postprocessorS.evaluateExpressions
+                (statesCountExpressionsS, constants);
+            cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
+                    statesCountExpressionsS, mappingS);
             ++i;
+            System.out.println ("Ran transient iteration " + i);
         }
 
-        double[] uncCdf = new double[indices];
+        double[] uncCdf = new double[times];
         // now integration, possible directly on obtained values
-        for (int s = 1; s < indices; ++s)
+        for (int s = 0; s < indices; ++s)
         {
-            double derivK = (K[s][0] - K[s - 1][0])/stepSize;
-            for (int t = 0; t < indices; ++t)
+            double derivK = (K[s + 1][0] - K[s][0]) / stepSize;
+            for (int t = 0; t < times; ++t)
             {
-                uncCdf[t] += cdf[s][t] * derivK;
+                uncCdf[t] += (cdf[s][t] * derivK);
             }
         }
 
-        for (int t = 0; t < indices; ++t)
+        for (int t = 0; t < times; ++t)
         {
             uncCdf[t] *= stepSize;
         }

@@ -1003,7 +1003,7 @@ scope
 			} ;
 
 mode returns [int chosenMode, double par]
-	:	^(STEADY limitTime=expression STEADY)
+	:	^(STEADY limitTime=expression)
 			{
 				$probe_def::steady = true;
 				ExpressionEvaluatorWithConstants parEval
@@ -1012,10 +1012,13 @@ mode returns [int chosenMode, double par]
 				$par = parEval.getResult ();
 				$chosenMode = 1;
 			}
-		| ^(TRANSIENT TRANSIENT)
+		| ^(TRANSIENT limitTime=expression)
 			{
 				$probe_def::steady = false;
-				$par = 0;
+				ExpressionEvaluatorWithConstants parEval
+					= new ExpressionEvaluatorWithConstants (mainConstants);
+				$limitTime.e.accept (parEval);
+				$par = parEval.getResult ();
 				$chosenMode = 2;
 			}
 		| ^(GLOBAL GLOBAL)

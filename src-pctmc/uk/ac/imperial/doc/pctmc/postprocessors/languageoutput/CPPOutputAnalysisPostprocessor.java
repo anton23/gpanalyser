@@ -30,7 +30,7 @@ public class CPPOutputAnalysisPostprocessor extends LanguageOutputPostprocessor{
         analysis.getOdeMethod().accept(printer);
         String code = printer.toClassString();
         String filename = getAnalysisFolder() + "/" + CPPODEMethodPrinter.PACKAGE.replace(".","/") + printer.getNativeClassName() + ".java";
-        writeFile(filename, code, "Writing Java ODE method in file " + filename);
+        writeFile(filename, code, "Writing CPP ODE method in file " + filename);
     }
 
 }

@@ -34,6 +34,7 @@ public class SimProbeRunner extends AbstractProbeRunner
          double stopTime, double stepSize, int parameter,
          double steadyStateTime)
     {
+        /*
         double maxTime = steadyStateTime - stepSize;
         double altMaxTime = stopTime - stepSize;
         int altMaxTimeIndex = (int) (altMaxTime / stepSize);
@@ -59,8 +60,8 @@ public class SimProbeRunner extends AbstractProbeRunner
                         steadyStateTime, stepSize, 1);
             LinkedHashMap<GroupComponentPair, AbstractExpression> crates
                 = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-            double[] cratesVal = getStartingStates (model,  mainDef, constants,
-                    postprocessor, maxTime, crates);
+            double[][] cratesVal = getStartingStates
+                (model, mainDef, constants, postprocessor, crates);
             double[] times = new double[statesCountExpressions.size ()];
             Arrays.fill (times, maxTime);
             AbstractExpressionEvaluator evaluator = postprocessor
@@ -68,8 +69,9 @@ public class SimProbeRunner extends AbstractProbeRunner
             double[] steadyVal = postprocessor.evaluateExpressionsAtTimes
                 (evaluator, times, constants);
 
+            int sindex = (int) (maxTime / stepSize) - 1;
             assignNewCounts (crates, definitionsMap, mainDef, model,
-                statesCountExpressions, mapping, cratesVal, steadyVal);
+                statesCountExpressions, mapping, cratesVal[sindex], steadyVal);
             altStatesCountExpressions = new LinkedList<AbstractExpression> ();
             altMapping = new HashMap<String, AbstractExpression> ();
             postprocessor = runTheProbedSystem (model, countActionStrings,
@@ -105,8 +107,8 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         passageTimeCDF (overallMeasurements, pairs, accepting,
                 cdf, altStatesCountExpressions, altMapping);
-
-        return new CDF (cdf);
+        */
+        return new CDF (null);
     }
 
     @Override
@@ -118,8 +120,10 @@ public class SimProbeRunner extends AbstractProbeRunner
          PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
-         double stopTime, double stepSize, int parameter)
+         double stopTime, double stepSize, int parameter,
+         double steadyStateTime)
     {
+        /*
         int indices = (int) Math.ceil (stopTime / stepSize);
         double[] mainCdf = new double[indices];
         for (int p = 0; p < parameter; ++p)
@@ -131,10 +135,8 @@ public class SimProbeRunner extends AbstractProbeRunner
             Set<GroupComponentPair> pairs
                 = model.getGroupComponentPairs (mainDef);
     
-            Set<AbstractExpression> afterBegins
-                    = new HashSet<AbstractExpression> ();
             double[][] K = getProbabilitiesComponentStateAfterBegin
-                    (pairs, mainDef, postprocessor, constants, afterBegins);
+                    (pairs, mainDef, postprocessor, constants);
             double[][] origVal = postprocessor.evaluateExpressions
                     (statesCountExpressions, constants);
     
@@ -185,7 +187,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         {
             mainCdf[t] /= parameter;
         }
-
-        return new CDF (mainCdf);
+    */
+        return new CDF (null);
     }
 }
