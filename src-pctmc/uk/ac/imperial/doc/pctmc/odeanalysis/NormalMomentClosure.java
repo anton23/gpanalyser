@@ -3,10 +3,8 @@ package uk.ac.imperial.doc.pctmc.odeanalysis;
 import java.util.HashMap;
 import java.util.Map;
 
-import uk.ac.imperial.doc.jexpressions.expanded.ContractingExpressionTransformer;
-import uk.ac.imperial.doc.jexpressions.expanded.DoubleConstantCoefficients;
-import uk.ac.imperial.doc.jexpressions.expanded.ExpandingExpressionTransformerWithMoments;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 
@@ -18,6 +16,13 @@ public class NormalMomentClosure extends MomentClosure {
 	
 	protected int maxOrder;
 	
+	
+	
+	@Override
+	public Map<ExpressionVariable, AbstractExpression> getVariables() {	
+		return null;
+	}
+
 	public NormalMomentClosure(int maxOrder) {
 		super(new HashMap<String, Object>());		
 		this.maxOrder = maxOrder;		

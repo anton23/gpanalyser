@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -12,29 +13,29 @@ public class AccumulatedNormalMomentClosureMinApproximation extends NormalMoment
 
 	public final static String NAME = "AccumulatedNormalClosureMinApproximation";
 	
-	Map<AbstractExpression, ExpressionVariable> usedVariables;
-	int variableIndex;
+	protected Map<AbstractExpression, ExpressionVariable> usedVariables;
+	protected int lastVariable;
 	
 	public AccumulatedNormalMomentClosureMinApproximation(int maxOrder) {
 		super(maxOrder);		
 		this.name = NAME;
 		usedVariables = new HashMap<AbstractExpression, ExpressionVariable>();
-		variableIndex = 0;
+		lastVariable = 0;
 	}
 	
 	public AccumulatedNormalMomentClosureMinApproximation(Map<String, Object> parameters) {
 		super(parameters);
 		this.name = NAME;
-		usedVariables = new HashMap<AbstractExpression, ExpressionVariable>();
-		variableIndex = 0;
+		usedVariables = new LinkedHashMap<AbstractExpression, ExpressionVariable>();
+		lastVariable = 0;
 	}
 
 	@Override
 	public AbstractExpression insertProductIntoRate(AbstractExpression rate,
 			PopulationProduct moment) {
-		AccumulatedNormalClosureMinApproximationVisitorUniversal visitor = new AccumulatedNormalClosureMinApproximationVisitorUniversal(new CombinedPopulationProduct(moment), maxOrder, usedVariables, variableIndex);
+		AccumulatedNormalClosureMinApproximationVisitorUniversal visitor = new AccumulatedNormalClosureMinApproximationVisitorUniversal(new CombinedPopulationProduct(moment), maxOrder, usedVariables, lastVariable);
 		rate.accept(visitor);
-		variableIndex = visitor.getVariableIndex();
+		lastVariable = visitor.getVariableIndex();
 		return visitor.getResult();
 	}
 	
@@ -44,10 +45,9 @@ public class AccumulatedNormalMomentClosureMinApproximation extends NormalMoment
 			CombinedPopulationProduct moment) {
 		AccumulatedNormalClosureMinApproximationVisitorUniversal visitor = new AccumulatedNormalClosureMinApproximationVisitorUniversal(
 				new CombinedPopulationProduct(null, moment
-						.getAccumulatedProducts()), maxOrder, usedVariables, variableIndex);
+						.getAccumulatedProducts()), maxOrder, usedVariables, lastVariable);
 		derivative.accept(visitor);
-		variableIndex = visitor.getVariableIndex();
+		lastVariable = visitor.getVariableIndex();
 		return visitor.getResult();
 	}
-
 }

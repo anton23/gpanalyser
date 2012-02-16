@@ -9,9 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import uk.ac.imperial.doc.jexpressions.expanded.ContractingExpressionTransformer;
-import uk.ac.imperial.doc.jexpressions.expanded.DoubleConstantCoefficients;
-import uk.ac.imperial.doc.jexpressions.expanded.ExpandingExpressionTransformerWithMoments;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -53,7 +50,8 @@ public class NewODEGenerator {
 			ret[i++] = new Assignment(CombinedProductExpression
 					.create(e.getKey()), e.getValue());
 		}			
-		return new ODEMethod(ret);
+
+		return new ODEMethod(ret, momentClosure.getVariables());
 	}
 	
 	protected void generateODESystem(Collection<CombinedPopulationProduct> usedMoments) {
