@@ -15,7 +15,6 @@ import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.*;
-import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.*;
@@ -30,6 +29,7 @@ public abstract class AbstractProbeRunner
     private ProbeGraph graph;
     protected Class<? extends AbstractPCTMCAnalysis> analysisType;
     protected Class<? extends NumericalPostprocessor> postprocType;
+    private static final String BEGIN_SIGNAL = "begin";
 
     protected abstract CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
@@ -50,7 +50,8 @@ public abstract class AbstractProbeRunner
          PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
-         double stopTime, double stepSize, int parameter);
+         double stopTime, double stepSize, int parameter,
+         double steadyStateTime);
     
     public CDF executeProbedModel
         (GlobalProbe gprobe, GroupedModel model,
@@ -119,7 +120,7 @@ public abstract class AbstractProbeRunner
                     (statesCountExpressions, mapping,
                         countActionStrings, model, stateObservers,
                         mainDef, definitionsMap, accepting,
-                        constants, stopTime, stepSize, parameter);
+                        constants, stopTime, stepSize, parameter, modePar);
             case 3:
                 return globalPassages
                     (gprobe, statesCountExpressions, mapping,
@@ -201,25 +202,22 @@ public abstract class AbstractProbeRunner
         return i;
     }
 */
-    protected double[] getStartingStates (GroupedModel model,
+    protected double[][] getStartingStates (GroupedModel model,
              PEPAComponentDefinitions definitions, Constants constants,
-             NumericalPostprocessor postprocessor, double time,
+             NumericalPostprocessor postprocessor,
              LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
     {
-        // obtaining ratios for steady state component distribution
         getProbabilitiesAfterBegin (model, definitions, crates);
 
-        // obtaining steady-state probabilities (user set stop-time)
         List<AbstractExpression> expressions
-            = new LinkedList<AbstractExpression> (crates.values ());
+            = new LinkedList<AbstractExpression> ();
+        for (GroupComponentPair gp : crates.keySet ())
+        {
+            expressions.add (crates.get (gp));
+        }
 
-        AbstractExpressionEvaluator eval = postprocessor
-            .getExpressionEvaluator (expressions, constants);
-        double[] times = new double[expressions.size ()];
-        Arrays.fill (times, time);
-
-        return postprocessor.evaluateExpressionsAtTimes
-            (eval, times, constants);
+        return postprocessor.evaluateExpressions
+            (expressions, constants);
     }
 
     protected void assignNewCounts
@@ -230,6 +228,8 @@ public abstract class AbstractProbeRunner
          Map<String, AbstractExpression> mapping,
          double[] matchVal, double[] origVal)
     {
+        LinkedHashMap<GroupComponentPair, AbstractExpression> newCounts
+            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         int i = 0;
         for (GroupComponentPair gc : crates.keySet ())
         {
@@ -245,11 +245,11 @@ public abstract class AbstractProbeRunner
 
             if (containsComp)
             {
-                crates.put (gc, new DoubleExpression (matchVal[i]));
+                newCounts.put (gc, new DoubleExpression (matchVal[i]));
             }
             else
             {
-                crates.put (gc, new DoubleExpression
+                newCounts.put (gc, new DoubleExpression
                     (origVal[statesCountExpressions.indexOf
                             (mapping.get (gc.toString ()))]));
             }
@@ -261,21 +261,21 @@ public abstract class AbstractProbeRunner
         for (LabelledComponentGroup lg : lgs.values ())
         {
             Group g = lg.getGroup ();
+            String label = lg.getLabel ();
             for (PEPAComponent c : g.getComponentDerivatives (definitions))
             {
-                g.setCountExpression (c, crates.get
-                        (new GroupComponentPair (lg.getLabel (), c)));
+                g.setCountExpression (c, newCounts.get
+                        (new GroupComponentPair (label, c)));
             }
         }
     }
 
-    protected void passageTimeCDF
+    protected double[] passageTimeCDF
         (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
-         ComponentId accepting, double[] cdf,
-         List<AbstractExpression> statesCountExpressions,
+         ComponentId accepting, List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping)
     {
-
+        double[] cdf = new double[obtainedMeasurements.length];
         for (GroupComponentPair gp : pairs)
         {
             if (gp.getComponent ().containsComponent (accepting))
@@ -288,14 +288,15 @@ public abstract class AbstractProbeRunner
                 }
             }
         }
+        return cdf;
     }
 
     protected double[][] getProbabilitiesComponentStateAfterBegin
         (Set<GroupComponentPair> pairs, PEPAComponentDefinitions definitions,
-         NumericalPostprocessor postprocessor, Constants constants,
-         Set<AbstractExpression> afterBegins)
+         NumericalPostprocessor postprocessor, Constants constants)
     {
-        afterBegins = new HashSet<AbstractExpression> ();
+        Set<AbstractExpression> afterBegins
+            = new HashSet<AbstractExpression> ();
         Set<PEPAComponent> afterBeginsC = new HashSet<PEPAComponent> ();
         for (GroupComponentPair q : pairs)
         {
@@ -305,7 +306,7 @@ public abstract class AbstractProbeRunner
                         = hq.getComponent ().getPrefixes (definitions);
                 for (AbstractPrefix prefix : prefices)
                 {
-                    if (prefix.getImmediates ().contains ("begin")
+                    if (prefix.getImmediates ().contains (BEGIN_SIGNAL)
                             && prefix.getContinuation ()
                             .equals(q.getComponent()))
                     {
@@ -322,10 +323,9 @@ public abstract class AbstractProbeRunner
             (afterBeginsC, definitions, new HashSet<PEPAComponent> ());
         for (GroupComponentPair hq : pairs)
         {
-            if (afterBeginsC.contains(hq.getComponent()))
+            if (afterBeginsC.contains (hq.getComponent ()))
             {
-                afterBegins.add
-                    (CombinedProductExpression.createMeanExpression
+                afterBegins.add (CombinedProductExpression.createMeanExpression
                         (new GPEPAState (hq)));
             }
         }
@@ -356,8 +356,9 @@ public abstract class AbstractProbeRunner
                 for (AbstractPrefix prefix : prefices)
                 {
                     if (prefix.getAction ().equals (action)
-                        && prefix.getImmediates ().contains ("begin"))
+                        && prefix.getImmediates ().contains (BEGIN_SIGNAL))
                     {
+                        if (prefix instanceof PassivePrefix) throw new Error("do pici");
                         AbstractExpression arate
                             = definitions.getApparentRateExpression
                                 (action, hc.getComponent());
@@ -397,7 +398,7 @@ public abstract class AbstractProbeRunner
                                     && prefix.getContinuation ()
                                         .equals(q.getComponent())
                                     && prefix.getImmediates ()
-                                        .contains("begin"))
+                                        .contains(BEGIN_SIGNAL))
                             {
                                 AbstractExpression arate
                                     = definitions.getApparentRateExpression
@@ -428,7 +429,7 @@ public abstract class AbstractProbeRunner
             if (!visited.contains(c))
             {
                 newFound.addAll
-                    (findClosureOnAnyActionsI (c, found, definitions, visited));
+                    (findClosureOnAnyActionsI (c, definitions, visited));
             }
         }
         found.addAll (newFound);
@@ -439,11 +440,11 @@ public abstract class AbstractProbeRunner
     }
 
     private Set<PEPAComponent> findClosureOnAnyActionsI
-        (PEPAComponent c, Set<PEPAComponent> found,
-             PEPAComponentDefinitions definitions, Set<PEPAComponent> visited)
+        (PEPAComponent c, PEPAComponentDefinitions definitions,
+         Set<PEPAComponent> visited)
     {
-        Set<PEPAComponent> newFound = new HashSet<PEPAComponent> ();
         visited.add (c);
+        Set<PEPAComponent> newFound = new HashSet<PEPAComponent> ();
         List<AbstractPrefix> prefices = c.getPrefixes (definitions);
         for (AbstractPrefix p : prefices)
         {
