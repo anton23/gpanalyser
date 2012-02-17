@@ -19,19 +19,18 @@ public class ODEProbeRunner extends AbstractProbeRunner
     public ODEProbeRunner ()
     {
         analysisType = PCTMCODEAnalysis.class;
-        postprocType = CPPODEAnalysisNumericalPostprocessor.class;
+        postprocessorType = CPPODEAnalysisNumericalPostprocessor.class;
     }
 
     @Override
     protected CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping,
-         GroupedModel model, Set<GPEPAState> stateObservers,
-         PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
+         Map<String, AbstractExpression> mapping, GroupedModel model,
+         Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
+         PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
-         double stopTime, double stepSize, int parameter,
-         double steadyStateTime)
+         ComponentId accepting, Constants constants, double stopTime,
+         double stepSize, int parameter, double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, null, stateObservers, statesCountExpressions, mapping,
@@ -76,13 +75,11 @@ public class ODEProbeRunner extends AbstractProbeRunner
     @Override
     protected CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping,
-         GroupedModel model, Set<GPEPAState> stateObservers,
-         PEPAComponentDefinitions mainDef,
+         Map<String, AbstractExpression> mapping, GroupedModel model,
+         Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
-         double stopTime, double stepSize, int parameter,
-         double steadyStateTime)
+         ComponentId accepting, Constants constants, double stopTime,
+         double stepSize, int parameter, double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, null, stateObservers, statesCountExpressions, mapping,
