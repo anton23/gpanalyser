@@ -26,7 +26,6 @@ public class SimProbeRunner extends AbstractProbeRunner
     protected CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping,
-         Set<String> countActionStrings,
          GroupedModel model, Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
@@ -115,7 +114,6 @@ public class SimProbeRunner extends AbstractProbeRunner
     protected CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping,
-         Set<String> countActionStrings,
          GroupedModel model, Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
