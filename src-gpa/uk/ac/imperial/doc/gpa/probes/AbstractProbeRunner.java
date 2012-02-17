@@ -34,7 +34,6 @@ public abstract class AbstractProbeRunner
     protected abstract CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping,
-         Set<String> countActionStrings,
          GroupedModel model, Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
@@ -45,7 +44,6 @@ public abstract class AbstractProbeRunner
     protected abstract CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping,
-         Set<String> countActionStrings,
          GroupedModel model, Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
@@ -111,14 +109,12 @@ public abstract class AbstractProbeRunner
         {
             case 1:
                 return steadyIndividual
-                    (statesCountExpressions, mapping,
-                        countActionStrings, model, stateObservers,
+                    (statesCountExpressions, mapping, model, stateObservers,
                         mainDef, altDef, definitionsMap, accepting,
                         constants, stopTime, stepSize, parameter, modePar);
             case 2:
                 return transientIndividual
-                    (statesCountExpressions, mapping,
-                        countActionStrings, model, stateObservers,
+                    (statesCountExpressions, mapping, model, stateObservers,
                         mainDef, definitionsMap, accepting,
                         constants, stopTime, stepSize, parameter, modePar);
             case 3:
@@ -145,7 +141,7 @@ public abstract class AbstractProbeRunner
          int start_time)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, false, stateObservers,
+            (model, countActionStrings, stateObservers,
                 statesCountExpressions, mapping, mainDef, constants,
                 stopTime, stepSize, parameter);
 
@@ -216,8 +212,7 @@ public abstract class AbstractProbeRunner
             expressions.add (crates.get (gp));
         }
 
-        return postprocessor.evaluateExpressions
-            (expressions, constants);
+        return postprocessor.evaluateExpressions (expressions, constants);
     }
 
     protected void assignNewCounts
@@ -228,8 +223,8 @@ public abstract class AbstractProbeRunner
          Map<String, AbstractExpression> mapping,
          double[] matchVal, double[] origVal)
     {
-        LinkedHashMap<GroupComponentPair, AbstractExpression> newCounts
-            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+        Map<GroupComponentPair, AbstractExpression> newCounts
+            = new HashMap<GroupComponentPair, AbstractExpression> ();
         int i = 0;
         for (GroupComponentPair gc : crates.keySet ())
         {
@@ -256,7 +251,7 @@ public abstract class AbstractProbeRunner
             ++i;
         }
 
-        // setting initial number of components for next analysis
+        // setting initial number of components for the next analysis
         Map<String, LabelledComponentGroup> lgs = model.getComponentGroups ();
         for (LabelledComponentGroup lg : lgs.values ())
         {
@@ -295,32 +290,25 @@ public abstract class AbstractProbeRunner
         (Set<GroupComponentPair> pairs, PEPAComponentDefinitions definitions,
          NumericalPostprocessor postprocessor, Constants constants)
     {
-        Set<AbstractExpression> afterBegins
-            = new HashSet<AbstractExpression> ();
         Set<PEPAComponent> afterBeginsC = new HashSet<PEPAComponent> ();
-        for (GroupComponentPair q : pairs)
+        for (GroupComponentPair hq : pairs)
         {
-            for (GroupComponentPair hq : pairs)
+            Collection<AbstractPrefix> prefices
+                = hq.getComponent ().getPrefixes (definitions);
+            for (AbstractPrefix prefix : prefices)
             {
-                Collection<AbstractPrefix> prefices
-                        = hq.getComponent ().getPrefixes (definitions);
-                for (AbstractPrefix prefix : prefices)
+                if (prefix.getImmediates ().contains (BEGIN_SIGNAL))
                 {
-                    if (prefix.getImmediates ().contains (BEGIN_SIGNAL)
-                            && prefix.getContinuation ()
-                            .equals(q.getComponent()))
-                    {
-                        afterBegins.add
-                            (CombinedProductExpression.createMeanExpression
-                                (new GPEPAState(q)));
-                        afterBeginsC.add (q.getComponent ());
-                    }
+                    afterBeginsC.add (prefix.getContinuation ());
                 }
             }
         }
 
         findClosureOnAnyActions
             (afterBeginsC, definitions, new HashSet<PEPAComponent> ());
+
+        List<AbstractExpression> afterBegins
+                = new ArrayList<AbstractExpression> ();
         for (GroupComponentPair hq : pairs)
         {
             if (afterBeginsC.contains (hq.getComponent ()))
@@ -350,7 +338,7 @@ public abstract class AbstractProbeRunner
             Collection<String> actions = hc.getComponent ()
                 .getActions (definitions);
             Collection<AbstractPrefix> prefices
-                = hc.getComponent ().getPrefixes(definitions);
+                = hc.getComponent ().getPrefixes (definitions);
             for (String action : actions)
             {
                 for (AbstractPrefix prefix : prefices)
@@ -358,7 +346,6 @@ public abstract class AbstractProbeRunner
                     if (prefix.getAction ().equals (action)
                         && prefix.getImmediates ().contains (BEGIN_SIGNAL))
                     {
-                        if (prefix instanceof PassivePrefix) throw new Error("do pici");
                         AbstractExpression arate
                             = definitions.getApparentRateExpression
                                 (action, hc.getComponent());
@@ -396,13 +383,13 @@ public abstract class AbstractProbeRunner
                         {
                             if (prefix.getAction ().equals (action)
                                     && prefix.getContinuation ()
-                                        .equals(q.getComponent())
+                                        .equals (q.getComponent ())
                                     && prefix.getImmediates ()
-                                        .contains(BEGIN_SIGNAL))
+                                        .contains (BEGIN_SIGNAL))
                             {
                                 AbstractExpression arate
                                     = definitions.getApparentRateExpression
-                                        (action, hc.getComponent());
+                                        (action, hc.getComponent ());
                                 AbstractExpression crate
                                     = model.getComponentRateExpression
                                         (action, definitions, hc);
@@ -426,7 +413,7 @@ public abstract class AbstractProbeRunner
         Set<PEPAComponent> newFound = new HashSet<PEPAComponent> ();
         for (PEPAComponent c : found)
         {
-            if (!visited.contains(c))
+            if (!visited.contains (c))
             {
                 newFound.addAll
                     (findClosureOnAnyActionsI (c, definitions, visited));
@@ -474,7 +461,7 @@ public abstract class AbstractProbeRunner
 
     protected NumericalPostprocessor runTheProbedSystem
         (GroupedModel model, Set<String> countActionsSet,
-             boolean countActions, Collection<GPEPAState> stateObservers,
+             Collection<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
              PEPAComponentDefinitions definitions, Constants constants,
@@ -490,7 +477,7 @@ public abstract class AbstractProbeRunner
         }
 
         Set<String> initActions = countActionsSet;
-        if (countActions)
+        if (countActionsSet != null)
         {
             for (String action : countActionsSet)
             {

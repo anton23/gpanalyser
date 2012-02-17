@@ -26,7 +26,6 @@ public class ODEProbeRunner extends AbstractProbeRunner
     protected CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping,
-         Set<String> countActionStrings,
          GroupedModel model, Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
@@ -35,9 +34,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
          double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, false, stateObservers,
-                statesCountExpressions, mapping, mainDef, constants,
-                steadyStateTime, stepSize, parameter);
+            (model, null, stateObservers, statesCountExpressions, mapping,
+                mainDef, constants, steadyStateTime, stepSize, parameter);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
 
@@ -63,9 +61,9 @@ public class ODEProbeRunner extends AbstractProbeRunner
         {
             stateObservers.add (new GPEPAState (pair));
         }
-        postprocessor = runTheProbedSystem (model, countActionStrings, false,
-                stateObservers, statesCountExpressions, mapping, altDef,
-                constants, stopTime, stepSize, parameter);
+        postprocessor = runTheProbedSystem
+            (model, null, stateObservers, statesCountExpressions, mapping,
+                altDef, constants, stopTime, stepSize, parameter);
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
@@ -79,7 +77,6 @@ public class ODEProbeRunner extends AbstractProbeRunner
     protected CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping,
-         Set<String> countActionStrings,
          GroupedModel model, Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
@@ -88,15 +85,15 @@ public class ODEProbeRunner extends AbstractProbeRunner
          double steadyStateTime)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActionStrings, false, stateObservers,
-                statesCountExpressions, mapping, mainDef, constants,
-                steadyStateTime + stepSize, stepSize, parameter);
-        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
-
-        double[][] K = getProbabilitiesComponentStateAfterBegin
-            (pairs, mainDef, postprocessor, constants);
+            (model, null, stateObservers, statesCountExpressions, mapping,
+                mainDef, constants, steadyStateTime + stepSize,
+                stepSize, parameter);
         double[][] steadyVal = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
+
+        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
+        double[][] K = getProbabilitiesComponentStateAfterBegin
+            (pairs, mainDef, postprocessor, constants);
 
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
@@ -119,8 +116,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             Map<String, AbstractExpression> mappingS
                 = new HashMap<String, AbstractExpression> ();
             NumericalPostprocessor postprocessorS = runTheProbedSystem
-                (model, countActionStrings, false, stateObservers,
-                    statesCountExpressionsS, mappingS,
+                (model, null, stateObservers, statesCountExpressionsS, mappingS,
                     mainDef, constants, stopTime, stepSize, parameter);
             double[][] obtainedMeasurements = postprocessorS.evaluateExpressions
                 (statesCountExpressionsS, constants);
