@@ -19,7 +19,7 @@ public class SimProbeRunner extends AbstractProbeRunner
     public SimProbeRunner ()
     {
         analysisType = PCTMCSimulation.class;
-        postprocType = SimulationAnalysisNumericalPostprocessor.class;
+        postprocessorType = SimulationAnalysisNumericalPostprocessor.class;
     }
 
     @Override

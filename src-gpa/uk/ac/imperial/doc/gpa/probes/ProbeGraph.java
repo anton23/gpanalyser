@@ -44,7 +44,7 @@ public class ProbeGraph extends JFrame
     {
         JFreeChart jfreechart = ChartFactory.createXYLineChart
                 ("CDF", "Time", "Probability", times, PlotOrientation.VERTICAL,
-                        false, false, false);
+                        true, false, false);
         XYPlot xyPlot = (XYPlot) jfreechart.getPlot ();
         xyPlot.setDomainCrosshairVisible (true);
         xyPlot.setRangeCrosshairVisible(true);
