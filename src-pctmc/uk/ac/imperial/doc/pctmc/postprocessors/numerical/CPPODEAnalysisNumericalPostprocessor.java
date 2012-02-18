@@ -51,10 +51,10 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
 		assert(odeAnalysis!=null);
 		PCTMCCPPImplementationProvider cppImplementation = new PCTMCCPPImplementationProvider();
-		CPPODEAnalysisNumericalPostprocessor ret = new CPPODEAnalysisNumericalPostprocessor(stopTime, stepSize, density, odeAnalysis, cppImplementation
-				.getPreprocessedODEImplementation(
+		return new CPPODEAnalysisNumericalPostprocessor
+                (stopTime, stepSize, density, odeAnalysis,
+                        cppImplementation.getPreprocessedODEImplementation(
 						odeAnalysis.getOdeMethod(), constants, momentIndex));
-		return ret;
 	}
 
 	@Override
@@ -63,20 +63,23 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 	}
 
 	@Override
-	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
-		super.prepare(analysis, constants);
-		odeAnalysis = null;
-		if (analysis instanceof PCTMCODEAnalysis) {
-			this.odeAnalysis = (PCTMCODEAnalysis) analysis;
-			PCTMCCPPImplementationProvider cppImplementation = new PCTMCCPPImplementationProvider();
-			preprocessedImplementation = cppImplementation
-					.getPreprocessedODEImplementation(
-							odeAnalysis.getOdeMethod(), constants, momentIndex);
-		} else {
-			throw new AssertionError("ODE postprocessor attached to an incompatible analysis " + analysis.toString());
-		}
-		
-	}
+    public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
+        super.prepare(analysis, constants);
+        odeAnalysis = null;
+        if (analysis instanceof PCTMCODEAnalysis) {
+            this.odeAnalysis = (PCTMCODEAnalysis) analysis;
+            if (preprocessedImplementation == null)
+            {
+                PCTMCCPPImplementationProvider cppImplementation
+                        = new PCTMCCPPImplementationProvider();
+                preprocessedImplementation = cppImplementation
+                        .getPreprocessedODEImplementation(
+                                odeAnalysis.getOdeMethod(), constants, momentIndex);
+            }
+        } else {
+            throw new AssertionError("ODE postprocessor attached to an incompatible analysis " + analysis.toString());
+        }
+    }
 
 	private CPPODEsPreprocessed preprocessedImplementation;
 
@@ -144,9 +147,8 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
     public AbstractExpressionEvaluator getExpressionEvaluator(
             final List<AbstractExpression> plotExpressions, Constants constants) {
         EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
-        AbstractExpressionEvaluator evaluator = new PCTMCCPPImplementationProvider()
+        return new PCTMCCPPImplementationProvider()
                 .getEvaluatorImplementation(updaterMethod, evaluatorClassName,
                         constants, momentIndex,generalExpectationIndex);
-        return evaluator;
     }
 }
