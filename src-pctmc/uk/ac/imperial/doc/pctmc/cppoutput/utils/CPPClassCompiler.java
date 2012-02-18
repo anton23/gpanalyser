@@ -26,7 +26,7 @@ public class CPPClassCompiler {
     private static void winCompile
             (String libName, String nativeFile, String javaInclude) {
         String command = "g++ -D_JNI_IMPLEMENTATION_ "
-            + "-Wl,--kill-at -shared -Wall -o "
+            + "-Wl,--kill-at -shared -Wall -O1 -o "
             + libName + " " + nativeFile + ".cpp "
             + " -I\"" + javaInclude + "include\""
             + " -I\"" + javaInclude + "include/win32\"";

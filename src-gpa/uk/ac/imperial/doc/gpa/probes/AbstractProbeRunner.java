@@ -133,8 +133,9 @@ public abstract class AbstractProbeRunner
          double stopTime, double stepSize, int parameter, double modePar)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, countActions, stateObservers, statesCountExpressions,
-                mapping, mainDef, constants, stopTime, stepSize, parameter);
+            (model, mainDef, constants, countActions, stateObservers,
+                new ArrayList<CombinedPopulationProduct>(),
+                statesCountExpressions, mapping, stopTime, stepSize, parameter);
 
         return new CDF (null);
     }
@@ -277,6 +278,7 @@ public abstract class AbstractProbeRunner
         return cdf;
     }
 
+    // assumes probes without cycles
     protected double[][] getProbabilitiesComponentStateAfterBegin
         (Set<GroupComponentPair> pairs, PEPAComponentDefinitions definitions,
          NumericalPostprocessor postprocessor, Constants constants)
@@ -315,9 +317,9 @@ public abstract class AbstractProbeRunner
     }
 
     protected void getProbabilitiesAfterBegin
-            (GroupedModel model, PEPAComponentDefinitions definitions,
-             LinkedHashMap<GroupComponentPair, AbstractExpression> result)
-    {
+        (GroupedModel model, PEPAComponentDefinitions definitions,
+         LinkedHashMap<GroupComponentPair, AbstractExpression> result)
+{
         Set<GroupComponentPair> pairs
             = model.getGroupComponentPairs (definitions);
 
@@ -399,7 +401,7 @@ public abstract class AbstractProbeRunner
 
     protected void findClosureOnAnyActions
         (Set<PEPAComponent> found, PEPAComponentDefinitions definitions,
-            Set<PEPAComponent> visited)
+         Set<PEPAComponent> visited)
     {
         Set<PEPAComponent> newFound = new HashSet<PEPAComponent> ();
         for (PEPAComponent c : found)
@@ -451,15 +453,14 @@ public abstract class AbstractProbeRunner
     }
 
     protected NumericalPostprocessor runTheProbedSystem
-        (GroupedModel model, Set<String> countActionsSet,
+            (GroupedModel model, PEPAComponentDefinitions definitions,
+             Constants constants, Set<String> countActionsSet,
              Collection<GPEPAState> stateObservers,
+             List<CombinedPopulationProduct> moments,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
-             PEPAComponentDefinitions definitions, Constants constants,
              double stopTime, double stepSize, int parameter)
     {
-        List<CombinedPopulationProduct> moments
-            = new ArrayList<CombinedPopulationProduct> ();
         for (GPEPAState state : stateObservers)
         {
             Multiset<State> states = HashMultiset.create ();
@@ -488,8 +489,8 @@ public abstract class AbstractProbeRunner
 
         List<PlotDescription> plotDescriptions
             = new LinkedList<PlotDescription> ();
-        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
-        analysis.setUsedMoments (moments);
+        AbstractPCTMCAnalysis analysis
+            = getPreparedAnalysis (pctmc, moments, constants);
 
         /*
             Set<String> cooperation = new HashSet<String> ();
@@ -507,9 +508,15 @@ public abstract class AbstractProbeRunner
 
         NumericalPostprocessor postprocessor
             = getPostprocessor (stopTime, stepSize, parameter);
-        analysis.addPostprocessor (postprocessor);
-        analysis.prepare (constants);
-        analysis.notifyPostprocessors (constants, plotDescriptions);
+        return runPostProcessor (analysis, postprocessor, constants);
+    }
+
+    protected NumericalPostprocessor runPostProcessor
+        (AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor,
+         Constants constants)
+    {
+        postprocessor.prepare (analysis, constants);
+        postprocessor.calculateDataPoints (constants);
         return postprocessor;
     }
 
@@ -540,7 +547,7 @@ public abstract class AbstractProbeRunner
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            e.printStackTrace ();
         }
         return null;
     }
@@ -557,5 +564,14 @@ public abstract class AbstractProbeRunner
             ex.printStackTrace ();
         }
         return null;
+    }
+
+    protected AbstractPCTMCAnalysis getPreparedAnalysis (PCTMC pctmc,
+            List<CombinedPopulationProduct> moments, Constants constants)
+    {
+        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
+        analysis.setUsedMoments (moments);
+        analysis.prepare (constants);
+        return analysis;
     }
 }
