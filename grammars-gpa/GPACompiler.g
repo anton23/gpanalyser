@@ -70,6 +70,7 @@ import PCTMCCompilerPrototype;
 
 	import uk.ac.imperial.doc.gpa.fsm.*;
 	import uk.ac.imperial.doc.gpa.probes.*;
+	import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.*;
 }
 
 @members {
@@ -430,7 +431,7 @@ rl_single [NFAState current_state, Set<ITransition> allActions]
 		| ^(RL_SINGLE (^(ACTION rs=immediateActions [starting_state]
 						(op=rl_un_operators
 							[starting_state, $rs.reached_state,
-								$allActions])?)))
+							$allActions])?)))
 			{
 				if (op != null)
 				{
@@ -447,6 +448,13 @@ rl_single [NFAState current_state, Set<ITransition> allActions]
 				$current_state.setAccepting (false);
 			} ;
 
+rl_bracketed  [NFAState current_state, Set<ITransition> allActions]
+	returns [NFAState reached_state]
+	:	^(RL_BRACKETED rl [$current_state, $allActions])
+			{
+				$reached_state = $rl.reached_state;
+			} ;
+
 rl [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state]
 @init
@@ -457,7 +465,8 @@ rl [NFAState current_state, Set<ITransition> allActions]
 	:	^(RL rl_single [new_starting_state1, $allActions]
 		(rl2=rl [new_starting_state2, $allActions] op=rl_bin_operators
 				[new_starting_state1, $rl_single.reached_state,
-				new_starting_state2, $rl2.reached_state, $allActions])?)
+				new_starting_state2, $rl2.reached_state, $allActions,
+				null, null])?)
 			{
 				if (op != null)
 				{
@@ -477,8 +486,10 @@ rl [NFAState current_state, Set<ITransition> allActions]
 
 rl_bin_operators [NFAState starting_state1,
 	NFAState current_state1, NFAState starting_state2,
-	NFAState current_state2, Set<ITransition> allActions]
-	returns [NFAState starting_state, NFAState reached_state]
+	NFAState current_state2, Set<ITransition> allActions,
+	AbstractUExpression U1, AbstractUExpression U2]
+	returns [NFAState starting_state, NFAState reached_state,
+		AbstractUExpression U]
 	:	^(BINARY_OP COMMA)
 			{
 				$starting_state = new NFAState (t);
@@ -488,6 +499,7 @@ rl_bin_operators [NFAState starting_state1,
 					starting_state2);
 				$current_state1.setAccepting (false);
 				$reached_state = $current_state2;
+				$U = new SequenceUExpression ($U1, $U2);
 			}
 		| ^(BINARY_OP PAR)
 			{
@@ -504,6 +516,7 @@ rl_bin_operators [NFAState starting_state1,
 					$reached_state);
 				$current_state2.addTransition (new EmptyTransition (),
 					$reached_state);
+				$U = new EitherUExpression ($U1, $U2);
 			}
 		| ^(BINARY_OP SEMI)
 			{
@@ -519,6 +532,7 @@ rl_bin_operators [NFAState starting_state1,
 				$reached_state = new NFAState (t);
 
 				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
+				$U = new BothUExpression ($U1, $U2);
 			}
 		| ^(BINARY_OP DIVIDE)
 			{
@@ -591,8 +605,7 @@ rl_un_operators [NFAState sub_starting_state,
 					{
 						NFAState sub = deepCloner.deepClone
 							($sub_starting_state);
-						currentLast.addTransition
-							(new EmptyTransition (), sub);
+						currentLast.addTransition (new EmptyTransition (), sub);
 						currentLast.setAccepting (true);
 						currentLast
 							= NFADetectors.detectSingleAcceptingState (sub);
@@ -676,13 +689,6 @@ times [NFAState sub_starting_state, NFAState sub_current_state]
 				$sub_current_state.setAccepting (false);
 			} ;
 
-rl_bracketed  [NFAState current_state, Set<ITransition> allActions]
-	returns [NFAState reached_state]
-	:	^(RL_BRACKETED rl [$current_state, $allActions])
-			{
-				$reached_state = $rl.reached_state;
-			} ;
-
 signal returns [String name]
 	:	^(SIGNAL signal_name=LOWERCASENAME)
 			{
@@ -709,7 +715,7 @@ immediateActions [NFAState current_state]
 			} ;
 
 eventual_specific_action [NFAState current_state]
-	returns [NFAState reached_state]
+	returns [NFAState reached_state, GPEPAActionCount action]
 @init
 {
 	NFAState new_starting_state1 = new NFAState (t);
@@ -735,10 +741,11 @@ eventual_specific_action [NFAState current_state]
 				$specific_action.reached_state.setAccepting (false);
 				$reached_state = $t2.reached_state;
 				$reached_state.setAccepting (true);
+				$action = new GPEPAActionCount ($specific_action.action);
 			} ;
 
 subsequent_specific_action [NFAState current_state]
-	returns [NFAState reached_state]
+	returns [NFAState reached_state, String action]
 	:	^(ACTION_NAME name=LOWERCASENAME)
 			{
 				$reached_state = new NFAState (t);
@@ -746,6 +753,7 @@ subsequent_specific_action [NFAState current_state]
 				$current_state.addTransition (new Transition ($name.text),
 					$reached_state);
 				$current_state.setAccepting (false);
+				$action = $name.text;
 			} ;
 
 any_action [NFAState current_state]
@@ -760,7 +768,7 @@ any_action [NFAState current_state]
 			} ;
 
 empty_action [NFAState current_state]
-	returns [NFAState reached_state]
+	returns [NFAState reached_state, AbstractUExpression U]
 	:	EMPTY
 			{
 				$reached_state = new NFAState (t);
@@ -768,6 +776,7 @@ empty_action [NFAState current_state]
 				$current_state.addTransition (new EmptyTransition (),
 					$reached_state);
 				$current_state.setAccepting (false);
+				$U = new BasicUExpression ();
 			} ;
 
 // Global
@@ -808,10 +817,12 @@ probeg [GlobalProbe gprobe, Set<ITransition> allActions]
 				NFAUtils.removeAnyTransitions
 					($probe_spec::allActions, starting_state1);
 				$gprobe.setStartingState (starting_state1);
+				$gprobe.setU1 ($start_actions.U);
+				$gprobe.setU2 ($stop_actions.U);
 			} ;
 
 rg [NFAState current_state, Set<ITransition> allActions]
-	returns [NFAState reached_state]
+	returns [NFAState reached_state, AbstractUExpression U]
 @init
 {
 	NFAState new_starting_state1 = new NFAState (t);
@@ -824,9 +835,10 @@ rg [NFAState current_state, Set<ITransition> allActions]
 	                new_starting_state1.setPredicate ($pred1.predicate);
 	            }
 	        }
-		(rg2=rg [new_starting_state2, $allActions] op=rl_bin_operators
+			(rg2=rg [new_starting_state2, $allActions] op=rl_bin_operators
 				[new_starting_state1, $rl_single.reached_state,
-				new_starting_state2, $rg2.reached_state, $allActions])?)
+				new_starting_state2, $rg2.reached_state,
+				$allActions, null, null])?)
 			{
 				if (op != null)
 				{
@@ -840,7 +852,62 @@ rg [NFAState current_state, Set<ITransition> allActions]
 						new_starting_state1);
 					$reached_state = $rl_single.reached_state;
 				}
+			}
+		// for fluid flow, we need no state machine
+		| ^(RG rg_sub pred1=main_pred?
+			{
+				$U = $rg_sub.U;
+				if (pred1 != null)
+				{
+					new_starting_state1.setPredicate ($pred1.predicate);
+					$U =new PredUExpression ($U, $pred1.predicate);
+				}
+			}
+			(rg2=rg [new_starting_state2, $allActions] op=rl_bin_operators
+				[new_starting_state1, new NFAState (t),
+				new_starting_state2, $rg2.reached_state,
+				$allActions, $U, $rg2.U])?)
+			{
+				if (op != null)
+				{
+					$current_state.addTransition (new EmptyTransition (),
+						$op.starting_state);
+					$reached_state = $op.reached_state;
+					$U = $op.U;
+				}
+				else
+				{
+					$current_state.addTransition (new EmptyTransition (),
+						new_starting_state1);
+					$reached_state = new NFAState (t);
+				}
 			} ;
+
+rg_sub returns [NFAState reached_state, AbstractUExpression U]
+	:	^(RGA_ALL rga expr=expression?)
+			{
+				int times = 1;
+				if (expr != null)
+				{
+					ExpressionEvaluatorWithConstants eval
+						= new ExpressionEvaluatorWithConstants (mainConstants);
+					$expr.e.accept (eval);
+					times = (int) eval.getResult ();
+				}
+				$U = new ActionsUExpression ($rga.U, times);
+			} ;
+
+rga returns [UPrimeExpression U]
+@init
+{
+	Set<GPEPAActionCount> actions = new HashSet<GPEPAActionCount> ();
+}
+	:	^(RGA (a=eventual_specific_action [new NFAState (t)]
+			{actions.add ($a.action);}) (PAR b=eventual_specific_action
+			[new NFAState (t)] {actions.add ($b.action);})*)
+		{
+			$U = new UPrimeExpression (actions);
+		} ;
 
 // Predicates for global
 main_pred returns [NFAPredicate predicate]
@@ -982,9 +1049,9 @@ scope
 }
 	:	^(PROBE_DEF	odeSettings
 				{
-						$probe_def::stop_time = $odeSettings.stopTime;
-						$probe_def::step_size = $odeSettings.stepSize;
-						$probe_def::parameter = $odeSettings.density;
+					$probe_def::stop_time = $odeSettings.stopTime;
+					$probe_def::step_size = $odeSettings.stepSize;
+					$probe_def::parameter = $odeSettings.density;
 				}
 			md=mode mt=probe_spec [false, $md.chosenMode, $md.par, $plot])
 			{
@@ -992,10 +1059,9 @@ scope
 			}
 		| ^(SIM_PROBE_DEF simulationSettings
 				{
-						$probe_def::stop_time = $simulationSettings.stopTime;
-						$probe_def::step_size = $simulationSettings.stepSize;
-						$probe_def::parameter
-							= $simulationSettings.replications;
+					$probe_def::stop_time = $simulationSettings.stopTime;
+					$probe_def::step_size = $simulationSettings.stepSize;
+					$probe_def::parameter = $simulationSettings.replications;
 				}
 			md=mode mt=probe_spec [true, $md.chosenMode, $md.par, $plot])
 			{
