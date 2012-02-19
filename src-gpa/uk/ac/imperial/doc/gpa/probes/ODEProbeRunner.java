@@ -175,15 +175,13 @@ public class ODEProbeRunner extends AbstractProbeRunner
                 statesCountExpressions, mapping, stopTime, stepSize, parameter);
         double states[][] = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
-        AbstractUExpression u1 = gprobe.getU1 ();
-        AbstractUExpression u2 = gprobe.getU2 ();
+        AbstractUExpression u = gprobe.getU ();
         UExpressionVisitor visitor = new UExpressionVisitor
             (states, stepSize, statesCountExpressions, mapping);
 
-        u1.accept (visitor, 0);
-        u2.accept (visitor, u1.getEvaluatedTime ());
+        u.accept (visitor, 0);
 
-        double pointMass = u2.getEvaluatedTime ();
+        double pointMass = u.getEvaluatedTime ();
         double[] cdf = new double[(int) (stopTime / stepSize)];
         for (double time = 0; time < stopTime; time += stepSize)
         {

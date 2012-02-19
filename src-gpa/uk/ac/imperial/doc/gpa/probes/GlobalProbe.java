@@ -15,26 +15,16 @@ public class GlobalProbe implements IProbe
 	private NFAState startingState = null;
     private NFAState currentState = null;
 	private String name;
-    private AbstractUExpression u1, u2;
+    private AbstractUExpression u;
 
-    public void setU1 (AbstractUExpression u1)
+    public void setU (AbstractUExpression u)
     {
-        this.u1 = u1;
+        this.u = u;
     }
 
-    public AbstractUExpression getU1 ()
+    public AbstractUExpression getU ()
     {
-        return u1;
-    }
-
-    public void setU2 (AbstractUExpression u2)
-    {
-        this.u2 = u2;
-    }
-
-    public AbstractUExpression getU2 ()
-    {
-        return u2;
+        return u;
     }
 
     public String getName ()
