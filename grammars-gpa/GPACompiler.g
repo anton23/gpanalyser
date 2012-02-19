@@ -776,7 +776,6 @@ empty_action [NFAState current_state]
 				$current_state.addTransition (new EmptyTransition (),
 					$reached_state);
 				$current_state.setAccepting (false);
-				$U = new BasicUExpression ();
 			} ;
 
 // Global
@@ -906,8 +905,16 @@ rga returns [UPrimeExpression U]
 			{actions.add ($a.action);}) (PAR b=eventual_specific_action
 			[new NFAState (t)] {actions.add ($b.action);})*)
 		{
+			actions.remove (null);
 			$U = new UPrimeExpression (actions);
 		} ;
+
+rga_action [NFAState dummy_state] returns [GPEPAActionCount action]
+	: eventual_specific_action [dummy_state]
+		{
+			$action = $eventual_specific_action.action;
+		}
+	| empty_action [dummy_state] ;
 
 // Predicates for global
 main_pred returns [NFAPredicate predicate]

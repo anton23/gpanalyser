@@ -19,7 +19,7 @@ public class UPrimeExpression extends AbstractUExpression
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals (Object o)
     {
         if (this == o) return true;
         if (o == null || getClass () != o.getClass ()) return false;
@@ -38,6 +38,11 @@ public class UPrimeExpression extends AbstractUExpression
     @Override
     public void accept (UExpressionVisitor v, double time)
     {
-        v.visit (this, time);
+        accept (v, time, 1);
+    }
+
+    public void accept (UExpressionVisitor v, double time, int times)
+    {
+        v.visit (this, time, times);
     }
 }
