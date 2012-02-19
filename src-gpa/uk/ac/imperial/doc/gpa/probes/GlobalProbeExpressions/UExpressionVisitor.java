@@ -63,30 +63,31 @@ public class UExpressionVisitor
                 (evalPred (expression.getPredicate(), R.getEvaluatedTime()));
     }
 
-    public void visit (BasicUExpression expression, double time)
-    {
-        expression.setEvaluatedTime (time);
-    }
-
     public void visit (ActionsUExpression expression, double time)
     {
         UPrimeExpression uprime = expression.getActions ();
-        for (int i = 0; i < expression.getTimes (); ++i)
-        {
-            uprime.accept (this, time);
-            time = uprime.getEvaluatedTime ();
-        }
+        uprime.accept (this, time, expression.getTimes ());
+        time = uprime.getEvaluatedTime ();
         expression.setEvaluatedTime (time);
     }
 
-    public void visit (UPrimeExpression expression, double time)
+    public void visit (UPrimeExpression expression, double time, int times)
     {
-        double currentTime = time + stepSize;
-        while (!enoughActions (expression.getActions (), currentTime, time))
+        Set<GPEPAActionCount> actions = expression.getActions ();
+        if (actions.size () == 0)
         {
-            currentTime += stepSize;
+            expression.setEvaluatedTime (time);
         }
-        expression.setEvaluatedTime (currentTime);
+        else
+        {
+            double newTime = time + stepSize;
+            while (!enoughActions (expression.getActions (),
+                    newTime, time, times))
+            {
+                newTime += stepSize;
+            }
+            expression.setEvaluatedTime (newTime);
+        }
     }
 
     private double evalPred (NFAPredicate predicate, double startingTime)
@@ -99,18 +100,12 @@ public class UExpressionVisitor
         return startingTime;
     }
 
-    private boolean enoughActions
-        (Set<GPEPAActionCount> actions, double time, double startingTime)
+    private boolean enoughActions (Set<GPEPAActionCount> actions, double time,
+            double startingTime, int n)
     {
         double atCurrent = 0, atStart = 0;
-        boolean empty = false;
         for (GPEPAActionCount action : actions)
         {
-            if (action == null)
-            {
-                empty = true;
-                break;
-            }
             atCurrent += states[getTimeIndex (time)]
                     [statesCountExpressions.indexOf
                     (mapping.get (action.getName ()))];
@@ -119,7 +114,7 @@ public class UExpressionVisitor
                     (mapping.get(action.getName ()))];
         }
 
-        return empty || (atCurrent - atStart) > 1;
+        return (atCurrent - atStart) >= n;
     }
 
     private int getTimeIndex (double time)
