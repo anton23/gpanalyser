@@ -1,6 +1,8 @@
 package uk.ac.imperial.doc.gpa.probes;
 
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
+import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.AbstractUExpression;
+import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.UExpressionVisitor;
 import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -158,4 +160,37 @@ public class ODEProbeRunner extends AbstractProbeRunner
 
         return new CDF (uncCdf);
     }
+
+    @Override
+    protected CDF globalPassages
+        (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping, Set<String> countActions,
+         Constants constants, PEPAComponentDefinitions mainDef,
+         double stopTime, double stepSize, int parameter)
+    {
+        NumericalPostprocessor postprocessor = runTheProbedSystem
+            (model, mainDef, constants, countActions, stateObservers,
+                new ArrayList<CombinedPopulationProduct>(),
+                statesCountExpressions, mapping, stopTime, stepSize, parameter);
+        double states[][] = postprocessor.evaluateExpressions
+            (statesCountExpressions, constants);
+        AbstractUExpression u1 = gprobe.getU1 ();
+        AbstractUExpression u2 = gprobe.getU2 ();
+        UExpressionVisitor visitor = new UExpressionVisitor
+            (states, stepSize, statesCountExpressions, mapping);
+
+        u1.accept (visitor, 0);
+        u2.accept (visitor, u1.getEvaluatedTime ());
+
+        double pointMass = u2.getEvaluatedTime ();
+        double[] cdf = new double[(int) (stopTime / stepSize)];
+        for (double time = 0; time < stopTime; time += stepSize)
+        {
+            int i = (int) (time / stepSize);
+            cdf[i] = (pointMass >= time) ? 1 : 0;
+        }
+        return new CDF (cdf);
+    }
+
 }

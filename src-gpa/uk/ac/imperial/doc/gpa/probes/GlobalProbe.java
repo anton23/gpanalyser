@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.gpa.probes;
 import com.google.common.collect.Multimap;
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
 import uk.ac.imperial.doc.gpa.fsm.NFAState;
+import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.AbstractUExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
 import java.util.List;
@@ -14,8 +15,29 @@ public class GlobalProbe implements IProbe
 	private NFAState startingState = null;
     private NFAState currentState = null;
 	private String name;
+    private AbstractUExpression u1, u2;
 
-	public String getName ()
+    public void setU1 (AbstractUExpression u1)
+    {
+        this.u1 = u1;
+    }
+
+    public AbstractUExpression getU1 ()
+    {
+        return u1;
+    }
+
+    public void setU2 (AbstractUExpression u2)
+    {
+        this.u2 = u2;
+    }
+
+    public AbstractUExpression getU2 ()
+    {
+        return u2;
+    }
+
+    public String getName ()
 	{
 		return name;
 	}

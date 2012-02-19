@@ -50,7 +50,14 @@ public abstract class AbstractProbeRunner
          ComponentId accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
          double steadyStateTime);
-    
+
+    protected abstract CDF globalPassages
+        (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping, Set<String> countActions,
+         Constants constants, PEPAComponentDefinitions mainDef,
+         double stopTime, double stepSize, int parameter);
+
     public CDF executeProbedModel
         (GlobalProbe gprobe, GroupedModel model,
          Set<GPEPAState> stateObservers,
@@ -118,78 +125,12 @@ public abstract class AbstractProbeRunner
                 return globalPassages
                     (gprobe, model, stateObservers, statesCountExpressions,
                         mapping, countActions, constants, mainDef,
-                        definitionsMap, stopTime, stepSize, parameter, modePar);
+                        stopTime, stepSize, parameter);
             default:
                 return null;
         }
     }
 
-    private CDF globalPassages
-        (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
-         List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, Set<String> countActions,
-         Constants constants, PEPAComponentDefinitions mainDef,
-         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         double stopTime, double stepSize, int parameter, double modePar)
-    {
-        NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, mainDef, constants, countActions, stateObservers,
-                new ArrayList<CombinedPopulationProduct>(),
-                statesCountExpressions, mapping, stopTime, stepSize, parameter);
-
-        return new CDF (null);
-    }
-/*
-    private int runGlobalProbe
-            (double[][] data, GlobalProbe gprobe,
-             List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> mapping, int start_time,
-             boolean repeating)
-    {
-        double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
-        Collection<ProbeTime> measuredTimes = new ArrayList<ProbeTime> ();
-        double tempStart = -1;
-
-        // observing wih global probe
-        int i = start_time;
-        while (i < data.length)
-        {
-            Set<ITransition> availableTransitions
-                    = gprobe.getAvailableTransitions ();
-            for (ITransition transition : availableTransitions)
-            {
-                int index = statesCountExpressions.indexOf
-                        (mapping.get (transition.toString ()));
-                if (Math.floor (actionsExecuted [index])
-                        < Math.floor (data[i][index]))
-                {
-                    actionsExecuted [index] = data[i][index];
-                    ITransition lastExecuted =
-                            gprobe.advanceWithTransition (transition,
-                                    statesCountExpressions, mapping, data[i]);
-                    if (lastExecuted != null)
-                    {
-                        if (lastExecuted.toString ().equals ("start"))
-                        {
-                            tempStart = i;
-                        }
-                        else if (lastExecuted.toString ().equals ("stop"))
-                        {
-                            measuredTimes.add (new ProbeTime (tempStart, i));
-                            if (!repeating)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            ++i;
-        }
-
-        return i;
-    }
-*/
     protected double[][] getStartingStates (GroupedModel model,
              PEPAComponentDefinitions definitions, Constants constants,
              NumericalPostprocessor postprocessor,
@@ -486,9 +427,6 @@ public abstract class AbstractProbeRunner
 
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
         //System.out.println (pctmc);
-
-        List<PlotDescription> plotDescriptions
-            = new LinkedList<PlotDescription> ();
         AbstractPCTMCAnalysis analysis
             = getPreparedAnalysis (pctmc, moments, constants);
 
