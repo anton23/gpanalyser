@@ -51,6 +51,8 @@ tokens{
   BRACKETED             ;
   PROBEG                ;
   RG                    ;
+  RGA                   ;
+  RGA_ALL               ;
   LOGICAL_NEGATION      ;
   LOGICAL_OR            ;
   LOGICAL_AND           ;
@@ -341,8 +343,25 @@ probeg
 			-> ^(PROBEG $start_sync $stop_sync REPETITION?) ;
 
 rg
-	:	(LBRACE pred RBRACE)? rl_single (rl_bin_operators rg)?
-			-> ^(RG rl_single pred? (rg rl_bin_operators)?) ;
+	:	(LBRACE pred RBRACE)? rg_sub (rl_bin_operators rg)?
+			-> ^(RG rg_sub pred? (rg rl_bin_operators)?) ;
+
+rg_sub
+	:	rga_all
+		| rl_single ;
+
+rga_all
+	:	({$probe_def::mode == 3 && $probe_def::fluid_flow}?=>
+			rga (LBRACK expression RBRACK)?)
+			-> ^(RGA_ALL rga expression?) ;
+
+rga
+	:	a=rga_action (PAR rga_action)*
+		-> ^(RGA $a rga_action*) ;
+
+rga_action
+	:	eventual_specific_action
+		| EMPTY ;
 
 // Predicates for global
 
@@ -390,15 +409,38 @@ componentCount
 // Probe_spec
 
 probe_def
-	:	PROBE_DEF odeSettings mode? LBRACE probe_spec RBRACE
+scope
+{
+	int mode;
+    boolean fluid_flow;
+}
+	:	PROBE_DEF
+			{
+				$probe_def::fluid_flow = true;
+			}
+		odeSettings mode? LBRACE probe_spec RBRACE
+			{
+				$probe_def::fluid_flow = true;
+			}
 			-> ^(PROBE_DEF odeSettings mode? probe_spec)
 		| SIM_PROBE_DEF simulationSettings mode? LBRACE probe_spec RBRACE
           	-> ^(SIM_PROBE_DEF simulationSettings mode? probe_spec) ;
 
 mode
-	:	STEADY expression -> ^(STEADY expression)
-		| TRANSIENT expression -> ^(TRANSIENT expression)
-		| -> ^(GLOBAL GLOBAL);
+	:	STEADY expression
+			{
+				$probe_def::mode = 1;
+			}
+			-> ^(STEADY expression)
+		| TRANSIENT expression
+			{
+				$probe_def::mode = 2;
+			}
+			-> ^(TRANSIENT expression)
+		|	{
+        		$probe_def::mode = 3;
+        	}
+			-> ^(GLOBAL GLOBAL) ;
 
 probe_spec
 scope

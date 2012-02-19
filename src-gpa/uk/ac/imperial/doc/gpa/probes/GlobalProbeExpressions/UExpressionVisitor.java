@@ -63,6 +63,11 @@ public class UExpressionVisitor
                 (evalPred (expression.getPredicate(), R.getEvaluatedTime()));
     }
 
+    public void visit (BasicUExpression expression, double time)
+    {
+        expression.setEvaluatedTime (time);
+    }
+
     public void visit (ActionsUExpression expression, double time)
     {
         UPrimeExpression uprime = expression.getActions ();
@@ -98,17 +103,23 @@ public class UExpressionVisitor
         (Set<GPEPAActionCount> actions, double time, double startingTime)
     {
         double atCurrent = 0, atStart = 0;
+        boolean empty = false;
         for (GPEPAActionCount action : actions)
         {
+            if (action == null)
+            {
+                empty = true;
+                break;
+            }
             atCurrent += states[getTimeIndex (time)]
                     [statesCountExpressions.indexOf
-                    (mapping.get (action.toString ()))];
+                    (mapping.get (action.getName ()))];
             atStart += states[getTimeIndex (startingTime)]
                     [statesCountExpressions.indexOf
-                    (mapping.get(action.toString()))];
+                    (mapping.get(action.getName ()))];
         }
 
-        return (atCurrent - atStart) > 1;
+        return empty || (atCurrent - atStart) > 1;
     }
 
     private int getTimeIndex (double time)

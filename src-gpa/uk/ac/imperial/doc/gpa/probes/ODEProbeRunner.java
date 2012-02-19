@@ -22,7 +22,7 @@ import java.util.*;
 
 public class ODEProbeRunner extends AbstractProbeRunner
 {
-    public ODEProbeRunner()
+    public ODEProbeRunner ()
     {
         analysisType = PCTMCODEAnalysis.class;
         postprocessorType = CPPODEAnalysisNumericalPostprocessor.class;
@@ -171,7 +171,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, countActions, stateObservers,
-                new ArrayList<CombinedPopulationProduct>(),
+                new ArrayList<CombinedPopulationProduct> (),
                 statesCountExpressions, mapping, stopTime, stepSize, parameter);
         double states[][] = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
@@ -188,7 +188,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         for (double time = 0; time < stopTime; time += stepSize)
         {
             int i = (int) (time / stepSize);
-            cdf[i] = (pointMass >= time) ? 1 : 0;
+            cdf[i] = (time >= pointMass) ? 1 : 0;
         }
         return new CDF (cdf);
     }
