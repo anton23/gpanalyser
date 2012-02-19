@@ -188,4 +188,67 @@ public class SimProbeRunner extends AbstractProbeRunner
     */
         return new CDF (null);
     }
+
+    protected CDF globalPassages
+        (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping, Set<String> countActions,
+         Constants constants, PEPAComponentDefinitions mainDef,
+         double stopTime, double stepSize, int parameter)
+    {
+        return new CDF (null);
+    }
+
+/*
+    private int runGlobalProbe
+            (double[][] data, GlobalProbe gprobe,
+             List<AbstractExpression> statesCountExpressions,
+             Map<String, AbstractExpression> mapping, int start_time,
+             boolean repeating)
+    {
+        double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
+        Collection<ProbeTime> measuredTimes = new ArrayList<ProbeTime> ();
+        double tempStart = -1;
+
+        // observing wih global probe
+        int i = start_time;
+        while (i < data.length)
+        {
+            Set<ITransition> availableTransitions
+                    = gprobe.getAvailableTransitions ();
+            for (ITransition transition : availableTransitions)
+            {
+                int index = statesCountExpressions.indexOf
+                        (mapping.get (transition.toString ()));
+                if (Math.floor (actionsExecuted [index])
+                        < Math.floor (data[i][index]))
+                {
+                    actionsExecuted [index] = data[i][index];
+                    ITransition lastExecuted =
+                            gprobe.advanceWithTransition (transition,
+                                    statesCountExpressions, mapping, data[i]);
+                    if (lastExecuted != null)
+                    {
+                        if (lastExecuted.toString ().equals ("start"))
+                        {
+                            tempStart = i;
+                        }
+                        else if (lastExecuted.toString ().equals ("stop"))
+                        {
+                            measuredTimes.add (new ProbeTime (tempStart, i));
+                            if (!repeating)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            ++i;
+        }
+
+        return i;
+    }
+*/
+
 }
