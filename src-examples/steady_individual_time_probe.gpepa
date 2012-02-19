@@ -1,0 +1,77 @@
+ron = 0.3;
+roff = 0.6;
+rinit = 0.5;
+rcont = 0.85;
+rradio = 0.16;
+rcharge = 0.02;
+rshutdown = 1.5;
+rtmt = 0.2;
+init = 0.07;
+tfr = 0.15;
+
+nc = 10;
+nh = 4;
+
+ClientHibernate = (clt_on, ron).ClientStandby
+	+ (clt_shutdown, T).ClientHibernate;
+ClientStandby = (clt_off, roff ).ClientHibernate
+	+ (radio_init, rinit ).ClientRadioUse
+	+ (cont_tfr, rcont ).ClientStandby
+	+ (clt_shutdown, T).ClientHibernate;
+ClientRadioUse = (data_tfr , rradio).ClientStandby
+	+ (clt_shutdown, T).ClientHibernate;
+
+BatteryEmpty = (clt_charge, rcharge ).Battery1;
+Battery0 = (clt_shutdown, rshutdown).BatteryEmpty;
+Battery1 = (data_tfr, T, tfr).Battery0
+	+ (data_tfr, T).Battery1
+	+ (cont_tfr, T, tfr).Battery0
+	+ (cont_tfr, T).Battery1
+	+ (radio_init, T, init).Battery0
+	+ (radio_init, T).Battery1
+	+ (clt_off, T).Battery1
+	+ (clt_on, T).Battery1
+	+ (clt_charge, rcharge).Battery2;
+Battery2 = (data_tfr , T, tfr).Battery1
+	+ (data_tfr, T).Battery2
+	+ (cont_tfr, T, tfr).Battery1
+	+ (cont_tfr, T).Battery2
+	+ (radio_init, T, init).Battery1
+	+ (radio_init, T).Battery2
+	+ (clt_off, T).Battery2
+	+ (clt_on, T).Battery2
+	+ (clt_charge, rcharge).Battery3;
+Battery3 = (data_tfr , T, tfr).Battery2
+	+ (data_tfr, T).Battery3
+	+ (cont_tfr, T, tfr).Battery2
+	+ (cont_tfr, T).Battery3
+	+ (radio_init, T, init).Battery2
+	+ (radio_init, T).Battery3
+	+ (clt_off, T).Battery3
+	+ (clt_on, T).Battery3
+	+ (clt_charge, rcharge).Battery3;
+
+CB = ClientHibernate <clt_on, clt_off, clt_shutdown, radio_init, data_tfr, cont_tfr> Battery3;
+
+Chan = (data_tfr, rradio).ChanBusy1
+	+ (cont_tfr, rcont).ChanBusy2;
+ChanBusy1 = (data_tfr , rradio).Chan
+	+ (tmt, rtmt).Chan;
+ChanBusy2 = (cont_tfr, rcont).Chan
+	+ (tmt, rtmt).Chan;
+
+Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
+
+Probe (stopTime=350, stepSize=1, density=10) steady 500
+{
+    PM6 = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = ((data_tfr; cont_tfr) / clt_shutdown) : begin, clt_shutdown : end <-
+    }
+    where
+    {
+    	Clients {CB[nc]} =>
+    		Clients {CB <data_tfr, cont_tfr, clt_shutdown> LProbe | CB[nc-1]}
+    }
+}

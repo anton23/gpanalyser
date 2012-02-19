@@ -816,8 +816,8 @@ probeg [GlobalProbe gprobe, Set<ITransition> allActions]
 				NFAUtils.removeAnyTransitions
 					($probe_spec::allActions, starting_state1);
 				$gprobe.setStartingState (starting_state1);
-				$gprobe.setU1 ($start_actions.U);
-				$gprobe.setU2 ($stop_actions.U);
+				$gprobe.setU (new SequenceUExpression
+						($start_actions.U, $stop_actions.U));
 			} ;
 
 rg [NFAState current_state, Set<ITransition> allActions]
