@@ -15,6 +15,17 @@ public class UExpressionVisitor
     List<AbstractExpression> statesCountExpressions;
     Map<String, AbstractExpression> mapping;
 
+    public UExpressionVisitor
+        (double[][] states, double stepSize,
+         List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping)
+    {
+        this.states = states;
+        this.stepSize = stepSize;
+        this.statesCountExpressions = statesCountExpressions;
+        this.mapping = mapping;
+    }
+
     public void visit (SequenceUExpression expression, double time)
     {
         AbstractUExpression R2 = expression.getR2();
@@ -94,7 +105,7 @@ public class UExpressionVisitor
                     (mapping.get (action.toString ()))];
             atStart += states[getTimeIndex (startingTime)]
                     [statesCountExpressions.indexOf
-                    (mapping.get (action.toString ()))];
+                    (mapping.get(action.toString()))];
         }
 
         return (atCurrent - atStart) > 1;
