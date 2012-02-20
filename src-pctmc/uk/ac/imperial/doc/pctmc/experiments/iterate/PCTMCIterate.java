@@ -301,6 +301,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 		}
 		PCTMCLogging.decreaseIndent();
 		PCTMCLogging.decreaseIndent();
+		PCTMCLogging.setVisible(true);
 	}
 	 
 	

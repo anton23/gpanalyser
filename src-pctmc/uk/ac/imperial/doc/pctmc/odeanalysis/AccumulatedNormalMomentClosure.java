@@ -12,16 +12,18 @@ public class AccumulatedNormalMomentClosure extends NormalMomentClosure {
 	
 	public AccumulatedNormalMomentClosure(int maxOrder) {
 		super(maxOrder);		
+		this.name = NAME;
 	}
 	
 	public AccumulatedNormalMomentClosure(Map<String, Object> parameters) {
 		super(parameters);
+		this.name = NAME;
 	}
 
 	@Override
 	public AbstractExpression insertProductIntoRate(AbstractExpression rate,
 			PopulationProduct moment) {
-		AccumulatedNormalClosureVisitor visitor = new AccumulatedNormalClosureVisitor(moment, maxOrder);
+		AccumulatedNormalClosureVisitorUniversal visitor = new AccumulatedNormalClosureVisitorUniversal(new CombinedPopulationProduct(moment), maxOrder);
 		rate.accept(visitor);
 		return visitor.getResult();
 	}
@@ -30,9 +32,9 @@ public class AccumulatedNormalMomentClosure extends NormalMomentClosure {
 	public AbstractExpression insertAccumulations(
 			AbstractExpression derivative,
 			CombinedPopulationProduct moment) {
-		IntegralInsterterVisitor visitor = new AccumulatedIntegralInsterterVisitor(
+		AccumulatedNormalClosureVisitorUniversal visitor = new AccumulatedNormalClosureVisitorUniversal(
 				new CombinedPopulationProduct(null, moment
-						.getAccumulatedProducts()));
+						.getAccumulatedProducts()), maxOrder);
 		derivative.accept(visitor);
 		return visitor.getResult();
 	}

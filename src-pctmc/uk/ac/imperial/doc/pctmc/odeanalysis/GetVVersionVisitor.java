@@ -1,5 +1,7 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis;
 
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.jexpressions.variables.IExpressionVariableVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
@@ -8,7 +10,7 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class GetVVersionVisitor extends MomentCountTransformerWithParameters
-		implements ICombinedProductExpressionVisitor {
+		implements ICombinedProductExpressionVisitor, IExpressionVariableVisitor {
 
 	protected PopulationProduct moment;
 
@@ -33,5 +35,15 @@ public class GetVVersionVisitor extends MomentCountTransformerWithParameters
 				.iterator().next();
 		result = CombinedProductExpression
 				.create(new CombinedPopulationProduct(moment.getV(state)));
+	}
+
+	@Override
+	public void visit(ExpressionVariable e) {
+		if (moment.getOrder() == 0) {
+			result = e;
+		} else {
+			e.getUnfolded().accept(this);
+		}
+		
 	}
 }

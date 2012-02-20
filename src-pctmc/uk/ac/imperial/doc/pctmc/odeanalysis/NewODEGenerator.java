@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -50,7 +50,8 @@ public class NewODEGenerator {
 			ret[i++] = new Assignment(CombinedProductExpression
 					.create(e.getKey()), e.getValue());
 		}			
-		return new ODEMethod(ret);
+
+		return new ODEMethod(ret, momentClosure.getVariables());
 	}
 	
 	protected void generateODESystem(Collection<CombinedPopulationProduct> usedMoments) {
@@ -105,6 +106,7 @@ public class NewODEGenerator {
 		} else {
 			derivative = getDerivativeOfAccumulatedMoment(moment);
 		}
+		
 		rhs.put(moment, derivative);		
 		// Generates ODEs for moments occurring on the RHS
 		CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
@@ -145,10 +147,13 @@ public class NewODEGenerator {
 			generateODEforCombinedMoment(nakedMoment);
 			AbstractExpression diffNakedMoment = rhs.get(nakedMoment);
 			// Need to insert the accumulated moments into the RHS			
-			sum.add(momentClosure.insertAccumulations(diffNakedMoment, new CombinedPopulationProduct(null, combinedProduct
-							.getAccumulatedProducts())));
+			AbstractExpression insertAccumulations = momentClosure.insertAccumulations(diffNakedMoment, new CombinedPopulationProduct(null, combinedProduct
+							.getAccumulatedProducts()));
+			sum.add(insertAccumulations);
 		}
-		return SumExpression.create(sum);
+		AbstractExpression result = SumExpression.create(sum);
+		
+		return result;
 	}
 
 	protected AbstractExpression getDerivativeOfMoment(PopulationProduct moment) {		

@@ -39,6 +39,10 @@ public class CombinedPopulationProduct {
 			nakedProduct = new PopulationProduct(new HashMap<State, Integer>());
 		this.accumulatedProducts = HashMultiset.<PopulationProduct> create();
 	}
+	
+	public static CombinedPopulationProduct getConstantProduct() {
+		return new CombinedPopulationProduct(new PopulationProduct(new HashMap<State, Integer>()));
+	}
 
 	/**
 	 * Returns the representation of a mean population.

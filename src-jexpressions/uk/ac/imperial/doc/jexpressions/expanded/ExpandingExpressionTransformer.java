@@ -21,9 +21,11 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.jexpressions.variables.IExpressionVariableVisitor;
 
 public class ExpandingExpressionTransformer implements IExpressionVisitor,
-		IConstantExpressionVisitor {
+		IConstantExpressionVisitor, IExpressionVariableVisitor {
 
 	protected ExpandedExpression result;
 
@@ -207,7 +209,12 @@ public class ExpandingExpressionTransformer implements IExpressionVisitor,
 	@Override
 	public void visit(TimeExpression e) {
 		// TODO Auto-generated method stub
+	}
+	
 
+	@Override
+	public void visit(ExpressionVariable e) {
+		result = new UnexpandableExpression(e, normaliser);		
 	}
 
 	@Override

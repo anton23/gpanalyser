@@ -1,10 +1,16 @@
 package uk.ac.imperial.doc.pctmc.statements.odeanalysis;
 
+import java.util.Map;
+
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 
 public class ODEMethod {
+	
+	protected Map<ExpressionVariable, AbstractExpression> variables;
 
-	private AbstractStatement[] body;
+	protected AbstractStatement[] body;
 
 	public AbstractStatement[] getBody() {
 		return body;
@@ -14,6 +20,11 @@ public class ODEMethod {
 	public ODEMethod(AbstractStatement[] body) {
 		this.body = body;
 
+	}
+	
+	public ODEMethod(AbstractStatement[] body, Map<ExpressionVariable, AbstractExpression> variables) {
+		this(body);
+		this.variables = variables;
 	}
 
 	public void accept(IODEMethodVisitor v) {

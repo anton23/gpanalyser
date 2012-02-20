@@ -56,8 +56,8 @@ public class Polynomial {
 		for (Entry<Multiset<UnexpandableExpression>, AbstractExpression> e : representation
 				.entrySet()) {
 			AbstractExpression term = e.getValue();
-			if (term instanceof UnexpandableExpression) {
-				term = ((UnexpandableExpression) term).toAbstractExpression();
+			if (term instanceof ExpandedExpression) {
+				term = ((ExpandedExpression) term).toAbstractExpression();
 			}
 			for (Multiset.Entry<UnexpandableExpression> f : e.getKey()
 					.entrySet()) {

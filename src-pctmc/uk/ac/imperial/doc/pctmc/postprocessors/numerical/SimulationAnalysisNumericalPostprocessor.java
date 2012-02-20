@@ -6,11 +6,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
+import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
@@ -177,6 +183,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	private String getProductUpdaterCode(Constants variables) {
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + SimulationUpdater.class.getName() + ";\n");
+		ret.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");
 		ret.append("public class " + updaterClassName + " extends "
 				+ SimulationUpdater.class.getName() + "{\n");
 		ret.append("double[] newValues = new double[" + 
@@ -187,7 +194,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			ret.append("newValues[" + entry.getValue() + "]=(");
 			//!!
 			AbstractExpression tmp = CombinedProductExpression.create(entry.getKey());
-			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(), simulation.getAccumulatedMomentIndex(), "oldValues");
+			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(), simulation.getAccumulatedMomentIndex(), "oldValues", true);
 			tmp.accept(printer); 
 			ret.append(printer.toString()); 
 			ret.append(");\n");
@@ -199,7 +206,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			ret.append("values["+(momentIndex.size() + entry.getValue()) + "]+=");
 			JavaPrinterPopulationBased printer =
 				  new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(), 
-						  simulation.getAccumulatedMomentIndex(), "oldValues");
+						  simulation.getAccumulatedMomentIndex(), "oldValues", true);
 			entry.getKey().accept(printer); 
 			ret.append(printer.toString()); 
 			ret.append(";\n"); 
@@ -216,6 +223,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + AccumulatorUpdater.class.getName() + ";\n");
+		ret.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");		
 		ret.append("public class " + accumulatorUpdaterName + " extends "
 				+ AccumulatorUpdater.class.getName() + "{\n");
 		ret.append( "       {n = " + simulation.getAccumulatedMomentIndex().size() + " ;}\n");
@@ -225,7 +233,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		
 		for (Map.Entry<PopulationProduct, Integer> entry : simulation.getAccumulatedMomentIndex().entrySet()) {
 			ret.append("values[" + entry.getValue() + "]=delta*(");			
-			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(),simulation.getAccumulatedMomentIndex(), "counts");
+			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(),simulation.getAccumulatedMomentIndex(), "counts", true);
 			PopulationProductExpression tmp = new PopulationProductExpression(entry.getKey()); 
 			tmp.accept(printer); 		
 			ret.append(printer.toString()); 
@@ -239,9 +247,10 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		return ret.toString();
 	}
 
-	private String getEventGeneratorCode(Constants variables) {
+	private String getEventGeneratorCode(Constants constants) {
 		StringBuilder code = new StringBuilder();
 		code.append("import " + AggregatedStateNextEventGenerator.class.getName() + "; \n");
+		code.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");		
 		code.append("import java.util.ArrayList; \n");
 		code.append("public class " + generatorName + " extends "
 				+ AggregatedStateNextEventGenerator.class.getName() + "{\n");
@@ -287,12 +296,13 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		String methodHeader = "   public void recalculateWeights(double[] counts){\n";
 		i = 0;
 		method.append("         totalRate=0.0;\n");
-
+		Set<ExpressionVariable> variables = new HashSet<ExpressionVariable>();
 		for (EvolutionEvent e : observableEvents) {
 			JavaPrinterPopulationBased ratePrinter = new JavaPrinterPopulationBased(
-					variables, pctmc.getStateIndex(), simulation.getAccumulatedMomentIndex(),
-					"counts");
+					constants, pctmc.getStateIndex(), simulation.getAccumulatedMomentIndex(),
+					"counts", false);
 			e.getRate().accept(ratePrinter);
+			variables.addAll(ratePrinter.getVariables());
 			String rate = ratePrinter.toString();
 			method.append("      weights[" + i + "] = " + rate + ";\n");
 			method.append("      totalRate+= weights[" + i + "];\n");
@@ -301,16 +311,26 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		}
 
 		method.append("   }\n");
-
+		for (ExpressionVariable v : variables) {
+			JavaPrinterPopulationBased tmp = new JavaPrinterPopulationBased(
+					constants, pctmc.getStateIndex(), simulation.getAccumulatedMomentIndex(),
+					"counts", true);
+			v.getUnfolded().accept(tmp);
+			methodHeader += "double " + JavaExpressionPrinterWithVariables.escapeName(v.getName()) + " = " + tmp.toString() + ";\n";
+		}
 		code.append(methodHeader);
 
 		code.append(method);
 		code.append("}\n");
 		if (PCTMCOptions.debug) {
 			File file = new File(PCTMCOptions.debugFolder + "/codeSim");
+			File file2 = new File(PCTMCOptions.debugFolder + "/simFriendly");
 			try {
 				Writer out = new BufferedWriter(new FileWriter(file));
 				out.write(code.toString());
+				out.close();
+				out = new BufferedWriter(new FileWriter(file2));
+				out.write(ToStringUtils.iterableToSSV(simulation.getPCTMC().getEvolutionEvents(), "\n"));
 				out.close();
 			} catch (IOException e) {
 				PCTMCLogging.error(e.getStackTrace().toString());

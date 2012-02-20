@@ -131,7 +131,7 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
   ^(ITERATE (r=rangeSpecification {ranges.add($r.range);})*
     (MINIMISE m=plotAtSpecification[$constants]  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
    (WHERE 
-       ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
+       ((c=constant rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
   
     a=analysis[$pctmc,$constants, null]   
     (p=plotAtSpecification[$constants] {plots.add($p.p);})*
@@ -139,7 +139,7 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
   {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,$a.postprocessor,plots,$unfoldedVariables);}
 | ^(TRANSIENT_ITERATE (r=rangeSpecification {ranges.add($r.range);})+
    (WHERE 
-       ((c=LOWERCASENAME rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
+       ((c=constant rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
       a=analysis[$pctmc,$constants, null]
       ps=plotDescriptions
   {$iterate = new PCTMCTransientIterate(ranges,reEvaluation,$a.analysis, $a.postprocessor,$ps.p, $unfoldedVariables);}
@@ -333,6 +333,7 @@ primary_expression returns[AbstractExpression e]:
  | m=mean {$e = $m.m;} 
  | eg = generalExpectation {$e = $eg.e;}  
  | cm=central {$e = $cm.c;}
+ | cov = covariance {$e = $cov.c;}
  | mom = moment {$e = $mom.c;}
  | scm=scentral {$e = $scm.c;}
  | ^(MIN exp1=expression COMMA exp2=expression) {$e = MinExpression.create($exp1.e,$exp2.e); }
@@ -365,6 +366,10 @@ mean returns [MeanOfLinearCombinationExpression m]:
 
 central returns [CentralMomentOfLinearCombinationExpression c]:
   ^(CENTRAL e=expression n=integer) {$c = new CentralMomentOfLinearCombinationExpression($e.e,$n.value,vars);}
+;
+
+covariance returns [CovarianceOfLinearCombinationsExpression c]:
+  ^(COV a = expression COMMA b = expression) {$c = new CovarianceOfLinearCombinationsExpression($a.e, $b.e, vars);}  
 ;
 
 

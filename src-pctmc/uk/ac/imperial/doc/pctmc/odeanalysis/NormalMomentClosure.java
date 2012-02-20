@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 
@@ -11,8 +12,17 @@ public class NormalMomentClosure extends MomentClosure {
 
 	public final static String NAME = "NormalClosure";
 	
+	protected String name = NAME;
+	
 	protected int maxOrder;
 	
+	
+	
+	@Override
+	public Map<ExpressionVariable, AbstractExpression> getVariables() {	
+		return null;
+	}
+
 	public NormalMomentClosure(int maxOrder) {
 		super(new HashMap<String, Object>());		
 		this.maxOrder = maxOrder;		
@@ -41,13 +51,13 @@ public class NormalMomentClosure extends MomentClosure {
 		IntegralInsterterVisitor visitor = new IntegralInsterterVisitor(
 				new CombinedPopulationProduct(null, moment
 						.getAccumulatedProducts()));
-		derivative.accept(visitor);
+		derivative.accept(visitor);		
 		return visitor.getResult();
 	}
 
 	@Override
 	public String toString() {
-		return MomentClosure.MOMENT_CLOSURE + "=" + NAME + ", " + MomentClosure.MAX_ORDER + "=" + maxOrder;
+		return MomentClosure.MOMENT_CLOSURE + "=" + name + ", " + MomentClosure.MAX_ORDER + "=" + maxOrder;
 	}
 	
 	

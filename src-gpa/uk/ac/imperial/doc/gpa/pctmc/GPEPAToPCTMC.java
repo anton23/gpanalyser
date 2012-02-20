@@ -14,6 +14,7 @@ import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
@@ -51,8 +52,12 @@ public class GPEPAToPCTMC {
 			AbstractExpression rate = event.getRate();
 			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(unfoldedVariables);			
 			rate.accept(setter);
+			RatePopulationToMomentTransformer transformer = new RatePopulationToMomentTransformer();
+			rate.accept(transformer);
+			rate = transformer.getResult();
 			events.add(new EvolutionEvent(decreasing, increasing, rate));
 		}
-		return new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions); 
+		GPEPAPCTMC pctmc = new GPEPAPCTMC(initCounts, events,componentDefinitions,model,countActions);
+		return pctmc; 
 	}
 }

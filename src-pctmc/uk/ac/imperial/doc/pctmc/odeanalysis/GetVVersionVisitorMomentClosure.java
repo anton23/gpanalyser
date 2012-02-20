@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ExpressionCondition;
 import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -39,13 +39,37 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 		if (insert) {
 			e.getNumerator().accept(this);
 			result = PEPADivExpression.create(result, e.getDenominator());
+			inserted = true;
 		} else {
+			boolean oldInsert = insert;
 			insert = true;
 			e.getNumerator().accept(this);
 			AbstractExpression newNumerator = result;
 			e.getDenominator().accept(this);
-			insert = false;
+			insert = oldInsert;
 			result = PEPADivExpression.create(newNumerator, result);
+		}
+	}
+	
+	@Override
+	public void visit(ConstantExpression e) {
+		if (insert) {
+			result = ProductExpression.create(e, CombinedProductExpression
+					.create(new CombinedPopulationProduct(moment)));
+			inserted = true;
+		} else {
+			result = e;
+		}
+	}
+	
+	@Override
+	public void visit(DoubleExpression e) {
+		if (insert) {
+			result = ProductExpression.create(e, CombinedProductExpression
+					.create(new CombinedPopulationProduct(moment)));
+			inserted = true;
+		} else {
+			result = e;
 		}
 	}
 	
@@ -86,17 +110,19 @@ public class GetVVersionVisitorMomentClosure extends GetVVersionVisitor {
 	public void visit(ProductExpression e) {
 		List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
 		boolean oldInsert = insert;
+		boolean oldInserted = inserted;
 		boolean isInserted = false;
 		for (AbstractExpression t : e.getTerms()) {
 			inserted = false;
 			t.accept(this);
-			isInserted = inserted;
+			isInserted |= inserted;
 			if (isInserted) {
 				insert = false;
 			}
 			terms.add(result);
 		}
 		insert = oldInsert;
+		inserted = oldInserted | isInserted;
 		result = ProductExpression.create(terms);
 	}
 

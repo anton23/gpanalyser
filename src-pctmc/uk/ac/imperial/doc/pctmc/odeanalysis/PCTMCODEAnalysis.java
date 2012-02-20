@@ -24,6 +24,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis {
 		momentClosures.put(NormalMomentClosure.NAME, NormalMomentClosure.class);
 		momentClosures.put(LognormalMomentClosure.NAME, LognormalMomentClosure.class);
 		momentClosures.put(AccumulatedNormalMomentClosure.NAME, AccumulatedNormalMomentClosure.class);
+		momentClosures.put(AccumulatedNormalMomentClosureMinApproximation.NAME, AccumulatedNormalMomentClosureMinApproximation.class);
 	}
 	
 	@Override

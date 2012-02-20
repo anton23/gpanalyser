@@ -10,7 +10,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ExpressionCondition;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
@@ -79,6 +78,7 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, IConstantEx
 		if (insert) {
 			result = ProductExpression.create(e, CombinedProductExpression
 					.create(toInsert));
+			foundMinimum = true;
 		} else {
 			result = e;
 		}
@@ -198,8 +198,9 @@ public class IntegralInsterterVisitor implements IExpressionVisitor, IConstantEx
 
 	@Override
 	public void visit(PowerExpression e) {
-		throw new AssertionError(
-				"Powers not supported in right hand sides of ODEs");
+		result = e;
+		/*throw new AssertionError(
+				"Powers not supported in right hand sides of ODEs");*/
 	}
 
 	@Override
