@@ -94,7 +94,8 @@ public class MASSPAToPCTMC
 				boolean zeroAgent = true;
 				for (MASSPAAgentPop p : (Set<MASSPAAgentPop>)_model.getPredecessorPopulations(pop))
 				{
-					if (!p.getInitialPopulation().equals(new IntegerExpression(0)))
+					if (!p.getInitialPopulation().equals(new IntegerExpression(0)) &&
+						!p.getInitialPopulation().equals(new DoubleExpression(0.0)))
 					{
 						zeroAgent = false;
 						break;
@@ -270,7 +271,7 @@ public class MASSPAToPCTMC
 					if(!_initCounts.containsKey(contPop)) {continue;}
 
 					// Local event (i.e. non-message induced event)
-					if (!(p instanceof ReceivePrefix) && !(p instanceof SendPrefix))
+					if (!(p instanceof ReceivePrefix))
 					{
 						List<State> increasing = new LinkedList<State>();			
 						List<State> decreasing = new LinkedList<State>();
@@ -284,8 +285,31 @@ public class MASSPAToPCTMC
 						// Add any countActions to increasing set
 						addCountActions(increasing,decreasing,p.getAction(),pop.getLocation(),_actionCounts);
 						
-						// Create and add event
-						events.add(new EvolutionEvent(decreasing, increasing, evoRate));
+						// Check if there is an asynchronous channel for send prefix
+						if (p instanceof SendPrefix)
+						{
+							boolean allSynchChannel=true;
+							for (MASSPAChannel chan : _model.getAllChannelsSender(pop, ((SendPrefix)p).getMsg()))
+							{
+								if (chan.getRateType() != MASSPAChannel.RateType.MULTISERVER_SYNC)
+								{
+									allSynchChannel=false;
+									break;
+								}
+							}
+							
+							// At least one channel is asynchronous
+							if (!allSynchChannel)
+							{
+								// Create and add event
+								events.add(new EvolutionEvent(decreasing, increasing, evoRate));	
+							}	
+						}
+						else
+						{
+							// Create and add event
+							events.add(new EvolutionEvent(decreasing, increasing, evoRate));	
+						}
 					}
 					// External event (i.e. message induced event)
 					if (p instanceof ReceivePrefix)
@@ -320,7 +344,6 @@ public class MASSPAToPCTMC
 											if (rate == 0) {continue;}
 
 											// Add any countActions to increasing set
-											addCountActions(increasing,decreasing,p.getAction(),pop.getLocation(),_actionCounts);
 											addCountActions(increasing,decreasing,rp.getAction(),contPop.getLocation(),_actionCounts);
 											
 											// Combined rate: rate = rate * E[nofSender nofReceiver]
@@ -329,6 +352,9 @@ public class MASSPAToPCTMC
 											Map<State, Integer> map2 = new HashMap<State, Integer>();
 											if (chan.getRateType() == MASSPAChannel.RateType.MULTISERVER_SYNC)
 											{
+												// Add any countActions to increasing set
+												addCountActions(increasing,decreasing,sp.getAction(),chan.getSender().getLocation(),_actionCounts);
+												
 												// Synchronous
 												decreasing.add(pop);
 												decreasing.add(chan.getSender());

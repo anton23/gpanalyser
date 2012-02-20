@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.masspa.language.Messages;
 import uk.ac.imperial.doc.masspa.representation.components.MASSPAAgents;
@@ -39,6 +39,7 @@ public class MASSPAModel
 	private final Map<MASSPAAgentPop,MASSPAAgentPop> m_agentPops;
 	private final Map<MASSPAActionCount,MASSPAActionCount> m_actionCounts;
 	private final HashMultimap<MASSPAAgentPop,MASSPAChannel> m_channels;
+	private final HashMultimap<MASSPAAgentPop,MASSPAChannel> m_channelsSender;
 	private final HashMultimap<MASSPAAgentPop,MASSPAMovement> m_movements;
 	private final HashMultimap<MASSPAAgentPop,MASSPAMovement> m_movementsReverse;
 	private final HashMap<MASSPAAgentPop,MASSPABirth> m_births;
@@ -67,6 +68,7 @@ public class MASSPAModel
 		m_agentPops = new HashMap<MASSPAAgentPop,MASSPAAgentPop>();
 		m_actionCounts = new HashMap<MASSPAActionCount,MASSPAActionCount>();
 		m_channels = HashMultimap.create();
+		m_channelsSender = HashMultimap.create();
 		m_movements = HashMultimap.create();
 		m_movementsReverse = HashMultimap.create();
 		m_births = new HashMap<MASSPAAgentPop,MASSPABirth>();
@@ -222,7 +224,7 @@ public class MASSPAModel
 				// Set population size to 0 if it isn't defined
 				if (!pop.hasInitialPopulation())
 				{
-					pop.setInitialPopulation(new IntegerExpression(0));
+					pop.setInitialPopulation(new DoubleExpression(0.0));
 				}
 			}
 		}
@@ -239,7 +241,7 @@ public class MASSPAModel
 		for (String action : m_agents.getActions())
 		{			
 			MASSPAActionCount globalCount = getActionCount(action,AllLocation.getInstance(),-1);
-			globalCount.setInitVal(new IntegerExpression(0));
+			globalCount.setInitVal(new DoubleExpression(0.0));
 			for (Location loc : m_locations.values())
 			{
 				MASSPAActionCount count = getActionCount(action,loc,-1);
@@ -247,7 +249,7 @@ public class MASSPAModel
 				// Set population size to 0 if it isn't defined
 				if (!count.hasInitVal())
 				{
-					count.setInitVal(new IntegerExpression(0));
+					count.setInitVal(new DoubleExpression(0.0));
 				}
 				// Add to global action count population
 				else
@@ -277,6 +279,24 @@ public class MASSPAModel
 		return l;
 	}
 
+	/**
+	 * @param _sender
+	 * @param _msg 
+	 * @return all channels for {@code _msg} that have sending agent population {@code _sender}
+	 */
+	public Set<MASSPAChannel> getAllChannelsSender(final MASSPAAgentPop _sender, final MASSPAMessage _msg)
+	{
+		Set<MASSPAChannel> l = new HashSet<MASSPAChannel>();
+		for (MASSPAChannel chan : m_channelsSender.get(_sender))
+		{
+			if (chan.getMsg().equals(_msg))
+			{
+				l.add(chan);
+			}
+		}
+		return l;
+	}
+	
 	/**
 	 * @param _from population we want to find the outgoing movements of
 	 * @return unmodifiable set all movements out of {@code _from}
@@ -417,6 +437,7 @@ public class MASSPAModel
 		else
 		{
 			m_channels.put(receiver,chan);
+			m_channelsSender.put(sender,chan);
 		}
 	}
 
