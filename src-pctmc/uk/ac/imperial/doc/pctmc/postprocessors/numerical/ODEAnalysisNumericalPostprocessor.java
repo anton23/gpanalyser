@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
+import java.io.IOException;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
@@ -10,6 +11,7 @@ import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import com.google.common.collect.BiMap;
 
@@ -18,6 +20,10 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	private PCTMCODEAnalysis odeAnalysis;
 
 	private int density;
+	
+
+	private String overrideCode;
+	private String overrideCodeClassName;
 	
 	public int getDensity() {
 		return density;
@@ -43,6 +49,28 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		this.dataPoints = null;
 	}
 	
+	
+	public ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize,
+			int density, Map<String, Object> parameters) {
+		this(stopTime, stepSize, density);
+		if (parameters.containsKey("overrideCode")) {
+			Object value = parameters.get("overrideCode");
+			if (value instanceof String) {
+				String asString = ((String) value);
+				try {
+					overrideCode =  FileUtils.readFile(asString);
+					String[] split = asString.split("/");
+					overrideCodeClassName = split[split.length-1].replace(".java", "");
+				}
+				catch (IOException e) {
+					throw new AssertionError("File + " + asString + " cannot be open!");
+				}
+				
+			} else {
+				throw new AssertionError("Given value of 'overrideCode' has to be a filename!");
+			}
+		}
+	}
 
 	@Override
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
@@ -66,9 +94,13 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		if (analysis instanceof PCTMCODEAnalysis) {
 			this.odeAnalysis = (PCTMCODEAnalysis) analysis;
 			PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider();
-			preprocessedImplementation = javaImplementation
-					.getPreprocessedODEImplementation(
-							odeAnalysis.getOdeMethod(), constants, momentIndex);
+			if (overrideCode == null) {
+				preprocessedImplementation = javaImplementation
+						.getPreprocessedODEImplementation(
+								odeAnalysis.getOdeMethod(), constants, momentIndex);
+			} else {
+				preprocessedImplementation = javaImplementation.getPreprocessedODEImplementationFromCode(overrideCode, overrideCodeClassName);
+			}
 		} else {
 			throw new AssertionError("ODE postprocessor attached to an incompatible analysis " + analysis.toString());
 		}

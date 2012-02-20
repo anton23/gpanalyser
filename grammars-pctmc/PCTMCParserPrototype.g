@@ -26,6 +26,7 @@ tokens{
   ODETEST;
   INDICATORFUNCTION;
   GT;
+  LT;
 }
 
 
