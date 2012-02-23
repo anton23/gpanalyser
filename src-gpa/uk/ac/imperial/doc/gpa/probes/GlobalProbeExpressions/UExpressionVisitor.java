@@ -11,16 +11,18 @@ import java.util.Set;
 public class UExpressionVisitor
 {
     double[][] states;
+    double stopTime;
     double stepSize;
     List<AbstractExpression> statesCountExpressions;
     Map<String, AbstractExpression> mapping;
 
     public UExpressionVisitor
-        (double[][] states, double stepSize,
+        (double[][] states, double stopTime, double stepSize,
          List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping)
     {
         this.states = states;
+        this.stopTime = stopTime;
         this.stepSize = stepSize;
         this.statesCountExpressions = statesCountExpressions;
         this.mapping = mapping;
@@ -82,7 +84,7 @@ public class UExpressionVisitor
         {
             double newTime = time + stepSize;
             while (!enoughActions (expression.getActions (),
-                    newTime, time, times))
+                    newTime, time, times) && newTime <= stopTime)
             {
                 newTime += stepSize;
             }
@@ -93,7 +95,7 @@ public class UExpressionVisitor
     private double evalPred (NFAPredicate predicate, double startingTime)
     {
         while (!predicate.eval (statesCountExpressions, mapping,
-                                    states[getTimeIndex (startingTime)]))
+            states[getTimeIndex (startingTime)]) && startingTime <= stopTime)
         {
             startingTime += stepSize;
         }

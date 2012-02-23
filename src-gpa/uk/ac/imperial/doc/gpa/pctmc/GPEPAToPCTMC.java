@@ -19,9 +19,7 @@ public class GPEPAToPCTMC {
 	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,GroupedModel model,Set<String> countActions){
 		Map<State,AbstractExpression> initCounts = new HashMap<State,AbstractExpression>();
 		for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
-			GPEPAState s = new GPEPAState(p); 
-			
-			initCounts.put(s,model.getCountExpression(p));
+			initCounts.put(new GPEPAState(p), model.getCountExpression(p));
 		}
 		for (String a:countActions){
 			initCounts.put(new GPEPAActionCount(a), DoubleExpression.ZERO);
@@ -32,10 +30,10 @@ public class GPEPAToPCTMC {
 		for (PEPAEvolutionEvent event:observableEvolutionEvents){
 			List<State> increasing = new LinkedList<State>();			
 			List<State> decreasing = new LinkedList<State>();
-			for (GroupComponentPair p:event.getDecreases()){
+			for (GroupComponentPair p : event.getDecreases()){
 				decreasing.add(new GPEPAState(p));
 			}
-			for (GroupComponentPair p:event.getIncreases()){
+			for (GroupComponentPair p : event.getIncreases()){
 				increasing.add(new GPEPAState(p));
 			}
 			if (countActions.contains(event.getAction())){

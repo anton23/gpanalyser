@@ -428,8 +428,8 @@ rl_single [NFAState current_state, Set<ITransition> allActions]
 				}
 				$current_state.setAccepting (false);
 			}
-		| ^(RL_SINGLE (^(ACTION rs=immediateActions [starting_state]
-						(op=rl_un_operators
+		| ^(RL_SINGLE (^(ACTION rs=immediateActions
+						[starting_state, $allActions] (op=rl_un_operators
 							[starting_state, $rs.reached_state,
 							$allActions])?)))
 			{
@@ -695,13 +695,13 @@ signal returns [String name]
 				$name = $signal_name.text;
 			} ;
 
-immediateActions [NFAState current_state]
+immediateActions [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state]
 	:	eventual_specific_action [$current_state]
 			{
 				$reached_state = $eventual_specific_action.reached_state;
 			}
-		| subsequent_specific_action  [$current_state]
+		| subsequent_specific_action  [$current_state, true, $allActions]
 			{
 				$reached_state = $subsequent_specific_action.reached_state;
 			}
@@ -727,7 +727,8 @@ eventual_specific_action [NFAState current_state]
 }
 	:	^(CCA dot1=any_action [new_starting_state1]
 				t1=times [new_starting_state1, $dot1.reached_state]
-			specific_action=subsequent_specific_action [new_starting_state2]
+			specific_action=subsequent_specific_action
+				[new_starting_state2, false, null]
 			dot2=any_action [new_starting_state3]
 				t2=times [new_starting_state3, $dot2.reached_state])
 			{
@@ -744,7 +745,8 @@ eventual_specific_action [NFAState current_state]
 				$action = new GPEPAActionCount ($specific_action.action);
 			} ;
 
-subsequent_specific_action [NFAState current_state]
+subsequent_specific_action [NFAState current_state,
+	boolean createFailureState, Set<ITransition> allActions]
 	returns [NFAState reached_state, String action]
 	:	^(ACTION_NAME name=LOWERCASENAME)
 			{
@@ -754,6 +756,19 @@ subsequent_specific_action [NFAState current_state]
 					$reached_state);
 				$current_state.setAccepting (false);
 				$action = $name.text;
+				/*
+				if (createFailureState)
+				{
+					NFAState failure = new NFAState (t);
+					$current_state.addTransition
+						(new AnyTransition (), failure);
+					for (ITransition transition : $allActions)
+					{
+						failure.addTransition
+							(transition.getSimpleTransition (), failure);
+					}
+				}
+				*/
 			} ;
 
 any_action [NFAState current_state]
