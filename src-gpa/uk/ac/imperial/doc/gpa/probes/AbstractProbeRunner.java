@@ -16,7 +16,6 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.*;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.expressions.*;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -247,8 +246,8 @@ public abstract class AbstractProbeRunner
         {
             if (afterBeginsC.contains (hq.getComponent ()))
             {
-                afterBegins.add (CombinedProductExpression.createMeanExpression
-                        (new GPEPAState (hq)));
+                afterBegins.add (CombinedProductExpression
+                        .createMeanExpression (new GPEPAState (hq)));
             }
         }
 
@@ -397,11 +396,12 @@ public abstract class AbstractProbeRunner
             (GroupedModel model, PEPAComponentDefinitions definitions,
              Constants constants, Set<String> countActionsSet,
              Collection<GPEPAState> stateObservers,
-             List<CombinedPopulationProduct> moments,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
              double stopTime, double stepSize, int parameter)
     {
+        List<CombinedPopulationProduct> moments
+            = new ArrayList<CombinedPopulationProduct> ();
         for (GPEPAState state : stateObservers)
         {
             Multiset<State> states = HashMultiset.create ();
@@ -426,7 +426,7 @@ public abstract class AbstractProbeRunner
         }
 
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
-        //System.out.println (pctmc);
+        System.out.println (pctmc);
         AbstractPCTMCAnalysis analysis
             = getPreparedAnalysis (pctmc, moments, constants);
 
@@ -490,6 +490,15 @@ public abstract class AbstractProbeRunner
         return null;
     }
 
+    protected AbstractPCTMCAnalysis getPreparedAnalysis (PCTMC pctmc,
+            List<CombinedPopulationProduct> moments, Constants constants)
+    {
+        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
+        analysis.setUsedMoments (moments);
+        analysis.prepare (constants);
+        return analysis;
+    }
+
     private AbstractPCTMCAnalysis getAnalysis (PCTMC pctmc)
     {
         try
@@ -502,14 +511,5 @@ public abstract class AbstractProbeRunner
             ex.printStackTrace ();
         }
         return null;
-    }
-
-    protected AbstractPCTMCAnalysis getPreparedAnalysis (PCTMC pctmc,
-            List<CombinedPopulationProduct> moments, Constants constants)
-    {
-        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
-        analysis.setUsedMoments (moments);
-        analysis.prepare (constants);
-        return analysis;
     }
 }

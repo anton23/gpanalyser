@@ -19,6 +19,8 @@ import java.util.Map;
 public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	private PCTMCODEAnalysis odeAnalysis;
+    private PCTMCCPPImplementationProvider pcctmc
+            = new PCTMCCPPImplementationProvider();
 
 	private int density;
 
@@ -68,14 +70,8 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
         odeAnalysis = null;
         if (analysis instanceof PCTMCODEAnalysis) {
             this.odeAnalysis = (PCTMCODEAnalysis) analysis;
-            if (preprocessedImplementation == null)
-            {
-                PCTMCCPPImplementationProvider cppImplementation
-                        = new PCTMCCPPImplementationProvider();
-                preprocessedImplementation = cppImplementation
-                        .getPreprocessedODEImplementation(
-                                odeAnalysis.getOdeMethod(), constants, momentIndex);
-            }
+            preprocessedImplementation = pcctmc.getPreprocessedODEImplementation
+                    (odeAnalysis.getOdeMethod(), constants, momentIndex);
         } else {
             throw new AssertionError("ODE postprocessor attached to an incompatible analysis " + analysis.toString());
         }
@@ -87,7 +83,7 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 	public void calculateDataPoints(Constants constants) {
 		if (odeAnalysis != null) {
 			initial = getInitialValues(constants);			
-			dataPoints = new PCTMCCPPImplementationProvider().runODEAnalysis(
+			dataPoints = pcctmc.runODEAnalysis(
 					preprocessedImplementation, initial, stopTime, stepSize,
 					density, constants);
 		}
@@ -108,8 +104,8 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 		double[] initialCounts = new double[size];
 
 		for (int i = 0; i < size; i++) {
-			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(
-					constants);
+			ExpressionEvaluatorWithConstants evaluator
+                    = new ExpressionEvaluatorWithConstants(constants);
 			odeAnalysis.getPCTMC().getInitCounts()[i].accept(evaluator);
 			initialCounts[i] = evaluator.getResult();
 		}
