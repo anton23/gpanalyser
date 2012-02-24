@@ -130,19 +130,15 @@ public abstract class AbstractProbeRunner
         }
     }
 
-    protected double[][] getStartingStates (GroupedModel model,
-             PEPAComponentDefinitions definitions, Constants constants,
-             NumericalPostprocessor postprocessor,
-             LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
+    protected double[][] getStartingStates
+        (GroupedModel model, PEPAComponentDefinitions definitions,
+         Constants constants, NumericalPostprocessor postprocessor,
+         LinkedHashMap<GroupComponentPair, AbstractExpression> crates)
     {
         getProbabilitiesAfterBegin (model, definitions, crates);
 
         List<AbstractExpression> expressions
-            = new LinkedList<AbstractExpression> ();
-        for (GroupComponentPair gp : crates.keySet ())
-        {
-            expressions.add (crates.get (gp));
-        }
+            = new LinkedList<AbstractExpression> (crates.values ());
 
         return postprocessor.evaluateExpressions (expressions, constants);
     }
@@ -158,6 +154,7 @@ public abstract class AbstractProbeRunner
         Map<GroupComponentPair, AbstractExpression> newCounts
             = new HashMap<GroupComponentPair, AbstractExpression> ();
         int i = 0;
+        double matchValSum = 0, origValSum = 0, origValCSum = 0;
         for (GroupComponentPair gc : crates.keySet ())
         {
             boolean containsComp = false;
@@ -173,16 +170,22 @@ public abstract class AbstractProbeRunner
             if (containsComp)
             {
                 newCounts.put (gc, new DoubleExpression (matchVal[i]));
+                matchValSum += matchVal[i];
+                origValCSum += origVal[statesCountExpressions.indexOf
+                        (mapping.get (gc.toString ()))];
             }
             else
             {
                 newCounts.put (gc, new DoubleExpression
                     (origVal[statesCountExpressions.indexOf
                             (mapping.get (gc.toString ()))]));
+                origValSum += origVal[statesCountExpressions.indexOf
+                        (mapping.get (gc.toString ()))];
             }
             ++i;
         }
 
+        System.out.println ("after ass, matchValSum: " + matchValSum + ", origValSum: " + origValSum + "origValCSum: " + origValCSum);
         // setting initial number of components for the next analysis
         Map<String, LabelledComponentGroup> lgs = model.getComponentGroups ();
         for (LabelledComponentGroup lg : lgs.values ())
@@ -198,9 +201,9 @@ public abstract class AbstractProbeRunner
     }
 
     protected double[] passageTimeCDF
-        (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
-         ComponentId accepting, List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping)
+            (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
+             ComponentId accepting, List<AbstractExpression> statesCountExpressions,
+             Map<String, AbstractExpression> mapping)
     {
         double[] cdf = new double[obtainedMeasurements.length];
         for (GroupComponentPair gp : pairs)
@@ -281,7 +284,7 @@ public abstract class AbstractProbeRunner
                     {
                         AbstractExpression arate
                             = definitions.getApparentRateExpression
-                                (action, hc.getComponent());
+                                (action, hc.getComponent ());
                         AbstractExpression crate
                             = model.getComponentRateExpression
                                 (action, definitions, hc);
