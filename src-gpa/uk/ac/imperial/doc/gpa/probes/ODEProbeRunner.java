@@ -65,7 +65,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         }
         postprocessor = runTheProbedSystem
             (model, altDef, constants, null, stateObservers,
-                    statesCountExpressions, mapping, stopTime, stepSize, parameter);
+                statesCountExpressions, mapping, stopTime, stepSize, parameter);
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
@@ -97,30 +97,33 @@ public class ODEProbeRunner extends AbstractProbeRunner
 
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        // obtaining ratios for steady state component distribution
         double[][] matchVal = getStartingStates
             (model, mainDef, constants, postprocessor, crates);
 
-        int times = (int) Math.ceil (stopTime / stepSize);
-        int indices = (int) Math.ceil (steadyStateTime / stepSize);
+        final int times = (int) Math.ceil (stopTime / stepSize);
+        final int indices = (int) Math.ceil (steadyStateTime / stepSize);
         int i = 0;
         double[][] cdf = new double[indices][];
 
         for (double s = 0; s < steadyStateTime; s += stepSize)
         {
+            if (s > 0)
+            {
             assignNewCounts (crates, definitionsMap, mainDef, model,
                     statesCountExpressions, mapping, matchVal[i], steadyVal[i]);
+            }
 
             List<AbstractExpression> statesCountExpressionsS
-                    = new ArrayList<AbstractExpression> ();
+                = new ArrayList<AbstractExpression> ();
             Map<String, AbstractExpression> mappingS
-                    = new HashMap<String, AbstractExpression> ();
+                = new HashMap<String, AbstractExpression> ();
             NumericalPostprocessor postprocessorS = runTheProbedSystem
                 (model, mainDef, constants, null, stateObservers,
                     statesCountExpressionsS, mappingS,
                     stopTime, stepSize, parameter);
             double[][] obtainedMeasurements = postprocessorS.evaluateExpressions
-                    (statesCountExpressionsS, constants);
+                (statesCountExpressionsS, constants);
+            //
             cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
                     statesCountExpressionsS, mappingS);
             ++i;
