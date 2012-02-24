@@ -701,7 +701,7 @@ immediateActions [NFAState current_state, Set<ITransition> allActions]
 			{
 				$reached_state = $eventual_specific_action.reached_state;
 			}
-		| subsequent_specific_action  [$current_state, true, $allActions]
+		| subsequent_specific_action  [$current_state, $allActions]
 			{
 				$reached_state = $subsequent_specific_action.reached_state;
 			}
@@ -731,37 +731,31 @@ eventual_specific_action [NFAState current_state]
 				$current_state.addTransition (new EmptyTransition (),
 					$t1.starting_state);
 				$t1.reached_state.addTransition(new Transition
-						($action_name.getText ()), $t2.starting_state);
+						($action_name.text), $t2.starting_state);
 				$t1.reached_state.setAccepting (false);
 				$reached_state = $t2.reached_state;
 				$reached_state.setAccepting (true);
-				$action = new GPEPAActionCount ($action_name.getText ());
+				$action = new GPEPAActionCount ($action_name.text);
 			} ;
 
-subsequent_specific_action [NFAState current_state,
-	boolean createFailureState, Set<ITransition> allActions]
+subsequent_specific_action [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state, String action]
-	:	^(ACTION_NAME name=LOWERCASENAME)
+	:	^(SPECIFIC name=LOWERCASENAME)
 			{
 				$reached_state = new NFAState (t);
 				$reached_state.setAccepting (true);
-				$current_state.addTransition (new Transition ($name.text),
-					$reached_state);
-				$current_state.setAccepting (false);
 				$action = $name.text;
-				/*
-				if (createFailureState)
+				$current_state.addTransition
+					(new Transition ($action), $reached_state);
+				$current_state.setAccepting (false);
+				NFAState failure = new NFAState (t);
+				$current_state.addTransition
+					(new AnyTransition (), failure);
+				for (ITransition transition : $allActions)
 				{
-					NFAState failure = new NFAState (t);
-					$current_state.addTransition
-						(new AnyTransition (), failure);
-					for (ITransition transition : $allActions)
-					{
-						failure.addTransition
-							(transition.getSimpleTransition (), failure);
-					}
+					failure.addTransition
+						(transition.getSimpleTransition (), failure);
 				}
-				*/
 			} ;
 
 any_action [NFAState current_state]

@@ -42,8 +42,8 @@ tokens{
   SIGNAL                ;
   EMPTY                 ;
   EVENTUAL				;
+  SPECIFIC				;
   ACTION                ;
-  ACTION_NAME           ;
 
   //Global
 
@@ -334,7 +334,7 @@ eventual_specific_action
 
 subsequent_specific_action
 	:	MINUS LOWERCASENAME
-			-> ^(ACTION_NAME LOWERCASENAME) ;
+			-> ^(SPECIFIC LOWERCASENAME) ;
 
 //Global
 
