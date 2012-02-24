@@ -43,16 +43,13 @@ NEGATION_OP
 EMPTY
 	:	'eE' ;
 
-CCA
-	:	'~' ;
-
 //Global
 
 START
 	:	'start' ;
 
 LOGICAL_NEGATION
-	:	'nN' ;
+	:	'¬' ;
 
 LOGICAL_OR
 	:	'||' ;

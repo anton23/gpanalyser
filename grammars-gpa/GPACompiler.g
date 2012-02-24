@@ -722,27 +722,20 @@ eventual_specific_action [NFAState current_state]
 	new_starting_state1.setAccepting (false);
 	NFAState new_starting_state2 = new NFAState (t);
 	new_starting_state2.setAccepting (false);
-	NFAState new_starting_state3 = new NFAState (t);
-	new_starting_state3.setAccepting (false);
 }
-	:	^(CCA dot1=any_action [new_starting_state1]
-				t1=times [new_starting_state1, $dot1.reached_state]
-			specific_action=subsequent_specific_action
-				[new_starting_state2, false, null]
-			dot2=any_action [new_starting_state3]
-				t2=times [new_starting_state3, $dot2.reached_state])
+	:	^(EVENTUAL dot1=any_action [new_starting_state1]
+			t1=times [new_starting_state1, $dot1.reached_state]
+			action_name=LOWERCASENAME dot2=any_action [new_starting_state2]
+			t2=times [new_starting_state2, $dot2.reached_state])
 			{
 				$current_state.addTransition (new EmptyTransition (),
 					$t1.starting_state);
-				$t1.reached_state.addTransition (new EmptyTransition (),
-					new_starting_state2);
+				$t1.reached_state.addTransition(new Transition
+						($action_name.getText ()), $t2.starting_state);
 				$t1.reached_state.setAccepting (false);
-				$specific_action.reached_state.addTransition
-					(new EmptyTransition (), $t2.starting_state);
-				$specific_action.reached_state.setAccepting (false);
 				$reached_state = $t2.reached_state;
 				$reached_state.setAccepting (true);
-				$action = new GPEPAActionCount ($specific_action.action);
+				$action = new GPEPAActionCount ($action_name.getText ());
 			} ;
 
 subsequent_specific_action [NFAState current_state,

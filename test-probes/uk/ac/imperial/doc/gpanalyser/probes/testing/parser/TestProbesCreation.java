@@ -185,7 +185,7 @@ public class TestProbesCreation
                     new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -274,7 +274,7 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -348,7 +348,7 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -396,7 +396,7 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -496,7 +496,7 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -557,7 +557,7 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -596,7 +596,7 @@ public class TestProbesCreation
                              new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -657,7 +657,7 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -761,7 +761,7 @@ public class TestProbesCreation
                              new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -850,7 +850,7 @@ public class TestProbesCreation
                              new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -873,7 +873,7 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 
     @Test
@@ -996,6 +996,6 @@ public class TestProbesCreation
                              new ArrayList<ImmediatePrefix> ())
         )));
 
-        assertEquals (probeGiven, probeExpected);
+        assertEquals (probeExpected, probeGiven);
     }
 }

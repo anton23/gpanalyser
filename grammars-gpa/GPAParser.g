@@ -41,7 +41,7 @@ tokens{
   NEGATION_OP           ;
   SIGNAL                ;
   EMPTY                 ;
-  CCA                   ;
+  EVENTUAL				;
   ACTION                ;
   ACTION_NAME           ;
 
@@ -328,13 +328,13 @@ immediateActions
 		| DOT | EMPTY ;
 
 eventual_specific_action
-	:	CCA subsequent_specific_action
-			-> ^(CCA DOT ^(UNARY_OP TIMES) subsequent_specific_action
+	:	LOWERCASENAME
+			-> ^(EVENTUAL DOT ^(UNARY_OP TIMES) LOWERCASENAME
 			DOT ^(UNARY_OP TIMES)) ;
 
 subsequent_specific_action
-	:	LOWERCASENAME
-			-> ^(ACTION_NAME LOWERCASENAME) ; 
+	:	MINUS LOWERCASENAME
+			-> ^(ACTION_NAME LOWERCASENAME) ;
 
 //Global
 

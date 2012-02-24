@@ -64,7 +64,7 @@ Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
 Probe (stopTime=250, stepSize=1, density=10)
 {
-    PM6 = eE : start, ~end [nc/2] : stop
+    PM6 = eE : start, end [nc/2] : stop
     observes
     {
     	LProbe = clt_shutdown : end
