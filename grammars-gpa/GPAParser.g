@@ -63,6 +63,7 @@ tokens{
   
   //Probes
 
+  FILE					;
   STEADY				;
   TRANSIENT				;
   GLOBAL				;
@@ -418,13 +419,13 @@ scope
 			{
 				$probe_def::fluid_flow = true;
 			}
-		odeSettings mode? LBRACE probe_spec RBRACE
+		out? odeSettings mode? LBRACE probe_spec RBRACE
 			{
 				$probe_def::fluid_flow = true;
 			}
-			-> ^(PROBE_DEF odeSettings mode? probe_spec)
-		| SIM_PROBE_DEF simulationSettings mode? LBRACE probe_spec RBRACE
-          	-> ^(SIM_PROBE_DEF simulationSettings mode? probe_spec) ;
+			-> ^(PROBE_DEF out? odeSettings mode? probe_spec)
+		| SIM_PROBE_DEF out? simulationSettings mode? LBRACE probe_spec RBRACE
+          	-> ^(SIM_PROBE_DEF out? simulationSettings mode? probe_spec) ;
 
 mode
 	:	STEADY expression
@@ -441,6 +442,10 @@ mode
         		$probe_def::mode = 3;
         	}
 			-> ^(GLOBAL GLOBAL) ;
+
+out
+	:	LBRACK FILENAME RBRACK
+		-> ^(FILE FILENAME) ;
 
 probe_spec
 scope

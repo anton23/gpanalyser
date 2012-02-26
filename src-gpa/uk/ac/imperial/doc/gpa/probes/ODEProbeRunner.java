@@ -32,7 +32,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
          PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants, double stopTime,
-         double stepSize, int parameter, double steadyStateTime)
+         double stepSize, int parameter, double steadyStateTime, String name)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
@@ -72,7 +72,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         double[] cdf = passageTimeCDF (obtainedMeasurements, pairs, accepting,
                 statesCountExpressions, mapping);
 
-        return new CDF (cdf);
+        return new CDF (name, stepSize, cdf);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants, double stopTime,
-         double stepSize, int parameter, double steadyStateTime)
+         double stepSize, int parameter, double steadyStateTime, String name)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
@@ -146,7 +146,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             uncCdf[t] *= stepSize;
         }
 
-        return new CDF (uncCdf);
+        return new CDF (name, stepSize, uncCdf);
     }
 
     @Override
@@ -175,7 +175,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             int i = (int) (time / stepSize);
             cdf[i] = (time >= pointMass) ? 1 : 0;
         }
-        return new CDF (cdf);
+        return new CDF (gprobe.getName (), stepSize, cdf);
     }
 
 }

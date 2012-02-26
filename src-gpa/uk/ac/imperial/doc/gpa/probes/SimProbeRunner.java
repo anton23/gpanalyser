@@ -35,7 +35,7 @@ public class SimProbeRunner extends AbstractProbeRunner
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              ComponentId accepting, Constants constants,
              double stopTime, double stepSize, int parameter,
-             double steadyStateTime)
+             double steadyStateTime, String name)
     {
         double maxTime = steadyStateTime - stepSize;
         double altMaxTime = stopTime - stepSize;
@@ -103,7 +103,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         double[] cdf = passageTimeCDF (overallMeasurements, pairs, accepting,
                 altStatesCountExpressions, altMapping);
-        return new CDF (cdf);
+        return new CDF (name, stepSize, cdf);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class SimProbeRunner extends AbstractProbeRunner
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              ComponentId accepting, Constants constants,
              double stopTime, double stepSize, int parameter,
-             double steadyStateTime)
+             double steadyStateTime, String name)
     {
         /*
         int indices = (int) Math.ceil (stopTime / stepSize);
@@ -182,7 +182,7 @@ public class SimProbeRunner extends AbstractProbeRunner
             mainCdf[t] /= parameter;
         }
     */
-        return new CDF (null);
+        return new CDF (name, stepSize, null);
     }
 
     protected CDF globalPassages
@@ -192,7 +192,7 @@ public class SimProbeRunner extends AbstractProbeRunner
              Constants constants, PEPAComponentDefinitions mainDef,
              double stopTime, double stepSize, int parameter)
     {
-        return new CDF (null);
+        return new CDF (gprobe.getName (), stepSize, null);
     }
 
     /*
