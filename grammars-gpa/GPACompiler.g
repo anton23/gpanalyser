@@ -71,6 +71,7 @@ import PCTMCCompilerPrototype;
 	import uk.ac.imperial.doc.gpa.fsm.*;
 	import uk.ac.imperial.doc.gpa.probes.*;
 	import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.*;
+	import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 }
 
 @members {
@@ -1056,7 +1057,7 @@ scope
 	$probe_def::parser.setErrorReporter (new ErrorReporter ());
 	$probe_def::model = deepCloner.deepClone (mainModel);
 }
-	:	^(PROBE_DEF	odeSettings
+	:	^(PROBE_DEF	o=out? odeSettings
 				{
 					$probe_def::stop_time = $odeSettings.stopTime;
 					$probe_def::step_size = $odeSettings.stepSize;
@@ -1065,8 +1066,13 @@ scope
 			md=mode mt=probe_spec [false, $md.chosenMode, $md.par, $plot])
 			{
 				$measured_times = $mt.measured_times;
+				if (o != null)
+				{
+					FileUtils.writeGeneralFile
+						($measured_times.toString (), $o.name);
+				}
 			}
-		| ^(SIM_PROBE_DEF simulationSettings
+		| ^(SIM_PROBE_DEF o=out? simulationSettings
 				{
 					$probe_def::stop_time = $simulationSettings.stopTime;
 					$probe_def::step_size = $simulationSettings.stepSize;
@@ -1075,6 +1081,11 @@ scope
 			md=mode mt=probe_spec [true, $md.chosenMode, $md.par, $plot])
 			{
 				$measured_times = $mt.measured_times;
+				if (o != null)
+				{
+					FileUtils.writeGeneralFile
+						($measured_times.toString (), $o.name);
+				}
 			} ;
 
 mode returns [int chosenMode, double par]
@@ -1102,6 +1113,12 @@ mode returns [int chosenMode, double par]
 				$par = 0;
 				$chosenMode = 3;
 			} ;
+
+out returns [String name]
+	:	^(FILE FILENAME)
+		{
+			$name = $FILENAME.text.replace ("\"", "");
+		} ;
 
 probe_spec [boolean simulate, int mode, double modePar, boolean plot]
 	returns [CDF measured_times]

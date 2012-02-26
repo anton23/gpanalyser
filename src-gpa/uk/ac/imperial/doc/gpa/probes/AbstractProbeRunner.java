@@ -38,7 +38,7 @@ public abstract class AbstractProbeRunner
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
-         double steadyStateTime);
+         double steadyStateTime, String name);
 
     protected abstract CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
@@ -48,7 +48,7 @@ public abstract class AbstractProbeRunner
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
-         double steadyStateTime);
+         double steadyStateTime, String name);
 
     protected abstract CDF globalPassages
         (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
@@ -114,12 +114,14 @@ public abstract class AbstractProbeRunner
                 return steadyIndividual
                     (statesCountExpressions, mapping, model, stateObservers,
                         mainDef, altDef, definitionsMap, accepting,
-                        constants, stopTime, stepSize, parameter, modePar);
+                        constants, stopTime, stepSize, parameter,
+                        modePar, gprobe.getName ());
             case 2:
                 return transientIndividual
                     (statesCountExpressions, mapping, model, stateObservers,
                         mainDef, definitionsMap, accepting,
-                        constants, stopTime, stepSize, parameter, modePar);
+                        constants, stopTime, stepSize, parameter,
+                        modePar, gprobe.getName ());
             case 3:
                 return globalPassages
                     (gprobe, model, stateObservers, statesCountExpressions,
