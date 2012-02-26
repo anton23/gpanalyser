@@ -1,0 +1,165 @@
+package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
+
+import uk.ac.imperial.doc.jexpressions.constants.Constants;
+import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.cppoutput.PCTMCCPPImplementationProvider;
+import uk.ac.imperial.doc.pctmc.cppoutput.simulation.*;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
+import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
+import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.simulation.SimulationUpdater;
+import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
+import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
+import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+
+import java.util.Collection;
+import java.util.List;
+
+public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor {
+
+	private PCTMCSimulation simulation;
+
+	private SimulationUpdater updater;
+	private AccumulatorUpdater accUpdater;
+	private NativeAggregatedStateNextEventGenerator eventGenerator;
+
+    private PCTMC pctmc;
+    private Collection<EvolutionEvent> observableEvents;
+
+
+    protected int replications;
+
+	@Override
+	public String toString() {
+		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", replications = " + replications+")";
+	}
+
+
+	@Override
+	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	public CPPSimulationAnalysisNumericalPostprocessor(double stopTime,
+                                                       double stepSize, int replications) {
+		super(stopTime, stepSize);
+		this.replications = replications;
+	}
+
+
+	@Override
+	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
+		super.prepare(analysis, constants);
+		simulation = null;
+		if (analysis instanceof PCTMCSimulation){
+            this.simulation = (PCTMCSimulation) analysis;
+
+            dataPoints = new double[(int) Math.ceil(stopTime / stepSize)]
+                       [momentIndex.size() + generalExpectationIndex.size()];
+            SimulationUpdaterPrinter printer = new SimulationUpdaterPrinter
+                    (constants, momentIndex, simulation, generalExpectationIndex);
+            printer.visit();
+            updater = (SimulationUpdater) CPPClassCompiler
+                .getInstance(printer.toClassString(), printer.getNativeClassName(),
+                        printer.toString(), printer.getNativeClassName(),
+                        SimulationUpdaterPrinter.PACKAGE);
+
+            AccumulatorUpdaterPrinter accPrinter
+                    = new AccumulatorUpdaterPrinter(constants, simulation);
+            accPrinter.visit();
+            accUpdater = (AccumulatorUpdater) CPPClassCompiler
+                .getInstance(accPrinter.toClassString(),
+                        accPrinter.getNativeClassName(), accPrinter.toString(),
+                        accPrinter.getNativeClassName(),
+                        AccumulatorUpdaterPrinter.PACKAGE);
+
+            PCTMCLogging.info("Generating one step generator.");
+
+            pctmc = simulation.getPCTMC();
+            observableEvents = pctmc.getEvolutionEvents();
+            AggregatedStateNextEventGeneratorPrinter egPrinter
+                    = new AggregatedStateNextEventGeneratorPrinter
+                    (constants, simulation, pctmc, observableEvents);
+            egPrinter.visit();
+            eventGenerator = (NativeAggregatedStateNextEventGenerator)
+                CPPClassCompiler.getInstance(egPrinter.toClassString(),
+                        egPrinter.getNativeClassName(),
+                        egPrinter.toString(), egPrinter.getNativeClassName(),
+                        AggregatedStateNextEventGeneratorPrinter.PACKAGE);
+		}
+	}
+
+	@Override
+	public void calculateDataPoints(Constants constants) {
+		if (simulation!=null){
+			simulate(constants);
+		}		
+	}
+	
+	private double[] initial;
+	
+	private void simulate(Constants constants) {
+
+		eventGenerator.setRates(constants.getFlatConstants());
+        eventGenerator.initCoefficients(pctmc, observableEvents);
+
+		int n = pctmc.getStateIndex().size();
+		initial = new double[n];
+		for (int i = 0; i < n; i++) {
+			ExpressionEvaluatorWithConstants evaluator
+                    = new ExpressionEvaluatorWithConstants(constants);
+			pctmc.getInitCounts()[i].accept(evaluator);
+			initial[i] = evaluator.getResult();
+		}
+
+		PCTMCLogging.info("Running Gillespie simulator.");
+		PCTMCLogging.increaseIndent();
+
+		updater.setRates(constants.getFlatConstants());
+		accUpdater.setRates(constants.getFlatConstants());
+
+		int m = momentIndex.size();
+
+		double[][] tmp;
+		for (int r = 0; r < replications; r++) {
+			if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {
+				PCTMCLogging.info(r + " replications finished.");
+			}
+			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
+					initial, stopTime, stepSize, accUpdater);
+			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
+				updater.update(dataPoints[t], tmp[t]);				
+			}
+		}
+
+		for (int t = 0; t < dataPoints.length; t++) {
+			for (int i = 0; i < m + generalExpectationIndex.size(); i++) {
+				dataPoints[t][i] = dataPoints[t][i] / replications;
+			}
+		}
+		PCTMCLogging.decreaseIndent();
+	}
+
+    /**
+     * Returns an object providing updates to expressions from moment data.
+     * @param plotExpressions
+     * @param constants
+     * @return
+     */
+    @Override
+    public AbstractExpressionEvaluator getExpressionEvaluator(
+            final List<AbstractExpression> plotExpressions, Constants constants) {
+        EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
+        return new PCTMCCPPImplementationProvider()
+                .getEvaluatorImplementation(updaterMethod, evaluatorClassName,
+                        constants, momentIndex,generalExpectationIndex);
+    }
+}
