@@ -20,12 +20,14 @@ import java.util.List;
 public class CPPClassCompiler {
 
     private static final String tmp = "tmp";
-    private static URLClassLoader urlLoader;
+    private static URLClassLoader classLoader;
+    private static boolean windows = System.getProperty("os.name")
+            .toLowerCase().contains("win");
 
     static {
         try {
             File currentDir = new File("./" + tmp);
-            urlLoader = new URLClassLoader
+            classLoader = new URLClassLoader
                     (new URL[] {currentDir.toURI().toURL()});
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -74,14 +76,27 @@ public class CPPClassCompiler {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 		List<JavaFileObject> files = new ArrayList<JavaFileObject>(1);
-        JavaFileManager fileManager
-                = compiler.getStandardFileManager(null, null, null);
+        JavaFileManager fileManager = null;
+        if (windows)
+        {
+            fileManager = new ClassFileManager
+                    (compiler.getStandardFileManager(null, null, null));
+        }
+        else
+        {
+            fileManager = compiler.getStandardFileManager(null, null, null);
+        }
+
         String filePath = packageName.replace(".", "/") ;
         String file = filePath + "/" + className;
         String fullClassName = packageName + "." + className;
 		files.add(new CharSequenceJavaFileObject(tmp + "/" + file, src));
 
-        String[] options = new String[] {"-d", tmp};
+        String[] options = new String[] {};
+        if (!windows)
+        {
+            options = new String[] {"-d", tmp};
+        }
 		compiler.getTask(null, fileManager, null,
                 Arrays.asList(options), null, files).call();
        
@@ -94,14 +109,15 @@ public class CPPClassCompiler {
                 javaInclude = javaHome.substring(0, indexJre);
             }
 
-            String command = "javah -jni -d . -classpath " + tmp + " " + fullClassName;
+            String command = "javah -jni -d . -classpath "
+                    + tmp + " " + fullClassName;
             ExecProcess.main(command, 1);
 
             File nativeFileObj =  new File(nativeFile + ".cpp");
             
             FileUtils.writeGeneralFile(nativeCode, nativeFileObj.getAbsolutePath());
             String libName = System.mapLibraryName(nativeFile);
-            if (System.getProperty("os.name").toLowerCase().contains("win"))
+            if (windows)
             {
                 winCompile(libName, nativeFile, javaInclude);
             }
@@ -112,10 +128,18 @@ public class CPPClassCompiler {
 
             // cleanup
             nativeFileObj.delete();
-            File headerFileObj = new File(fullClassName.replace(".","_") + ".h");
-            headerFileObj.delete();
+            File headerFile = new File(fullClassName.replace(".","_") + ".h");
+            headerFile.delete();
 
-            return urlLoader.loadClass(fullClassName).newInstance();
+            if (windows)
+            {
+                return fileManager.getClassLoader(null)
+                        .loadClass(fullClassName).newInstance();
+            }
+            else
+            {
+                return classLoader.loadClass(fullClassName).newInstance();
+            }
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -163,4 +187,35 @@ public class CPPClassCompiler {
 			return bos;
 		}
 	}
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    class ClassFileManager extends ForwardingJavaFileManager {
+
+        private JavaClassObject jclassObject;
+
+        public ClassFileManager(StandardJavaFileManager standardManager) {
+            super(standardManager);
+        }
+
+        @Override
+        public ClassLoader getClassLoader(Location location) {
+            return new SecureClassLoader() {
+                @Override
+                protected Class<?> findClass(String name)
+                        throws ClassNotFoundException {
+                    byte[] b = jclassObject.getBytes();
+                    return super.defineClass(name, jclassObject.getBytes(), 0,
+                            b.length);
+                }
+            };
+        }
+
+        @Override
+        public JavaFileObject getJavaFileForOutput(Location location,
+                                                   String className, Kind kind, FileObject sibling)
+                throws IOException {
+            jclassObject = new JavaClassObject(className, kind);
+            return jclassObject;
+        }
+    }
 }
