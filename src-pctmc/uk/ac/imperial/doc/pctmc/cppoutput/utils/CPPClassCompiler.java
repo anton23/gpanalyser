@@ -8,14 +8,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CPPClassCompiler {
 
     private static final String tmp = "tmp";
+    private static URLClassLoader urlLoader;
+
+    static {
+        try {
+            File currentDir = new File("./" + tmp);
+            urlLoader = new URLClassLoader
+                    (new URL[] {currentDir.toURI().toURL()});
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
 
 	public static Object getInstance(String javaCode, String className,
              String nativeCode, String nativeFile, String packageName) {
@@ -42,7 +57,7 @@ public class CPPClassCompiler {
 
     private static void linuxCompile
             (String libName, String nativeFile, String javaInclude) {
-        String command = "gcc -Wall -shared -fPIC -o " + libName
+        String command = "g++ -Wall -shared -fPIC -o " + libName
             + " " + nativeFile + ".cpp"
             + " -I\"" + javaInclude + "include\""
             + " -I\"" + javaInclude + "include/linux\"";
@@ -59,14 +74,16 @@ public class CPPClassCompiler {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 		List<JavaFileObject> files = new ArrayList<JavaFileObject>(1);
-        JavaFileManager fileManager = new ClassFileManager
-                (compiler.getStandardFileManager(null, null, null));
+        JavaFileManager fileManager
+                = compiler.getStandardFileManager(null, null, null);
         String filePath = packageName.replace(".", "/") ;
         String file = filePath + "/" + className;
         String fullClassName = packageName + "." + className;
 		files.add(new CharSequenceJavaFileObject(tmp + "/" + file, src));
 
-		compiler.getTask(null, fileManager, null, null, null, files).call();
+        String[] options = new String[] {"-d", tmp};
+		compiler.getTask(null, fileManager, null,
+                Arrays.asList(options), null, files).call();
        
 		try {
             String javaHome = System.getProperty("java.home");
@@ -77,9 +94,9 @@ public class CPPClassCompiler {
                 javaInclude = javaHome.substring(0, indexJre);
             }
 
-            String command = "javah -jni -classpath " + tmp + " " + fullClassName;
+            String command = "javah -jni -d . -classpath " + tmp + " " + fullClassName;
             ExecProcess.main(command, 1);
-            
+
             File nativeFileObj =  new File(nativeFile + ".cpp");
             
             FileUtils.writeGeneralFile(nativeCode, nativeFileObj.getAbsolutePath());
@@ -98,8 +115,7 @@ public class CPPClassCompiler {
             File headerFileObj = new File(fullClassName.replace(".","_") + ".h");
             headerFileObj.delete();
 
-            return fileManager.getClassLoader(null)
-                    .loadClass(fullClassName).newInstance();
+            return urlLoader.loadClass(fullClassName).newInstance();
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -145,40 +161,6 @@ public class CPPClassCompiler {
 		@Override
 		public OutputStream openOutputStream() throws IOException {
 			return bos;
-		}
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	class ClassFileManager extends ForwardingJavaFileManager {
-
-		private JavaClassObject jclassObject;
-
-
-		public ClassFileManager(StandardJavaFileManager standardManager) {
-			super(standardManager);
-		}
-
-
-		@Override
-		public ClassLoader getClassLoader(Location location) {
-			return new SecureClassLoader() {
-				@Override
-				protected Class<?> findClass(String name)
-						throws ClassNotFoundException {
-					byte[] b = jclassObject.getBytes();
-					return super.defineClass(name, jclassObject.getBytes(), 0,
-							b.length);
-				}
-			};
-		}
-
-		
-		@Override
-		public JavaFileObject getJavaFileForOutput(Location location,
-				String className, Kind kind, FileObject sibling)
-				throws IOException {
-			jclassObject = new JavaClassObject(className, kind);
-			return jclassObject;
 		}
 	}
 }
