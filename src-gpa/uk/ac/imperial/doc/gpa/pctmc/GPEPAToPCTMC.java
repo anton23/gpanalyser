@@ -17,7 +17,7 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 public class GPEPAToPCTMC {
 	
 	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,GroupedModel model,Set<String> countActions){
-		Map<State,AbstractExpression> initCounts = new HashMap<State,AbstractExpression>();
+		Map<State,AbstractExpression> initCounts = new LinkedHashMap<State,AbstractExpression>();
 		for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
 			initCounts.put(new GPEPAState(p), model.getCountExpression(p));
 		}

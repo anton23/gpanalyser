@@ -70,8 +70,11 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
         odeAnalysis = null;
         if (analysis instanceof PCTMCODEAnalysis) {
             this.odeAnalysis = (PCTMCODEAnalysis) analysis;
-            preprocessedImplementation = pcctmc.getPreprocessedODEImplementation
-                    (odeAnalysis.getOdeMethod(), constants, momentIndex);
+            if (preprocessedImplementation == null)
+            {
+                preprocessedImplementation = pcctmc.getPreprocessedODEImplementation
+                        (odeAnalysis.getOdeMethod(), constants, momentIndex);
+            }
         } else {
             throw new AssertionError("ODE postprocessor attached to an incompatible analysis " + analysis.toString());
         }

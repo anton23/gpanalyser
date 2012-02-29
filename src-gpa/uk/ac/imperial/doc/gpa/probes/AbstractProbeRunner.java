@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.gpa.probes;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
@@ -152,7 +153,6 @@ public abstract class AbstractProbeRunner
         Map<GroupComponentPair, AbstractExpression> newCounts
             = new HashMap<GroupComponentPair, AbstractExpression> ();
         int i = 0;
-        double matchValSum = 0, origValSum = 0, origValCSum = 0;
         for (GroupComponentPair gc : crates.keySet ())
         {
             boolean containsComp = false;
@@ -168,22 +168,16 @@ public abstract class AbstractProbeRunner
             if (containsComp)
             {
                 newCounts.put (gc, new DoubleExpression (matchVal[i]));
-                matchValSum += matchVal[i];
-                origValCSum += origVal[statesCountExpressions.indexOf
-                        (mapping.get (gc.toString ()))];
             }
             else
             {
                 newCounts.put (gc, new DoubleExpression
                     (origVal[statesCountExpressions.indexOf
                             (mapping.get (gc.toString ()))]));
-                origValSum += origVal[statesCountExpressions.indexOf
-                        (mapping.get (gc.toString ()))];
             }
             ++i;
         }
 
-        System.out.println ("after ass, matchValSum: " + matchValSum + ", origValSum: " + origValSum + "origValCSum: " + origValCSum);
         // setting initial number of components for the next analysis
         Map<String, LabelledComponentGroup> lgs = model.getComponentGroups ();
         for (LabelledComponentGroup lg : lgs.values ())
@@ -397,12 +391,12 @@ public abstract class AbstractProbeRunner
             (GroupedModel model, PEPAComponentDefinitions definitions,
              Constants constants, Set<String> countActionsSet,
              Collection<GPEPAState> stateObservers,
+             List<CombinedPopulationProduct> moments,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
-             double stopTime, double stepSize, int parameter)
+             double stopTime, double stepSize, int parameter,
+             BiMap<CombinedPopulationProduct, Integer> momentIndex)
     {
-        List<CombinedPopulationProduct> moments
-            = new ArrayList<CombinedPopulationProduct> ();
         for (GPEPAState state : stateObservers)
         {
             Multiset<State> states = HashMultiset.create ();
@@ -430,6 +424,7 @@ public abstract class AbstractProbeRunner
         System.out.println (pctmc);
         AbstractPCTMCAnalysis analysis
             = getPreparedAnalysis (pctmc, moments, constants);
+        momentIndex.putAll (analysis.getMomentIndex ());
 
         /*
             Set<String> cooperation = new HashSet<String> ();
@@ -491,12 +486,23 @@ public abstract class AbstractProbeRunner
         return null;
     }
 
-    protected AbstractPCTMCAnalysis getPreparedAnalysis (PCTMC pctmc,
-            List<CombinedPopulationProduct> moments, Constants constants)
+    protected AbstractPCTMCAnalysis getPreparedAnalysis
+        (PCTMC pctmc, List<CombinedPopulationProduct> moments,
+         Constants constants)
     {
         AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
         analysis.setUsedMoments (moments);
         analysis.prepare (constants);
+        return analysis;
+    }
+
+    protected AbstractPCTMCAnalysis getPreparedAnalysis
+        (PCTMC pctmc, List<CombinedPopulationProduct> moments,
+         BiMap<CombinedPopulationProduct, Integer> momentIndex)
+    {
+        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
+        analysis.setUsedMoments (moments);
+        analysis.prepare (momentIndex);
         return analysis;
     }
 
