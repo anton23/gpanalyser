@@ -70,6 +70,10 @@ public abstract class AbstractPCTMCAnalysis {
 	 */
 	public abstract void prepare(Constants constants);
 
+    public void prepare(BiMap<CombinedPopulationProduct, Integer> momentIndex) {
+        this.momentIndex = momentIndex;
+    }
+
 	/**
 	 * Notifies postprocessors about finished analysis generation.
 	 * @param constants

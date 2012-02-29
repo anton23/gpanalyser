@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.gpa.probes;
 
+import com.google.common.collect.HashBiMap;
 import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
@@ -12,6 +13,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CPPSimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
@@ -59,8 +61,9 @@ public class SimProbeRunner extends AbstractProbeRunner
             mapping = new HashMap<String, AbstractExpression> ();
             NumericalPostprocessor postprocessor = runTheProbedSystem
                 (model, mainDef, constants, null, stateObservers,
-                 statesCountExpressions, mapping,
-                 steadyStateTime, stepSize, 1);
+                 new ArrayList<CombinedPopulationProduct>(),
+                 statesCountExpressions, mapping, steadyStateTime, stepSize, 1,
+                 HashBiMap.<CombinedPopulationProduct, Integer>create ());
             double[] times = new double[statesCountExpressions.size ()];
             Arrays.fill (times, maxTime);
             AbstractExpressionEvaluator evaluator = postprocessor
@@ -72,9 +75,11 @@ public class SimProbeRunner extends AbstractProbeRunner
                 (mainDef, model, statesCountExpressions, mapping, steadyVal);
             altStatesCountExpressions = new LinkedList<AbstractExpression> ();
             altMapping = new HashMap<String, AbstractExpression> ();
-            postprocessor = runTheProbedSystem (model, altDef, constants, null,
-                    altStateObservers, altStatesCountExpressions,
-                    altMapping, stopTime, stepSize, 1);
+            postprocessor = runTheProbedSystem
+                (model, altDef, constants, null, altStateObservers,
+                 new ArrayList<CombinedPopulationProduct>(),
+                 altStatesCountExpressions, altMapping, stopTime, stepSize, 1,
+                 HashBiMap.<CombinedPopulationProduct, Integer>create ());
             double[][] obtainedMeasurements = postprocessor.evaluateExpressions
                 (altStatesCountExpressions, constants);
             for (int x = 0; x < altMaxTimeIndex; ++x)
@@ -124,18 +129,22 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         NumericalPostprocessor postprocessorK = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-                    new ArrayList<AbstractExpression> (),
-                    new HashMap<String, AbstractExpression> (),
-                    steadyStateTime + stepSize, stepSize, parameter);        
+             new ArrayList<CombinedPopulationProduct>(),
+             new ArrayList<AbstractExpression> (),
+             new HashMap<String, AbstractExpression> (),
+             steadyStateTime + stepSize, stepSize, parameter,
+             HashBiMap.<CombinedPopulationProduct, Integer>create ());
         double[][] K = getProbabilitiesComponentStateAfterBegin
                 (pairs, mainDef, postprocessorK, constants);
 
         for (int p = 0; p < parameter; ++p)
         {
             NumericalPostprocessor postprocessor = runTheProbedSystem
-                    (model, mainDef, constants, null, stateObservers,
-                            statesCountExpressions, mapping,
-                            steadyStateTime + stepSize, stepSize, 1);
+                (model, mainDef, constants, null, stateObservers,
+                 new ArrayList<CombinedPopulationProduct>(),
+                 statesCountExpressions, mapping,
+                 steadyStateTime + stepSize, stepSize, 1,
+                 HashBiMap.<CombinedPopulationProduct, Integer>create ());
             double[][] steadyVal = postprocessor.evaluateExpressions
                 (statesCountExpressions, constants);
 
@@ -152,8 +161,10 @@ public class SimProbeRunner extends AbstractProbeRunner
                     = new HashMap<String, AbstractExpression> ();
                 NumericalPostprocessor postprocessorS = runTheProbedSystem
                     (model, mainDef, constants, null, stateObservers,
-                        statesCountExpressionsS, mappingS,
-                        stopTime, stepSize, 1);
+                     new ArrayList<CombinedPopulationProduct>(),
+                     statesCountExpressionsS, mappingS,
+                     stopTime, stepSize, 1,
+                     HashBiMap.<CombinedPopulationProduct, Integer>create ());
                 double[][] obtainedMeasurements = postprocessorS
                     .evaluateExpressions (statesCountExpressionsS, constants);
                 cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
@@ -198,7 +209,9 @@ public class SimProbeRunner extends AbstractProbeRunner
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem (model,
                 mainDef, constants, countActions, stateObservers,
-                statesCountExpressions, mapping, stopTime, stepSize, parameter);
+                new ArrayList<CombinedPopulationProduct>(),
+                statesCountExpressions, mapping, stopTime, stepSize, parameter,
+                HashBiMap.<CombinedPopulationProduct, Integer>create ());
 
         double[][] values = postprocessor
             .evaluateExpressions (statesCountExpressions, constants);
