@@ -3,6 +3,7 @@ package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.cppoutput.PCTMCCPPImplementationProvider;
@@ -18,6 +19,7 @@ import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor {
@@ -84,7 +86,14 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
             PCTMCLogging.info("Generating one step generator.");
 
             pctmc = simulation.getPCTMC();
-            observableEvents = pctmc.getEvolutionEvents();
+            observableEvents = new LinkedList<EvolutionEvent>();
+            Collection<EvolutionEvent> events = pctmc.getEvolutionEvents();
+            for (EvolutionEvent event : events) {
+                if (!event.getRate().equals(DoubleExpression.ZERO)) {
+                    observableEvents.add(event);
+                }
+            }
+            
             AggregatedStateNextEventGeneratorPrinter egPrinter
                     = new AggregatedStateNextEventGeneratorPrinter
                     (constants, simulation, pctmc, observableEvents);

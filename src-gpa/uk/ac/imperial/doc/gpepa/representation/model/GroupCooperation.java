@@ -4,8 +4,10 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
+import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.*;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 
 import java.util.*;
 
@@ -53,18 +55,30 @@ public class GroupCooperation extends GroupedModel {
 			if (actions.contains(le.getAction())) {
 				leftActionmap.put(le.getAction(), le);
 			}
+            for (String immediateAction : le.getImmediateActions()) {
+                if (actions.contains(immediateAction)) {
+                    leftActionmap.put(immediateAction, le);
+                }
+            }
 		}
 
 		for (PEPAEvolutionEvent re : rightEvents) {
 			if (actions.contains(re.getAction())) {
 				rightActionmap.put(re.getAction(), re);
 			}
+            for (String immediateAction : re.getImmediateActions()) {
+                if (actions.contains(immediateAction)) {
+                    rightActionmap.put(immediateAction, re);
+                }
+            }
 		}
 
-		for (final String action : leftActionmap.keySet()) {
+        Collection<String> allActions = new HashSet<String>(leftActionmap.keySet());
+        allActions.addAll(rightActionmap.keySet());
+		for (final String action : allActions) {
 			for (final PEPAEvolutionEvent le : leftActionmap.get(action)) {
 				for (final PEPAEvolutionEvent re : rightActionmap.get(action)) {
-					List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
+                    List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
 					List<GroupComponentPair> decreases = new LinkedList<GroupComponentPair>();
 					increases.addAll(le.getIncreases());
 					increases.addAll(re.getIncreases());
@@ -74,7 +88,13 @@ public class GroupCooperation extends GroupedModel {
                     List<String> immediateActions
                         = new LinkedList<String>() ;
                     immediateActions.addAll(le.getImmediateActions());
+                    if (!le.getAction().equals(action)) {
+                        immediateActions.remove(action);
+                    }
                     immediateActions.addAll(re.getImmediateActions());
+                    if (!re.getAction().equals(action)) {
+                        immediateActions.remove(action);
+                    }
 
 					AbstractExpression leftApparentRate = left
 							.getMomentOrientedRateExpression(action,
@@ -83,14 +103,43 @@ public class GroupCooperation extends GroupedModel {
 					AbstractExpression rightApparentRate = right
 							.getMomentOrientedRateExpression(action,
 									definitions);
-					AbstractExpression leftRate = le.getRate();
-					AbstractExpression rightRate = re.getRate();
 
-					AbstractExpression rate = DivDivMinExpression.create(
-							leftRate, rightRate, leftApparentRate,
-							rightApparentRate);
-					events.add(new PEPAEvolutionEvent(action, immediateActions,
-                            rate, increases, decreases));
+                    AbstractExpression leftRate = le.getRate();
+                    AbstractExpression rightRate = re.getRate();
+
+                    AbstractExpression rate;
+                    // left passive
+                    if (leftRate.equals(DoubleExpression.ZERO)) {
+                        List<AbstractExpression> decreasingStates
+                                = new ArrayList<AbstractExpression>();
+                        for (GroupComponentPair gp : le.getDecreases()) {
+                            decreasingStates.add(MinExpression.create
+                                    (DoubleExpression.ONE,
+                                     CombinedProductExpression
+                                         .createMeanExpression(new GPEPAState(gp))));
+                        }
+                        decreasingStates.add(rightRate);
+                        rate = ProductExpression.create(decreasingStates);
+                    }
+                    // right passive
+                    else if (rightRate.equals(DoubleExpression.ZERO)) {
+                        List<AbstractExpression> decreasingStates
+                                = new ArrayList<AbstractExpression>();
+                        for (GroupComponentPair gp : re.getDecreases()) {
+                            decreasingStates.add(MinExpression.create
+                                    (DoubleExpression.ONE,
+                                     CombinedProductExpression
+                                         .createMeanExpression(new GPEPAState(gp))));
+                        }
+                        decreasingStates.add(leftRate);
+                        rate = ProductExpression.create(decreasingStates);
+                    }
+                    else {
+                        rate = DivDivMinExpression.create(leftRate,
+                                rightRate, leftApparentRate, rightApparentRate);
+                    }
+                    events.add(new PEPAEvolutionEvent(action,
+                            immediateActions, rate, increases, decreases));
 				}
 			}
 		}

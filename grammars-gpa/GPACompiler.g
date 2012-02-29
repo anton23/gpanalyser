@@ -23,6 +23,7 @@ import PCTMCCompilerPrototype;
 	import java.util.Collection;
 
 	import com.google.common.collect.Multimap;
+	import com.google.common.collect.HashMultimap;
 	import com.google.common.collect.LinkedHashMultimap;
 	import com.google.common.collect.HashMultiset;
 	import com.google.common.collect.Multiset;
@@ -122,8 +123,8 @@ import PCTMCCompilerPrototype;
 
 	private void initExcluded ()
 	{
-		excluded.add (new SignalTransition ("start"));
-		excluded.add (new SignalTransition ("stop"));
+		excluded.add (new StartTransition ());
+		excluded.add (new StopTransition ());
 	}
 
 	private Map<String, PEPAComponent>
@@ -166,11 +167,11 @@ import PCTMCCompilerPrototype;
 		}
 		startingState = NFAtoDFA.convertToDFA (startingState, t);
 		NFAUtils.removeAnyTransitions (allActions, startingState);
-		alphabet.addAll (NFADetectors.detectAlphabet
-				(startingState, true, excluded));
 		NFAUtils.extendStatesWithSelfLoops
 			(allActions, startingState);
 		NFAUtils.removeSurplusSelfLoops (startingState);
+		alphabet.addAll (NFADetectors.detectAlphabet
+				(startingState, true, excluded));
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 		NFAStateToPEPA.HybridDFAtoPEPA
@@ -783,7 +784,7 @@ empty_action [NFAState current_state]
 
 // Global
 
-probeg [GlobalProbe gprobe, Set<ITransition> allActions]
+probeg [boolean simulate, GlobalProbe gprobe, Set<ITransition> allActions]
 @init
 {
 	NFAState starting_state1 = new NFAState (t);
@@ -792,35 +793,39 @@ probeg [GlobalProbe gprobe, Set<ITransition> allActions]
 	:	^(PROBEG start_actions=rg [starting_state1, $allActions]
 			stop_actions=rg [starting_state2, $allActions] rp=REPETITION?)
 			{
-				NFAState acc_state = new NFAState (t);
-				NFAUtils.unifyAcceptingStates (starting_state1, acc_state);
-				acc_state.replaceTransition
-					(new SignalTransition ("start"), starting_state2);
-				acc_state.setAccepting (false);
-				acc_state = new NFAState (t);
-                NFAUtils.unifyAcceptingStates (starting_state2, acc_state);
-                acc_state.setAccepting (false);
-                NFAState final_acc_state = new NFAState (t);
-                final_acc_state.setAccepting (true);
-                acc_state.replaceTransition
-                    (new SignalTransition ("stop"), final_acc_state);
-                starting_state1 = NFAtoDFA.convertToDFA (starting_state1, t);
-                acc_state = NFADetectors.detectSingleAcceptingState
-                	(starting_state1);
-                Set<ITransition> alphabet = NFADetectors.detectAlphabet
-					(starting_state1, false, new LinkedList<ITransition> ());
-				if (rp != null)
+				if ($simulate)
 				{
-					acc_state.addTransition
-						(new EmptyTransition (), starting_state1);
-					starting_state1 = NFAtoDFA.convertToDFA (starting_state1,
-						$gprobe.getName ());
+					NFAState acc_state = new NFAState (t);
+					NFAUtils.unifyAcceptingStates (starting_state1, acc_state);
+					acc_state.replaceTransition
+						(new StartTransition (), starting_state2);
+					acc_state.setAccepting (false);
+					acc_state = new NFAState (t);
+					NFAUtils.unifyAcceptingStates (starting_state2, acc_state);
+					acc_state.setAccepting (false);
+					NFAState final_acc_state = new NFAState (t);
+					final_acc_state.setAccepting (true);
+					acc_state.replaceTransition
+						(new StopTransition (), final_acc_state);
+					starting_state1 = NFAtoDFA.convertToDFA (starting_state1, t);
+					acc_state = NFADetectors.detectSingleAcceptingState
+						(starting_state1);
+					Set<ITransition> alphabet = NFADetectors.detectAlphabet
+						(starting_state1, false, new LinkedList<ITransition> ());
+					if (rp != null)
+					{
+						acc_state.addTransition
+							(new EmptyTransition (), starting_state1);
+						starting_state1 = NFAtoDFA.convertToDFA
+							(starting_state1, $gprobe.getName ());
+					}
+					$gprobe.setStartingState (starting_state1);
 				}
-				NFAUtils.removeAnyTransitions
-					($probe_spec::allActions, starting_state1);
-				$gprobe.setStartingState (starting_state1);
-				$gprobe.setU (new SequenceUExpression
-						($start_actions.U, $stop_actions.U));
+				else
+				{
+					$gprobe.setU (new SequenceUExpression
+							($start_actions.U, $stop_actions.U));
+				}
 			} ;
 
 rg [NFAState current_state, Set<ITransition> allActions]
@@ -1154,7 +1159,7 @@ scope
 					}
 				}
 			globalProbeName=UPPERCASENAME (local_probes [newComp, altComp]
-			locations)?	probeg [gprobe, $probe_spec::allActions])
+			locations)?	probeg [simulate, gprobe, $probe_spec::allActions])
 			{
 				gprobe.setName ($globalProbeName.text);
 				Map<String, PEPAComponent> newDef
@@ -1190,25 +1195,75 @@ scope
 				}
 				if ($simulate)
 				{
-					$measured_times = new SimProbeRunner ().executeProbedModel
-						(gprobe, $probe_def::model, stateObservers,
-						definitions, altDef, defMap,
-						$probe_spec::localAcceptingState,
-						mainConstants, $probe_def::stop_time,
-						$probe_def::step_size, $probe_def::parameter,
-						$probe_spec::alphabet, excluded,
-						$mode, $modePar, $plot);
+					if (mode == 3)
+					{
+						Set<ITransition> observedActions
+							= new HashSet<ITransition> ();
+						Map<String, PEPAComponent> globalComponents
+							= new HashMap<String, PEPAComponent> ();
+						ComponentId accepting = generateProbeComponent
+							(gprobe.getName (), gprobe.getStartingState (),
+								false, $probe_spec::allActions,
+								observedActions, globalComponents,
+								$probe_def::parser);
+
+						Multimap<PEPAComponent, AbstractExpression> counts
+							= HashMultimap.create ();
+						counts.put (new ComponentId	(gprobe.getName ()),
+								DoubleExpression.ONE);
+                        Group group = new Group (counts);
+                        String label = "GlobalProbe";
+                        Set<String> syncActions = new HashSet<String> ();
+                        for (ITransition trans : observedActions)
+                        {
+                        	syncActions.add (trans.toString ());
+                        }
+						GroupedModel globalModel = new GroupCooperation
+							($probe_def::model, new LabelledComponentGroup
+								(label, group), syncActions);
+
+						globalComponents.putAll ($probe_spec::origComponents);
+						globalComponents.putAll (newComp);
+						PEPAComponentDefinitions globalDef
+							= new PEPAComponentDefinitions (globalComponents)
+							.removeVanishingStates ();
+
+						stateObservers.clear ();
+						pairs = globalModel.getGroupComponentPairs (globalDef);
+						for (GroupComponentPair g : pairs)
+						{
+							stateObservers.add (new GPEPAState (g));
+						}
+
+						$measured_times = new SimProbeRunner ()
+							.executeProbedModel
+							(gprobe, globalModel, stateObservers,
+							 globalDef, null, null, accepting,
+ 							 mainConstants, $probe_def::stop_time,
+							 $probe_def::step_size, $probe_def::parameter,
+							 $probe_spec::alphabet, $mode, $modePar, $plot);
+					}
+					else
+					{
+						$measured_times = new SimProbeRunner ()
+							.executeProbedModel
+							(gprobe, $probe_def::model, stateObservers,
+							 definitions, altDef, defMap,
+							 $probe_spec::localAcceptingState,
+							 mainConstants, $probe_def::stop_time,
+							 $probe_def::step_size, $probe_def::parameter,
+							 $probe_spec::alphabet, $mode, $modePar, $plot);
+					}
 				}
 				else
 				{
 					$measured_times = new ODEProbeRunner ().executeProbedModel
 						(gprobe, $probe_def::model, stateObservers,
-						definitions, altDef, defMap,
-						$probe_spec::localAcceptingState,
-						mainConstants, $probe_def::stop_time,
-						$probe_def::step_size, $probe_def::parameter,
-						$probe_spec::alphabet, excluded,
-						$mode, $modePar, $plot);
+						 definitions, altDef, defMap,
+						 $probe_spec::localAcceptingState,
+						 mainConstants, $probe_def::stop_time,
+						 $probe_def::step_size, $probe_def::parameter,
+						 $probe_spec::alphabet, $mode, $modePar, $plot);
 				}
             } ;
 

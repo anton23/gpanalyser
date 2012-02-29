@@ -32,11 +32,7 @@ public abstract class AbstractPrefix
     }
 
     public List<ImmediatePrefix> getImmediatesRawCopy() {
-        List<ImmediatePrefix> actions = new LinkedList<ImmediatePrefix>();
-        for (ImmediatePrefix immediate : immediates) {
-            actions.add (immediate);
-        }
-        return actions;
+        return new LinkedList<ImmediatePrefix>(immediates);
     }
 
     public List<String> getImmediates() {
@@ -92,17 +88,17 @@ public abstract class AbstractPrefix
 
         List<ImmediatePrefix> newImmediates = getImmediatesRawCopy();
         newImmediates.addAll(otherAbstractPrefix.getImmediatesRawCopy());
-        String action = cooperationAction;
+        String newAction = cooperationAction;
 
         // new prefix will have the main action as the new action
         if (thisContains == 2) {
-            action = getAction();
+            newAction = getAction();
         }
         if (otherContains == 2) {
-            action = otherAbstractPrefix.getAction();
+            newAction = otherAbstractPrefix.getAction();
         }
 
-        return getCooperationImpl(action, otherAbstractPrefix,
+        return getCooperationImpl(newAction, otherAbstractPrefix,
                 otherApparentRate, otherApparentWeight,
                 thisApparentRate, thisApparentWeight,
                 newContinuation, newImmediates);

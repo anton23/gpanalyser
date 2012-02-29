@@ -30,7 +30,7 @@ public abstract class NativeAggregatedStateNextEventGenerator
             for (State decreasingState : e.getDecreasing()) {
                 decreasing[i].add(pctmc.getStateIndex().get(decreasingState));
             }
-            i++;
+            ++i;
         }
     }
 
@@ -38,7 +38,7 @@ public abstract class NativeAggregatedStateNextEventGenerator
     public void initCoefficients() {}
 
     public abstract double recalculateWeightsI
-            (double[] counts, double[] weights, double[] r);
+        (double[] counts, double[] weights, double[] r);
 
     @Override
     public void recalculateWeights(double[] counts) {

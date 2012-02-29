@@ -41,11 +41,18 @@ public class DivDivMinExpression extends AbstractExpression {
 			AbstractExpression rateJointRight, AbstractExpression rateLeft,
 			AbstractExpression rateRight) {
 
+        if (rateLeft.equals(DoubleExpression.ZERO)
+                || rateRight.equals(DoubleExpression.ZERO)
+                || rateJointLeft.equals(DoubleExpression.ZERO)
+                || rateJointRight.equals(DoubleExpression.ZERO)) {
+            return DoubleExpression.ZERO;
+        }
+
 		AbstractExpression minTerm = MinExpression.create(rateLeft, rateRight);
 
 		boolean leftEquals = rateJointLeft.equals(rateLeft);
 		boolean rightEquals = rateJointRight.equals(rateRight);
-
+                                                  
 		if (leftEquals && rightEquals) {
 			return minTerm;
 		} else if (!leftEquals && rightEquals) {

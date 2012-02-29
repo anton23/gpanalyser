@@ -64,7 +64,7 @@ Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
 Probe (stopTime=350, stepSize=1, density=10) steady 500
 {
-    PM6 = begin : start, end : stop <-
+    SIPT = begin : start, end : stop <-
     observes
     {
     	LProbe = ((data_tfr; cont_tfr) / clt_shutdown) : begin, clt_shutdown : end <-

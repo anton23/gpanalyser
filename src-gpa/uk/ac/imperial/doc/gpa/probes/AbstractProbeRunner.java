@@ -3,7 +3,6 @@ package uk.ac.imperial.doc.gpa.probes;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
-import uk.ac.imperial.doc.gpa.fsm.NFADetectors;
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
 import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
@@ -54,7 +53,8 @@ public abstract class AbstractProbeRunner
         (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping, Set<String> countActions,
-         Constants constants, PEPAComponentDefinitions mainDef,
+         ComponentId accepting, Constants constants,
+         PEPAComponentDefinitions mainDef,
          double stopTime, double stepSize, int parameter);
 
     public CDF executeProbedModel
@@ -64,14 +64,10 @@ public abstract class AbstractProbeRunner
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
          AbstractExpression stopTime, AbstractExpression stepSize,
-         int parameter, Collection<ITransition> alphabet,
-         Collection<ITransition> excluded, int mode, double modePar,
-         boolean plot)
+         int parameter, Set<ITransition> alphabet,
+         int mode, double modePar, boolean plot)
     {
-        Set<ITransition> countActions = NFADetectors.detectAlphabet
-            (gprobe.getStartingState (), true, excluded);
-        countActions.addAll (alphabet);
-        Set<String> countActionStrings = convertObjectsToStrings (countActions);
+        Set<String> countActionStrings = convertObjectsToStrings (alphabet);
         List<AbstractExpression> statesCountExpressions
             = new LinkedList<AbstractExpression> ();
         Map<String, AbstractExpression> mapping
@@ -125,7 +121,7 @@ public abstract class AbstractProbeRunner
             case 3:
                 return globalPassages
                     (gprobe, model, stateObservers, statesCountExpressions,
-                        mapping, countActions, constants, mainDef,
+                        mapping, countActions, accepting, constants, mainDef,
                         stopTime, stepSize, parameter);
             default:
                 return null;
