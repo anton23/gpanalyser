@@ -17,13 +17,8 @@ public class PassivePrefix extends AbstractPrefix {
 
     private AbstractExpression weight;      //T
 
-    // the return value of this function should not matter
-    // MAX is used for check, that this function
-    // really is unused in the final model. It would be used,
-    // if a Choice offered both a passive and an active prefix
-    // for the same action.
-    public AbstractExpression getRate() {
-        return DoubleExpression.MAX;
+     public AbstractExpression getRate() {
+        return DoubleExpression.ZERO;
     }
 
     @Override

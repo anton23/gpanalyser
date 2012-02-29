@@ -37,7 +37,14 @@ public class LabelledComponentGroup extends GroupedModel {
 		for (final PEPAComponent derivative : group
 				.getComponentDerivatives(definitions)) {
 			for (final AbstractPrefix prefix : derivative.getPrefixes(definitions)) {
-				if (!restrictedActions.contains(prefix.getAction())) {
+                boolean restricted = false;
+                for (String immediateAction : prefix.getImmediates()) {
+                    restricted = restrictedActions.contains(immediateAction);
+                    if (restricted) {
+                        break;
+                    }
+                }
+				if (!restricted && !restrictedActions.contains(prefix.getAction())) {
 					AbstractExpression rate
                         = ProductExpression.create(CombinedProductExpression
                             .createMeanExpression (new GPEPAState

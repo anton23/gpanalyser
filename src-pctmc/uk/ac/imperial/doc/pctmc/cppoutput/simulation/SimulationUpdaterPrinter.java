@@ -77,19 +77,19 @@ public class SimulationUpdaterPrinter
                     + " (JNIEnv *env, jobject,"
                     + " jdoubleArray arr_values, jdoubleArray arr_tmp,"
                     + " jdoubleArray arr_r) {\n");
-            jniCode.append("jdouble *values = env -> " +
-                    "GetDoubleArrayElements (arr_values, 0);\n");
+            jniCode.append("jdouble *values = env -> "
+                    + "GetDoubleArrayElements (arr_values, 0);\n");
             jniCode.append("jdouble *tmp = env -> GetDoubleArrayElements"
                     + " (arr_tmp, 0);\n");
             jniCode.append("jdouble *r = env -> GetDoubleArrayElements"
                     + " (arr_r, 0);\n");
             jniCode.append("update (values, tmp, r);\n");
-            jniCode.append("env -> ReleaseDoubleArrayElements" +
-                    " (arr_values, values, 0);\n");
-            jniCode.append("env -> ReleaseDoubleArrayElements" +
-                    " (arr_tmp, tmp, JNI_ABORT);\n");
-            jniCode.append("env -> ReleaseDoubleArrayElements" +
-                    " (arr_r, r, JNI_ABORT);\n");
+            jniCode.append("env -> ReleaseDoubleArrayElements"
+                    + " (arr_values, values, 0);\n");
+            jniCode.append("env -> ReleaseDoubleArrayElements"
+                    + " (arr_tmp, tmp, JNI_ABORT);\n");
+            jniCode.append("env -> ReleaseDoubleArrayElements"
+                    + " (arr_r, r, JNI_ABORT);\n");
             jniCode.append("}\n");
 
             code.append("void update (double *values, double *oldValues,"

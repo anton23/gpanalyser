@@ -117,45 +117,47 @@ public class SimProbeRunner extends AbstractProbeRunner
              double stopTime, double stepSize, int parameter,
              double steadyStateTime, String name)
     {
-        /*
         int indices = (int) Math.ceil (stopTime / stepSize);
         double[] mainCdf = new double[indices];
+        Set<GroupComponentPair> pairs
+            = model.getGroupComponentPairs (mainDef);
+
+        NumericalPostprocessor postprocessorK = runTheProbedSystem
+            (model, mainDef, constants, null, stateObservers,
+                    new ArrayList<AbstractExpression> (),
+                    new HashMap<String, AbstractExpression> (),
+                    steadyStateTime + stepSize, stepSize, parameter);        
+        double[][] K = getProbabilitiesComponentStateAfterBegin
+                (pairs, mainDef, postprocessorK, constants);
+
         for (int p = 0; p < parameter; ++p)
         {
             NumericalPostprocessor postprocessor = runTheProbedSystem
-                    (model, countActionStrings, false, stateObservers,
-                            statesCountExpressions, mapping, mainDef, constants,
-                            stopTime, stepSize, 1);
-            Set<GroupComponentPair> pairs
-                = model.getGroupComponentPairs (mainDef);
-    
-            double[][] K = getProbabilitiesComponentStateAfterBegin
-                    (pairs, mainDef, postprocessor, constants);
-            double[][] origVal = postprocessor.evaluateExpressions
-                    (statesCountExpressions, constants);
-    
-            LinkedHashMap<GroupComponentPair, AbstractExpression> crates = new
-                    LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+                    (model, mainDef, constants, null, stateObservers,
+                            statesCountExpressions, mapping,
+                            steadyStateTime + stepSize, stepSize, 1);
+            double[][] steadyVal = postprocessor.evaluateExpressions
+                (statesCountExpressions, constants);
+
             int i = 0;
             double[][] cdf = new double[indices][];
     
             for (double s = 0; s < stopTime; s += stepSize)
             {
-                double[] matchVal = getStartingStates (model,  mainDef,
-                        constants, postprocessor, s, crates);
-
-                assignNewCounts (crates, definitionsMap, mainDef, model,
-                        statesCountExpressions, mapping, matchVal, origVal[i]);
-                postprocessor = runTheProbedSystem (model, countActionStrings,
-                        false, stateObservers, statesCountExpressions, mapping,
-                        mainDef, constants, stopTime, stepSize, 1);
-                double[][] obtainedMeasurements
-                    = postprocessor.evaluateExpressions
-                    (statesCountExpressions, constants);
-                cdf[i] = new double[obtainedMeasurements.length];
-    
-                passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                        cdf[i], statesCountExpressions, mapping);
+                assignNewCounts (mainDef, model,
+                        statesCountExpressions, mapping, steadyVal[i]);
+                List<AbstractExpression> statesCountExpressionsS
+                    = new ArrayList<AbstractExpression> ();
+                Map<String, AbstractExpression> mappingS
+                    = new HashMap<String, AbstractExpression> ();
+                NumericalPostprocessor postprocessorS = runTheProbedSystem
+                    (model, mainDef, constants, null, stateObservers,
+                        statesCountExpressionsS, mappingS,
+                        stopTime, stepSize, 1);
+                double[][] obtainedMeasurements = postprocessorS
+                    .evaluateExpressions (statesCountExpressionsS, constants);
+                cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
+                        statesCountExpressions, mapping);
                 ++i;
             }
     
@@ -181,71 +183,32 @@ public class SimProbeRunner extends AbstractProbeRunner
         {
             mainCdf[t] /= parameter;
         }
-    */
-        return new CDF (name, stepSize, null);
+
+        return new CDF (name, stepSize, mainCdf);
     }
 
     protected CDF globalPassages
-            (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
+            (GlobalProbe gprobe, GroupedModel model,
+             Set<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> mapping, Set<String> countActions,
-             Constants constants, PEPAComponentDefinitions mainDef,
+             ComponentId accepting, Constants constants,
+             PEPAComponentDefinitions mainDef,
              double stopTime, double stepSize, int parameter)
     {
-        return new CDF (gprobe.getName (), stepSize, null);
+        NumericalPostprocessor postprocessor = runTheProbedSystem (model,
+                mainDef, constants, countActions, stateObservers,
+                statesCountExpressions, mapping, stopTime, stepSize, parameter);
+
+        double[][] values = postprocessor
+            .evaluateExpressions (statesCountExpressions, constants);
+
+        double[] cdf = passageTimeCDF (values,
+                model.getGroupComponentPairs (mainDef),
+                accepting, statesCountExpressions, mapping);
+        return new CDF (gprobe.getName (), stepSize, cdf);
     }
 
-    /*
-        private int runGlobalProbe
-                (double[][] data, GlobalProbe gprobe,
-                 List<AbstractExpression> statesCountExpressions,
-                 Map<String, AbstractExpression> mapping, int start_time,
-                 boolean repeating)
-        {
-            double[] actionsExecuted = Arrays.copyOf (data[0], data[0].length);
-            Collection<ProbeTime> measuredTimes = new ArrayList<ProbeTime> ();
-            double tempStart = -1;
-
-            // observing wih global probe
-            int i = start_time;
-            while (i < data.length)
-            {
-                Set<ITransition> availableTransitions
-                        = gprobe.getAvailableTransitions ();
-                for (ITransition transition : availableTransitions)
-                {
-                    int index = statesCountExpressions.indexOf
-                            (mapping.get (transition.toString ()));
-                    if (Math.floor (actionsExecuted [index])
-                            < Math.floor (data[i][index]))
-                    {
-                        actionsExecuted [index] = data[i][index];
-                        ITransition lastExecuted =
-                                gprobe.advanceWithTransition (transition,
-                                        statesCountExpressions, mapping, data[i]);
-                        if (lastExecuted != null)
-                        {
-                            if (lastExecuted.toString ().equals ("start"))
-                            {
-                                tempStart = i;
-                            }
-                            else if (lastExecuted.toString ().equals ("stop"))
-                            {
-                                measuredTimes.add (new ProbeTime (tempStart, i));
-                                if (!repeating)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                ++i;
-            }
-
-            return i;
-        }
-    */
     protected void assignNewCounts
     (PEPAComponentDefinitions definitions, GroupedModel model,
      List<AbstractExpression> statesCountExpressions,

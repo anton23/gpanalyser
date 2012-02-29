@@ -64,7 +64,7 @@ Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
 Probe (stopTime=150, stepSize=1, density=10) transient 165
 {
-	Trans = begin : start, end : stop
+	TIPT = begin : start, end : stop
 	observes
 	{
 		LProbe = cont_tfr : begin, data_tfr[4] : end

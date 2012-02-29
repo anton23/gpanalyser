@@ -20,11 +20,12 @@ public class PEPAComponentDefinitions {
 		return c;
 	}
 
+    // assumption: action with same name not used both as timed and immediate
     public AbstractExpression getApparentRateExpression
             (final String action, PEPAComponent from) {
         List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
         for (AbstractPrefix p : from.getPrefixes(this)) {
-            if (p.getAction().equals(action)) {
+            if (p.getAction().equals(action) || p.getImmediates().contains(action)) {
                 summands.add(p.getRate());
             }
         }
@@ -35,12 +36,13 @@ public class PEPAComponentDefinitions {
         return SumExpression.create(summands);
     }
 
-	public RateWeightPair getApparentRateWeightExpressions
+    // assumption: action with same name not used both as timed and immediate
+    public RateWeightPair getApparentRateWeightExpressions
             (final String action, PEPAComponent from) {
 		List<AbstractExpression> summandsRates = new LinkedList<AbstractExpression>();
         List<AbstractExpression> summandsWeights = new LinkedList<AbstractExpression>();
 		for (AbstractPrefix p : from.getPrefixes(this)) {
-			if (p.getAction().equals(action)) {
+            if (p.getAction().equals(action) || p.getImmediates().contains(action)) {
 				summandsRates.add(p.getRate());
                 summandsWeights.add(p.getWeight());
 			}
@@ -121,8 +123,9 @@ public class PEPAComponentDefinitions {
 
                     for (AbstractPrefix prefix : prefixes) {
                         if (prefix.getContinuation().equals(shorthand)) {
-                            predecessorExists = shorthand.equals
-                                    (newDefinitions.getShorthand(otherChoice));
+                            predecessorExists =  predecessorExists ||
+                                    !(shorthand.equals(newDefinitions
+                                            .getShorthand(otherChoice)));
 
                             // refreshing hash - 1
                             String name = newDefinitions.inverseDefinitions

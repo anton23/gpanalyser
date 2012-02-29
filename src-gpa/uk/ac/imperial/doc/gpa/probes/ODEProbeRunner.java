@@ -86,8 +86,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-                statesCountExpressions, mapping,
-                steadyStateTime + stepSize, stepSize, parameter);
+             statesCountExpressions, mapping,
+             steadyStateTime + stepSize, stepSize, parameter);
         double[][] steadyVal = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
 
@@ -109,8 +109,9 @@ public class ODEProbeRunner extends AbstractProbeRunner
         {
             if (s > 0)
             {
-            assignNewCounts (crates, definitionsMap, mainDef, model,
-                    statesCountExpressions, mapping, matchVal[i], steadyVal[i]);
+                assignNewCounts (crates, definitionsMap, mainDef, model,
+                        statesCountExpressions, mapping,
+                        matchVal[i], steadyVal[i]);
             }
 
             List<AbstractExpression> statesCountExpressionsS
@@ -154,7 +155,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
         (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
          Map<String, AbstractExpression> mapping, Set<String> countActions,
-         Constants constants, PEPAComponentDefinitions mainDef,
+         ComponentId accepting, Constants constants,
+         PEPAComponentDefinitions mainDef,
          double stopTime, double stepSize, int parameter)
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
