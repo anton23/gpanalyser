@@ -59,7 +59,7 @@ public class CPPClassCompiler {
 
     private static void linuxCompile
             (String libName, String nativeFile, String javaInclude) {
-        String command = "g++ -Wall -shared -fPIC -o " + libName
+        String command = "g++ -B/usr/bin -Wall -shared -fPIC -o " + libName
             + " " + nativeFile + ".cpp"
             + " -I\"" + javaInclude + "include\""
             + " -I\"" + javaInclude + "include/linux\"";
@@ -76,7 +76,7 @@ public class CPPClassCompiler {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 		List<JavaFileObject> files = new ArrayList<JavaFileObject>(1);
-        JavaFileManager fileManager = null;
+        JavaFileManager fileManager;
         if (windows)
         {
             fileManager = new ClassFileManager

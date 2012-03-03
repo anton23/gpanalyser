@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.gpa.pctmc;
 
 import java.util.*;
 
+import com.google.common.collect.BiMap;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
@@ -15,7 +16,18 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class GPEPAToPCTMC {
-	
+
+    public static PCTMC updatePCTMC (PCTMC pctmc,
+            PEPAComponentDefinitions componentDefinitions, GroupedModel model) {
+
+        BiMap<State,Integer> stateIndexes = pctmc.getStateIndex();
+        AbstractExpression[] counts = pctmc.getInitCounts();
+        for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
+            counts[stateIndexes.get(new GPEPAState(p))] = model.getCountExpression(p);
+        }
+        return pctmc;
+    }
+    
 	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,GroupedModel model,Set<String> countActions){
 		Map<State,AbstractExpression> initCounts = new LinkedHashMap<State,AbstractExpression>();
 		for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){

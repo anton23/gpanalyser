@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.gpa.probes;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
@@ -395,7 +394,7 @@ public abstract class AbstractProbeRunner
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
              double stopTime, double stepSize, int parameter,
-             BiMap<CombinedPopulationProduct, Integer> momentIndex)
+             AbstractPCTMCAnalysis[] analysis)
     {
         for (GPEPAState state : stateObservers)
         {
@@ -422,9 +421,7 @@ public abstract class AbstractProbeRunner
 
         PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
         System.out.println (pctmc);
-        AbstractPCTMCAnalysis analysis
-            = getPreparedAnalysis (pctmc, moments, constants);
-        momentIndex.putAll (analysis.getMomentIndex ());
+        analysis[0] = getPreparedAnalysis (pctmc, moments, constants);
 
         /*
             Set<String> cooperation = new HashSet<String> ();
@@ -442,7 +439,7 @@ public abstract class AbstractProbeRunner
 
         NumericalPostprocessor postprocessor
             = getPostprocessor (stopTime, stepSize, parameter);
-        return runPostProcessor (analysis, postprocessor, constants);
+        return runPostProcessor (analysis[0], postprocessor, constants);
     }
 
     protected NumericalPostprocessor runPostProcessor
@@ -496,17 +493,7 @@ public abstract class AbstractProbeRunner
         return analysis;
     }
 
-    protected AbstractPCTMCAnalysis getPreparedAnalysis
-        (PCTMC pctmc, List<CombinedPopulationProduct> moments,
-         BiMap<CombinedPopulationProduct, Integer> momentIndex)
-    {
-        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
-        analysis.setUsedMoments (moments);
-        analysis.prepare (momentIndex);
-        return analysis;
-    }
-
-    private AbstractPCTMCAnalysis getAnalysis (PCTMC pctmc)
+    protected AbstractPCTMCAnalysis getAnalysis (PCTMC pctmc)
     {
         try
         {
