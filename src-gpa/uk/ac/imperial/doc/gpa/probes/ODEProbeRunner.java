@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.gpa.probes;
 
-import com.google.common.collect.BiMap;
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
 import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.AbstractUExpression;
 import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.UExpressionVisitor;
@@ -12,8 +11,6 @@ import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
-import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CPPODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
@@ -41,10 +38,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-             new ArrayList<CombinedPopulationProduct>(),
              statesCountExpressions, mapping,
-             steadyStateTime, stepSize, parameter,
-             new AbstractPCTMCAnalysis[1]);
+             steadyStateTime, stepSize, parameter, new PCTMC[1]);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
 
@@ -72,9 +67,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
         }
         postprocessor = runTheProbedSystem
             (model, altDef, constants, null, stateObservers,
-             new ArrayList<CombinedPopulationProduct>(),
              statesCountExpressions, mapping, stopTime, stepSize, parameter,
-             new AbstractPCTMCAnalysis[1]);
+             new PCTMC[1]);
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
@@ -95,10 +89,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-             new ArrayList<CombinedPopulationProduct>(),
-             statesCountExpressions, mapping,
-             steadyStateTime + stepSize, stepSize, parameter,
-             new AbstractPCTMCAnalysis[1]);
+             statesCountExpressions, mapping, steadyStateTime + stepSize,
+             stepSize, parameter, new PCTMC[1]);
         double[][] steadyVal = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
 
@@ -116,25 +108,17 @@ public class ODEProbeRunner extends AbstractProbeRunner
         int i = 0;
         double[][] cdf = new double[indices][];
 
-        List<CombinedPopulationProduct> moments
-            = new ArrayList<CombinedPopulationProduct> ();
         List<AbstractExpression> statesCountExpressionsS
             = new ArrayList<AbstractExpression> ();
         Map<String, AbstractExpression> mappingS
             = new HashMap<String, AbstractExpression> ();
-        AbstractPCTMCAnalysis[] analysis = new AbstractPCTMCAnalysis[1];
+        PCTMC[] pctmcs = new PCTMC[1];
         NumericalPostprocessor postprocessorS = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-             moments, statesCountExpressionsS, mappingS,
-             stopTime, stepSize, parameter, analysis);
-        BiMap<CombinedPopulationProduct, Integer> momentIndex
-            = analysis[0].getMomentIndex ();
+             statesCountExpressionsS, mappingS,
+             stopTime, stepSize, parameter, pctmcs);
         AbstractExpressionEvaluator evaluator = postprocessorS
             .getExpressionEvaluator(statesCountExpressions, constants);
-        PCTMC pctmc = GPEPAToPCTMC.getPCTMC
-            (mainDef, model, new HashSet<String> ());
-        AbstractPCTMCAnalysis analysisS = getPreparedAnalysis
-            (pctmc, moments, momentIndex);
 
         for (double s = 0; s < steadyStateTime; s += stepSize)
         {
@@ -145,8 +129,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
                         matchVal[i], steadyVal[i]);
             }
 
-            GPEPAToPCTMC.updatePCTMC (pctmc, mainDef, model);
-            runPostProcessor (analysisS, postprocessorS, constants);
+            GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
+            postprocessorS.calculateDataPoints (constants);
             double[][] obtainedMeasurements = postprocessorS.evaluateExpressions
                 (evaluator, constants);
 
@@ -186,9 +170,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, countActions, stateObservers,
-             new ArrayList<CombinedPopulationProduct>(),
              statesCountExpressions, mapping, stopTime, stepSize, parameter,
-                    new AbstractPCTMCAnalysis[1]);
+             new PCTMC[1]);
         double states[][] = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
         AbstractUExpression u = gprobe.getU ();
@@ -205,15 +188,5 @@ public class ODEProbeRunner extends AbstractProbeRunner
             cdf[i] = (time >= pointMass) ? 1 : 0;
         }
         return new CDF (gprobe.getName (), stepSize, cdf);
-    }
-
-    protected AbstractPCTMCAnalysis getPreparedAnalysis
-            (PCTMC pctmc, List<CombinedPopulationProduct> moments,
-             BiMap<CombinedPopulationProduct, Integer> momentIndex)
-    {
-        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
-        analysis.setUsedMoments (moments);
-        analysis.prepare (momentIndex);
-        return analysis;
     }
 }

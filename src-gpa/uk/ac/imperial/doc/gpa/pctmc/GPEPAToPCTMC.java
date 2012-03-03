@@ -23,8 +23,12 @@ public class GPEPAToPCTMC {
         BiMap<State,Integer> stateIndexes = pctmc.getStateIndex();
         AbstractExpression[] counts = pctmc.getInitCounts();
         for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
-            counts[stateIndexes.get(new GPEPAState(p))] = model.getCountExpression(p);
+            GPEPAState state = new GPEPAState(p);
+            AbstractExpression count = model.getCountExpression(p);
+            counts[stateIndexes.get(state)] = count;
+            pctmc.getInitMap().put(state, count);
         }
+        // here we should assign model to this GPEPAPCTMC, but not for testing
         return pctmc;
     }
     

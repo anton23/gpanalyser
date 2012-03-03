@@ -192,9 +192,9 @@ public abstract class AbstractProbeRunner
     }
 
     protected double[] passageTimeCDF
-            (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
-             ComponentId accepting, List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> mapping)
+        (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
+         ComponentId accepting, List<AbstractExpression> statesCountExpressions,
+         Map<String, AbstractExpression> mapping)
     {
         double[] cdf = new double[obtainedMeasurements.length];
         for (GroupComponentPair gp : pairs)
@@ -390,12 +390,12 @@ public abstract class AbstractProbeRunner
             (GroupedModel model, PEPAComponentDefinitions definitions,
              Constants constants, Set<String> countActionsSet,
              Collection<GPEPAState> stateObservers,
-             List<CombinedPopulationProduct> moments,
              List<AbstractExpression> statesCountExpressions,
              Map<String, AbstractExpression> stateCombPopMapping,
-             double stopTime, double stepSize, int parameter,
-             AbstractPCTMCAnalysis[] analysis)
+             double stopTime, double stepSize, int parameter, PCTMC[] pctmcs)
     {
+        List<CombinedPopulationProduct> moments
+            = new ArrayList<CombinedPopulationProduct> ();
         for (GPEPAState state : stateObservers)
         {
             Multiset<State> states = HashMultiset.create ();
@@ -419,9 +419,10 @@ public abstract class AbstractProbeRunner
             initActions = new HashSet<String> ();
         }
 
-        PCTMC pctmc = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
-        System.out.println (pctmc);
-        analysis[0] = getPreparedAnalysis (pctmc, moments, constants);
+        pctmcs[0] = GPEPAToPCTMC.getPCTMC (definitions, model, initActions);
+        System.out.println (pctmcs[0]);
+        AbstractPCTMCAnalysis analysis
+            = getPreparedAnalysis (pctmcs[0], moments, constants);
 
         /*
             Set<String> cooperation = new HashSet<String> ();
@@ -439,7 +440,7 @@ public abstract class AbstractProbeRunner
 
         NumericalPostprocessor postprocessor
             = getPostprocessor (stopTime, stepSize, parameter);
-        return runPostProcessor (analysis[0], postprocessor, constants);
+        return runPostProcessor (analysis, postprocessor, constants);
     }
 
     protected NumericalPostprocessor runPostProcessor
