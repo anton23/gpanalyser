@@ -36,6 +36,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
          ComponentId accepting, Constants constants, double stopTime,
          double stepSize, int parameter, double steadyStateTime, String name)
     {
+        // creating and running the steady-state postprocessor and evaluator
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressions, mapping,
@@ -43,7 +44,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
 
-        // obtaining ratios for steady state component distribution
+        // obtaining the ratios for steady state component distribution
         double[][] cratesVal = getStartingStates
             (model, mainDef, constants, postprocessor, crates);
         double[] times = new double[statesCountExpressions.size ()];
@@ -55,6 +56,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             (evaluator, times, constants);
 
         int sindex = (int) (maxTime / stepSize) - 1;
+        // setting the absorbing model with new initial values and measuring
         assignNewCounts (crates, definitionsMap, mainDef, model,
                 statesCountExpressions, mapping, cratesVal[sindex], steadyVal);
         statesCountExpressions = new LinkedList<AbstractExpression> ();
@@ -87,17 +89,22 @@ public class ODEProbeRunner extends AbstractProbeRunner
          ComponentId accepting, Constants constants, double stopTime,
          double stepSize, int parameter, double steadyStateTime, String name)
     {
+        // obtaining the system values for various times
+        PCTMC[] pctmcs = new PCTMC[1];
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressions, mapping, steadyStateTime + stepSize,
-             stepSize, parameter, new PCTMC[1]);
-        double[][] steadyVal = postprocessor.evaluateExpressions
-            (statesCountExpressions, constants);
+             stepSize, parameter, pctmcs);
+        AbstractExpressionEvaluator evaluator = postprocessor
+            .getExpressionEvaluator(statesCountExpressions, constants);
+        double[][] transientVal = postprocessor.evaluateExpressions
+            (evaluator, constants);
 
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
         double[][] K = getProbabilitiesComponentStateAfterBegin
             (pairs, mainDef, postprocessor, constants);
 
+        // obtaining the ratios for steady state component distribution
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         double[][] matchVal = getStartingStates
@@ -108,40 +115,28 @@ public class ODEProbeRunner extends AbstractProbeRunner
         int i = 0;
         double[][] cdf = new double[indices][];
 
-        List<AbstractExpression> statesCountExpressionsS
-            = new ArrayList<AbstractExpression> ();
-        Map<String, AbstractExpression> mappingS
-            = new HashMap<String, AbstractExpression> ();
-        PCTMC[] pctmcs = new PCTMC[1];
-        NumericalPostprocessor postprocessorS = runTheProbedSystem
-            (model, mainDef, constants, null, stateObservers,
-             statesCountExpressionsS, mappingS,
-             stopTime, stepSize, parameter, pctmcs);
-        AbstractExpressionEvaluator evaluator = postprocessorS
-            .getExpressionEvaluator(statesCountExpressions, constants);
-
         for (double s = 0; s < steadyStateTime; s += stepSize)
         {
             if (s > 0)
             {
                 assignNewCounts (crates, definitionsMap, mainDef, model,
                         statesCountExpressions, mapping,
-                        matchVal[i], steadyVal[i]);
+                        matchVal[i], transientVal[i]);
             }
 
             GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
-            postprocessorS.calculateDataPoints (constants);
-            double[][] obtainedMeasurements = postprocessorS.evaluateExpressions
+            postprocessor.calculateDataPoints (constants);
+            double[][] obtainedMeasurements = postprocessor.evaluateExpressions
                 (evaluator, constants);
 
             cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                    statesCountExpressionsS, mappingS);
+                    statesCountExpressions, mapping);
             ++i;
             System.out.println ("Ran transient iteration " + i);
         }
 
         double[] uncCdf = new double[times];
-        // now integration, possible directly on obtained values
+        // now integration and truncation, possible directly on obtained values
         for (int s = 0; s < indices; ++s)
         {
             final double derivK = (K[s + 1][0] - K[s][0]) / stepSize;
