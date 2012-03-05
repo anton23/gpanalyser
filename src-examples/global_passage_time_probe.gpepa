@@ -62,7 +62,7 @@ ChanBusy2 = (cont_tfr, rcont).Chan
 
 Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
-Probe (stopTime=400, stepSize=1, density=10)
+SimProbe (stopTime=400, stepSize=1, replications=5000)
 {
     GPT = eE : start, end [nc/2] : stop
     observes
