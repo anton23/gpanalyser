@@ -54,10 +54,17 @@ public class SimProbeRunner extends AbstractProbeRunner
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         getProbabilitiesAfterBegin (model, mainDef, crates);
+        NumericalPostprocessor postprocessorC = runTheProbedSystem
+            (model, mainDef, constants, null, stateObservers,
+             statesCountExpressions, mapping, steadyStateTime + stepSize,
+             stepSize, parameter, new PCTMC[1]);
         List<AbstractExpression> cratesExpr
             = new LinkedList<AbstractExpression> (crates.values ());
-        AbstractExpressionEvaluator cratesEval = postprocessor
-            .getExpressionEvaluator(cratesExpr, constants);
+        AbstractExpressionEvaluator cratesEval = postprocessorC
+            .getExpressionEvaluator (cratesExpr, constants);
+        // obtaining the ratios for steady state component distribution
+        double[] cratesVal = postprocessorC
+            .evaluateExpressionsAtTimes (cratesEval, times, constants);
 
         // creating the absorbing postprocessor and evaluator
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (altDef);
@@ -86,9 +93,6 @@ public class SimProbeRunner extends AbstractProbeRunner
             postprocessor.calculateDataPoints (constants);
             double[] steadyVal = postprocessor.evaluateExpressionsAtTimes
                 (evaluator, times, constants);
-            // obtaining the ratios for steady state component distribution
-            double[] cratesVal = postprocessor
-                .evaluateExpressionsAtTimes(cratesEval, times, constants);
 
             // setting the absorbing model with new initial values
             assignNewCounts (crates, definitionsMap, mainDef, model,
@@ -268,6 +272,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         Map<GroupComponentPair, AbstractExpression> newCounts
             = new HashMap<GroupComponentPair, AbstractExpression> ();
         int i = 0;
+        double totalWeight = 0;
         List<Double> weights = new ArrayList<Double> ();
         List<GroupComponentPair> gcs = new ArrayList<GroupComponentPair> ();
         for (GroupComponentPair gc : crates.keySet ())
@@ -285,6 +290,7 @@ public class SimProbeRunner extends AbstractProbeRunner
             if (containsComp)
             {
                 weights.add (matchVal[i]);
+                totalWeight += matchVal[i];
                 gcs.add (gc);
                 newCounts.put (gc, DoubleExpression.ZERO);
             }
@@ -297,14 +303,14 @@ public class SimProbeRunner extends AbstractProbeRunner
             ++i;
         }
 
-        double pick = Math.random ();
-        double totalWeight = 0;
+        double pick = totalWeight * Math.random ();
+        double currentWeight = 0;
         GroupComponentPair chosen = null;
         i = 0;
         for (double d : weights)
         {
-            totalWeight += d;
-            if (totalWeight >= pick)
+            currentWeight += d;
+            if (currentWeight >= pick)
             {
                 chosen = gcs.get (i);
                 break;
