@@ -22,7 +22,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor {
+public class CPPSimulationAnalysisNumericalPostprocessor
+        extends NumericalPostprocessor {
 
 	private PCTMCSimulation simulation;
 
@@ -31,6 +32,7 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 	private NativeAggregatedStateNextEventGenerator eventGenerator;
 
     private PCTMC pctmc;
+    private boolean initCoeff = true;
     private Collection<EvolutionEvent> observableEvents;
 
 
@@ -38,20 +40,22 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 
 	@Override
 	public String toString() {
-		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", replications = " + replications+")";
+		return "(stopTime = " + stopTime + ", stepSize = "
+                + stepSize + ", replications = " + replications+")";
 	}
 
 
 	@Override
-	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
+	public NumericalPostprocessor getNewPreparedPostprocessor
+            (Constants constants) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
 
-	public CPPSimulationAnalysisNumericalPostprocessor(double stopTime,
-                                                       double stepSize, int replications) {
+	public CPPSimulationAnalysisNumericalPostprocessor
+            (double stopTime, double stepSize, int replications) {
 		super(stopTime, stepSize);
 		this.replications = replications;
 	}
@@ -61,14 +65,12 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
 		super.prepare(analysis, constants);
 		simulation = null;
-		if (analysis instanceof PCTMCSimulation){
+		if (analysis instanceof PCTMCSimulation) {
             this.simulation = (PCTMCSimulation) analysis;
+            pctmc = simulation.getPCTMC();
 
-            dataPoints = new double[(int) Math.ceil(stopTime / stepSize)]
-                       [momentIndex.size() + generalExpectationIndex.size()];
             SimulationUpdaterPrinter printer = new SimulationUpdaterPrinter
                     (constants, momentIndex, simulation, generalExpectationIndex);
-            printer.visit();
             updater = (SimulationUpdater) CPPClassCompiler
                 .getInstance(printer.toClassString(), printer.getNativeClassName(),
                         printer.toString(), printer.getNativeClassName(),
@@ -76,16 +78,12 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 
             AccumulatorUpdaterPrinter accPrinter
                     = new AccumulatorUpdaterPrinter(constants, simulation);
-            accPrinter.visit();
             accUpdater = (AccumulatorUpdater) CPPClassCompiler
                 .getInstance(accPrinter.toClassString(),
                         accPrinter.getNativeClassName(), accPrinter.toString(),
                         accPrinter.getNativeClassName(),
                         AccumulatorUpdaterPrinter.PACKAGE);
 
-            PCTMCLogging.info("Generating one step generator.");
-
-            pctmc = simulation.getPCTMC();
             observableEvents = new LinkedList<EvolutionEvent>();
             Collection<EvolutionEvent> events = pctmc.getEvolutionEvents();
             for (EvolutionEvent event : events) {
@@ -93,11 +91,12 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
                     observableEvents.add(event);
                 }
             }
-            
+
+            PCTMCLogging.info("Generating one step generator.");
+
             AggregatedStateNextEventGeneratorPrinter egPrinter
                     = new AggregatedStateNextEventGeneratorPrinter
                     (constants, simulation, pctmc, observableEvents);
-            egPrinter.visit();
             eventGenerator = (NativeAggregatedStateNextEventGenerator)
                 CPPClassCompiler.getInstance(egPrinter.toClassString(),
                         egPrinter.getNativeClassName(),
@@ -108,7 +107,10 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 
 	@Override
 	public void calculateDataPoints(Constants constants) {
-		if (simulation!=null){
+        dataPoints = new double[(int) Math.ceil(stopTime / stepSize)]
+                [momentIndex.size() + generalExpectationIndex.size()];
+
+		if (simulation!=null) {
 			simulate(constants);
 		}		
 	}
@@ -117,8 +119,10 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 	
 	private void simulate(Constants constants) {
 
-		eventGenerator.setRates(constants.getFlatConstants());
-        eventGenerator.initCoefficients(pctmc, observableEvents);
+        if (initCoeff) {
+            eventGenerator.setRates(constants.getFlatConstants());
+            eventGenerator.initCoefficients(pctmc, observableEvents);
+        }
 
 		int n = pctmc.getStateIndex().size();
 		initial = new double[n];
@@ -132,8 +136,10 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 		PCTMCLogging.info("Running Gillespie simulator.");
 		PCTMCLogging.increaseIndent();
 
-		updater.setRates(constants.getFlatConstants());
-		accUpdater.setRates(constants.getFlatConstants());
+        if (initCoeff) {
+            updater.setRates(constants.getFlatConstants());
+            accUpdater.setRates(constants.getFlatConstants());
+        }
 
 		int m = momentIndex.size();
 
@@ -154,6 +160,7 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
 				dataPoints[t][i] = dataPoints[t][i] / replications;
 			}
 		}
+        initCoeff = false;
 		PCTMCLogging.decreaseIndent();
 	}
 
@@ -169,6 +176,6 @@ public class CPPSimulationAnalysisNumericalPostprocessor extends NumericalPostpr
         EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
         return new PCTMCCPPImplementationProvider()
                 .getEvaluatorImplementation(updaterMethod, evaluatorClassName,
-                        constants, momentIndex,generalExpectationIndex);
+                        constants, momentIndex, generalExpectationIndex);
     }
 }

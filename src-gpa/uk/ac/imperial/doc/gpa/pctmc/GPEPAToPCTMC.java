@@ -17,7 +17,7 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class GPEPAToPCTMC {
 
-    public static PCTMC updatePCTMC (PCTMC pctmc,
+    public static void updatePCTMC (PCTMC pctmc,
             PEPAComponentDefinitions componentDefinitions, GroupedModel model) {
 
         BiMap<State,Integer> stateIndexes = pctmc.getStateIndex();
@@ -29,7 +29,6 @@ public class GPEPAToPCTMC {
             pctmc.getInitMap().put(state, count);
         }
         // here we should assign model to this GPEPAPCTMC, but not for testing
-        return pctmc;
     }
     
 	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,GroupedModel model,Set<String> countActions){

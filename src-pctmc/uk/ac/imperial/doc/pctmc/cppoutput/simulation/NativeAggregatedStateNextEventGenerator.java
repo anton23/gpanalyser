@@ -35,7 +35,9 @@ public abstract class NativeAggregatedStateNextEventGenerator
     }
 
     @Override
-    public void initCoefficients() {}
+    public void initCoefficients() {
+        weights = new double[weights.length];
+    }
 
     public abstract double recalculateWeightsI
         (double[] counts, double[] weights, double[] r);

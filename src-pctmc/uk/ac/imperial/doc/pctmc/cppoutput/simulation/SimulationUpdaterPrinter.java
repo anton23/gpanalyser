@@ -36,6 +36,7 @@ public class SimulationUpdaterPrinter
             classOutput = new StringBuilder();
             uuid = UUID.randomUUID();
             nativeClassName = GENERATEDCLASSNAME + uuid.toString().replace("-","");
+            visit();
         }
 
         public String getNativeClassName() {
@@ -51,7 +52,7 @@ public class SimulationUpdaterPrinter
             return output.toString();
         }
 
-        public void visit() {
+        private void visit() {
             StringBuilder header = new StringBuilder();
             StringBuilder jniCode = new StringBuilder();
             StringBuilder code = new StringBuilder();
@@ -77,8 +78,8 @@ public class SimulationUpdaterPrinter
                     + " (JNIEnv *env, jobject,"
                     + " jdoubleArray arr_values, jdoubleArray arr_tmp,"
                     + " jdoubleArray arr_r) {\n");
-            jniCode.append("jdouble *values = env -> "
-                    + "GetDoubleArrayElements (arr_values, 0);\n");
+            jniCode.append("jdouble *values = env ->"
+                    + " GetDoubleArrayElements (arr_values, 0);\n");
             jniCode.append("jdouble *tmp = env -> GetDoubleArrayElements"
                     + " (arr_tmp, 0);\n");
             jniCode.append("jdouble *r = env -> GetDoubleArrayElements"
@@ -100,7 +101,7 @@ public class SimulationUpdaterPrinter
 
             for (Map.Entry<CombinedPopulationProduct, Integer> entry : momentIndex.entrySet()){
                 code.append("newValues[" + entry.getValue() + "]=(");
-                //!!
+
                 AbstractExpression tmp = CombinedProductExpression.create(entry.getKey());
                 CPPPrinterPopulationBased printer = new CPPPrinterPopulationBased
                         (variables, simulation.getPCTMC().getStateIndex(),
