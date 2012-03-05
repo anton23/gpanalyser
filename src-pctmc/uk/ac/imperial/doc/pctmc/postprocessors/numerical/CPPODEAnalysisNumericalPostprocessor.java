@@ -145,6 +145,6 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
         EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
         return new PCTMCCPPImplementationProvider()
                 .getEvaluatorImplementation(updaterMethod, evaluatorClassName,
-                        constants, momentIndex,generalExpectationIndex);
+                        constants, momentIndex, generalExpectationIndex);
     }
 }

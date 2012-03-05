@@ -19,10 +19,7 @@ public abstract class AggregatedStateNextEventGenerator {
 	public abstract void initCoefficients(); // needs only at the beginning
 
 	public abstract void recalculateWeights(double[] counts); // responsible for
-
-	// calculating the
-	// total weight as
-	// well
+	// calculating the total weight as well
 
 	public double nextStep(double[] counts) {
 		recalculateWeights(counts);
@@ -37,12 +34,10 @@ public abstract class AggregatedStateNextEventGenerator {
 		for (Integer d : decreasing[nextEvent]) {
 			counts[d]--;
 			if (counts[d]<0.0){
-				//counts[d] = 0.0;
 				throw new AssertionError("Counts going negative");
 			}
 		}		
-		double duration = Exponential.getSample(totalRate);
-		return duration;
+		return Exponential.getSample(totalRate);
 	}
 	
 

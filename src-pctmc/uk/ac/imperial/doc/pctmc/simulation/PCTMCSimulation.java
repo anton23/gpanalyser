@@ -54,9 +54,9 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
 	int n;
 
+    @Override
 	public void prepare(Constants variables) {		
 		prepareAccumulatedIndex();
 		prepareGeneralExpectationIndex();
-
-			}	
+	}
 }

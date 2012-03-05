@@ -28,6 +28,7 @@ public class AccumulatorUpdaterPrinter
         classOutput = new StringBuilder();
         uuid = UUID.randomUUID();
         nativeClassName = GENERATEDCLASSNAME + uuid.toString().replace("-","");
+        visit();
     }
 
     public String getNativeClassName() {
@@ -43,7 +44,7 @@ public class AccumulatorUpdaterPrinter
         return output.toString();
     }
 
-    public void visit() {
+    private void visit() {
         StringBuilder header = new StringBuilder();
         StringBuilder jniCode = new StringBuilder();
         StringBuilder code = new StringBuilder();
