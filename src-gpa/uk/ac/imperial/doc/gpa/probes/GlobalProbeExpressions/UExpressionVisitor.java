@@ -87,6 +87,11 @@ public class UExpressionVisitor
                     newTime, time, times) && newTime <= stopTime)
             {
                 newTime += stepSize;
+                if (newTime >= stopTime)
+                {
+                    expression.setEvaluatedTime (stopTime);
+                    return;
+                }
             }
             expression.setEvaluatedTime (newTime);
         }
