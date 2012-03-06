@@ -1,0 +1,34 @@
+rt  = 0.5;
+rg  = 0.3;
+rc  = 1.2;
+ri  = 0.7;
+rp  = 0.1;
+rcl = 0.4;
+
+nc = 100;
+np = 30;
+
+Consumer			= (think, rt).Consumer_decided;
+Consumer_decided	= (get_product, rg).Consumer_prep;
+Consumer_prep		= (consume, rc).Consumer;
+Producer			= (init, ri).Producer_inited;
+Producer_inited		= (produce, rp).Producer_full;
+Producer_full		= (get_product, T).Producer
+					+ (clear, rcl).Producer;
+
+Consumers {Consumer[nc]} <get_product> Producers {Producer[np]}
+
+SimProbe ["steady100_30.dat"]
+	(stopTime=60, stepSize=1, replications=5000) steady 250
+{
+    SIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = init : begin, (get_product | clear) [2] : end <-
+    }
+    where
+    {
+    	Producers {Producer[np]} =>
+    		Producers {Producer <init, get_product, clear> LProbe | Producer [np - 1]}
+    }
+}
