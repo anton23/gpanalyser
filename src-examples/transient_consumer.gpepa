@@ -18,17 +18,16 @@ Producer_full		= (get_product, T).Producer
 
 Consumers {Consumer[nc]} <get_product> Producers {Producer[np]}
 
-Probe ["transient.dat"]
-	(stopTime=60, stepSize=1, replications=5000) transient 150
+SimProbe ["transient100-30.dat"] (stopTime=80, stepSize=1, replications=5000) transient 100
 {
     TIPT = begin : start, end : stop
     observes
     {
-    	LProbe = init : begin, get_product[4] : end
+    	LProbe = init : begin, produce[2] : end
     }
     where
     {
     	Producers {Producer[np]} =>
-    		Producers {Producer <init, get_product> LProbe | Producer [np - 1]}
+    		Producers {Producer <init, produce> LProbe | Producer [np - 1]}
     }
 }

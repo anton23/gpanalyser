@@ -135,85 +135,94 @@ public class SimProbeRunner extends AbstractProbeRunner
     @Override
     protected CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping,
-         GroupedModel model, Set<GPEPAState> stateObservers,
-         PEPAComponentDefinitions mainDef,
+         Map<String, AbstractExpression> mapping, GroupedModel model,
+         Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
-         double stopTime, double stepSize, int parameter,
-         double steadyStateTime, String name)
+         ComponentId accepting, Constants constants, double stopTime,
+         double stepSize, int parameter, double steadyStateTime, String name)
     {
-        int indices = (int) Math.ceil (stopTime / stepSize);
-        double[] mainCdf = new double[indices];
-        Set<GroupComponentPair> pairs
-            = model.getGroupComponentPairs (mainDef);
-
-        NumericalPostprocessor postprocessorK = runTheProbedSystem
+        // obtaining the system values for various times
+        NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-                    new ArrayList<AbstractExpression> (),
-             new HashMap<String, AbstractExpression> (),
-             steadyStateTime + stepSize, stepSize, parameter,
-                    new PCTMC[1]);
+             statesCountExpressions, mapping, steadyStateTime + stepSize,
+             stepSize, parameter, new PCTMC[1]);
+
+        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
         double[][] K = getProbabilitiesComponentStateAfterBegin
-                (pairs, mainDef, postprocessorK, constants);
+            (pairs, mainDef, postprocessor, constants);
+
+        // obtaining the ratios for steady state component distribution
+        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
+            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+        double[][] matchVal = getStartingStates
+            (model, mainDef, constants, postprocessor, crates);
+
+        PCTMC[] pctmcs = new PCTMC[1];
+        postprocessor = runTheProbedSystem
+            (model, mainDef, constants, null, stateObservers,
+             statesCountExpressions, mapping, steadyStateTime + stepSize,
+             stepSize, 1, pctmcs);
+        AbstractExpressionEvaluator evaluator = postprocessor
+            .getExpressionEvaluator(statesCountExpressions, constants);
+
+        final int times = (int) Math.ceil (stopTime / stepSize);
+        final int indices = (int) Math.ceil (steadyStateTime / stepSize);
+
+        double[] overallUncCdf = new double[times];
 
         for (int p = 0; p < parameter; ++p)
         {
-            NumericalPostprocessor postprocessor = runTheProbedSystem
-                (model, mainDef, constants, null, stateObservers,
-                        statesCountExpressions, mapping,
-                 steadyStateTime + stepSize, stepSize, 1,
-                        new PCTMC[1]);
-            double[][] steadyVal = postprocessor.evaluateExpressions
-                (statesCountExpressions, constants);
-
             int i = 0;
             double[][] cdf = new double[indices][];
-    
-            for (double s = 0; s < stopTime; s += stepSize)
+
+            for (double s = 0; s < steadyStateTime; s += stepSize)
             {
-                assignNewCounts (mainDef, model,
-                        statesCountExpressions, mapping, steadyVal[i]);
-                List<AbstractExpression> statesCountExpressionsS
-                    = new ArrayList<AbstractExpression> ();
-                Map<String, AbstractExpression> mappingS
-                    = new HashMap<String, AbstractExpression> ();
-                NumericalPostprocessor postprocessorS = runTheProbedSystem
-                    (model, mainDef, constants, null, stateObservers,
-                            statesCountExpressionsS, mappingS,
-                     stopTime, stepSize, 1,
-                            new PCTMC[1]);
-                double[][] obtainedMeasurements = postprocessorS
-                    .evaluateExpressions (statesCountExpressionsS, constants);
+                postprocessor.calculateDataPoints (constants);
+                double[][] transientVal = postprocessor.evaluateExpressions
+                        (evaluator, constants);
+
+                if (s > 0)
+                {
+                    assignNewCounts (crates, definitionsMap, mainDef, model,
+                            statesCountExpressions, mapping,
+                            matchVal[i], transientVal[i]);
+                }
+
+                GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
+                postprocessor.calculateDataPoints (constants);
+                double[][] obtainedMeasurements = postprocessor.evaluateExpressions
+                    (evaluator, constants);
+
                 cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
                         statesCountExpressions, mapping);
                 ++i;
             }
-    
-            double[] uncCdf = new double[indices];
-            // now integration, possible directly on obtained values
-            for (int s = 1; s < indices; ++s)
+
+            double[] uncCdf = new double[times];
+            // now integration and truncation, possible directly on obtained values
+            for (int s = 0; s < indices; ++s)
             {
-                double derivK = (K[s][0] - K[s - 1][0])/stepSize;
-                System.out.println(derivK);
-                for (int t = 0; t < indices; ++t)
+                final double derivK = (K[s + 1][0] - K[s][0]) / stepSize;
+                for (int t = 0; t < times; ++t)
                 {
-                    uncCdf[t] += cdf[s][t] * derivK;
+                    uncCdf[t] += (cdf[s][t] * derivK);
                 }
             }
-    
-            for (int t = 0; t < indices; ++t)
+
+            for (int t = 0; t < times; ++t)
             {
-                mainCdf[t] += uncCdf[t] * stepSize;
+                overallUncCdf[t] += uncCdf[t] * stepSize;
             }
+
+            System.out.println ("Ran transient replication " + p);
         }
 
-        for (int t = 0; t < indices; ++t)
+        for (int t = 0; t < times; ++t)
         {
-            mainCdf[t] /= parameter;
+            overallUncCdf[t] /= parameter;
         }
 
-        return new CDF (name, stepSize, mainCdf);
+        return new CDF (name, stepSize, overallUncCdf);
     }
 
     protected CDF globalPassages
@@ -237,27 +246,6 @@ public class SimProbeRunner extends AbstractProbeRunner
                 model.getGroupComponentPairs (mainDef),
                 accepting, statesCountExpressions, mapping);
         return new CDF (gprobe.getName (), stepSize, cdf);
-    }
-
-    protected void assignNewCounts
-        (PEPAComponentDefinitions definitions, GroupedModel model,
-         List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, double[] newVal)
-    {
-        // setting initial number of components for the next analysis
-        Map<String, LabelledComponentGroup> lgs = model.getComponentGroups ();
-        for (LabelledComponentGroup lg : lgs.values ())
-        {
-            Group g = lg.getGroup ();
-            String label = lg.getLabel ();
-            for (PEPAComponent c : g.getComponentDerivatives (definitions))
-            {
-                g.setCountExpression (c, new DoubleExpression
-                        (newVal[statesCountExpressions.indexOf
-                            (mapping.get (new GroupComponentPair(label, c)
-                             .toString ()))]));
-            }
-        }
     }
 
     @Override
