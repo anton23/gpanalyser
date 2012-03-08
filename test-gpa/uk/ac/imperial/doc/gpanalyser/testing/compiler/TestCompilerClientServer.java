@@ -26,7 +26,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -116,23 +116,23 @@ public class TestCompilerClientServer extends BaseCompilerTest {
 		Collection<EvolutionEvent> evolutionEventsExpected = new LinkedList<EvolutionEvent>();
 
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sClient, sServer), Lists.newArrayList(sClientWaiting, sServerGet),
-				MinExpression.create(ProductExpression.create(new PopulationExpression(sClient), rr),
-					                 ProductExpression.create(new PopulationExpression(sServer), rr))
+				MinExpression.create(ProductExpression.create(CombinedProductExpression.createMeanExpression(sClient), rr),
+					                 ProductExpression.create(CombinedProductExpression.createMeanExpression(sServer), rr))
 						                 ));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sClientWaiting, sServerGet), Lists.newArrayList(sClientThink, sServer),
-				MinExpression.create(ProductExpression.create(new PopulationExpression(sClientWaiting), rd),
-						             ProductExpression.create(new PopulationExpression(sServerGet), rd))
+				MinExpression.create(ProductExpression.create(CombinedProductExpression.createMeanExpression(sClientWaiting), rd),
+						             ProductExpression.create(CombinedProductExpression.createMeanExpression(sServerGet), rd))
 			    ));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sClientThink), Lists.newArrayList(sClient),
-				ProductExpression.create(new PopulationExpression(sClientThink), new ConstantExpression("rt"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sClientThink), new ConstantExpression("rt"))));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sServer), Lists.newArrayList(sServerBroken),
-				ProductExpression.create(new PopulationExpression(sServer), new ConstantExpression("rb"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sServer), new ConstantExpression("rb"))));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sServerBroken), Lists.newArrayList(sServer),
-				ProductExpression.create(new PopulationExpression(sServerBroken), new ConstantExpression("rrst"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sServerBroken), new ConstantExpression("rrst"))));
 		assertEquals(new HashSet<EvolutionEvent>(evolutionEventsExpected), new HashSet<EvolutionEvent>(evolutionEvents));
 	}
 	
