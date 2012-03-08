@@ -90,7 +90,6 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 						allVariables.add(newVar);
 					}
 				}
-
 			}
 		}
 		
