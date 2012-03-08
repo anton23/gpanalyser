@@ -109,7 +109,7 @@ public class ClassCompiler {
 
 		@Override
 		public ClassLoader getClassLoader(Location location) {
-			return new SecureClassLoader() {
+			ClassLoader ret = new SecureClassLoader(Thread.currentThread().getContextClassLoader()) {
 				@Override
 				protected Class<?> findClass(String name)
 						throws ClassNotFoundException {
@@ -118,6 +118,7 @@ public class ClassCompiler {
 							b.length);
 				}
 			};
+			return ret;	
 		}
 
 		
