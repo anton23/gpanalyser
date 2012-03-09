@@ -1,0 +1,22 @@
+rr = 2.0; 
+rtmt = 0.3; 
+rt = 0.27;
+rb = 0.1; 
+rd = 1.0; 
+rrst = 1.0; 
+
+n = 100; 
+m = 60;
+
+stopTime = 40.0;
+stepSize = 0.1;
+ 
+Client = (request,rr).Client_waiting; 
+Client_waiting = (data,rd).Client_think; 
+Client_think = (think,rt).Client; 
+
+Server = (request,rr).Server_get + (break,rb).Server_broken;
+Server_get = (data,rd).Server;
+Server_broken = (reset,rrst).Server; 
+
+Clients{Client[n]}<request,data>Servers{Server[m]}
