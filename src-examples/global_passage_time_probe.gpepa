@@ -9,8 +9,8 @@ rtmt = 0.2;
 init = 0.07;
 tfr = 0.15;
 
-nc = 20;
-nh = 12;
+nc = 200;
+nh = 120;
 
 ClientHibernate = (clt_on, ron).ClientStandby
 	+ (clt_shutdown, T).ClientHibernate;
@@ -62,7 +62,7 @@ ChanBusy2 = (cont_tfr, rcont).Chan
 
 Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
-SimProbe (stopTime=400, stepSize=1, replications=5000)
+Probe (stopTime=400, stepSize=1, density=10)
 {
     GPT = eE : start, end [nc/2] : stop
     observes

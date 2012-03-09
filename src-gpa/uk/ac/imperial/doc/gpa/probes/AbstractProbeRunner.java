@@ -27,7 +27,7 @@ public abstract class AbstractProbeRunner
     private static ProbeGraph graph;
     protected Class<? extends AbstractPCTMCAnalysis> analysisType;
     protected Class<? extends NumericalPostprocessor> postprocessorType;
-    private static final String BEGIN_SIGNAL = "begin";
+    protected static final String BEGIN_SIGNAL = "begin";
 
     protected abstract CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
