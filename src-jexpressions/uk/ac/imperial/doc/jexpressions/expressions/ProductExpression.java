@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * An expression for a product of a number of terms a1*a2*...*an.
@@ -61,6 +64,31 @@ public class ProductExpression extends AbstractExpression {
 
 	public static AbstractExpression create(Collection<AbstractExpression> t) {
 		return create(t.toArray(new AbstractExpression[0]));
+	}
+	
+	public static AbstractExpression createOrdered(Collection<AbstractExpression> t)
+	{
+		Map<String,AbstractExpression> orderedProduct = new TreeMap<String,AbstractExpression>();
+		Map<String,Integer> orderedProductMult = new TreeMap<String,Integer>();
+		for (AbstractExpression ae : t)
+		{
+			String name = ae.toString();
+			orderedProduct.put(name, ae);
+			Integer mult = orderedProductMult.get(name);
+			mult = (mult == null) ? 1 : ++mult;
+			orderedProductMult.put(name,mult);
+		}
+		int i=0;
+		AbstractExpression[] product = new AbstractExpression[t.size()];
+		for (Entry<String, Integer> e : orderedProductMult.entrySet())
+		{
+			for (int j = e.getValue(); j > 0; --j)
+			{
+				product[i++] = orderedProduct.get(e.getKey());
+			}
+		}
+		
+		return create(product);
 	}
 
 	/**

@@ -6,7 +6,7 @@ package uk.ac.imperial.doc.masspa.language;
  * @author Chris Guenther
  */
 public class Messages
-{	
+{
 	// Compiler
 	public static final String s_COMPILER_KEYWORD_MULTISERVER_SYNC = "multiServerSync";
 	public static final String s_COMPILER_KEYWORD_MASSACTION_ASYNC = "massActionAsync";
