@@ -133,8 +133,8 @@ public class CPPSimulationAnalysisNumericalPostprocessor
 			initial[i] = evaluator.getResult();
 		}
 
-		PCTMCLogging.info("Running Gillespie simulator.");
-		PCTMCLogging.increaseIndent();
+		//PCTMCLogging.info("Running Gillespie simulator.");
+		//PCTMCLogging.increaseIndent();
 
         if (initCoeff) {
             updater.setRates(constants.getFlatConstants());
@@ -145,9 +145,9 @@ public class CPPSimulationAnalysisNumericalPostprocessor
 
 		double[][] tmp;
 		for (int r = 0; r < replications; r++) {
-			if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {
-				PCTMCLogging.info(r + " replications finished.");
-			}
+			//if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {
+			//	PCTMCLogging.info(r + " replications finished.");
+			//}
 			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
 					initial, stopTime, stepSize, accUpdater);
 			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
@@ -161,7 +161,7 @@ public class CPPSimulationAnalysisNumericalPostprocessor
 			}
 		}
         initCoeff = false;
-		PCTMCLogging.decreaseIndent();
+		//PCTMCLogging.decreaseIndent();
 	}
 
     /**

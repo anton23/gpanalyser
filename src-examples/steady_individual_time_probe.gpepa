@@ -9,8 +9,8 @@ rtmt = 0.2;
 init = 0.07;
 tfr = 0.15;
 
-nc = 10;
-nh = 4;
+nc = 100;
+nh = 40;
 
 ClientHibernate = (clt_on, ron).ClientStandby
 	+ (clt_shutdown, T).ClientHibernate;
@@ -62,8 +62,8 @@ ChanBusy2 = (cont_tfr, rcont).Chan
 
 Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
-SimProbe ["out.txt"]
-	(stopTime=350, stepSize=1, replications=2000) steady 500
+Probe ["steady.txt"]
+	(stopTime=350, stepSize=1, density=10) steady 500
 {
     SIPT = begin : start, end : stop <-
     observes

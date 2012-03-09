@@ -9,8 +9,8 @@ rtmt = 0.2;
 init = 0.07;
 tfr = 0.15;
 
-nc = 10000;
-nh = 4000;
+nc = 100;
+nh = 40;
 
 ClientHibernate = (clt_on, ron).ClientStandby
 	+ (clt_shutdown, T).ClientHibernate;
@@ -62,7 +62,7 @@ ChanBusy2 = (cont_tfr, rcont).Chan
 
 Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
-Probe ["out.txt"] (stopTime=150, stepSize=1, density=10) transient 165
+SimProbe (stopTime=150, stepSize=1, replications=5000) transient 165
 {
 	TIPT = begin : start, end : stop
 	observes
@@ -72,6 +72,20 @@ Probe ["out.txt"] (stopTime=150, stepSize=1, density=10) transient 165
 	where
 	{
 		Clients {CB[nc]} =>
-			Clients {CB <data_tfr, cont_tfr> LProbe | CB[nc-1]}
+			Clients {CB <data_tfr, cont_tfr> LProbe | CB[nc - 1]}
+	}
+}
+
+Probe (stopTime=150, stepSize=1, density=10) transient 165
+{
+	TIPT = begin : start, end : stop
+	observes
+	{
+		LProbe = cont_tfr : begin, data_tfr[4] : end
+	}
+	where
+	{
+		Clients {CB[nc]} =>
+			Clients {CB <data_tfr, cont_tfr> LProbe | CB[nc - 1]}
 	}
 }

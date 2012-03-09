@@ -8,11 +8,13 @@ import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.representation.model.LabelledComponentGroup;
+import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CPPSimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -141,88 +143,112 @@ public class SimProbeRunner extends AbstractProbeRunner
          ComponentId accepting, Constants constants, double stopTime,
          double stepSize, int parameter, double steadyStateTime, String name)
     {
-        // obtaining the system values for various times
-        NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, mainDef, constants, null, stateObservers,
-             statesCountExpressions, mapping, steadyStateTime + stepSize,
-             stepSize, parameter, new PCTMC[1]);
-
-        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
-        double[][] K = getProbabilitiesComponentStateAfterBegin
-            (pairs, mainDef, postprocessor, constants);
+        double[][] overallMeasurements = null;
 
         // obtaining the ratios for steady state component distribution
+        NumericalPostprocessor postprocessor = runTheProbedSystem (model,
+                mainDef, constants, null, stateObservers,
+                new ArrayList<AbstractExpression> (),
+                new HashMap<String, AbstractExpression> (), steadyStateTime,
+                stepSize, parameter, new PCTMC[1]);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         double[][] matchVal = getStartingStates
             (model, mainDef, constants, postprocessor, crates);
+        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
 
-        PCTMC[] pctmcs = new PCTMC[1];
+        // we use this to measure when the begin signal fires
+        Set<String> beginActionCount = new HashSet<String> ();
+        beginActionCount.add (BEGIN_SIGNAL);
+        List<AbstractExpression> beginActionExpr
+            = new ArrayList<AbstractExpression> ();
+        beginActionExpr.add (CombinedProductExpression.createMeanExpression
+                (new GPEPAActionCount (BEGIN_SIGNAL)));
+
+        // initial upto begin signal
         postprocessor = runTheProbedSystem
-            (model, mainDef, constants, null, stateObservers,
-             statesCountExpressions, mapping, steadyStateTime + stepSize,
+            (model, mainDef, constants, beginActionCount, stateObservers,
+             statesCountExpressions, mapping, steadyStateTime,
+             stepSize, 1, new PCTMC[1]);
+        PCTMC[] pctmcs = new PCTMC[1];
+
+        // main after begin signal
+        NumericalPostprocessor postprocessorA = runTheProbedSystem
+            (model, mainDef, constants, beginActionCount, stateObservers,
+             statesCountExpressions, mapping, steadyStateTime,
              stepSize, 1, pctmcs);
-        AbstractExpressionEvaluator evaluator = postprocessor
-            .getExpressionEvaluator(statesCountExpressions, constants);
+        AbstractExpressionEvaluator evaluator = postprocessorA
+            .getExpressionEvaluator (statesCountExpressions, constants);
+        AbstractExpressionEvaluator beginEvaluator = postprocessorA
+            .getExpressionEvaluator (beginActionExpr, constants);
 
-        final int times = (int) Math.ceil (stopTime / stepSize);
-        final int indices = (int) Math.ceil (steadyStateTime / stepSize);
-
-        double[] overallUncCdf = new double[times];
-
+        double[] times = new double[statesCountExpressions.size ()];
         for (int p = 0; p < parameter; ++p)
         {
+            // detect when begin signal fired
+            double time = 0;
+            postprocessor.calculateDataPoints (constants);
+            double[][] beginSignalled = postprocessor
+                .evaluateExpressions (beginEvaluator, constants);
             int i = 0;
-            double[][] cdf = new double[indices][];
-
-            for (double s = 0; s < steadyStateTime; s += stepSize)
+            for (; i < beginSignalled.length; ++i)
             {
-                postprocessor.calculateDataPoints (constants);
-                double[][] transientVal = postprocessor.evaluateExpressions
-                        (evaluator, constants);
-
-                if (s > 0)
+                if (beginSignalled[i][0] == 1)
                 {
-                    assignNewCounts (crates, definitionsMap, mainDef, model,
-                            statesCountExpressions, mapping,
-                            matchVal[i], transientVal[i]);
-                }
-
-                GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
-                postprocessor.calculateDataPoints (constants);
-                double[][] obtainedMeasurements = postprocessor.evaluateExpressions
-                    (evaluator, constants);
-
-                cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                        statesCountExpressions, mapping);
-                ++i;
-            }
-
-            double[] uncCdf = new double[times];
-            // now integration and truncation, possible directly on obtained values
-            for (int s = 0; s < indices; ++s)
-            {
-                final double derivK = (K[s + 1][0] - K[s][0]) / stepSize;
-                for (int t = 0; t < times; ++t)
-                {
-                    uncCdf[t] += (cdf[s][t] * derivK);
+                    time = i * stepSize;
+                    Arrays.fill (times, time);
+                    break;
                 }
             }
 
-            for (int t = 0; t < times; ++t)
+            if (i >= beginSignalled.length)
             {
-                overallUncCdf[t] += uncCdf[t] * stepSize;
+                throw new Error ("No begin action in the given time occured.");
+            }
+
+            // calculate state of art after begin signal and rerun the model
+            // with new component counts
+            double[] transientVal = postprocessor.evaluateExpressionsAtTimes
+                (evaluator, times, constants);
+
+            assignNewCounts (crates, definitionsMap, mainDef, model,
+                    statesCountExpressions, mapping, matchVal[i], transientVal);
+            GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
+            postprocessorA.calculateDataPoints (constants);
+
+            double[][] obtainedMeasurements = postprocessorA.evaluateExpressions
+                (evaluator, constants);
+
+            if (overallMeasurements == null)
+            {
+                overallMeasurements = obtainedMeasurements;
+            }
+            else
+            {
+                for (int x = 0; x < overallMeasurements.length; ++x)
+                {
+                    for (int y = 0; y < stateObservers.size (); ++y)
+                    {
+                        overallMeasurements[x][y] += obtainedMeasurements[x][y];
+                    }
+                }
             }
 
             System.out.println ("Ran transient replication " + p);
         }
 
-        for (int t = 0; t < times; ++t)
+        // averaging the obtained measurements
+        for (int x = 0; x < overallMeasurements.length; ++x)
         {
-            overallUncCdf[t] /= parameter;
+            for (int y = 0; y < stateObservers.size (); ++y)
+            {
+                overallMeasurements[x][y] /= parameter;
+            }
         }
 
-        return new CDF (name, stepSize, overallUncCdf);
+        double[] cdf = passageTimeCDF (overallMeasurements, pairs, accepting,
+                statesCountExpressions, mapping);
+        return new CDF (name, stepSize, cdf);
     }
 
     protected CDF globalPassages
