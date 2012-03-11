@@ -75,17 +75,17 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 		AbstractExpression muB2 = e.getB();
 		theta = considerVariable(theta);
 
-		if (moment.getOrder() > 0 && insert) {
-			inserted = false;
+		if (m_moment.getOrder() > 0 && m_insert) {
+			m_inserted = false;
 			muA.accept(this);
 			muA2 = considerVariable(result);
-			inserted = false;
+			m_inserted = false;
 			muB.accept(this);
 			muB2 = considerVariable(result);
 
 			result = considerVariable(FunctionCallExpression.create("normalMinProduct",
 				Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression
-						.create(moment))	
+						.create(m_moment))	
 			));
 		} else { 
 		
@@ -105,14 +105,14 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 				Lists.newArrayList(muA, muB, theta)	
 			));
 		}
-		inserted = true;
+		m_inserted = true;
 	}
 	
 	@Override
 	public void visit(ProductExpression e) {
 		List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-		boolean oldInsert = insert;
-		boolean oldInserted = inserted;
+		boolean oldInsert = m_insert;
+		boolean oldInserted = m_inserted;
 		boolean isInserted = false;
 		AbstractExpression minTerm = null;
 		for (AbstractExpression t: e.getTerms()) {
@@ -132,38 +132,38 @@ public class AccumulatedNormalClosureMinApproximationVisitorUniversal extends Ac
 			orderedTerms = e.getTerms();
 		}
 		for (AbstractExpression t : orderedTerms) {
-			inserted = false;
+			m_inserted = false;
 			t.accept(this);
-			isInserted |= inserted;
+			isInserted |= m_inserted;
 			if (isInserted) {
-				insert = false;
+				m_insert = false;
 			}
 			terms.add(result);
 		}
-		insert = oldInsert;
-		inserted = oldInserted | isInserted;
+		m_insert = oldInsert;
+		m_inserted = oldInserted | isInserted;
 		result = ProductExpression.create(terms);
 	}
 	
 	
 	@Override
 	public void visit(FunctionCallExpression e) {
-		if (e.getName().equals("normalMin") && insert) {
+		if (e.getName().equals("normalMin") && m_insert) {
 			AbstractExpression muA = e.getArguments().get(0);
 			AbstractExpression muB = e.getArguments().get(1);
 			AbstractExpression theta = e.getArguments().get(2);
-			inserted = false;
+			m_inserted = false;
 			muA.accept(this);
 			AbstractExpression muA2 = considerVariable(result);
-			inserted = false;
+			m_inserted = false;
 			muB.accept(this);
 			AbstractExpression muB2 = considerVariable(result);
 
 			result = FunctionCallExpression.create("normalMinProduct",
 				Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression
-						.create(moment))	
+						.create(m_moment))	
 			);
-		} else if (e.getName().equals("normalMinProduct") && insert) {
+		} else if (e.getName().equals("normalMinProduct") && m_insert) {
 			throw new AssertionError("This should not happen!");
 /*			AbstractExpression muA = e.getArguments().get(0);
 			AbstractExpression muB = e.getArguments().get(1);

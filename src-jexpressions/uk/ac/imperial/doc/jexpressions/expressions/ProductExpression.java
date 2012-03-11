@@ -66,8 +66,7 @@ public class ProductExpression extends AbstractExpression {
 		return create(t.toArray(new AbstractExpression[0]));
 	}
 	
-	public static AbstractExpression createOrdered(Collection<AbstractExpression> t)
-	{
+	public static AbstractExpression createOrdered(Collection<AbstractExpression> t) {
 		Map<String,AbstractExpression> orderedProduct = new TreeMap<String,AbstractExpression>();
 		Map<String,Integer> orderedProductMult = new TreeMap<String,Integer>();
 		for (AbstractExpression ae : t)
@@ -87,7 +86,6 @@ public class ProductExpression extends AbstractExpression {
 				product[i++] = orderedProduct.get(e.getKey());
 			}
 		}
-		
 		return create(product);
 	}
 
