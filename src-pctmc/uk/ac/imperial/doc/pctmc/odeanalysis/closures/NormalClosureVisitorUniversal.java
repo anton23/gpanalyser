@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc.odeanalysis;
+package uk.ac.imperial.doc.pctmc.odeanalysis.closures;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,12 +28,13 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
+import uk.ac.imperial.doc.pctmc.odeanalysis.MomentCountTransformerWithParameters;
 import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 import com.google.common.collect.Multiset;
 
-public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransformerWithParameters implements ICombinedProductExpressionVisitor, IExpressionVariableVisitor
+public class NormalClosureVisitorUniversal extends MomentCountTransformerWithParameters implements ICombinedProductExpressionVisitor, IExpressionVariableVisitor
 {
 	protected boolean m_insert;
 	protected boolean m_inserted;
@@ -56,117 +57,117 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 		s_genMomentNameId.put("M9", 9);
 	}
 	
-	public AccumulatedNormalClosureVisitorUniversal(CombinedPopulationProduct moment, int maxOrder)
+	public NormalClosureVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder)
 	{
-		m_maxOrder = maxOrder;
-		m_moment = moment;
+		m_maxOrder = _maxOrder;
+		m_moment = _moment;
 		m_inserted = false;
 		m_insert = true;
 	}
 	
 	@Override
-	public void visit(PowerExpression e)
+	public void visit(PowerExpression _e)
 	{
-		onlyMultiply(e);
+		onlyMultiply(_e);
 	}
 	
 
 	@Override
-	public void visit(ExpressionVariable e)
+	public void visit(ExpressionVariable _e)
 	{
 		if (m_moment.getOrder() == 0 )
 		{
-			result = e;
+			result = _e;
 		}
 		else
 		{
-			e.getUnfolded().accept(this);
+			_e.getUnfolded().accept(this);
 		}
 	}
 
 	@Override
-	public void visit(PEPADivExpression e)
+	public void visit(PEPADivExpression _e)
 	{
 		if (m_insert)
 		{
-			e.getNumerator().accept(this);
-			result = PEPADivExpression.create(result, e.getDenominator());
+			_e.getNumerator().accept(this);
+			result = PEPADivExpression.create(result, _e.getDenominator());
 			m_inserted = true;
 		}
 		else
 		{
 			boolean oldInsert = m_insert;
 			m_insert = true;
-			e.getNumerator().accept(this);
+			_e.getNumerator().accept(this);
 			AbstractExpression newNumerator = result;
-			e.getDenominator().accept(this);
+			_e.getDenominator().accept(this);
 			m_insert = oldInsert;
 			result = PEPADivExpression.create(newNumerator, result);
 		}
 	}
 	
-	protected void onlyMultiply(AbstractExpression e)
+	protected void onlyMultiply(AbstractExpression _e)
 	{
 		if (m_insert)
 		{
-			result = ProductExpression.create(e, CombinedProductExpression.create(m_moment));
+			result = ProductExpression.create(_e, CombinedProductExpression.create(m_moment));
 			m_inserted = true;
 		}
 		else
 		{
-			result = e;
+			result = _e;
 		}
 	}
 
 	@Override
-	public void visit(ConstantExpression e)
+	public void visit(ConstantExpression _e)
 	{
-		onlyMultiply(e);
+		onlyMultiply(_e);
 	}
 
 	@Override
-	public void visit(DoubleExpression e)
+	public void visit(DoubleExpression _e)
 	{
-		onlyMultiply(e);
+		onlyMultiply(_e);
 	}
 
 	@Override
-	public void visit(IndicatorFunction e)
+	public void visit(IndicatorFunction _e)
 	{
-		result = e;
+		result = _e;
 	}
 	
 	@Override
-	public void visit(DivMinExpression e)
+	public void visit(DivMinExpression _e)
 	{
-		e.getFullExpression().accept(this);
+		_e.getFullExpression().accept(this);
 	}
 	
 	@Override
-	public void visit(PopulationExpression e)
+	public void visit(PopulationExpression _e)
 	{
 		CombinedPopulationProduct product;
 		if (m_insert)
 		{
-			product = new CombinedPopulationProduct(m_moment.getNakedProduct().getV(e.getState()));
+			product = new CombinedPopulationProduct(m_moment.getNakedProduct().getV(_e.getState()));
 			m_inserted = true;
 		}
 		else
 		{
-			product = new CombinedPopulationProduct(PopulationProduct.getMeanProduct(e.getState()));
+			product = new CombinedPopulationProduct(PopulationProduct.getMeanProduct(_e.getState()));
 		}
 		result = CombinedProductExpression.create(product);
 	}
 
 	@Override
-	public void visit(ProductExpression e)
+	public void visit(ProductExpression _e)
 	{
 		List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
 		boolean oldInsert = m_insert;
 		boolean oldInserted = m_inserted;
 		boolean isInserted = false;
 		AbstractExpression momentTerm = null;
-		for (AbstractExpression t: e.getTerms())
+		for (AbstractExpression t: _e.getTerms())
 		{
 			if (t instanceof CombinedProductExpression)
 			{
@@ -177,7 +178,7 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 		if (momentTerm != null)
 		{
 			orderedTerms.add(momentTerm);
-			for (AbstractExpression t:e.getTerms())
+			for (AbstractExpression t:_e.getTerms())
 			{
 				if (t != momentTerm)
 				{
@@ -187,7 +188,7 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 		}
 		else
 		{
-			orderedTerms = e.getTerms();
+			orderedTerms = _e.getTerms();
 		}
 		for (AbstractExpression t : orderedTerms)
 		{
@@ -206,35 +207,35 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 	}
 
 	@Override
-	public void visit(FunctionCallExpression e)
+	public void visit(FunctionCallExpression _e)
 	{
 		if (m_insert)
 		{
-			result = ProductExpression.create(e, CombinedProductExpression.create(m_moment));
+			result = ProductExpression.create(_e, CombinedProductExpression.create(m_moment));
 			m_inserted = true;
 		}
 		else
 		{
-			result = e;
+			result = _e;
 		}
 	}
 	
 	@Override
-	public void visit(DivExpression e)
+	public void visit(DivExpression _e)
 	{
-		onlyMultiply(e);
+		onlyMultiply(_e);
 	}
 
 	@Override
-	public void visit(CombinedProductExpression e)
+	public void visit(CombinedProductExpression _e)
 	{
 		if (m_insert)
 		{
 			m_inserted = true;
-			int order = m_moment.getOrder() + e.getProduct().getOrder();
+			int order = m_moment.getOrder() + _e.getProduct().getOrder();
 			if (order <= m_maxOrder)
 			{
-				result = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(m_moment,e.getProduct()));
+				result = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct()));
 			}
 			// Mean field closure
 			else if (m_maxOrder == 1)
@@ -254,14 +255,14 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(entry.getElement())));
 					}
 				}
-				for (Entry<State, Integer> entry : e.getProduct().getNakedProduct().getRepresentation().entrySet())
+				for (Entry<State, Integer> entry : _e.getProduct().getNakedProduct().getRepresentation().entrySet())
 				{
 					for (int i = 0; i < entry.getValue(); i++)
 					{
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
 					}
 				}
-				for (com.google.common.collect.Multiset.Entry<PopulationProduct> entry : e.getProduct().getAccumulatedProducts().entrySet())
+				for (com.google.common.collect.Multiset.Entry<PopulationProduct> entry : _e.getProduct().getAccumulatedProducts().entrySet())
 				{
 					for (int i = 0; i < entry.getCount(); i++)
 					{
@@ -274,7 +275,7 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 			else
 			{
 				genClosure(m_maxOrder,order);
-				Map<AbstractExpression, Integer> closureSummands = applyClosure(m_maxOrder,CombinedPopulationProduct.getProductOf(m_moment,e.getProduct()));
+				Map<AbstractExpression, Integer> closureSummands = applyNormalClosure(m_maxOrder,CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct()));
 				List<AbstractExpression> closure = new LinkedList<AbstractExpression>();
 				for (Entry<AbstractExpression, Integer> exp : closureSummands.entrySet())
 				{
@@ -285,10 +286,10 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 		}
 		else
 		{
-			result = e;
+			result = _e;
 		}
 	}
-
+	
 	/**
 	 * Load template for (_maxorder, order(_cpp)) normal closure and replace
 	 * place-holder names in template by state names in _cpp
@@ -296,7 +297,7 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 	 * @param _cpp
 	 * @return
 	 */
-	private Map<AbstractExpression, Integer> applyClosure(int _maxorder, CombinedPopulationProduct _cpp)
+	private Map<AbstractExpression, Integer> applyNormalClosure(int _maxorder, CombinedPopulationProduct _cpp)
 	{
 		int i=0;
 		State[] states = new State[_cpp.getOrder()];
@@ -385,7 +386,8 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 		{
 			Set<AbstractExpression> remove = new HashSet<AbstractExpression>();
 			Set<AbstractExpression> removeIfNull = new HashSet<AbstractExpression>();
-			for (Entry<AbstractExpression, Integer> e : closure.entrySet())
+			Map<AbstractExpression,Integer> tmpClosure = new HashMap<AbstractExpression,Integer>(closure);
+			for (Entry<AbstractExpression, Integer> e : tmpClosure.entrySet())
 			{
 				// Break up the moment product
 				ProductExpression pex = (ProductExpression)e.getKey();
@@ -398,7 +400,7 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 					if (cpp.getOrder() == i)
 					{
 						terms.remove(ae);
-						summands = applyClosure(_maxOrder,cpp);
+						summands = applyNormalClosure(i-1,cpp);
 						break;
 					}
 				}
@@ -414,10 +416,11 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 						terms2.addAll(terms);
 						
 						AbstractExpression expr = ProductExpression.createOrdered(terms2);
-						int multiplicity = closure.get(expr);
-						multiplicity  +=  e.getValue() * e2.getValue();
+						Integer multiplicity = closure.get(expr);
+						multiplicity  = (multiplicity == null) ? 0 : multiplicity;
+						multiplicity  += e.getValue() * e2.getValue();
 						closure.put(expr, multiplicity);
-						if (multiplicity != 0)
+						if (multiplicity == 0)
 						{
 							removeIfNull.add(expr);
 						}
@@ -465,7 +468,7 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 		// Add even moment extra terms
 		if (_order % 2 == 0)
 		{
-			Set<Set<List<CombinedPopulationProduct>>> allPartitionsIntoPairs = GetVVersionVisitorMomentClosure.<CombinedPopulationProduct> getAllPartitionsIntoPairs(Arrays.asList(states));
+			Set<Set<List<CombinedPopulationProduct>>> allPartitionsIntoPairs = NormalClosureVisitorUniversal.<CombinedPopulationProduct> getAllPartitionsIntoPairs(Arrays.asList(states));
 			for (Set<List<CombinedPopulationProduct>> partition : allPartitionsIntoPairs)
 			{
 				// Needs to evaluate the product
@@ -520,7 +523,8 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 		
 		// Remaining terms
 		double numberOfTerms = Math.pow(2.0, states.length);
-		for (long i = 1; i < numberOfTerms; i++) {
+		for (long i = 1; i < numberOfTerms; i++)
+		{
 			List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
 			CombinedPopulationProduct product = null;
 			long tmp = i;
@@ -571,5 +575,47 @@ public class AccumulatedNormalClosureVisitorUniversal extends MomentCountTransfo
 				}
 			}
 		}
+	}	
+	
+	/**
+	 * Find all pair partition pair required for even terms in normal closure
+	 * @param l
+	 * @return set of partitions
+	 */
+	public static <T> Set<Set<List<T>>> getAllPartitionsIntoPairs(List<T> l)
+	{
+		assert(l.size() % 2 == 0);
+		Set<Set<List<T>>> ret = new HashSet<Set<List<T>>>();
+		if (l.size()==2)
+		{
+			Set<List<T>> tmp = new HashSet<List<T>>();
+			tmp.add(l);
+			ret.add(tmp);
+			return ret;
+		}
+		for (int i = 0; i<l.size(); i++)
+		{
+			for (int j = i+1; j<l.size(); j++)
+			{
+				List<T> smaller = new ArrayList<T>(l.size()-2);
+				for (int k = 0; k<l.size(); k++)
+				{
+					if (k!=j && k!=i)
+					{
+						smaller.add(l.get(k));
+					}
+				}
+				List<T> pair = new LinkedList<T>();
+				pair.add(l.get(i));
+				pair.add(l.get(j));
+				Set<Set<List<T>>> smallerPartitions = getAllPartitionsIntoPairs(smaller);
+				for (Set<List<T>> partition:smallerPartitions)
+				{
+					partition.add(pair);
+					ret.add(partition);
+				}
+			}
+		}
+		return ret;
 	}
 }

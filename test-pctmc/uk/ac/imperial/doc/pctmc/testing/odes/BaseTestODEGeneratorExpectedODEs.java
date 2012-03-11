@@ -27,7 +27,7 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
-import uk.ac.imperial.doc.pctmc.odeanalysis.NormalMomentClosure;
+import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
 
 
 @RunWith(Parameterized.class)
