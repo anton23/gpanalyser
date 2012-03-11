@@ -22,7 +22,7 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
-import uk.ac.imperial.doc.pctmc.odeanalysis.NormalMomentClosure;
+import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.testing.odes.BaseTestODEGeneratorExpectedODEs;
 public class TestODEGenerator extends NewODEGenerator{
 	
@@ -61,9 +61,9 @@ public class TestODEGenerator extends NewODEGenerator{
 
 		for (Map.Entry<CombinedPopulationProduct, AbstractExpression> e:expectedODEs.entrySet()) {
 			ExpandedExpression expectedExpanded = TestGPEPAExpectedODEs.expandExpression(e.getValue());
-			ExpandedExpression actualExpanded = TestGPEPAExpectedODEs.expandExpression((rhs.get(e.getKey())));
+			ExpandedExpression actualExpanded = TestGPEPAExpectedODEs.expandExpression((m_rhs.get(e.getKey())));
 			assertEquals("ODE for moment " + e.getKey() + ", difference:\n"
-					+ TestGPEPAExpectedODEs.expandExpression(new MinusExpression(e.getValue(), rhs.get(e.getKey()))).toAbstractExpression()+"\n",
+					+ TestGPEPAExpectedODEs.expandExpression(new MinusExpression(e.getValue(), m_rhs.get(e.getKey()))).toAbstractExpression()+"\n",
 					expectedExpanded, actualExpanded);			
 		}
 	}

@@ -367,12 +367,13 @@ public class MASSPAToPCTMC
 												// Special case when intensity is a population
 												if (intensity instanceof CombinedProductExpression)
 												{
+													/*
 													map.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
 													map2.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
 													ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
-											//		ae = ProductExpression.create(new DoubleExpression(rate),intensity,MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
-											//		ae = ProductExpression.create(ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))))),intensity);
-								//					ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),intensity),ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))),intensity)));
+													*/
+													ae = ProductExpression.create(ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))))),intensity);
+					
 												}
 												else
 												{

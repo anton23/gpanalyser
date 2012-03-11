@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc.odeanalysis;
+package uk.ac.imperial.doc.pctmc.odeanalysis.closures;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
+import uk.ac.imperial.doc.pctmc.odeanalysis.MomentClosure;
 
 /***
  * Applies Singh's (2006) Lognormal closure
@@ -18,8 +19,8 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
  * 
  * @author Chris Guenther
  */
-public class LognormalMomentClosure extends MomentClosure {
-	
+public class LognormalMomentClosure extends MomentClosure 
+{
 	public final static String NAME = "LognormalClosure";
 	protected int m_maxOrder;
 	protected double m_mfStabiliser;
@@ -48,7 +49,7 @@ public class LognormalMomentClosure extends MomentClosure {
 	@Override
 	public AbstractExpression insertProductIntoRate(AbstractExpression _rate, PopulationProduct _moment)
 	{
-		GetVVersionVisitorMomentClosureLognormal visitor = new GetVVersionVisitorMomentClosureLognormal(_moment, m_maxOrder, m_mfStabiliser);
+		LognormalClosureVisitorUniversal visitor = new LognormalClosureVisitorUniversal(new CombinedPopulationProduct(_moment), m_maxOrder, m_mfStabiliser);
 		_rate.accept(visitor);
 		return visitor.getResult();
 	}
@@ -56,7 +57,7 @@ public class LognormalMomentClosure extends MomentClosure {
 	@Override
 	public AbstractExpression insertAccumulations(AbstractExpression _derivative, CombinedPopulationProduct _moment)
 	{
-		IntegralInsterterVisitor visitor = new IntegralInsterterVisitor(new CombinedPopulationProduct(null, _moment.getAccumulatedProducts()));
+		LognormalClosureVisitorUniversal visitor = new LognormalClosureVisitorUniversal(new CombinedPopulationProduct(null, _moment.getAccumulatedProducts()), m_maxOrder, m_mfStabiliser);
 		_derivative.accept(visitor);
 		return visitor.getResult();
 	}
