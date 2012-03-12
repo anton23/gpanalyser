@@ -65,7 +65,7 @@ public class NewODEGenerator {
 		for (CombinedPopulationProduct m:rhs.keySet()) {
 			momentIndex.put(m, i++);
 		}
-		PCTMCLogging.info("The total number od ODEs is " + i);
+		PCTMCLogging.info("The total number of ODEs is " + i);
 	}
 	
 	
