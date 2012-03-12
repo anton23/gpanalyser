@@ -72,7 +72,6 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 	{
 		onlyMultiply(_e);
 	}
-	
 
 	@Override
 	public void visit(ExpressionVariable _e)

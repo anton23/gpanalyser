@@ -220,27 +220,41 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 	@Override
 	public void visit(CombinedProductExpression _e)
 	{
-		// Result when no closure is needed
-		CombinedPopulationProduct moment = CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct());
-		int order = moment.getOrder();
-		result = CombinedProductExpression.create(moment);
-
-		if (m_insert && order > m_maxOrder)
+		if (m_insert)
 		{
 			m_inserted = true;
+			int order = m_moment.getOrder() + _e.getProduct().getOrder();
+			if (order <= m_maxOrder)
+			{
+				result = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct()));
+			}
 
 			// Mean field closure
-			if (m_maxOrder == 1)
+			else if (m_maxOrder == 1)
 			{		
 				List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-				for (Entry<State, Integer> entry : moment.getNakedProduct().getRepresentation().entrySet())
+				for (Entry<State, Integer> entry : m_moment.getNakedProduct().getRepresentation().entrySet())
 				{
 					for (int i = 0; i < entry.getValue(); i++)
 					{
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
 					}
 				}
-				for (Multiset.Entry<PopulationProduct> entry : moment.getAccumulatedProducts().entrySet())
+				for (Multiset.Entry<PopulationProduct> entry : m_moment.getAccumulatedProducts().entrySet())
+				{
+					for (int i = 0; i < entry.getCount(); i++)
+					{
+						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(entry.getElement())));
+					}
+				}
+				for (Entry<State, Integer> entry : _e.getProduct().getNakedProduct().getRepresentation().entrySet())
+				{
+					for (int i = 0; i < entry.getValue(); i++)
+					{
+						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
+					}
+				}
+				for (com.google.common.collect.Multiset.Entry<PopulationProduct> entry : _e.getProduct().getAccumulatedProducts().entrySet())
 				{
 					for (int i = 0; i < entry.getCount(); i++)
 					{
@@ -252,8 +266,12 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			// Lognormal closure
 			else
 			{
-				applyLognormalClosure(moment);
+				applyLognormalClosure(CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct()));
 			}
+		}
+		else
+		{
+			result = _e;
 		}
 	}
 
