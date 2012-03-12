@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.pctmc.simulation;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -33,7 +34,7 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	
 	
 
-	public BiMap<PopulationProduct, Integer> getAccumulatedMomentIndex() {
+	public Map<PopulationProduct, Integer> getAccumulatedMomentIndex() {
 		return accumulatedMomentIndex;
 	}
 

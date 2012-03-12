@@ -24,12 +24,12 @@ public class MatlabPrinterCombinedProductBased extends
 		MatlabPrinterWithConstants implements
 		ICombinedProductExpressionVisitor, IGeneralExpectationExpressionVisitor {
 
-	protected BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	protected Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	protected Map<AbstractExpression, Integer> generalExpectationIndex;
 	private String f;
 
 	public MatlabPrinterCombinedProductBased(Constants parameters,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex, String f) {
 		super(parameters);
 		this.combinedMomentsIndex = combinedMomentsIndex;

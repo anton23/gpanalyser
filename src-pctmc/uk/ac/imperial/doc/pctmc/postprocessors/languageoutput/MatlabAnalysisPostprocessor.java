@@ -99,7 +99,7 @@ public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 	
 	private String getInitialValuesName = "getInitialValues";
 	
-	private String getInitialValues(PCTMC pctmc, Constants constants,ODEMethod odes,BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex){
+	private String getInitialValues(PCTMC pctmc, Constants constants,ODEMethod odes,Map<CombinedPopulationProduct, Integer> combinedMomentsIndex){
 		StringBuilder out = new StringBuilder(); 
 		out.append("function y = " + getInitialValuesName+"(" + MatlabPrinterWithConstants.param+")\n");
 		out.append("   y = zeros("+combinedMomentsIndex.size()+",1);\n");

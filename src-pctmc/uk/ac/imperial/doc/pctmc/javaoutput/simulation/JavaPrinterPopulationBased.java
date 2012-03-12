@@ -13,7 +13,6 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.Multiset;
 
 /**
@@ -24,12 +23,12 @@ import com.google.common.collect.Multiset;
 public class JavaPrinterPopulationBased extends JavaExpressionPrinterWithVariables implements
 		IPopulationVisitor, IPopulationProductVisitor,ICombinedProductExpressionVisitor {
 	
-	private BiMap<State, Integer> stateIndex;
-	private BiMap<PopulationProduct,Integer> accumulatedProductsIndex;
+	private Map<State, Integer> stateIndex;
+	private Map<PopulationProduct,Integer> accumulatedProductsIndex;
 	private String f;
 	
 	public JavaPrinterPopulationBased(Constants constants,
-			BiMap<State, Integer> stateIndex,BiMap<PopulationProduct,Integer> accumulatedProductsIndex, String f, boolean expandVariables) {
+			Map<State, Integer> stateIndex, Map<PopulationProduct,Integer> accumulatedProductsIndex, String f, boolean expandVariables) {
 		super(constants, expandVariables);
 		this.stateIndex = stateIndex;
 		this.accumulatedProductsIndex = accumulatedProductsIndex;
