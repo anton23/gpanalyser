@@ -1,7 +1,9 @@
 package uk.ac.imperial.doc.pctmc.simulation;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -11,9 +13,6 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
@@ -29,17 +28,17 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 		n = pctmc.getStateIndex().size();
 	}
 
-	private BiMap<PopulationProduct, Integer> accumulatedMomentIndex;
+	private Map<PopulationProduct, Integer> accumulatedMomentIndex;
 	
 	
 
-	public BiMap<PopulationProduct, Integer> getAccumulatedMomentIndex() {
+	public Map<PopulationProduct, Integer> getAccumulatedMomentIndex() {
 		return accumulatedMomentIndex;
 	}
 
 	private void prepareAccumulatedIndex() {
 		int j = 0;
-		accumulatedMomentIndex = HashBiMap.<PopulationProduct, Integer> create();
+		accumulatedMomentIndex = new HashMap<PopulationProduct, Integer>();
 		Collection<CombinedPopulationProduct> requiredProducts = new HashSet<CombinedPopulationProduct>(usedCombinedProducts);
 		for (EvolutionEvent event:pctmc.getEvolutionEvents()) {
 			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
@@ -57,7 +56,7 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	
 	private void prepareGeneralExpectationIndex(){
 		int j = 0; 
-		generalExpectationIndex = HashBiMap.<AbstractExpression,Integer>create(); 
+		generalExpectationIndex = new HashMap<AbstractExpression,Integer>(); 
 		for (AbstractExpression eg: usedGeneralExpectations){
 			generalExpectationIndex.put(eg,j++);
 		}

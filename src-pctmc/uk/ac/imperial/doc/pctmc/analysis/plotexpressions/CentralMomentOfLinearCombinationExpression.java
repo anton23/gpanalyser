@@ -87,12 +87,13 @@ public class CentralMomentOfLinearCombinationExpression extends
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result
 				+ ((coefficients == null) ? 0 : coefficients.hashCode());
 		result = prime
 				* result
 				+ ((combinedProducts == null) ? 0 : combinedProducts.hashCode());
+		result = prime * result + order;
 		return result;
 	}
 
@@ -100,7 +101,7 @@ public class CentralMomentOfLinearCombinationExpression extends
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -115,6 +116,10 @@ public class CentralMomentOfLinearCombinationExpression extends
 				return false;
 		} else if (!combinedProducts.equals(other.combinedProducts))
 			return false;
+		if (order != other.order)
+			return false;
 		return true;
 	}
+
+
 }

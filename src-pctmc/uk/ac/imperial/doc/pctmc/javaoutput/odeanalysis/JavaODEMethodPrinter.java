@@ -31,8 +31,6 @@ import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java ODE method printer.
  * 
@@ -42,7 +40,7 @@ import com.google.common.collect.BiMap;
 public class JavaODEMethodPrinter implements IODEMethodVisitor {
 
 	private Constants constants;
-	private BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	private Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	private Map<AbstractExpression, Integer> generalExpectationIndex;
 
 	private int methodCharacters = 6000;
@@ -53,7 +51,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 	private StringBuilder output;
 
 	public JavaODEMethodPrinter(Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex) {
 
 		this.constants = constants;
@@ -90,7 +88,6 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 						allVariables.add(newVar);
 					}
 				}
-
 			}
 		}
 		

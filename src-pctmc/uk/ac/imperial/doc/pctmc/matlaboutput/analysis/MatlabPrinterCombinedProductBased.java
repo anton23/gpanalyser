@@ -12,8 +12,6 @@ import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.matlaboutput.utils.MatlabOutputUtils;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java printer for expressions with combined population products as leaves.
  * 
@@ -24,12 +22,12 @@ public class MatlabPrinterCombinedProductBased extends
 		MatlabPrinterWithConstants implements
 		ICombinedProductExpressionVisitor, IGeneralExpectationExpressionVisitor {
 
-	protected BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	protected Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	protected Map<AbstractExpression, Integer> generalExpectationIndex;
 	private String f;
 
 	public MatlabPrinterCombinedProductBased(Constants parameters,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex, String f) {
 		super(parameters);
 		this.combinedMomentsIndex = combinedMomentsIndex;

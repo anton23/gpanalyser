@@ -37,7 +37,7 @@ public class RangeSpecification {
 		this.from = from;
 		this.to = to;
 		this.steps = steps;
-		this.dc = (steps > 0) ? ((to - from) / (steps - 1)) : 0.0;
+		this.dc = (steps == 0 || from == to) ? 0.0 : ((to - from) / (steps - 1));
 	}
 
 	public RangeSpecification(String constant, double from, double to,

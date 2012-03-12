@@ -13,8 +13,6 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
-import com.google.common.collect.BiMap;
-
 public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	private PCTMCODEAnalysis odeAnalysis;
@@ -128,7 +126,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	public double[] getInitialValues(Constants constants) {
 		initial = new double[momentIndex.size()];
 
-		BiMap<State, Integer> stateIndex = odeAnalysis.getPCTMC()
+		Map<State, Integer> stateIndex = odeAnalysis.getPCTMC()
 				.getStateIndex();
 		int size = stateIndex.size();
 		double[] initialCounts = new double[size];

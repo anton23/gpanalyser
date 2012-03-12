@@ -1,9 +1,12 @@
 package uk.ac.imperial.doc.pctmc.javaoutput.utils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +39,14 @@ public class ClassCompiler {
 
 		List<JavaFileObject> files = new ArrayList<JavaFileObject>(1);
 		files.add(new CharSequenceJavaFileObject(className, src));
-
-		compiler.getTask(null, fileManager, null, null, null, files).call();
+		List<String> options = new ArrayList<String>();
+		options.add("-classpath");
+		StringBuilder sb = new StringBuilder();
+		URLClassLoader urlClassLoader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
+		for (URL url : urlClassLoader.getURLs())
+		        sb.append(url.getFile()).append(File.pathSeparator);
+		options.add(sb.toString());
+		compiler.getTask(null, fileManager, null, options, null, files).call();
 		try {
 			return fileManager.getClassLoader(null).loadClass(className)
 					.newInstance();
@@ -100,7 +109,7 @@ public class ClassCompiler {
 
 		@Override
 		public ClassLoader getClassLoader(Location location) {
-			return new SecureClassLoader() {
+			ClassLoader ret = new SecureClassLoader(Thread.currentThread().getContextClassLoader()) {
 				@Override
 				protected Class<?> findClass(String name)
 						throws ClassNotFoundException {
@@ -109,6 +118,7 @@ public class ClassCompiler {
 							b.length);
 				}
 			};
+			return ret;	
 		}
 
 		
@@ -120,5 +130,4 @@ public class ClassCompiler {
 			return jclassObject;
 		}
 	}
-
 }
