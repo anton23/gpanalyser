@@ -10,8 +10,6 @@ import uk.ac.imperial.doc.pctmc.matlaboutput.analysis.MatlabStatementPrinterComb
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.IODEMethodVisitor;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java ODE method printer.
  * @author Anton Stefanek

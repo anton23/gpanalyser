@@ -11,8 +11,6 @@ import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java printer for expression evaluator methods.
  * 

@@ -18,8 +18,6 @@ import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Provides implementation for the abstract methods used by analyses. For now
  * accepts specific method classes - UpdateMethod,ODEMethod In future, it should

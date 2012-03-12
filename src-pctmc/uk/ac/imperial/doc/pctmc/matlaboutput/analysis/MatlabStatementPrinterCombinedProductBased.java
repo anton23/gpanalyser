@@ -13,8 +13,6 @@ import uk.ac.imperial.doc.jexpressions.statements.Increment;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.matlaboutput.statements.MatlabStatementPrinter;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java statement printer.
  * 

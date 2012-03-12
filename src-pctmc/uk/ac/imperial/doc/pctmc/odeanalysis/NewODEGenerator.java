@@ -26,8 +26,6 @@ import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.Binomial;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
@@ -40,7 +38,7 @@ public class NewODEGenerator {
 	protected Map<CombinedPopulationProduct, AbstractExpression> rhs;
 	protected Set<CombinedPopulationProduct> processing;
 	
-	protected BiMap<CombinedPopulationProduct, Integer> momentIndex;
+	protected Map<CombinedPopulationProduct, Integer> momentIndex;
 	
 	public ODEMethod getODEMethodWithCombinedMoments(Collection<CombinedPopulationProduct> combinedMoments) {
 		generateODESystem(combinedMoments);
@@ -63,7 +61,7 @@ public class NewODEGenerator {
 		}
 		// Generates moment index
 		int i = 0;
-		momentIndex = HashBiMap.<CombinedPopulationProduct, Integer>create();
+		momentIndex = new HashMap<CombinedPopulationProduct, Integer>();
 		for (CombinedPopulationProduct m:rhs.keySet()) {
 			momentIndex.put(m, i++);
 		}
@@ -232,7 +230,7 @@ public class NewODEGenerator {
 		return rhs;
 	}
 
-	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
+	public Map<CombinedPopulationProduct, Integer> getMomentIndex() {
 		return momentIndex;
 	}
 	

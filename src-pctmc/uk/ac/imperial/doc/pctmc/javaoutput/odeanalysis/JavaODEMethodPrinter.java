@@ -31,8 +31,6 @@ import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java ODE method printer.
  * 

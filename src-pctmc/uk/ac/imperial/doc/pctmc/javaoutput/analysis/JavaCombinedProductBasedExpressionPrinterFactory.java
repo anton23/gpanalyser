@@ -7,8 +7,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionPrinterFactory;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Factory for printers of expressions based on counts.
  * 

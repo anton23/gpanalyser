@@ -10,8 +10,6 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.matlaboutput.statements.MatlabStatementPrinter;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java printer for expression evaluator methods.
  * 

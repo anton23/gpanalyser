@@ -22,8 +22,6 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-import com.google.common.collect.BiMap;
-
 public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 
 	public MatlabAnalysisPostprocessor(){

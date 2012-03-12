@@ -16,8 +16,6 @@ import uk.ac.imperial.doc.jexpressions.statements.Increment;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java statement printer.
  * 

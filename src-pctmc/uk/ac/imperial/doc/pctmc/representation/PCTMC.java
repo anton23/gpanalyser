@@ -4,15 +4,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-
 public class PCTMC {
-	private BiMap<State,Integer> stateIndex; 
+	private Map<State,Integer> stateIndex; 
 	private State[] inverseStateIndex; 
 	private AbstractExpression[] initCounts; 
 	private Map<State,AbstractExpression> initMap; 
@@ -31,7 +29,7 @@ public class PCTMC {
 	}
 	
 	private void prepareStateIndexes(Map<State,AbstractExpression> initMap){
-		stateIndex = HashBiMap.<State,Integer>create(); 
+		stateIndex = new HashMap<State,Integer>(); 
 		inverseStateIndex = new State[initMap.size()];
 		initCounts = new AbstractExpression[initMap.size()];
 		
@@ -44,7 +42,7 @@ public class PCTMC {
 		}
 	}
 
-	public BiMap<State, Integer> getStateIndex() {
+	public Map<State, Integer> getStateIndex() {
 		return stateIndex;
 	}
 
@@ -92,7 +90,11 @@ public class PCTMC {
 	@Override
 	public String toString() {
 		Map<State,AbstractExpression> initMap = new HashMap<State, AbstractExpression>(); 
-		BiMap<Integer, State> inverseIndex = stateIndex.inverse();
+		//BiMap<Integer, State> inverseIndex = stateIndex.inverse();
+		Map<Integer, State> inverseIndex = new HashMap<Integer, State>();		
+		for (Entry<State, Integer> e : stateIndex.entrySet()) {
+			inverseIndex.put(e.getValue(), e.getKey());
+		}
 		for (int i = 0; i<initCounts.length; i++){
 			initMap.put(inverseIndex.get(i),initCounts[i]); 
 		}
