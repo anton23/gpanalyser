@@ -23,7 +23,7 @@ import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -79,10 +79,10 @@ public class TestCompilerSimpleInput extends BaseCompilerTest {
 		Collection<EvolutionEvent> evolutionEvents = tmp.getEvolutionEvents();
 		Collection<EvolutionEvent> evolutionEventsExpected = new LinkedList<EvolutionEvent>();
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sAsA), Lists.newArrayList(sAsB),
-				ProductExpression.create(new PopulationExpression(sAsA), new ConstantExpression("ra"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sAsA), new ConstantExpression("ra"))));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sAsB), Lists.newArrayList(sAsA),
-				ProductExpression.create(new PopulationExpression(sAsB), new ConstantExpression("rb"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sAsB), new ConstantExpression("rb"))));
 
 		assertEquals(evolutionEventsExpected, evolutionEvents);
 	}

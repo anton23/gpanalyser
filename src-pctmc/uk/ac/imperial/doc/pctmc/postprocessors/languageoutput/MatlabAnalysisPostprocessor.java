@@ -22,8 +22,6 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-import com.google.common.collect.BiMap;
-
 public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 
 	public MatlabAnalysisPostprocessor(){
@@ -99,7 +97,7 @@ public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 	
 	private String getInitialValuesName = "getInitialValues";
 	
-	private String getInitialValues(PCTMC pctmc, Constants constants,ODEMethod odes,BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex){
+	private String getInitialValues(PCTMC pctmc, Constants constants,ODEMethod odes,Map<CombinedPopulationProduct, Integer> combinedMomentsIndex){
 		StringBuilder out = new StringBuilder(); 
 		out.append("function y = " + getInitialValuesName+"(" + MatlabPrinterWithConstants.param+")\n");
 		out.append("   y = zeros("+combinedMomentsIndex.size()+",1);\n");

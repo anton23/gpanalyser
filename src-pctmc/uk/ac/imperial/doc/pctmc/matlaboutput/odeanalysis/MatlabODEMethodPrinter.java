@@ -10,8 +10,6 @@ import uk.ac.imperial.doc.pctmc.matlaboutput.analysis.MatlabStatementPrinterComb
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.IODEMethodVisitor;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java ODE method printer.
  * @author Anton Stefanek
@@ -20,7 +18,7 @@ import com.google.common.collect.BiMap;
 public class MatlabODEMethodPrinter implements IODEMethodVisitor {
 
 	private Constants parameters;
-	private BiMap<CombinedPopulationProduct,Integer> combinedMomentsIndex; 
+	private Map<CombinedPopulationProduct,Integer> combinedMomentsIndex; 
 	private Map<AbstractExpression,Integer> generalExpectationIndex;
 	public static final String ODESNAME = "odes";
 	private static final String OLDY = "y";
@@ -28,7 +26,7 @@ public class MatlabODEMethodPrinter implements IODEMethodVisitor {
 	private StringBuilder output;
 
 	public MatlabODEMethodPrinter(Constants parameters,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex) {
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,Map<AbstractExpression,Integer> generalExpectationIndex) {
 		this.parameters = parameters;
 		this.combinedMomentsIndex = combinedMomentsIndex;
 		this.generalExpectationIndex = generalExpectationIndex; 

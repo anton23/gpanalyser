@@ -10,8 +10,6 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.matlaboutput.statements.MatlabStatementPrinter;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java printer for expression evaluator methods.
  * 
@@ -21,12 +19,12 @@ import com.google.common.collect.BiMap;
 public class MatlabMethodPrinter {
 
 	private Constants constants;
-	private BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	private Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	private Map<AbstractExpression, Integer> generalExpectationIndex;
 	public static String evaluatorName = "evaluator";
 
 	public MatlabMethodPrinter(Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex) {
 		super();
 		this.constants = constants;
