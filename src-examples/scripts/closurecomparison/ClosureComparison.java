@@ -1,76 +1,181 @@
 package scripts.closurecomparison;
 
-import java.util.HashMap;
+import java.text.DecimalFormat;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
-import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
-import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
-import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
-import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
-import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-public class ClosureComparison {
-	
-	final String modelFile = "src-examples/scripts/closurecomparison/models/clientServer.gpepa";
-	
-	PCTMCInterpreter interpreter = GPAPMain.createGPEPAInterpreter();
-	
+public class ClosureComparison extends RangeRunner {
 	// The evaluated model and used constants
-	PCTMC pctmc;
-	Constants constants;
-	
+
+	protected Constants constants;
+
 	// Analyses to use for evaluation and expressions
 	// for comparison
-	List<PCTMCODEAnalysis> analyses;
-	List<AbstractExpression> expressions;
-	
-	// Specification of the parameter space to explore
-	List<RangeSpecification> ranges;
-	
-	double stopTime;
-	double stepSize;
-	
-	private void loadAnalyses() {
-		Map<String, Object> options = new HashMap<String, Object>();
-		options.put("momentClosure", "AccumulatedMinClosure");
-		options.put("maxOrder", 2);
-		PCTMCODEAnalysis a = new PCTMCODEAnalysis(pctmc, options);
-		AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts(a, new PlotDescription(expressions), )
+
+	protected List<ODEAnalysisNumericalPostprocessor> postprocessors;
+	protected List<AbstractExpressionEvaluator> evaluators;
+	protected List<AbstractExpression> expressions;
+
+	// Simulation
+	protected PCTMCSimulation simulation;
+	protected SimulationAnalysisNumericalPostprocessor simPostprocessor;
+	protected AbstractExpressionEvaluator simEvaluator;
+
+	protected ErrorEvaluator errorEvaluator;
+
+	// Results
+	protected double[][] maxAverage;
+	protected double[][] averageAverage;
+	protected int totalIterations;
+
+	public ClosureComparison(
+			List<ODEAnalysisNumericalPostprocessor> postprocessors,
+			SimulationAnalysisNumericalPostprocessor simPostprocessor,
+			List<AbstractExpression> expressions,
+			Constants constants,
+			List<RangeSpecification> ranges, int nParts, boolean toplevel) {
+		super(ranges, toplevel);
+		this.postprocessors = postprocessors;
+		this.simPostprocessor = simPostprocessor;
+		this.expressions = expressions;
+		this.constants = constants;
+		prepareEvaluators();
+		this.parts = split(nParts);
+		maxAverage = new double[postprocessors.size()][expressions.size()];
+		averageAverage = new double[postprocessors.size()][expressions.size()];
+		totalIterations = 0;
 	}
 	
-	private void loadModel() {
-		try {
-			PCTMCFileRepresentation fileRepresentation = interpreter.parsePCTMCFile(modelFile);
-			pctmc = fileRepresentation.getPctmc();
-			constants = fileRepresentation.getConstants();
-			stopTime = constants.getConstantValue("stopTime");
-			stepSize = constants.getConstantValue("stepSize");
-			
-			fileRepresentation.getUnfoldedVariables();
-			
-			for (State s : pctmc.getStateIndex().keySet()) {
-				
-			}
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void runAnalyses() {
-		for (PCTMCODEAnalysis analysis : analyses) {
-			
-		}
-	}
-	
-	public static void main(String[] args) {
-		
+	public ClosureComparison(
+			List<ODEAnalysisNumericalPostprocessor> postprocessors,
+			SimulationAnalysisNumericalPostprocessor simPostprocessor,
+			List<AbstractExpression> expressions,
+			Constants constants,
+			List<RangeSpecification> ranges) {
+		this(postprocessors, simPostprocessor, expressions, constants, ranges, PCTMCOptions.nthreads, true);
 	}
 
+	@Override
+	protected RangeRunner createSlave(List<RangeSpecification> ranges,
+			int nParts) {
+		List<ODEAnalysisNumericalPostprocessor> newPostprocessors = new LinkedList<ODEAnalysisNumericalPostprocessor>();
+		for (ODEAnalysisNumericalPostprocessor p : postprocessors) {
+			newPostprocessors.add((ODEAnalysisNumericalPostprocessor) p
+					.getNewPreparedPostprocessor(constants));
+		}
+		SimulationAnalysisNumericalPostprocessor newSimPostprocessor = (SimulationAnalysisNumericalPostprocessor) simPostprocessor
+				.getNewPreparedPostprocessor(constants);
+		return new ClosureComparison(newPostprocessors, newSimPostprocessor, expressions,
+				constants, ranges, nParts, false);
+	}
+
+	@Override
+	protected void join(Constants constants) {
+		System.out.println("Joining data");
+		for (RangeRunner r : parts) {
+			ClosureComparison part = (ClosureComparison) r;
+			totalIterations += part.getTotalIterations();
+			for (int i = 0; i < postprocessors.size(); i++) {
+				for (int j = 0; j < expressions.size(); j++) {
+					if (maxAverage[i][j] < part.getMaxAverage()[i][j]) {
+						maxAverage[i][j] = part.getMaxAverage()[i][j];
+					}
+					averageAverage[i][j] += part.getAverageAverage()[i][j];
+				}
+			}
+		}
+
+	}
+
+	@Override
+	protected void runSingle(Constants constants) {
+		runAnalyses(constants);
+	}
+
+	@Override
+	protected void processData(Constants constants) {	
+		System.out.println("Final summary:");
+		DecimalFormat df = new DecimalFormat("#.##");
+		for (int i = 0; i < postprocessors.size(); i++) {
+			System.out.println("Analysis " + i);
+			for (int j = 0; j < expressions.size(); j++) {
+				System.out
+				.println(j
+						+ "\t max: "
+						+ df.format(maxAverage[i][j] * 100.0)
+						+ "\t average: "
+						+ df
+								.format(averageAverage[i][j] * 100.0 / totalIterations)
+);
+			}
+		}
+
+	}
+
+	protected void prepareEvaluators() {
+		System.out.println("Preparing evaluators");
+		evaluators = new LinkedList<AbstractExpressionEvaluator>();
+		for (int i = 0; i < postprocessors.size(); i++) {
+			evaluators.add(postprocessors.get(i).getExpressionEvaluator(
+					expressions, constants));
+		}
+		simEvaluator = simPostprocessor.getExpressionEvaluator(expressions,
+				constants);
+		errorEvaluator = new ErrorEvaluator(postprocessors, evaluators,
+				simPostprocessor, simEvaluator);
+	}
+
+	public void runAnalyses(Constants constants) {
+		System.out.println("Running analyses");
+		totalIterations++;
+		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
+		DecimalFormat df = new DecimalFormat("#.##");
+		for (int i = 0; i < errors.length; i++) {
+			System.out.println("Analysis " + i);
+			for (int j = 0; j < errors[0].length; j++) {
+				if (maxAverage[i][j] < errors[i][j].getAverageRelative()) {
+					maxAverage[i][j] = errors[i][j].getAverageRelative();
+				}
+				averageAverage[i][j] += errors[i][j].getAverageRelative();
+				System.out
+						.println(j
+								+ "\t acc: "
+								+ df.format(errors[i][j]
+										.getRelativeAccumulated() * 100.0)
+								+ "\t max: "
+								+ df
+										.format(errors[i][j].getMaxRelative() * 100.0)
+								+ "\t avg: "
+								+ df
+										.format(errors[i][j]
+												.getAverageRelative() * 100.0));
+			}
+		}
+		System.out.println("Finished analyses");
+	}
+
+	public double[][] getMaxAverage() {
+		return maxAverage;
+	}
+
+	public double[][] getAverageAverage() {
+		return averageAverage;
+	}
+
+	public int getTotalIterations() {
+		return totalIterations;
+	}
+
+	
+	
+	
 }

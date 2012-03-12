@@ -49,7 +49,10 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 	protected int replications; 
 
-	private final String generatorName = "GeneratedNextEventGenerator";
+	private static final String generatorName = "GeneratedNextEventGenerator";
+	private static final String updaterClassName = "GeneratedProductUpdater";
+	
+	protected Map<String, Object> parameters;
 	
 	@Override
 	public String toString() {
@@ -59,10 +62,11 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	
 	@Override
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
-		// TODO Auto-generated method stub
-		return null;
+		assert(simulation!=null);
+		SimulationAnalysisNumericalPostprocessor ret = new SimulationAnalysisNumericalPostprocessor(stopTime, stepSize, replications, parameters);
+		ret.prepare(simulation, constants);
+		return ret;
 	}
-
 
 
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,
@@ -75,7 +79,8 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,
 			double stepSize, int replications, Map<String, Object> parameters) {
 		this(stopTime, stepSize, replications);
-		if (parameters.containsKey("overrideCode")) {
+		this.parameters = parameters;
+		if (parameters != null && parameters.containsKey("overrideCode")) {
 			Object value = parameters.get("overrideCode");
 			if (value instanceof String) {
 				String asString = ((String) value);
@@ -99,20 +104,27 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
 		super.prepare(analysis, constants);
 		simulation = null;
-		if (analysis instanceof PCTMCSimulation){
-		this.simulation = (PCTMCSimulation) analysis;  
-		
-		dataPoints = new double[(int) Math.ceil(stopTime / stepSize)]
-				   [momentIndex.size() + generalExpectationIndex.size()];
-		updater = (SimulationUpdater) ClassCompiler
-		.getInstance(getProductUpdaterCode(constants), updaterClassName);
-		
-		accUpdater = (AccumulatorUpdater) ClassCompiler
-		.getInstance(getAccumulatorUpdaterCode(constants), accumulatorUpdaterName);
-		
-		PCTMCLogging.info("Generating one step generator.");
-		PCTMCLogging.increaseIndent();
+		if (analysis instanceof PCTMCSimulation) {
+			this.simulation = (PCTMCSimulation) analysis;
 
+			dataPoints = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
+					.size()
+					+ generalExpectationIndex.size()];
+			updater = (SimulationUpdater) ClassCompiler.getInstance(
+					getProductUpdaterCode(constants), updaterClassName);
+
+			accUpdater = (AccumulatorUpdater) ClassCompiler.getInstance(
+					getAccumulatorUpdaterCode(constants),
+					accumulatorUpdaterName);
+
+			PCTMCLogging.info("Generating one step generator.");
+			PCTMCLogging.increaseIndent();
+			eventGenerator = getEventGenerator(constants);
+			PCTMCLogging.decreaseIndent();
+		}
+	}
+	
+	protected AggregatedStateNextEventGenerator getEventGenerator(Constants constants) {
 		String code;
 		String className;
 		if (overrideCode==null) {
@@ -122,11 +134,10 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			code = overrideCode;
 			className = overrideCodeClassName;
 		}
-		PCTMCLogging.decreaseIndent();
 
-		eventGenerator = (AggregatedStateNextEventGenerator) ClassCompiler.getInstance(code,
-				className);
-		}
+
+		return (AggregatedStateNextEventGenerator) ClassCompiler.getInstance(code,
+				className);		
 	}
 
 	@Override
@@ -178,7 +189,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		PCTMCLogging.decreaseIndent();
 	}
 
-	private String updaterClassName = "GeneratedProductUpdater";
+
 	
 	private String getProductUpdaterCode(Constants variables) {
 		StringBuilder ret = new StringBuilder();
