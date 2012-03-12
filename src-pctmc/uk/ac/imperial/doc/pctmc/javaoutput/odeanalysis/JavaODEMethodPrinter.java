@@ -42,7 +42,7 @@ import com.google.common.collect.BiMap;
 public class JavaODEMethodPrinter implements IODEMethodVisitor {
 
 	private Constants constants;
-	private BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	private Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	private Map<AbstractExpression, Integer> generalExpectationIndex;
 
 	private int methodCharacters = 6000;
@@ -53,7 +53,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 	private StringBuilder output;
 
 	public JavaODEMethodPrinter(Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex) {
 
 		this.constants = constants;

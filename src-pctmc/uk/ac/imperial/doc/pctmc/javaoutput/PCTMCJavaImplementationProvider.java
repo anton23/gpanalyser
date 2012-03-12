@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.javaoutput;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -32,8 +33,8 @@ public class PCTMCJavaImplementationProvider implements
 
 	public AbstractExpressionEvaluator getEvaluatorImplementation(
 			EvaluatorMethod method, String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			BiMap<AbstractExpression, Integer> generalExpectationIndex) {
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex) {
 		JavaMethodPrinter printer = new JavaMethodPrinter(constants,
 				combinedMomentsIndex, generalExpectationIndex);
 		String code = printer.printEvaluatorMethod(method, className);
@@ -44,7 +45,7 @@ public class PCTMCJavaImplementationProvider implements
 
 	public JavaODEsPreprocessed getPreprocessedODEImplementation(
 			ODEMethod method, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
 		SystemOfODEs odes = getSystemOfODEsImplementation(method,
 				"GeneratedODEs", constants, combinedMomentsIndex);
 		return new JavaODEsPreprocessed(odes);
@@ -58,7 +59,7 @@ public class PCTMCJavaImplementationProvider implements
 
 	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method,
 			String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
 
 		JavaODEMethodPrinter printer = new JavaODEMethodPrinter(constants,
 				combinedMomentsIndex,
