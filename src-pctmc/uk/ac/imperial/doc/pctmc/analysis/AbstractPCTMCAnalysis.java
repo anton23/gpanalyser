@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.analysis;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,9 +18,6 @@ import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-
 /*
  * Abstract class for transient analysis of PCTMCs. 
  */
@@ -32,10 +30,10 @@ public abstract class AbstractPCTMCAnalysis {
 
 	protected PCTMC pctmc;
 
-	protected BiMap<State, Integer> stateIndex;
-	protected BiMap<CombinedPopulationProduct, Integer> momentIndex;
+	protected Map<State, Integer> stateIndex;
+	protected Map<CombinedPopulationProduct, Integer> momentIndex;
 
-	protected BiMap<AbstractExpression, Integer> generalExpectationIndex;
+	protected Map<AbstractExpression, Integer> generalExpectationIndex;
 
 	protected List<PCTMCAnalysisPostprocessor> postprocessors;
 
@@ -55,11 +53,11 @@ public abstract class AbstractPCTMCAnalysis {
 		return pctmc;
 	}
 
-	public BiMap<CombinedPopulationProduct, Integer> getMomentIndex() {
+	public Map<CombinedPopulationProduct, Integer> getMomentIndex() {
 		return momentIndex;
 	}
 
-	public BiMap<AbstractExpression, Integer> getGeneralExpectationIndex() {
+	public Map<AbstractExpression, Integer> getGeneralExpectationIndex() {
 		return generalExpectationIndex;
 	}
 
@@ -86,9 +84,9 @@ public abstract class AbstractPCTMCAnalysis {
 	public AbstractPCTMCAnalysis(PCTMC pctmc) {
 		this.pctmc = pctmc;
 		stateIndex = pctmc.getStateIndex();
-		momentIndex = HashBiMap.<CombinedPopulationProduct, Integer> create();
-		generalExpectationIndex = HashBiMap
-				.<AbstractExpression, Integer> create();
+		momentIndex = new HashMap<CombinedPopulationProduct, Integer>();
+		generalExpectationIndex = new HashMap
+				<AbstractExpression, Integer>();
 		usedCombinedProducts = new HashSet<CombinedPopulationProduct>();
 		usedGeneralExpectations = new HashSet<AbstractExpression>();
 		postprocessors = new LinkedList<PCTMCAnalysisPostprocessor>();
@@ -107,7 +105,7 @@ public abstract class AbstractPCTMCAnalysis {
 			usedCombinedProducts.addAll(combinedProducts);		
 		}
 		
-		momentIndex = HashBiMap.<CombinedPopulationProduct, Integer> create();
+		momentIndex = new HashMap<CombinedPopulationProduct, Integer>();
 		
 		int i = 0;
 		for (CombinedPopulationProduct p : combinedProducts) {

@@ -20,13 +20,13 @@ public class MatlabCombinedProductBasedExpressionPrinterFactory implements
 		IExpressionPrinterFactory {
 
 	private Constants parameters;
-	private BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	private Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	private Map<AbstractExpression, Integer> generalExpectationIndex;
 	private String f;
 
 	public MatlabCombinedProductBasedExpressionPrinterFactory(
 			Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex, String f) {
 		super();
 		this.parameters = constants;

@@ -27,7 +27,7 @@ public class MatlabStatementPrinterCombinedProductBased extends
 	protected IExpressionPrinterFactory lhsFactory;
 
 	public MatlabStatementPrinterCombinedProductBased(Constants parameters,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex,
 			String oldY, String newY) {
 		super(

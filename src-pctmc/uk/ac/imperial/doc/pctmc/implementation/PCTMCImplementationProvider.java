@@ -10,8 +10,6 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
-import com.google.common.collect.BiMap;
-
 public interface PCTMCImplementationProvider {
 
 	public AbstractExpressionEvaluator getEvaluatorImplementation(
