@@ -170,17 +170,22 @@ public class SimProbeRunner extends AbstractProbeRunner
             (model, mainDef, constants, beginActionCount, stateObservers,
              statesCountExpressions, mapping, steadyStateTime,
              stepSize, 1, new PCTMC[1]);
+        AbstractExpressionEvaluator evaluator = postprocessor
+            .getExpressionEvaluator (statesCountExpressions, constants);
+        AbstractExpressionEvaluator beginEvaluator = postprocessor
+            .getExpressionEvaluator (beginActionExpr, constants);
         PCTMC[] pctmcs = new PCTMC[1];
 
+        List<AbstractExpression> statesCountExpressionsA
+            = new ArrayList<AbstractExpression> ();
+        Map<String, AbstractExpression> mappingA
+            = new HashMap<String, AbstractExpression> ();
         // main after begin signal
         NumericalPostprocessor postprocessorA = runTheProbedSystem
-            (model, mainDef, constants, beginActionCount, stateObservers,
-             statesCountExpressions, mapping, steadyStateTime,
-             stepSize, 1, pctmcs);
-        AbstractExpressionEvaluator evaluator = postprocessorA
-            .getExpressionEvaluator (statesCountExpressions, constants);
-        AbstractExpressionEvaluator beginEvaluator = postprocessorA
-            .getExpressionEvaluator (beginActionExpr, constants);
+            (model, mainDef, constants, null, stateObservers,
+             statesCountExpressionsA, mappingA, stopTime, stepSize, 1, pctmcs);
+        AbstractExpressionEvaluator evaluatorA = postprocessor
+            .getExpressionEvaluator(statesCountExpressionsA, constants);
 
         double[] times = new double[statesCountExpressions.size ()];
         for (int p = 0; p < parameter; ++p)
@@ -203,7 +208,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
             if (i >= beginSignalled.length)
             {
-                throw new Error ("No begin action in the given time occured.");
+                throw new Error ("No begin action in the given time occurred.");
             }
 
             // calculate state of art after begin signal and rerun the model
@@ -216,8 +221,8 @@ public class SimProbeRunner extends AbstractProbeRunner
             GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
             postprocessorA.calculateDataPoints (constants);
 
-            double[][] obtainedMeasurements = postprocessorA.evaluateExpressions
-                (evaluator, constants);
+            double[][] obtainedMeasurements = postprocessorA
+                .evaluateExpressions (evaluatorA, constants);
 
             if (overallMeasurements == null)
             {
@@ -246,8 +251,8 @@ public class SimProbeRunner extends AbstractProbeRunner
             }
         }
 
-        double[] cdf = passageTimeCDF (overallMeasurements, pairs, accepting,
-                statesCountExpressions, mapping);
+        double[] cdf = passageTimeCDF (overallMeasurements, pairs,
+                accepting, statesCountExpressionsA, mappingA);
         return new CDF (name, stepSize, cdf);
     }
 

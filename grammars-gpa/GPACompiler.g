@@ -1133,6 +1133,7 @@ scope
     Set<ITransition> allActions;
     Map<String, PEPAComponent> origComponents;
     ComponentId localAcceptingState;
+    Set<PEPAComponent> initialStates;
 }
 @init
 {
@@ -1140,6 +1141,7 @@ scope
 	$probe_spec::alphabet = new HashSet<ITransition> ();
 	$probe_spec::allActions = new HashSet<ITransition> ();
 	Set<String> actions = mainDefinitions.getActions ();
+	$probe_spec::initialStates = new HashSet<PEPAComponent> ();
 	for (String action : actions)
 	{
 		$probe_spec::allActions.add (new Transition (action));
@@ -1167,7 +1169,7 @@ scope
 				newDef.putAll ($probe_spec::origComponents);
 				PEPAComponentDefinitions definitions
 					= new PEPAComponentDefinitions (newDef)
-					.removeVanishingStates ();
+					.removeVanishingStates ($probe_spec::initialStates);
 
 				Set<GPEPAState> stateObservers = new HashSet<GPEPAState> ();
 				Set<GroupComponentPair> pairs
@@ -1190,8 +1192,8 @@ scope
 				{
 					// we can reuse altComp now
 					altComp.putAll ($probe_spec::origComponents);
-					altDef = new PEPAComponentDefinitions
-						(altComp).removeVanishingStates ();
+					altDef = new PEPAComponentDefinitions (altComp)
+						.removeVanishingStates ($probe_spec::initialStates);
 				}
 				if ($simulate)
 				{
@@ -1226,7 +1228,7 @@ scope
 						globalComponents.putAll (newComp);
 						PEPAComponentDefinitions globalDef
 							= new PEPAComponentDefinitions (globalComponents)
-							.removeVanishingStates ();
+							.removeVanishingStates ($probe_spec::initialStates);
 
 						stateObservers.clear ();
 						pairs = globalModel.getGroupComponentPairs (globalDef);
@@ -1283,6 +1285,7 @@ local_probe_ass [Map<String, PEPAComponent> newComp,
 			 		$altComp.putAll ($probe.altProbeComponents);
 			 	}
 			 	$probe_spec::localAcceptingState = ($probe.acceptingComponent);
+			 	$probe_spec::initialStates.add (new ComponentId ($name.text));
 			 };
 
 locations
