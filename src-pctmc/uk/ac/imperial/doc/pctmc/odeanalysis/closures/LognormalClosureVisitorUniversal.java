@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import org.ejml.alg.dense.decomposition.SingularMatrixException;
 import org.ejml.simple.SimpleMatrix;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
@@ -33,6 +34,7 @@ import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.odeanalysis.MomentCountTransformerWithParameters;
+import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 /***
@@ -218,10 +220,12 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 	@Override
 	public void visit(CombinedProductExpression _e)
 	{
-		int order = m_moment.getOrder() + _e.getProduct().getOrder();
+		// Result when no closure is needed
 		CombinedPopulationProduct moment = CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct());
+		int order = moment.getOrder();
 		result = CombinedProductExpression.create(moment);
-		if (m_insert)
+
+		if (m_insert && order > m_maxOrder)
 		{
 			m_inserted = true;
 
@@ -248,53 +252,72 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			// Lognormal closure
 			else
 			{
-				applyLognormalClosure((CombinedProductExpression)CombinedProductExpression.create(moment), order);
+				applyLognormalClosure(moment);
 			}
 		}
 	}
-	
-	public void applyLognormalClosure(CombinedProductExpression _e, int _order)
+
+	private void applyLognormalClosure(CombinedPopulationProduct _cpp)
 	{
-        CombinedPopulationProduct[] x = new CombinedPopulationProduct[_order];
-        int i = 0;
-        for (State s : _e.getProduct().getNakedProduct().asMultiset())
-        {
-                if (s != null)
-                {
-                	x[i++] = CombinedPopulationProduct.getMeanPopulation(s);
-                }
-        }
-        for (PopulationProduct p : _e.getProduct().getAccumulatedProducts())
-        {
-                x[i++] = CombinedPopulationProduct.getMeanAccumulatedProduct(p);
-        }	
+		int i=0;
+		PopulationProduct[] pops = new PopulationProduct[_cpp.getOrder()];
+		for (Entry<State, Integer> e : _cpp.getNakedProduct().getRepresentation().entrySet())
+		{
+			for (int j=0; j<e.getValue(); j++)
+			{
+				pops[i++] = PopulationProduct.getMeanProduct(e.getKey());
+			}
+		}
+		int accStartIndex=i;
+		for (com.google.common.collect.Multiset.Entry<PopulationProduct> e : _cpp.getAccumulatedProducts().entrySet())
+		{
+			pops[i++] = e.getElement();
+		}
 
 		// Step 1: Find all moments that might be needed to close the higherOrderMoment.
 		//         There at most (order + order choose 2 + ... + order choose m_maxOrder) such moments
 		Set<AbstractExpression> possibleMoments = new HashSet<AbstractExpression>();
-		AbstractExpression meanfield=new DoubleExpression(m_mfStabiliser);
-		for (CombinedPopulationProduct cpp : x)
+		AbstractExpression meanfield=null;
+		List<AbstractExpression> lMF = new LinkedList<AbstractExpression>();
+		lMF.add(new DoubleExpression(m_mfStabiliser));
+		for (int j=0; j<pops.length; ++j)
 		{
-			meanfield=ProductExpression.create(meanfield, CombinedProductExpression.create(cpp));
+			if (j<accStartIndex)
+			{
+				lMF.add(CombinedProductExpression.create(new CombinedPopulationProduct(pops[j])));
+			}
+			else
+			{
+				lMF.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(pops[j])));
+			}
 		}
-		int[] indices = new int[_order];
+		meanfield = ProductExpression.createOrdered(lMF);
+		int[] indices = new int[pops.length];
 		
 		while (getNextIndex(indices,m_maxOrder))
 		{
-			CombinedPopulationProduct cpp = null;
-			for (int k=0; k<_order; k++)
+			PopulationProduct popTemp = null;
+			Multiset<PopulationProduct> accumulatedProdTerms = HashMultiset.create();
+			for (int k=0; k<pops.length; k++)
 			{
 				if (indices[k] == 0) {continue;}
-				if (cpp == null)
+				if (k<accStartIndex)
 				{
-					cpp = x[k];
+					if (popTemp == null)
+					{
+						popTemp = pops[k];
+					}
+					else
+					{
+						popTemp = PopulationProduct.getProduct(popTemp, pops[k]);
+					}
 				}
 				else
 				{
-					cpp = CombinedPopulationProduct.getProductOf(cpp, x[k]);
+					accumulatedProdTerms.add(pops[k]);
 				}
 			}
-			possibleMoments.add(CombinedProductExpression.create(cpp));
+			possibleMoments.add(CombinedProductExpression.create(new CombinedPopulationProduct(popTemp,accumulatedProdTerms)));
 		}
 		
 		// Step 2: Enumerate the moments
@@ -312,10 +335,10 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 		// Create A and b 
 		for (int j=0;j < possibleMoments.size();j++)
 		{
-			b.set(j, 0, vectorChoose(_e,(CombinedProductExpression)momentMapping.get(j)));
+			b.set(j, 0, vectorChoose(_cpp,((CombinedProductExpression)momentMapping.get(j)).getProduct()));
 			for (int k=0;k < possibleMoments.size();k++)
 			{
-				A.set(j,k,vectorChoose((CombinedProductExpression)momentMapping.get(k),(CombinedProductExpression)momentMapping.get(j)));
+				A.set(j,k,vectorChoose(((CombinedProductExpression)momentMapping.get(k)).getProduct(),((CombinedProductExpression)momentMapping.get(j)).getProduct()));
 			}	
 		}
 		
@@ -353,7 +376,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			}
 			if (closedFormNum.size()==0){closedFormNum.add(new IntegerExpression(1));}
 			if (closedFormDen.size()==0){closedFormDen.add(new IntegerExpression(1));}
-			result=PEPADivExpression.create(ProductExpression.create(closedFormNum),ProductExpression.create(closedFormDen));
+			result=PEPADivExpression.create(ProductExpression.createOrdered(closedFormNum),ProductExpression.createOrdered(closedFormDen));
 			result=(m_mfStabiliser > 0) ? MinExpression.create(result,meanfield) : result;
 		}
 		catch(SingularMatrixException exception)
@@ -379,9 +402,25 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 		}
 	}
 
-	private double vectorChoose(CombinedProductExpression _cppTop, CombinedProductExpression _cppBottom)
+	private double vectorChoose(CombinedPopulationProduct _cppTop, CombinedPopulationProduct _cppBottom)
 	{
-		return vectorChoose(_cppTop.getProduct().getNakedProduct().getRepresentation(),_cppBottom.getProduct().getNakedProduct().getRepresentation());
+		Map<State, Integer> top = new HashMap<State, Integer>(_cppTop.getNakedProduct().getRepresentation());
+		for (PopulationProduct ap : _cppTop.getAccumulatedProducts())
+		{
+			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());
+			Integer mult = top.get(s);
+			mult = (mult == null) ? 1 : ++mult;
+			top.put(s, mult);
+		}
+		Map<State, Integer> bottom = new HashMap<State, Integer>(_cppBottom.getNakedProduct().getRepresentation());
+		for (PopulationProduct ap : _cppBottom.getAccumulatedProducts())
+		{
+			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());
+			Integer mult = bottom.get(s);
+			mult = (mult == null) ? 1 : ++mult;
+			bottom.put(s, mult);
+		}
+		return vectorChoose(top,bottom);
 	}	
 	
 	private double vectorChoose(Map<State, Integer> _top, Map<State, Integer> _bottom)

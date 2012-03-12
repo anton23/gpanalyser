@@ -32,6 +32,7 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.MomentCountTransformerWithParameters
 import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 
 public class NormalClosureVisitorUniversal extends MomentCountTransformerWithParameters implements ICombinedProductExpressionVisitor, IExpressionVariableVisitor
@@ -52,9 +53,10 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 		s_genMomentNameId.put("M4", 3);
 		s_genMomentNameId.put("M5", 4);
 		s_genMomentNameId.put("M6", 5);
-		s_genMomentNameId.put("M7", 7);
-		s_genMomentNameId.put("M8", 8);
-		s_genMomentNameId.put("M9", 9);
+		s_genMomentNameId.put("M7", 6);
+		s_genMomentNameId.put("M8", 7);
+		s_genMomentNameId.put("M9", 8);
+		s_genMomentNameId.put("M10", 9);
 	}
 	
 	public NormalClosureVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder)
@@ -237,6 +239,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 			{
 				result = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct()));
 			}
+
 			// Mean field closure
 			else if (m_maxOrder == 1)
 			{		
@@ -300,13 +303,18 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 	private Map<AbstractExpression, Integer> applyNormalClosure(int _maxorder, CombinedPopulationProduct _cpp)
 	{
 		int i=0;
-		State[] states = new State[_cpp.getOrder()];
+		PopulationProduct[] pops = new PopulationProduct[_cpp.getOrder()];
 		for (Entry<State, Integer> e : _cpp.getNakedProduct().getRepresentation().entrySet())
 		{
 			for (int j=0; j<e.getValue(); j++)
 			{
-				states[i++] = e.getKey();
+				pops[i++] = PopulationProduct.getMeanProduct(e.getKey());
 			}
+		}
+		int accStartIndex=i;
+		for (com.google.common.collect.Multiset.Entry<PopulationProduct> e : _cpp.getAccumulatedProducts().entrySet())
+		{
+			pops[i++] = e.getElement();
 		}
 		
 		// Get generic closure
@@ -323,15 +331,21 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 			{
 				CombinedProductExpression cpex = (CombinedProductExpression) ae;
 				CombinedPopulationProduct cpp = cpex.getProduct();
-				Map<State, Integer> term = new HashMap<State, Integer>();
+				PopulationProduct popTemp = null;
+				Multiset<PopulationProduct> accumulatedProdTerms = HashMultiset.create();
 				for (Entry<State, Integer> e2 : cpp.getNakedProduct().getRepresentation().entrySet())
 				{
-					State s = states[s_genMomentNameId.get(e2.getKey().toString())];
-					Integer mult = term.get(s);
-					mult = (mult == null) ? 1 : ++mult;
-					term.put(s,mult);
+					int index = s_genMomentNameId.get(e2.getKey().toString());
+					if (index < accStartIndex)
+					{
+						popTemp = PopulationProduct.getProduct(popTemp,pops[index]);
+					}
+					else
+					{
+						accumulatedProdTerms.add(pops[index]);
+					}
 				}
-				terms.add(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(term))));
+				terms.add(CombinedProductExpression.create(new CombinedPopulationProduct(popTemp,accumulatedProdTerms)));
 			}
 			AbstractExpression pexNew = ProductExpression.createOrdered(terms);
 			Integer mult = closureSummands.get(pexNew);
