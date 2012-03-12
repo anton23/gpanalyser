@@ -101,7 +101,8 @@ public class PEPAComponentDefinitions {
 	}
 
     // supports only one immediate action per choice
-	public PEPAComponentDefinitions removeVanishingStates() {
+	public PEPAComponentDefinitions removeVanishingStates
+            (Set<PEPAComponent> initialComponent) {
         Cloner deepcloner = new Cloner();
         PEPAComponentDefinitions newDefinitions = deepcloner.deepClone(this);
         Map<Choice, String> choices = getChoiceComponents(newDefinitions);
@@ -117,30 +118,32 @@ public class PEPAComponentDefinitions {
                 choicesToRemove.add(shorthand.toString());
                 boolean predecessorExists = false;
 
-                // we need to find all predecessors of this choice
-                for (Choice otherChoice : choices.keySet()) {
-                    List<AbstractPrefix> prefixes = otherChoice.getChoices();
+                if (!initialComponent.contains(shorthand)) {
+                    // we need to find all predecessors of this choice
+                    for (Choice otherChoice : choices.keySet()) {
+                        List<AbstractPrefix> prefixes = otherChoice.getChoices();
 
-                    for (AbstractPrefix prefix : prefixes) {
-                        if (prefix.getContinuation().equals(shorthand)) {
-                            predecessorExists =  predecessorExists ||
-                                    !(shorthand.equals(newDefinitions
-                                            .getShorthand(otherChoice)));
+                        for (AbstractPrefix prefix : prefixes) {
+                            if (prefix.getContinuation().equals(shorthand)) {
+                                predecessorExists = predecessorExists ||
+                                        !(shorthand.equals(newDefinitions
+                                                .getShorthand(otherChoice)));
 
-                            // refreshing hash - 1
-                            String name = newDefinitions.inverseDefinitions
-                                    .remove(otherChoice);
+                                // refreshing hash - 1
+                                String name = newDefinitions.inverseDefinitions
+                                        .remove(otherChoice);
 
-                            List<ImmediatePrefix> immediates
-                                = new LinkedList<ImmediatePrefix>();
-                            PEPAComponent newCont = getImmediatesList
-                                (prefix.getContinuation(), imms, immediates);
-                            prefix.addImmediates(immediates);
-                            prefix.setContinuation(newCont);
+                                List<ImmediatePrefix> immediates
+                                    = new LinkedList<ImmediatePrefix>();
+                                PEPAComponent newCont = getImmediatesList
+                                    (prefix.getContinuation(), imms, immediates);
+                                prefix.addImmediates(immediates);
+                                prefix.setContinuation(newCont);
 
-                            // refreshing hash - 2
-                            newDefinitions.inverseDefinitions
-                                    .put(otherChoice, name);
+                                // refreshing hash - 2
+                                newDefinitions.inverseDefinitions
+                                        .put(otherChoice, name);
+                            }
                         }
                     }
                 }

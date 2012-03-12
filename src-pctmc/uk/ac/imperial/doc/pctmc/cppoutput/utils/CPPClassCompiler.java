@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
@@ -55,6 +56,7 @@ public class CPPClassCompiler {
             + " /I\"" + javaInclude + "include/win32\"";
 */
         ExecProcess.main(command, 2);
+        PCTMCLogging.info("Finished the C++ code compilation.");
     }
 
     private static void linuxCompile
@@ -64,6 +66,7 @@ public class CPPClassCompiler {
             + " -I\"" + javaInclude + "include\""
             + " -I\"" + javaInclude + "include/linux\"";
         ExecProcess.main(command, 3);
+        PCTMCLogging.info("Finished the C++ code compilation.");
     }
 
 	private Object getInstancePrivate (String javaCode, String className,
