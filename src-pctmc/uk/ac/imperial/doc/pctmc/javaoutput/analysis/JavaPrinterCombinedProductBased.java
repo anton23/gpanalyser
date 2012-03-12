@@ -11,8 +11,6 @@ import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 
-import com.google.common.collect.BiMap;
-
 /**
  * Java printer for expressions with combined population products as leaves.
  * 
