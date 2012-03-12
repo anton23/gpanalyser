@@ -32,7 +32,7 @@ public class JavaStatementPrinterCombinedProductBased extends
 	protected Set<ExpressionVariable> rhsVariables;
 
 	public JavaStatementPrinterCombinedProductBased(Constants parameters,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex,
 			String oldY, String newY, boolean expandVariables) {
 		super(new JavaCombinedProductBasedExpressionPrinterFactory(parameters,

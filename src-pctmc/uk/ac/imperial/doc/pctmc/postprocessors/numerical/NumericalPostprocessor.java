@@ -29,9 +29,9 @@ import com.google.common.collect.BiMap;
 
 public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocessor {
 	
-	protected BiMap<CombinedPopulationProduct, Integer> momentIndex;
+	protected Map<CombinedPopulationProduct, Integer> momentIndex;
 
-	protected BiMap<AbstractExpression, Integer> generalExpectationIndex;
+	protected Map<AbstractExpression, Integer> generalExpectationIndex;
 
 	protected double stopTime;
 	protected double stepSize;

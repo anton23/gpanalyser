@@ -23,13 +23,13 @@ public class JavaPrinterCombinedProductBased extends JavaExpressionPrinterWithVa
 		implements ICombinedProductExpressionVisitor,
 		IGeneralExpectationExpressionVisitor {
 	
-	protected BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+	protected Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
 	protected Map<AbstractExpression, Integer> generalExpectationIndex;
 
 	private String f;
 	
 	public JavaPrinterCombinedProductBased(Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
 			Map<AbstractExpression, Integer> generalExpectationIndex, String f, boolean expandVariables) {
 		super(constants, expandVariables);
 		this.combinedMomentsIndex = combinedMomentsIndex;

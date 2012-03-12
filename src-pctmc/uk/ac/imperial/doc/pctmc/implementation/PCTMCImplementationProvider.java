@@ -1,5 +1,7 @@
 package uk.ac.imperial.doc.pctmc.implementation;
 
+import java.util.Map;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
@@ -14,12 +16,12 @@ public interface PCTMCImplementationProvider {
 
 	public AbstractExpressionEvaluator getEvaluatorImplementation(
 			EvaluatorMethod method, String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex,
-			BiMap<AbstractExpression, Integer> generalExpectationIndex);
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
+			Map<AbstractExpression, Integer> generalExpectationIndex);
 
 	public SystemOfODEs getSystemOfODEsImplementation(ODEMethod method,
 			String className, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex);
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex);
 
 	public abstract double[][] runODEAnalysis(
 			PCTMCImplementationPreprocessed preprocessed, double[] initial,
@@ -27,5 +29,5 @@ public interface PCTMCImplementationProvider {
 
 	public PCTMCImplementationPreprocessed getPreprocessedODEImplementation(
 			ODEMethod method, Constants constants,
-			BiMap<CombinedPopulationProduct, Integer> combinedMomentsIndex);
+			Map<CombinedPopulationProduct, Integer> combinedMomentsIndex);
 }
