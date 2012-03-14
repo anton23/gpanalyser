@@ -25,7 +25,6 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPos
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 import com.google.common.collect.Lists;
 
@@ -175,5 +174,4 @@ public class ClosureComparisonMain {
 	public static void main(String[] args) {
 		new ClosureComparisonMain(args).compareClosures();
 	}
-
 }
