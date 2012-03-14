@@ -1,4 +1,4 @@
-package scripts.closurecomparison;
+package uk.ac.imperial.doc.gpa.testing.quantitative;
 
 public class ErrorSummary {
 	protected double relativeAccumulated;
