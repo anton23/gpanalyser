@@ -108,13 +108,14 @@ public class ClosureComparison extends RangeRunner {
 		for (int i = 0; i < postprocessors.size(); i++) {
 			System.out.println("Analysis " + i);
 			for (int j = 0; j < expressions.size(); j++) {
+				averageAverage[i][j] /= totalIterations;
 				System.out
 				.println(j
 						+ "\t max: "
 						+ df.format(maxAverage[i][j] * 100.0)
 						+ "\t average: "
 						+ df
-								.format(averageAverage[i][j] * 100.0 / totalIterations)
+								.format(averageAverage[i][j] * 100.0)
 );
 			}
 		}
@@ -174,8 +175,4 @@ public class ClosureComparison extends RangeRunner {
 	public int getTotalIterations() {
 		return totalIterations;
 	}
-
-	
-	
-	
 }
