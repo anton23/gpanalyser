@@ -8,7 +8,7 @@ rrst = 2.0;
 n = 100; 
 m = 60;
 
-scale = 100;
+scale = 10;
 
 Client = (request,rr).Client_waiting; 
 Client_waiting = (data,rd).Client_think + (timeout, rtmt).Client; 

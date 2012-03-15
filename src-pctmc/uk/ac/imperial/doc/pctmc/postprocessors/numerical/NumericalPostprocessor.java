@@ -83,7 +83,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		if (dataPoints!=null){
 			results = new HashMap<PlotDescription, double[][]>();
 			for (PlotDescription pd:plotDescriptions){
-				double[][] data = plotData(analysis, constants, pd.getExpressions(), pd.getFilename());
+				double[][] data = plotData(analysis.toString(), constants, pd.getExpressions(), pd.getFilename());
 				results.put(pd, data);
 			}
 		}
@@ -96,7 +96,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	}
 
 
-	public double[][] plotData(AbstractPCTMCAnalysis analysis,
+	public double[][] plotData(String analysisTitle,
 			Constants constants, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
@@ -107,8 +107,8 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,
 				stepSize, names);
 		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
-				analysis.toString()+this.toString());
-		if (!filename.equals("")) {
+				analysisTitle+this.toString());
+		if (filename != null && !filename.equals("")) {
 			List<String> labels = new LinkedList<String>();
 			for (AbstractExpression e : expressions) {
 				labels.add(e.toString());
