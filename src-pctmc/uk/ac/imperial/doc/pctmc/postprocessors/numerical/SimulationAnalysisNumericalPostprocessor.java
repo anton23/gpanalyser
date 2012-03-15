@@ -134,9 +134,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			prepared = true;
 			PCTMCSimulation simulation = (PCTMCSimulation) analysis;
 
-			dataPoints = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
-					.size()
-					+ generalExpectationIndex.size()];
+			
 			productUpdaterCode = getProductUpdaterCode(simulation, constants);
 			accumulatorUpdaterCode = getAccumulatorUpdaterCode(simulation, constants);
 			if (overrideCode==null) {
@@ -201,7 +199,9 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		accUpdater.setRates(constants.getFlatConstants());
 
 		int m = momentIndex.size();
-
+		dataPoints = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
+		                                          					.size()
+		                                          					+ generalExpectationIndex.size()];
 		double[][] tmp;
 		for (int r = 0; r < replications; r++) {
 			if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {

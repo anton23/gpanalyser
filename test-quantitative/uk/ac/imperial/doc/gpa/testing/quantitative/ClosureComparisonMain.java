@@ -148,10 +148,24 @@ public class ClosureComparisonMain {
 			e.printStackTrace();
 		}
 	}
+	
+	public void compareInitial() {
+		System.out.println("Comparing closures on the initial constants:");
+		ErrorEvaluator errorEvaluator = new ErrorEvaluator(postprocessors, simPostprocessor, expressions, constants);
+		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
+		System.out.println(ErrorEvaluator.printSummary(errors));
+		
+		simPostprocessor.plotData(simulation.toString(), constants, expressions, null);
+		for (int i = 0; i < postprocessors.size(); i++) {		
+			postprocessors.get(i).plotData(analyses.get(i).toString(), constants, expressions, null);
+		}
+		
+	}
 
 	public void compareClosures() {
 		loadModel();
 		loadAnalyses();
+		compareInitial();
 		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, expressions,
 				constants, ranges);
 		closureComparison.run(constants);
