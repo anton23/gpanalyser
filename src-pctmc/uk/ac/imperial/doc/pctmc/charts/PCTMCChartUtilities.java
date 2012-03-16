@@ -19,6 +19,7 @@ import org.jfree.chart.plot.DrawingSupplier;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.GrayPaintScale;
+import org.jfree.chart.renderer.xy.DeviationRenderer;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.chart.title.PaintScaleLegend;
 import org.jfree.data.xy.XYDataset;
@@ -173,11 +174,63 @@ public class PCTMCChartUtilities {
 		// lasty += 0.05;
 	}
 
-	public static void drawChartPairs(XYDataset dataset, String xlabel,
+	public static void drawDeviationChart(XYDataset dataset, String xlabel,
 			String ylabel, String chartTitle, String windowTitle) {
 		if (!gui)
 			return;
 
+		JTabbedPane tab;
+		if (!windows.containsKey(windowTitle))
+			setWindow(windowTitle);
+		tab = tabs.get(windowTitle);
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(null, // chart //
+				// title
+				xlabel, // x axis label
+				ylabel, // y axis label
+				dataset, // data
+				PlotOrientation.VERTICAL, true, // include legend
+				true, // tooltips
+				false // urls
+				);
+
+        chart.setBackgroundPaint(Color.white);
+        
+        // get a reference to the plot for further customisation...
+        XYPlot plot = (XYPlot) chart.getPlot();
+        plot.setBackgroundPaint(Color.lightGray);
+        plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+        plot.setDomainGridlinePaint(Color.white);
+        plot.setRangeGridlinePaint(Color.white);
+
+        
+        DeviationRenderer renderer = new DeviationRenderer(true, false);
+        
+        Paint[] color = DefaultDrawingSupplier.DEFAULT_PAINT_SEQUENCE;
+        for (int i=0; i< dataset.getSeriesCount(); i++)
+        {
+        	Color col = (Color)color[i];
+	        renderer.setSeriesPaint(i, col);
+	        col = col.brighter().brighter();
+	        renderer.setSeriesFillPaint(i, new Color(col.getRed(), col.getGreen(), col.getBlue(),255));
+        }
+        plot.setRenderer(renderer);
+                
+		ChartPanel chartPanel = new ChartPanel(chart);
+		chartPanel.setMouseZoomable(true, false);
+		chartPanel.setDoubleBuffered(true);
+		tab.addTab("", chartPanel);
+
+		// RefineryUtilities.positionFrameOnScreen(frame, lastx, lasty);
+		// lastx += 0.05;
+		// lasty += 0.05;
+	}
+	
+	public static void drawChartPairs(XYDataset dataset, String xlabel,
+			String ylabel, String chartTitle, String windowTitle) {
+		if (!gui)
+			return;
+		
 		JFreeChart chart = ChartFactory.createXYLineChart(null, // chart //
 				// title
 				xlabel, // x axis label

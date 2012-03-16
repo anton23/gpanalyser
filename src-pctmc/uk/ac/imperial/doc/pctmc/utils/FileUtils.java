@@ -11,7 +11,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 
 public class FileUtils {
 
@@ -70,7 +70,7 @@ public class FileUtils {
 		}
 	}
 
-	public static void writeCSVfile(String filename, XYSeriesCollection dataset) {
+	public static void writeCSVfile(String filename, XYDataset dataset) {
 		File file = new File(filename);
 		Writer out;
 		try {
@@ -89,7 +89,7 @@ public class FileUtils {
 					.error("Could not write to the file - please make sure the given path exists.");
 		}
 	}
-	
+		
 	public static void write3DGnuplotFile(String filename, String xlabel, String ylabel, String zlabel) {
 		FileUtils.createNeededDirectories(filename);
 		String[] pathTmp = filename.split("/");

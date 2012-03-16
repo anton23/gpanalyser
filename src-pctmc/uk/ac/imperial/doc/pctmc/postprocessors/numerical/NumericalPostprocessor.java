@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -72,42 +72,65 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	}
 
 	protected double[][] dataPoints;
+	protected double[][][] confidenceIntervalWidth;
 	
+	List<PlotDescription> plotDescriptions;
 	
 	@Override
 	public final void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
-			List<PlotDescription> plotDescriptions){
+			List<PlotDescription> _plotDescriptions){
+		plotDescriptions = _plotDescriptions;
 		prepare(analysis, constants);
 		calculateDataPoints(constants); 
-		if (dataPoints!=null){
+		if (dataPoints!=null)
+		{
 			results = new HashMap<PlotDescription, double[][]>();
-			for (PlotDescription pd:plotDescriptions){
-				double[][] data = plotData(analysis, constants, pd.getExpressions(), pd.getFilename());
+			resultsCI = new HashMap<PlotDescription, double[][]>();
+			int index=0;
+			for (PlotDescription pd:plotDescriptions)
+			{
+				double[][] ci = null;
+				if (confidenceIntervalWidth!=null)
+				{
+					ci = confidenceIntervalWidth[index++];
+					resultsCI.put(pd, ci);
+				}
+				double[][] data = plotData(analysis, constants, ci, pd.getExpressions(), pd.getFilename());
 				results.put(pd, data);
 			}
 		}
 	}
-	
+
 	protected Map<PlotDescription, double[][]> results;
+	protected Map<PlotDescription, double[][]> resultsCI;
 	
 	public Map<PlotDescription, double[][]> getResults() {
 		return results;
 	}
-
+	
+	public Map<PlotDescription, double[][]> getResultsCI() {
+		return resultsCI;
+	}
 
 	public double[][] plotData(AbstractPCTMCAnalysis analysis,
-			Constants constants, List<AbstractExpression> expressions,
+			Constants constants, double[][] dataCI, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
 		for (int i = 0; i < expressions.size(); i++) {
 			names[i] = expressions.get(i).toString();
 		}
 		double[][] data = evaluateExpressions(expressions, constants);
-		XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,
-				stepSize, names);
-		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
-				analysis.toString()+this.toString());
+		XYDataset dataset = AnalysisUtils.getDatasetFromArray(data, dataCI, stepSize, names);
+		if (dataCI == null)
+		{
+			PCTMCChartUtilities.drawChart(dataset, "time", "count", "",	analysis.toString()+this.toString());
+		}
+		else
+		{
+			PCTMCChartUtilities.drawDeviationChart(dataset, "time", "count", "",	analysis.toString()+this.toString());
+		}
+
 		if (!filename.equals("")) {
 			List<String> labels = new LinkedList<String>();
 			for (AbstractExpression e : expressions) {
@@ -116,6 +139,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 			FileUtils.writeGnuplotFile(filename, "", labels, "time", "count");
 			FileUtils.writeCSVfile(filename, dataset);
 		}
+		
 		return data;
 	}
 
@@ -172,6 +196,15 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		for (int t = 0; t < selectedData.length; t++) {
 			selectedData[t] = evaluator.update(constants.getFlatConstants(),dataPoints[t], t * stepSize);
 		}
+
+		return selectedData;
+	}
+	
+	public double[] evaluateExpressions(AbstractExpressionEvaluator evaluator,final double[] data, int t, Constants constants){
+		//evaluator.setRates(constants.getFlatConstants());
+		
+		double[] selectedData = new double[evaluator.getNumberOfExpressions()];
+		selectedData = evaluator.update(constants.getFlatConstants(),data, t * stepSize);
 
 		return selectedData;
 	}

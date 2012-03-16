@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -131,7 +131,7 @@ public class PCTMCTransientIterate extends PCTMCExperiment {
 				labels[2*j]   = "min " + plotDescriptionArray[i].getExpressions().get(j);
 				labels[2*j+1] = "max " + plotDescriptionArray[i].getExpressions().get(j);
 			}
-			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(tmp, postprocessor.getStepSize(), labels);
+			XYDataset dataset = AnalysisUtils.getDatasetFromArray(tmp,null, postprocessor.getStepSize(), labels);
 			PCTMCChartUtilities.drawChartPairs(dataset, "time", "count", "", this.toString());
 		}
 	}

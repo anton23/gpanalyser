@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
@@ -339,8 +339,8 @@ public class PCTMCIterate extends PCTMCExperiment {
 					newData[j][0] = data[i][j][0];
 				}
 				results.put(plot, newData);
-				XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(
-						newData, range.getFrom(), range.getDc(),
+				XYDataset dataset = AnalysisUtils.getDatasetFromArray(
+						newData, null, range.getFrom(), range.getDc(),
 						new String[] { plot.toString() });
 
 				PCTMCChartUtilities.drawChart(dataset, range.getConstant(),
