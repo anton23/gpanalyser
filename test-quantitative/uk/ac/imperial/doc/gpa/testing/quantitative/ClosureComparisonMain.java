@@ -182,8 +182,9 @@ public class ClosureComparisonMain {
 				}
 				out.append("\n");
 			}
+			FileUtils.writeGeneralFile(out.toString(), outputFile);
 		}
-		FileUtils.writeGeneralFile(out.toString(), outputFile);
+
 	}
 
 	public static void main(String[] args) {

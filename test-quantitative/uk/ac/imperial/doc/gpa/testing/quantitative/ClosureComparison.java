@@ -134,7 +134,6 @@ public class ClosureComparison extends RangeRunner {
 		totalIterations++;
 		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
 		for (int i = 0; i < errors.length; i++) {
-			System.out.println("Analysis " + i);
 			for (int j = 0; j < errors[0].length; j++) {
 				if (maxAverage[i][j] < errors[i][j].getAverageRelative()) {
 					maxAverage[i][j] = errors[i][j].getAverageRelative();
