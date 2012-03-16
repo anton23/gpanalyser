@@ -243,6 +243,7 @@ modelDefinition:
 analysis:
   odeAnalysis
  |simulation
+ |accuratesimulation
  |compare
 ;
 
@@ -388,6 +389,21 @@ simulation:
   RBRACE
   -> ^(SIMULATION $stopTime COMMA $stepSize COMMA $replications LBRACE plotDescription* RBRACE )
 ;
+
+
+accuratesimulation:
+  ACCURATESIMULATION LPAR
+  STOPTIME DEF stopTime = expression COMMA
+  STEPSIZE DEF stepSize = expression COMMA
+  MAXRELCHANGEPERREP DEF maxRelChangePerRep= expression COMMA
+  BATCHSIZE DEF batchSize = INTEGER COMMA
+  CI DEF ci = expression
+  RPAR LBRACE
+    plotDescription*
+  RBRACE
+  -> ^(ACCURATESIMULATION $stopTime COMMA $stepSize COMMA $maxRelChangePerRep COMMA $batchSize COMMA $ci LBRACE plotDescription* RBRACE )
+;
+
 
 plotDescription:
  {hint.push("each plot description has to be of the form\n   'e1,...,en (optional ->\"filename\");\n" +

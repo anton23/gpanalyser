@@ -2,7 +2,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
@@ -46,7 +45,7 @@ public class ExampleUseOfAPI {
 						
 			for (Map.Entry<PlotDescription, double[][]> e:results.entrySet()){
 				double stepSize = numericalPostprocessor.getStepSize();
-				XYDataset dataset = AnalysisUtils.getDatasetFromArray(e.getValue(), stepSize, e.getKey().getLabels());
+				XYDataset dataset = AnalysisUtils.getDatasetFromArray(e.getValue(), null, stepSize, e.getKey().getLabels());
 				PCTMCChartUtilities.nextBatch();
 				PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
 						"Example plots from postprocessors");
@@ -70,7 +69,7 @@ public class ExampleUseOfAPI {
 					System.out.println("The results are standard plots:");
 					for (Map.Entry<PlotAtDescription, double[][]> e:asIterate.getResults().entrySet()){
 						RangeSpecification range = asIterate.getRanges().get(0);
-						XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(e.getValue(), 
+						XYDataset dataset = AnalysisUtils.getDatasetFromArray(e.getValue(), null,
 								range.getFrom(),range.getDc(), 
 			    		  new String[]{e.getKey().toString()});
 			    		PCTMCChartUtilities.drawChart(dataset, range.getConstant(), "count", "", "Example " + asIterate.toShortString());

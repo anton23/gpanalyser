@@ -35,6 +35,9 @@ STOPTIME: 'stopTime';
 STEPSIZE: 'stepSize';
 DENSITY: 'density';
 REPLICATIONS:'replications';
+MAXRELCHANGEPERREP:'maxRelChangePerRep';
+BATCHSIZE:'batchSize';
+CI:'CI';
 
 ACC: 'acc';
 
@@ -50,6 +53,8 @@ COV: 'Cov';
 
 ODES: 'ODEs';
 SIMULATION: 'Simulation';
+CISIMULATION: 'CISimulation';
+ACCURATESIMULATION: 'AccurateSimulation';
 COMPARE: 'Compare';
 ITERATE: 'Iterate';
 TRANSIENT_ITERATE: 'TransientIterate';
@@ -72,13 +77,11 @@ LANGLE:'<';
 DERMEAN: 'dE';
 DT: 'dt';
 
-
 UPPERCASENAME : ('A'..'Z')('A'..'Z'|'a'..'z'|'0'..'9'|'_')*('\'')*;
 LOWERCASENAME  : ('a'..'z'|'_')('a'..'z'|'0'..'9'|'_'|'A'..'Z'|'\'')*;
 INTEGER : ('0'..'9')+;
 REALNUMBER : ('0'..'9')+('.'('0'..'9')+)?;
 FILENAME  : '"' ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'.'|'/'|'-')* '"';
-
 
 WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+  { $channel = HIDDEN; } ;
 COMMENT : '//' (~('\n' | '\r'))* ('\r'|'\n')?  { $channel=HIDDEN;} ;

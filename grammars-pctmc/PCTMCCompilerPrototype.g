@@ -185,6 +185,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
 :
    o=odeAnalysis[pctmc,constants, plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
  | s=simulation[pctmc,constants, plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | accs=accuratesimulation[pctmc,constants, plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 ;
 
@@ -264,6 +265,38 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
       } else {
         $postprocessor = new SimulationAnalysisNumericalPostprocessor(
             stopEval.getResult(),stepEval.getResult(),$replications.value, parameters);
+      }
+      $analysis.addPostprocessor($postprocessor);
+      if ($plots!=null) $plots.putAll($analysis,$ps.p); 
+   }
+;
+
+accuratesimulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
+@init{
+  Map<String, Object> parameters = new HashMap<String, Object>();
+}:
+  ^(ACCURATESIMULATION stop=expression COMMA step=expression COMMA maxRelChangePerRep=expression COMMA batchSize=integer COMMA ci=expression
+    (COMMA p=parameter {parameters.put($p.name, $p.value);})*
+    LBRACE 
+         ps=plotDescriptions 
+    RBRACE    
+   ){
+      $analysis = new PCTMCSimulation($pctmc);
+      
+      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+      $stop.e.accept(stopEval);
+      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+      $step.e.accept(stepEval);
+      ExpressionEvaluatorWithConstants maxRelChangePerRepEval = new ExpressionEvaluatorWithConstants($constants);
+      $maxRelChangePerRep.e.accept(maxRelChangePerRepEval);
+      ExpressionEvaluatorWithConstants ciEval = new ExpressionEvaluatorWithConstants($constants);
+      $ci.e.accept(ciEval);
+      
+      if (parameters.isEmpty()) {
+        $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),maxRelChangePerRepEval.getResult(),$batchSize.value,ciEval.getResult());
+      } else {
+        $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),maxRelChangePerRepEval.getResult(),$batchSize.value,ciEval.getResult(), parameters);
       }
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
