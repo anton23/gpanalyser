@@ -7,8 +7,8 @@ import java.util.List;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
@@ -26,7 +26,7 @@ public class ClosureComparison extends RangeRunner {
 
 	// Simulation
 	protected PCTMCSimulation simulation;
-	protected SimulationAnalysisNumericalPostprocessor simPostprocessor;
+	protected NumericalPostprocessor simPostprocessor;
 
 
 	protected ErrorEvaluator errorEvaluator;
@@ -38,7 +38,7 @@ public class ClosureComparison extends RangeRunner {
 
 	public ClosureComparison(
 			List<ODEAnalysisNumericalPostprocessor> postprocessors,
-			SimulationAnalysisNumericalPostprocessor simPostprocessor,
+			NumericalPostprocessor simPostprocessor,
 			List<AbstractExpression> expressions,
 			Constants constants,
 			List<RangeSpecification> ranges, int nParts, boolean toplevel) {
@@ -56,7 +56,7 @@ public class ClosureComparison extends RangeRunner {
 	
 	public ClosureComparison(
 			List<ODEAnalysisNumericalPostprocessor> postprocessors,
-			SimulationAnalysisNumericalPostprocessor simPostprocessor,
+			NumericalPostprocessor simPostprocessor,
 			List<AbstractExpression> expressions,
 			Constants constants,
 			List<RangeSpecification> ranges) {
@@ -71,7 +71,7 @@ public class ClosureComparison extends RangeRunner {
 			newPostprocessors.add((ODEAnalysisNumericalPostprocessor) p
 					.getNewPreparedPostprocessor(constants));
 		}
-		SimulationAnalysisNumericalPostprocessor newSimPostprocessor = (SimulationAnalysisNumericalPostprocessor) simPostprocessor
+		NumericalPostprocessor newSimPostprocessor = simPostprocessor
 				.getNewPreparedPostprocessor(constants);
 		return new ClosureComparison(newPostprocessors, newSimPostprocessor, expressions,
 				constants, ranges, nParts, false);

@@ -8,8 +8,8 @@ import java.util.List;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 
 public class ErrorEvaluator {
 	
@@ -18,13 +18,13 @@ public class ErrorEvaluator {
 	List<AbstractExpressionEvaluator> evaluators;
 
 	// Simulation	
-	SimulationAnalysisNumericalPostprocessor simPostprocessor;
+	NumericalPostprocessor simPostprocessor;
 	AbstractExpressionEvaluator simEvaluator;
 	
 	public ErrorEvaluator(
 			List<ODEAnalysisNumericalPostprocessor> postprocessors,
 			List<AbstractExpressionEvaluator> evaluators,
-			SimulationAnalysisNumericalPostprocessor simPostprocessor,
+			NumericalPostprocessor simPostprocessor,
 			AbstractExpressionEvaluator simEvaluator) {
 		super();
 		this.postprocessors = postprocessors;
@@ -34,7 +34,7 @@ public class ErrorEvaluator {
 	}
 	
 	public ErrorEvaluator(List<ODEAnalysisNumericalPostprocessor> postprocessors,
-						  SimulationAnalysisNumericalPostprocessor simPostprocessor,
+						NumericalPostprocessor simPostprocessor,
 						  List<AbstractExpression> expressions, Constants constants) {
 		this(postprocessors, getEvaluators(postprocessors, expressions, constants),
 				simPostprocessor, simPostprocessor.getExpressionEvaluator(expressions,
