@@ -96,7 +96,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 					ci = confidenceIntervalWidth[index++];
 					resultsCI.put(pd, ci);
 				}
-				double[][] data = plotData(analysis, constants, ci, pd.getExpressions(), pd.getFilename());
+				double[][] data = plotData(analysis.toString(), constants, ci, pd.getExpressions(), pd.getFilename());
 				results.put(pd, data);
 			}
 		}
@@ -113,7 +113,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		return resultsCI;
 	}
 
-	public double[][] plotData(AbstractPCTMCAnalysis analysis,
+	public double[][] plotData(String analysisTitle,
 			Constants constants, double[][] dataCI, List<AbstractExpression> expressions,
 			String filename) {
 		String[] names = new String[expressions.size()];
@@ -124,11 +124,11 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		XYDataset dataset = AnalysisUtils.getDatasetFromArray(data, dataCI, stepSize, names);
 		if (dataCI == null)
 		{
-			PCTMCChartUtilities.drawChart(dataset, "time", "count", "",	analysis.toString()+this.toString());
+			PCTMCChartUtilities.drawChart(dataset, "time", "count", "",	analysisTitle+this.toString());
 		}
 		else
 		{
-			PCTMCChartUtilities.drawDeviationChart(dataset, "time", "count", "",	analysis.toString()+this.toString());
+			PCTMCChartUtilities.drawDeviationChart(dataset, "time", "count", "", analysisTitle+this.toString());
 		}
 
 		if (!filename.equals("")) {

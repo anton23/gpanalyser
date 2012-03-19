@@ -1,4 +1,5 @@
-package scripts.closurecomparison;
+package uk.ac.imperial.doc.gpa.testing.quantitative;
+
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -6,13 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCIterate;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
@@ -23,16 +25,17 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import com.google.common.collect.Lists;
 
 public class ClosureComparisonMain {
 
-	final String modelFile = "src-examples/scripts/closurecomparison/models/clientServer.gpepa";
+	protected String modelFile;// =
+								// "src-examples/scripts/closurecomparison/models/clientServer.gpepa";
+	protected String outputFile;
 
-	protected PCTMCInterpreter interpreter = GPAPMain.createGPEPAInterpreter();
+	protected PCTMCInterpreter interpreter;
 	protected PCTMCFileRepresentation fileRepresentation;
 
 	protected Constants constants;
@@ -47,9 +50,23 @@ public class ClosureComparisonMain {
 	// Simulation
 	protected PCTMCSimulation simulation;
 	protected SimulationAnalysisNumericalPostprocessor simPostprocessor;
-	
+
 	// Ranges
 	protected List<RangeSpecification> ranges;
+
+	public ClosureComparisonMain(String[] args) {
+		OptionParser optionParser = GPAPMain.createOptionParser();
+		optionParser.accepts("output", "Saves results into a file")
+				.withRequiredArg().ofType(String.class).describedAs(
+						"output file");
+		OptionSet options = optionParser.parse(args);
+		this.interpreter = GPAPMain.processOptions(optionParser, options);
+		if (options.has("output")) {
+			outputFile = options.valueOf("output").toString();
+			System.out.println("Output file: " + outputFile);
+		}
+		modelFile = options.nonOptionArguments().iterator().next();
+	}
 
 	private void loadAnalyses() {
 		analyses = new LinkedList<PCTMCODEAnalysis>();
@@ -104,13 +121,13 @@ public class ClosureComparisonMain {
 		}
 		simulation.prepare(constants);
 		simPostprocessor.prepare(simulation, constants);
-		
-		ranges = ((PCTMCIterate)fileRepresentation.getExperiments().iterator().next()).getRanges();
+
+		ranges = ((PCTMCIterate) fileRepresentation.getExperiments().iterator()
+				.next()).getRanges();
 	}
 
 	private void loadModel() {
 		try {
-
 			fileRepresentation = interpreter.parsePCTMCFile(modelFile);
 
 			constants = fileRepresentation.getConstants();
@@ -131,19 +148,46 @@ public class ClosureComparisonMain {
 			e.printStackTrace();
 		}
 	}
+	
+	public void compareInitial() {
+		System.out.println("Comparing closures on the initial constants:");
+		ErrorEvaluator errorEvaluator = new ErrorEvaluator(postprocessors, simPostprocessor, expressions, constants);
+		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
+		System.out.println(ErrorEvaluator.printSummary(errors));
+		
+		simPostprocessor.plotData(simulation.toString(), constants, null, expressions, null);
+		for (int i = 0; i < postprocessors.size(); i++) {		
+			postprocessors.get(i).plotData(analyses.get(i).toString(), constants, null, expressions, null);
+		}
+		
+	}
 
 	public void compareClosures() {
-		PCTMCChartUtilities.setGui(false);
 		loadModel();
 		loadAnalyses();
-		PCTMCOptions.nthreads = 4;		
-		new ClosureComparison(postprocessors, simPostprocessor, expressions, constants,
-				ranges).run(constants);
-		PCTMCLogging.info("Finished.");
+		compareInitial();
+		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, expressions,
+				constants, ranges);
+		closureComparison.run(constants);
+		System.out.println("Finished.");
+		StringBuilder out = new StringBuilder();
+		if (outputFile != null) {
+			System.out.println("Saving results in the file " + outputFile);
+			double[][] maxAverage = closureComparison.getMaxAverage();
+			double[][] averageAverage = closureComparison.getAverageAverage();
+			for (int i = 0; i < expressions.size(); i++) {
+				out.append(i);
+				for (int j = 0; j < analyses.size(); j++) {
+					out.append("\t" + averageAverage[j][i] + "\t" + maxAverage[j][i]);
+				}
+				out.append("\n");
+			}
+			FileUtils.writeGeneralFile(out.toString(), outputFile);
+		}
+
 	}
 
 	public static void main(String[] args) {
-		new ClosureComparisonMain().compareClosures();
+		new ClosureComparisonMain(args).compareClosures();
 	}
-
 }
