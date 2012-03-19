@@ -49,8 +49,8 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 	protected int replications; 
 
-	private static final String generatorName = "GeneratedNextEventGenerator";
-	private static final String updaterClassName = "GeneratedProductUpdater";
+	public static final String generatorName = "GeneratedNextEventGenerator";
+	public static final String updaterClassName = "GeneratedProductUpdater";
 	
 	protected Map<String, Object> parameters;
 	
@@ -135,7 +135,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			PCTMCSimulation simulation = (PCTMCSimulation) analysis;
 
 			
-			productUpdaterCode = getProductUpdaterCode(simulation, constants);
+			productUpdaterCode = getProductUpdaterCode(simulation, constants, false);
 			accumulatorUpdaterCode = getAccumulatorUpdaterCode(simulation, constants);
 			if (overrideCode==null) {
 				eventGeneratorCode = getEventGeneratorCode(simulation, constants);
@@ -223,49 +223,50 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	}
 
 
-	
-	private static String getProductUpdaterCode(PCTMCSimulation simulation, Constants variables) {
+	public static final String mUpdaterNoAddClassName = "GeneratedProductUpdaterNoAdd";
+
+
+	public static String getProductUpdaterCode(PCTMCSimulation simulation, Constants variables, boolean noadd) {
 		Map<CombinedPopulationProduct, Integer> momentIndex = simulation.getMomentIndex();
+		Map<PopulationProduct, Integer> accumulatedMomentIndex = simulation.getAccumulatedMomentIndex();
 		Map<AbstractExpression, Integer> generalExpectationIndex = simulation.getGeneralExpectationIndex();
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + SimulationUpdater.class.getName() + ";\n");
 		ret.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");
-		ret.append("public class " + updaterClassName + " extends "
-				+ SimulationUpdater.class.getName() + "{\n");
-		ret.append("double[] newValues = new double[" + 
-				(momentIndex.size() + simulation.getAccumulatedMomentIndex().size() + generalExpectationIndex.size()) + "];\n");
+		ret.append("public class "
+				+ ((noadd) ? mUpdaterNoAddClassName : updaterClassName)
+				+ " extends " + SimulationUpdater.class.getName() + "{\n");
+		ret.append("double[] newValues = new double["
+				+ (momentIndex.size()
+						+ accumulatedMomentIndex.size() + generalExpectationIndex
+						.size()) + "];\n");
 		ret.append("    public void update(double[] values, double[] oldValues){\n");
-		
-		for (Map.Entry<CombinedPopulationProduct, Integer> entry:momentIndex.entrySet()){
+
+		for (Map.Entry<CombinedPopulationProduct, Integer> entry : momentIndex
+				.entrySet()) {
 			ret.append("newValues[" + entry.getValue() + "]=(");
-			//!!
-			AbstractExpression tmp = CombinedProductExpression.create(entry.getKey());
-			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(), simulation.getAccumulatedMomentIndex(), "oldValues", true);
-			tmp.accept(printer); 
-			ret.append(printer.toString()); 
+			// !!
+			AbstractExpression tmp = CombinedProductExpression.create(entry
+					.getKey());
+			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(
+					variables, simulation.getPCTMC().getStateIndex(),
+					accumulatedMomentIndex, "oldValues", true);
+			tmp.accept(printer);
+			ret.append(printer.toString());
 			ret.append(");\n");
-			ret.append("values[" +entry.getValue() + "]+= newValues["+entry.getValue() +"];\n");
-			
+			ret.append("values[" + entry.getValue() + "]"
+					+ ((!noadd) ? "+" : "") + "= newValues[" + entry.getValue()
+					+ "]" + ";\n");
 		}
-		
-		for (Map.Entry<AbstractExpression, Integer> entry:generalExpectationIndex.entrySet()){
-			ret.append("values["+(momentIndex.size() + entry.getValue()) + "]+=");
-			JavaPrinterPopulationBased printer =
-				  new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(), 
-						  simulation.getAccumulatedMomentIndex(), "oldValues", true);
-			entry.getKey().accept(printer); 
-			ret.append(printer.toString()); 
-			ret.append(";\n"); 
-		}
-		
+
 		ret.append("    }");
 		ret.append("}");
 		return ret.toString();
 	}
 	
-	private static final String accumulatorUpdaterName = "GeneratedAccumulatorUpdater";
+	public static final String accumulatorUpdaterName = "GeneratedAccumulatorUpdater";
 	
-	private static String getAccumulatorUpdaterCode(PCTMCSimulation simulation, Constants constants) {
+	public static String getAccumulatorUpdaterCode(PCTMCSimulation simulation, Constants constants) {
 
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + AccumulatorUpdater.class.getName() + ";\n");
@@ -293,7 +294,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		return ret.toString();
 	}
 
-	private static String getEventGeneratorCode(PCTMCSimulation simulation, Constants constants) {	
+	public static String getEventGeneratorCode(PCTMCSimulation simulation, Constants constants) {	
 		StringBuilder code = new StringBuilder();
 		code.append("import " + AggregatedStateNextEventGenerator.class.getName() + "; \n");
 		code.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");		
