@@ -21,6 +21,7 @@
 	<property name="plain.test" value="test-plain"/>
 	<property name="masspa.test" value="test-masspa"/>
 	<property name="gpa.test" value="test-gpa"/>
+	<property name="quantitative.test" value="test-quantitative"/>
     
 	<property name="lib" value="lib"/>
     <property name="examples" value="inputs"/>
@@ -56,9 +57,12 @@
     <!-- JAR properties -->
     <property name="author" value="Anton Stefanek" />
     <property name="main.class" value="uk.ac.imperial.doc.gpa.GPAPMain"/>
+	<property name="comparison-main.class" value="uk.ac.imperial.doc.gpa.testing.quantitative.ClosureComparisonMain"/>
     <property name="masspa.main.class" value="uk.ac.imperial.doc.masspa.MASSPAMain"/>
     <property name="jar.name" value="gpa-${version}.jar"/>
     <property name="jar.name.link" value="gpa.jar"/>
+	
+	<property name="comparison-jar.name" value="gpa-compare-${version}.jar"/>
 	
     <path id="CLASSPATH">
         <fileset dir="${lib}">
@@ -372,6 +376,7 @@
 		        	<src path="${plain.test}"/>
 		        	<src path="${masspa.test}"/>
 			        <src path="${gpa.test}"/>
+		        	<src path="${quantitative.test}"/>
 		        	<include name="**/*.java"/> 
 		        	<include name="**/*.class"/>
 		         	<exclude name="**/package-info.java"/> 
@@ -398,6 +403,26 @@
 	      <formatter type="brief" usefile="false"/>
 	    </junit>
 	</target>
+
+
+    <target name="comparison-jar" depends="build,dist, build-test">
+        <jar destfile="${dist.out}/${comparison-jar.name}" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Built-By" value="${author}"/>
+                <attribute name="Main-Class" value="${comparison-main.class}"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Java-Library-Path" value="lib"/>
+            </manifest>
+            <fileset dir="${test.class}"/>
+        	<fileset dir="${build.class}"/>
+
+        	<fileset dir=".">
+        		<include name="LICENSE"/>	
+        		<include name="LICENSES"/>
+        	</fileset>
+        	<zipgroupfileset dir="${lib}" includes="**/*.jar" excludes="META-INF/*.SF"/>
+        </jar>
+    </target>
 
 	
 </project>

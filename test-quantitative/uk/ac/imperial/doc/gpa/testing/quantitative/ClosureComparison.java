@@ -1,4 +1,4 @@
-package scripts.closurecomparison;
+package uk.ac.imperial.doc.gpa.testing.quantitative;
 
 import java.text.DecimalFormat;
 import java.util.LinkedList;
@@ -6,7 +6,6 @@ import java.util.List;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
@@ -22,13 +21,13 @@ public class ClosureComparison extends RangeRunner {
 	// for comparison
 
 	protected List<ODEAnalysisNumericalPostprocessor> postprocessors;
-	protected List<AbstractExpressionEvaluator> evaluators;
+
 	protected List<AbstractExpression> expressions;
 
 	// Simulation
 	protected PCTMCSimulation simulation;
 	protected SimulationAnalysisNumericalPostprocessor simPostprocessor;
-	protected AbstractExpressionEvaluator simEvaluator;
+
 
 	protected ErrorEvaluator errorEvaluator;
 
@@ -108,13 +107,14 @@ public class ClosureComparison extends RangeRunner {
 		for (int i = 0; i < postprocessors.size(); i++) {
 			System.out.println("Analysis " + i);
 			for (int j = 0; j < expressions.size(); j++) {
+				averageAverage[i][j] /= totalIterations;
 				System.out
 				.println(j
 						+ "\t max: "
 						+ df.format(maxAverage[i][j] * 100.0)
 						+ "\t average: "
 						+ df
-								.format(averageAverage[i][j] * 100.0 / totalIterations)
+								.format(averageAverage[i][j] * 100.0)
 );
 			}
 		}
@@ -123,43 +123,29 @@ public class ClosureComparison extends RangeRunner {
 
 	protected void prepareEvaluators() {
 		System.out.println("Preparing evaluators");
-		evaluators = new LinkedList<AbstractExpressionEvaluator>();
-		for (int i = 0; i < postprocessors.size(); i++) {
-			evaluators.add(postprocessors.get(i).getExpressionEvaluator(
-					expressions, constants));
-		}
-		simEvaluator = simPostprocessor.getExpressionEvaluator(expressions,
-				constants);
-		errorEvaluator = new ErrorEvaluator(postprocessors, evaluators,
-				simPostprocessor, simEvaluator);
+		
+		errorEvaluator = new ErrorEvaluator(postprocessors, simPostprocessor, expressions, constants);
 	}
+	
+	
 
 	public void runAnalyses(Constants constants) {
 		System.out.println("Running analyses");
 		totalIterations++;
 		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
-		DecimalFormat df = new DecimalFormat("#.##");
 		for (int i = 0; i < errors.length; i++) {
-			System.out.println("Analysis " + i);
 			for (int j = 0; j < errors[0].length; j++) {
 				if (maxAverage[i][j] < errors[i][j].getAverageRelative()) {
 					maxAverage[i][j] = errors[i][j].getAverageRelative();
 				}
 				averageAverage[i][j] += errors[i][j].getAverageRelative();
-				System.out
-						.println(j
-								+ "\t acc: "
-								+ df.format(errors[i][j]
-										.getRelativeAccumulated() * 100.0)
-								+ "\t max: "
-								+ df
-										.format(errors[i][j].getMaxRelative() * 100.0)
-								+ "\t avg: "
-								+ df
-										.format(errors[i][j]
-												.getAverageRelative() * 100.0));
 			}
 		}
+		simPostprocessor.plotData("Sim", constants, expressions, null);
+		for (int i = 0; i < postprocessors.size(); i++) {		
+			postprocessors.get(i).plotData(i+"", constants, expressions, null);
+		}
+		System.out.println(ErrorEvaluator.printSummary(errors));
 		System.out.println("Finished analyses");
 	}
 
@@ -174,8 +160,4 @@ public class ClosureComparison extends RangeRunner {
 	public int getTotalIterations() {
 		return totalIterations;
 	}
-
-	
-	
-	
 }
