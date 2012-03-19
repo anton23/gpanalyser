@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.gpa.testing.quantitative;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +23,8 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessorCI;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
@@ -49,7 +50,7 @@ public class ClosureComparisonMain {
 
 	// Simulation
 	protected PCTMCSimulation simulation;
-	protected SimulationAnalysisNumericalPostprocessor simPostprocessor;
+	protected NumericalPostprocessor simPostprocessor;
 
 	// Ranges
 	protected List<RangeSpecification> ranges;
@@ -87,7 +88,7 @@ public class ClosureComparisonMain {
 							"The model file can contain only one simulation!");
 				} else {
 					simulation = (PCTMCSimulation) a;
-					simPostprocessor = (SimulationAnalysisNumericalPostprocessor) simulation
+					simPostprocessor = (NumericalPostprocessor) simulation
 							.getPostprocessors().get(0);
 				}
 			}
@@ -121,6 +122,12 @@ public class ClosureComparisonMain {
 		}
 		simulation.prepare(constants);
 		simPostprocessor.prepare(simulation, constants);
+		// Dirty hack for now
+		if (simPostprocessor instanceof NumericalPostprocessorCI) {
+			((NumericalPostprocessorCI) simPostprocessor).setPlotDescriptions(
+					new ArrayList<PlotDescription>(fileRepresentation.getPlots().get(
+							fileRepresentation.getPlots().keySet().iterator().next())));
+		}
 
 		ranges = ((PCTMCIterate) fileRepresentation.getExperiments().iterator()
 				.next()).getRanges();
