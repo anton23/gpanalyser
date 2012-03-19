@@ -25,7 +25,7 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class GPAPMain {
 
-	private static OptionParser createOptionParser() {
+	public static OptionParser createOptionParser() {
 		return new OptionParser() {
 			{
 				accepts("debug",
@@ -62,18 +62,19 @@ public class GPAPMain {
 		};
 
 	}
+	
+	public static PCTMCInterpreter processOptions(OptionParser optionParser, OptionSet options) {
 
-	public static void main(String[] args) {
-		OptionParser optionParser = createOptionParser();
-		OptionSet options = optionParser.parse(args);
 		 
 		if (options.nonOptionArguments().isEmpty()) {
 			try {
 				System.out.println("Usage: gpa <options> <model files>");
 				optionParser.printHelpOn(System.out);
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			return null;
 		} else {
 			PCTMCInterpreter interpreter;
 			if (options.has("help")) {
@@ -139,9 +140,17 @@ public class GPAPMain {
 			 if (interpreter.getPatternMatcherClass() != null) {
 			  PCTMCLogging.debug("Registering pattern matcher " +
 			  interpreter.getPatternMatcherClass());
-			 }			 
-			interpreter.run(options.nonOptionArguments());
+			 }
+			return interpreter;
 		}
+
+	}
+
+	public static void main(String[] args) {
+		OptionParser optionParser = createOptionParser();
+		OptionSet options = optionParser.parse(args);
+		PCTMCInterpreter interpreter = processOptions(optionParser, options);
+		interpreter.run(options.nonOptionArguments());
 
 	}
 

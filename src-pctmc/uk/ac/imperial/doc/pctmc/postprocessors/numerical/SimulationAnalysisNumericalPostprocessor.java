@@ -38,7 +38,7 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class SimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
-	private PCTMCSimulation simulation;
+	//private PCTMCSimulation simulation;
 	
 	private SimulationUpdater updater;
 	private AccumulatorUpdater accUpdater; 
@@ -54,6 +54,10 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	
 	protected Map<String, Object> parameters;
 	
+	protected AbstractExpression[] initialExpressions;
+	
+	protected boolean prepared;
+	
 	@Override
 	public String toString() {
 		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", replications = " + replications+")";
@@ -62,17 +66,37 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	
 	@Override
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
-		assert(simulation!=null);
-		SimulationAnalysisNumericalPostprocessor ret = new SimulationAnalysisNumericalPostprocessor(stopTime, stepSize, replications, parameters);
-		ret.prepare(simulation, constants);
+		assert(prepared);
+		SimulationAnalysisNumericalPostprocessor ret = new SimulationAnalysisNumericalPostprocessor(
+				stopTime, stepSize, replications, parameters);
+		ret.fastPrepare(momentIndex, generalExpectationIndex,
+				productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode,
+				initialExpressions, eventGeneratorClassName);
 		return ret;
 	}
+	
+	protected void fastPrepare(Map<CombinedPopulationProduct, Integer> momentIndex, Map<AbstractExpression, Integer> generalExpectationIndex, 
+							   String productUpdaterCode, String accumulatorUpdaterCode, String eventGeneratorCode,
+							   AbstractExpression[] initialExpressions, String eventGeneratorClassName) {
+		this.prepared = true;
+		this.momentIndex = momentIndex;
+		this.generalExpectationIndex = generalExpectationIndex;
+		this.productUpdaterCode = productUpdaterCode;
+		this.accumulatorUpdaterCode = accumulatorUpdaterCode;
+		this.eventGeneratorCode = eventGeneratorCode;
+		this.eventGeneratorClassName = eventGeneratorClassName;
+		this.initialExpressions = initialExpressions;
+		compileUpdatersAndGenerator();
+		dataPoints = new double[(int) Math.ceil(stopTime / stepSize)]
+		                       [momentIndex.size() + generalExpectationIndex.size()];
+	}
 
-
+	
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,
 			double stepSize, int replications) {
 		super(stopTime, stepSize);
 		this.replications = replications;
+		this.prepared = false;
 	}
 
 
@@ -100,64 +124,71 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 	}
 	
+	protected String productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode ;
+	
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
 		super.prepare(analysis, constants);
-		simulation = null;
+		prepared = false;
 		if (analysis instanceof PCTMCSimulation) {
-			this.simulation = (PCTMCSimulation) analysis;
+			prepared = true;
+			PCTMCSimulation simulation = (PCTMCSimulation) analysis;
 
-			dataPoints = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
-					.size()
-					+ generalExpectationIndex.size()];
-			updater = (SimulationUpdater) ClassCompiler.getInstance(
-					getProductUpdaterCode(constants), updaterClassName);
-
-			accUpdater = (AccumulatorUpdater) ClassCompiler.getInstance(
-					getAccumulatorUpdaterCode(constants),
-					accumulatorUpdaterName);
+			
+			productUpdaterCode = getProductUpdaterCode(simulation, constants);
+			accumulatorUpdaterCode = getAccumulatorUpdaterCode(simulation, constants);
+			if (overrideCode==null) {
+				eventGeneratorCode = getEventGeneratorCode(simulation, constants);
+				eventGeneratorClassName = generatorName;
+			} else {
+				eventGeneratorCode = overrideCode;
+				eventGeneratorClassName = overrideCodeClassName;
+			}
+			compileUpdatersAndGenerator();
+			
+			int n = simulation.getPCTMC().getStateIndex().size();
+			initialExpressions = new AbstractExpression[n];
+			for (int i = 0; i < n; i++) {
+				initialExpressions[i] = simulation.getPCTMC().getInitCounts()[i];				
+			}
 
 			PCTMCLogging.info("Generating one step generator.");
 			PCTMCLogging.increaseIndent();
-			eventGenerator = getEventGenerator(constants);
+
 			PCTMCLogging.decreaseIndent();
 		}
 	}
 	
-	protected AggregatedStateNextEventGenerator getEventGenerator(Constants constants) {
-		String code;
-		String className;
-		if (overrideCode==null) {
-			code = getEventGeneratorCode(constants);
-			className = generatorName;
-		} else {
-			code = overrideCode;
-			className = overrideCodeClassName;
-		}
-
-
-		return (AggregatedStateNextEventGenerator) ClassCompiler.getInstance(code,
-				className);		
+	private String eventGeneratorClassName;
+	
+	protected void compileUpdatersAndGenerator() {
+		updater = (SimulationUpdater) ClassCompiler.getInstance(
+				productUpdaterCode, updaterClassName);
+		accUpdater = (AccumulatorUpdater) ClassCompiler.getInstance(
+				accumulatorUpdaterCode,
+				accumulatorUpdaterName);
+		eventGenerator = (AggregatedStateNextEventGenerator) ClassCompiler.getInstance(eventGeneratorCode,
+				eventGeneratorClassName);
+		
 	}
 
 	@Override
 	public void calculateDataPoints(Constants constants) {
-		if (simulation!=null){
+		if (prepared){
 			simulate(constants);
 		}		
 	}
 	
-	private double[] initial;
+	
 	
 	private void simulate(Constants constants) {
-
+		
 		eventGenerator.setRates(constants.getFlatConstants());
 
-		int n = simulation.getPCTMC().getStateIndex().size();
-		initial = new double[n];
-		for (int i = 0; i < n; i++) {
+		double[] initial = new double[initialExpressions.length];
+		for (int i = 0; i < initialExpressions.length; i++) {
 			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(constants);
-			simulation.getPCTMC().getInitCounts()[i].accept(evaluator);
+			initialExpressions[i].accept(evaluator);
 			initial[i] = evaluator.getResult();
 		}
 
@@ -168,7 +199,9 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		accUpdater.setRates(constants.getFlatConstants());
 
 		int m = momentIndex.size();
-
+		dataPoints = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
+		                                          					.size()
+		                                          					+ generalExpectationIndex.size()];
 		double[][] tmp;
 		for (int r = 0; r < replications; r++) {
 			if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {
@@ -191,7 +224,9 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 
 	
-	private String getProductUpdaterCode(Constants variables) {
+	private static String getProductUpdaterCode(PCTMCSimulation simulation, Constants variables) {
+		Map<CombinedPopulationProduct, Integer> momentIndex = simulation.getMomentIndex();
+		Map<AbstractExpression, Integer> generalExpectationIndex = simulation.getGeneralExpectationIndex();
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + SimulationUpdater.class.getName() + ";\n");
 		ret.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");
@@ -228,9 +263,9 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		return ret.toString();
 	}
 	
-	private final String accumulatorUpdaterName = "GeneratedAccumulatorUpdater";
+	private static final String accumulatorUpdaterName = "GeneratedAccumulatorUpdater";
 	
-	private String getAccumulatorUpdaterCode(Constants variables) {
+	private static String getAccumulatorUpdaterCode(PCTMCSimulation simulation, Constants constants) {
 
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + AccumulatorUpdater.class.getName() + ";\n");
@@ -244,7 +279,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		
 		for (Map.Entry<PopulationProduct, Integer> entry : simulation.getAccumulatedMomentIndex().entrySet()) {
 			ret.append("values[" + entry.getValue() + "]=delta*(");			
-			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(),simulation.getAccumulatedMomentIndex(), "counts", true);
+			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(constants, simulation.getPCTMC().getStateIndex(),simulation.getAccumulatedMomentIndex(), "counts", true);
 			PopulationProductExpression tmp = new PopulationProductExpression(entry.getKey()); 
 			tmp.accept(printer); 		
 			ret.append(printer.toString()); 
@@ -258,7 +293,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		return ret.toString();
 	}
 
-	private String getEventGeneratorCode(Constants constants) {
+	private static String getEventGeneratorCode(PCTMCSimulation simulation, Constants constants) {	
 		StringBuilder code = new StringBuilder();
 		code.append("import " + AggregatedStateNextEventGenerator.class.getName() + "; \n");
 		code.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");		

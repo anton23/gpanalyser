@@ -44,7 +44,7 @@ import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor
+public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalPostprocessorCI
 {
 	private PCTMCSimulation mSimulation;
 	
