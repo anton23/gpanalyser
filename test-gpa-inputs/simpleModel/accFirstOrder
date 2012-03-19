@@ -1,0 +1,6 @@
+E[acc(As:A)], E[acc(As:B)];
+		
+dE[As:A]/dt = - E[As:A] * ra + E[As:B] * rb;
+dE[As:B]/dt = E[As:A] * ra - E[As:B] * rb;	
+dE[acc(As:A)]/dt = E[As:A];
+dE[acc(As:B)]/dt = E[As:B];

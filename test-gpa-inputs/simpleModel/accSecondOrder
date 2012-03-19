@@ -1,0 +1,17 @@
+E[acc(As:A)^2], E[acc(As:B)^2], E[acc(As:A^2)];
+				
+dE[acc(As:A)^2]/dt = 2* E[As:A acc(As:A)];
+dE[acc(As:B)^2]/dt = 2* E[As:B acc(As:B)];
+dE[As:A acc(As:A)]/dt = - E[As:A acc(As:A)]* ra + E[As:B acc(As:A)] * rb + E[As:A^2];
+dE[As:B acc(As:B)]/dt = E[As:A acc(As:B)]* ra - E[As:B acc(As:B)] * rb + E[As:B^2];
+
+dE[As:A acc(As:B)]/dt = - E[As:A acc(As:B)]* ra + E[As:B acc(As:B)] * rb + E[As:A As:B];
+dE[As:B acc(As:A)]/dt = E[As:A acc(As:A)]* ra - E[As:B acc(As:A)] * rb + E[As:A As:B];
+
+dE[acc(As:A^2)]/dt = E[As:A^2];
+
+dE[As:A]/dt = - E[As:A] * ra + E[As:B] * rb;
+dE[As:B]/dt = E[As:A] * ra - E[As:B] * rb;		
+dE[As:A^2]/dt = -2*E[As:A^2] * ra + E[As:A] * ra + 2*E[As:A As:B] * rb + E[As:B] * rb;
+dE[As:B^2]/dt = -2*E[As:B^2] * rb + E[As:B] * rb + 2*E[As:A As:B] * ra + E[As:A] * ra;
+dE[As:A As:B]/dt = E[As:A^2] * ra - E[As:A As:B] * ra - E[As:A] * ra + E[As:B^2] * rb - E[As:A As:B] * rb - E[As:B] * rb;
