@@ -37,7 +37,17 @@ public class CentralMomentOfLinearCombinationExpression extends
 		this.originalExpression = e;
 		this.order = order;
 	}
+	
+	public final AbstractExpression getOriginalExpression()
+	{
+		return originalExpression;
+	}
 
+	public final int getOrder()
+	{
+		return order;
+	}
+	
 	public static AbstractExpression createExpression(
 			List<AbstractExpression> coefficients,
 			List<CombinedPopulationProduct> combinedMoments, int order) {
