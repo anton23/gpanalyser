@@ -41,7 +41,8 @@ public class ClosureComparisonMain {
 
 	protected Constants constants;
 	protected Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
-	protected List<AbstractExpression> expressions;
+
+	protected List<PlotDescription> plots;
 
 	// Analyses to use for evaluation and expressions
 	// for comparison
@@ -110,8 +111,7 @@ public class ClosureComparisonMain {
 					throw new AssertionError("All step sizes must be the same!");
 				}
 			}
-			AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts(a, Lists
-					.newArrayList(new PlotDescription(expressions)),
+			AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts(a, plots,
 					unfoldedVariables);
 		}
 		System.out.println("Found " + analyses.size() + " analyses.");
@@ -140,32 +140,40 @@ public class ClosureComparisonMain {
 			constants = fileRepresentation.getConstants();
 
 			unfoldedVariables = fileRepresentation.getUnfoldedVariables();
-			Set<AbstractExpression> allExp = new HashSet<AbstractExpression>();
-			expressions = new LinkedList<AbstractExpression>();
+			//Set<AbstractExpression> allExp = new HashSet<AbstractExpression>();
+			//expressions = new LinkedList<AbstractExpression>();
+			
+			plots = new LinkedList<PlotDescription>(
+					fileRepresentation.getPlots().get(fileRepresentation.getPlots().keys().elementSet().iterator().next()));
 
-			for (PlotDescription d : fileRepresentation.getPlots().values()) {
+			/*for (PlotDescription d : fileRepresentation.getPlots().values()) {
 				for (AbstractExpression p : d.getExpressions()) {
 					if (!allExp.contains(p)) {
 						allExp.add(p);
 						expressions.add(p);
 					}
 				}
-			}
+			}*/
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public void compareInitial() {
-		System.out.println("Comparing closures on the initial constants:");
+		/*System.out.println("Comparing closures on the initial constants:");
 		ErrorEvaluator errorEvaluator = new ErrorEvaluator(postprocessors, simPostprocessor, expressions, constants);
-		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
+		errorEvaluator.calculateErrors(constants);
+		ErrorSummary[][] errors = errorEvaluator.getAccumulatedErrors();
 		System.out.println(ErrorEvaluator.printSummary(errors));
 		
-		simPostprocessor.plotData(simulation.toString(), constants, expressions, null);
-		for (int i = 0; i < postprocessors.size(); i++) {		
-			postprocessors.get(i).plotData(analyses.get(i).toString(), constants, expressions, null);
+		for (PlotDescription pd : plots) {
+			simPostprocessor.plotData(simulation.toString(), constants, pd.getExpressions(), null);
 		}
+		for (int i = 0; i < postprocessors.size(); i++) {
+			for (PlotDescription pd : plots) {
+				postprocessors.get(i).plotData(analyses.get(i).toString(), constants, pd.getExpressions(), null);
+			}
+		}*/
 		
 	}
 
@@ -173,7 +181,7 @@ public class ClosureComparisonMain {
 		loadModel();
 		loadAnalyses();
 		compareInitial();
-		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, expressions,
+		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, plots,
 				constants, ranges);
 		closureComparison.run(constants);
 		System.out.println("Finished.");
@@ -182,7 +190,7 @@ public class ClosureComparisonMain {
 			System.out.println("Saving results in the file " + outputFile);
 			double[][] maxAverage = closureComparison.getMaxAverage();
 			double[][] averageAverage = closureComparison.getAverageAverage();
-			for (int i = 0; i < expressions.size(); i++) {
+			for (int i = 0; i < maxAverage[0].length; i++) {
 				out.append(i);
 				for (int j = 0; j < analyses.size(); j++) {
 					out.append("\t" + averageAverage[j][i] + "\t" + maxAverage[j][i]);
