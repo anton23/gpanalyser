@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.gpa.testing.quantitative;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +23,8 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessorCI;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
@@ -40,7 +41,8 @@ public class ClosureComparisonMain {
 
 	protected Constants constants;
 	protected Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
-	protected List<AbstractExpression> expressions;
+
+	protected List<PlotDescription> plots;
 
 	// Analyses to use for evaluation and expressions
 	// for comparison
@@ -49,7 +51,7 @@ public class ClosureComparisonMain {
 
 	// Simulation
 	protected PCTMCSimulation simulation;
-	protected SimulationAnalysisNumericalPostprocessor simPostprocessor;
+	protected NumericalPostprocessor simPostprocessor;
 
 	// Ranges
 	protected List<RangeSpecification> ranges;
@@ -87,7 +89,7 @@ public class ClosureComparisonMain {
 							"The model file can contain only one simulation!");
 				} else {
 					simulation = (PCTMCSimulation) a;
-					simPostprocessor = (SimulationAnalysisNumericalPostprocessor) simulation
+					simPostprocessor = (NumericalPostprocessor) simulation
 							.getPostprocessors().get(0);
 				}
 			}
@@ -109,8 +111,7 @@ public class ClosureComparisonMain {
 					throw new AssertionError("All step sizes must be the same!");
 				}
 			}
-			AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts(a, Lists
-					.newArrayList(new PlotDescription(expressions)),
+			AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts(a, plots,
 					unfoldedVariables);
 		}
 		System.out.println("Found " + analyses.size() + " analyses.");
@@ -121,6 +122,12 @@ public class ClosureComparisonMain {
 		}
 		simulation.prepare(constants);
 		simPostprocessor.prepare(simulation, constants);
+		// Dirty hack for now
+		if (simPostprocessor instanceof NumericalPostprocessorCI) {
+			((NumericalPostprocessorCI) simPostprocessor).setPlotDescriptions(
+					new ArrayList<PlotDescription>(fileRepresentation.getPlots().get(
+							fileRepresentation.getPlots().keySet().iterator().next())));
+		}
 
 		ranges = ((PCTMCIterate) fileRepresentation.getExperiments().iterator()
 				.next()).getRanges();
@@ -133,32 +140,40 @@ public class ClosureComparisonMain {
 			constants = fileRepresentation.getConstants();
 
 			unfoldedVariables = fileRepresentation.getUnfoldedVariables();
-			Set<AbstractExpression> allExp = new HashSet<AbstractExpression>();
-			expressions = new LinkedList<AbstractExpression>();
+			//Set<AbstractExpression> allExp = new HashSet<AbstractExpression>();
+			//expressions = new LinkedList<AbstractExpression>();
+			
+			plots = new LinkedList<PlotDescription>(
+					fileRepresentation.getPlots().get(fileRepresentation.getPlots().keys().elementSet().iterator().next()));
 
-			for (PlotDescription d : fileRepresentation.getPlots().values()) {
+			/*for (PlotDescription d : fileRepresentation.getPlots().values()) {
 				for (AbstractExpression p : d.getExpressions()) {
 					if (!allExp.contains(p)) {
 						allExp.add(p);
 						expressions.add(p);
 					}
 				}
-			}
+			}*/
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public void compareInitial() {
-		System.out.println("Comparing closures on the initial constants:");
+		/*System.out.println("Comparing closures on the initial constants:");
 		ErrorEvaluator errorEvaluator = new ErrorEvaluator(postprocessors, simPostprocessor, expressions, constants);
-		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
+		errorEvaluator.calculateErrors(constants);
+		ErrorSummary[][] errors = errorEvaluator.getAccumulatedErrors();
 		System.out.println(ErrorEvaluator.printSummary(errors));
 		
-		simPostprocessor.plotData(simulation.toString(), constants, expressions, null);
-		for (int i = 0; i < postprocessors.size(); i++) {		
-			postprocessors.get(i).plotData(analyses.get(i).toString(), constants, expressions, null);
+		for (PlotDescription pd : plots) {
+			simPostprocessor.plotData(simulation.toString(), constants, pd.getExpressions(), null);
 		}
+		for (int i = 0; i < postprocessors.size(); i++) {
+			for (PlotDescription pd : plots) {
+				postprocessors.get(i).plotData(analyses.get(i).toString(), constants, pd.getExpressions(), null);
+			}
+		}*/
 		
 	}
 
@@ -166,7 +181,7 @@ public class ClosureComparisonMain {
 		loadModel();
 		loadAnalyses();
 		compareInitial();
-		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, expressions,
+		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, plots,
 				constants, ranges);
 		closureComparison.run(constants);
 		System.out.println("Finished.");
@@ -175,7 +190,7 @@ public class ClosureComparisonMain {
 			System.out.println("Saving results in the file " + outputFile);
 			double[][] maxAverage = closureComparison.getMaxAverage();
 			double[][] averageAverage = closureComparison.getAverageAverage();
-			for (int i = 0; i < expressions.size(); i++) {
+			for (int i = 0; i < maxAverage[0].length; i++) {
 				out.append(i);
 				for (int j = 0; j < analyses.size(); j++) {
 					out.append("\t" + averageAverage[j][i] + "\t" + maxAverage[j][i]);
