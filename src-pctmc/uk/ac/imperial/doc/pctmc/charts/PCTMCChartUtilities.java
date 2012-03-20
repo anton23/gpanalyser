@@ -130,14 +130,14 @@ public class PCTMCChartUtilities {
 		return windows.get(title);
 	}
 
-	public static void addChart(Component component, String windowTitle) {
+	public static void addChart(Component component, String tabTitle, String windowTitle) {
 		if (!gui)
 			return;
 		JTabbedPane tab;
 		if (!windows.containsKey(windowTitle))
 			setWindow(windowTitle);
 		tab = tabs.get(windowTitle);
-		tab.addTab("", component);
+		tab.addTab(tabTitle, component);
 		windows.get(windowTitle).setSize(new java.awt.Dimension(600, 500));
 
 	}
@@ -167,7 +167,8 @@ public class PCTMCChartUtilities {
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setMouseZoomable(true, false);
 		chartPanel.setDoubleBuffered(true);
-		tab.addTab("", chartPanel);
+		tab.addTab(chartTitle, chartPanel);
+		
 
 		// RefineryUtilities.positionFrameOnScreen(frame, lastx, lasty);
 		// lastx += 0.05;

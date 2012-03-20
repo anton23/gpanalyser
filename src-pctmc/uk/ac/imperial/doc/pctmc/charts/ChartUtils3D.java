@@ -102,6 +102,6 @@ public class ChartUtils3D {
 		mouse.addTarget(chart.getView());
 		mouse.addMouseSource(canvas);
 
-		PCTMCChartUtilities.addChart(panel3d, windowTitle);
+		PCTMCChartUtilities.addChart(panel3d, command, windowTitle);
 	}
 }
