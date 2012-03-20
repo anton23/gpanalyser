@@ -395,13 +395,13 @@ accuratesimulation:
   ACCURATESIMULATION LPAR
   STOPTIME DEF stopTime = expression COMMA
   STEPSIZE DEF stepSize = expression COMMA
-  MAXRELCHANGEPERREP DEF maxRelChangePerRep= expression COMMA
-  BATCHSIZE DEF batchSize = INTEGER COMMA
-  CI DEF ci = expression
+  CI DEF ci = expression COMMA
+  MAXRELCIWIDTH DEF maxRelCIWidth = expression COMMA
+  BATCHSIZE DEF batchSize = INTEGER
   RPAR LBRACE
     plotDescription*
   RBRACE
-  -> ^(ACCURATESIMULATION $stopTime COMMA $stepSize COMMA $maxRelChangePerRep COMMA $batchSize COMMA $ci LBRACE plotDescription* RBRACE )
+  -> ^(ACCURATESIMULATION $stopTime COMMA $stepSize COMMA $ci COMMA $maxRelCIWidth COMMA $batchSize LBRACE plotDescription* RBRACE )
 ;
 
 

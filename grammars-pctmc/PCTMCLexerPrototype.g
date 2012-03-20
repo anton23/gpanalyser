@@ -35,9 +35,9 @@ STOPTIME: 'stopTime';
 STEPSIZE: 'stepSize';
 DENSITY: 'density';
 REPLICATIONS:'replications';
-MAXRELCHANGEPERREP:'maxRelChangePerRep';
-BATCHSIZE:'batchSize';
 CI:'CI';
+MAXRELCIWIDTH:'maxRelCIWidth';
+BATCHSIZE:'batchSize';
 
 ACC: 'acc';
 

@@ -155,9 +155,9 @@ public class ClosureComparisonMain {
 		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
 		System.out.println(ErrorEvaluator.printSummary(errors));
 		
-		simPostprocessor.plotData(simulation.toString(), constants, null, expressions, null);
+		simPostprocessor.plotData(simulation.toString(), constants, expressions, null);
 		for (int i = 0; i < postprocessors.size(); i++) {		
-			postprocessors.get(i).plotData(analyses.get(i).toString(), constants, null, expressions, null);
+			postprocessors.get(i).plotData(analyses.get(i).toString(), constants, expressions, null);
 		}
 		
 	}
