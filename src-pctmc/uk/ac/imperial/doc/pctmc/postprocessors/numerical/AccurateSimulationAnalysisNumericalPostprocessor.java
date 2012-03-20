@@ -9,8 +9,15 @@ import org.apache.commons.math.distribution.TDistributionImpl;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CentralMomentOfLinearCombinationExpression;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.MeanOfLinearCombinationExpression;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.StandardisedCentralMomentOfLinearCombinationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.simulation.SimulationUpdater;
@@ -169,7 +176,9 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 		double[] curDataSamples = new double[dataPoints[0].length];
 		double[][][] incMoment = new double[dataPoints.length][dataPoints[0].length][4];
 		boolean accurate = false;
-
+		final int timeSteps = (int) Math.ceil(stopTime / stepSize);
+		double ci = 1.96;
+		
 		while (!accurate)
 		{
 			for (int r = 0; r < mBatchSize; ++r)
@@ -179,7 +188,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 					PCTMCLogging.info(reps + " replications finished.");
 				}
 				tmp = GillespieSimulator.simulateAccumulated(mEventGenerator,initial, stopTime, stepSize, mAccUpdater);
-				for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++)
+				for (int t = 0; t < timeSteps; t++)
 				{
 					mUpdater.update(dataPoints[t], tmp[t]);
 					mUpdaterNoAdd.update(curDataSamples, tmp[t]);
@@ -188,7 +197,8 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 					double n1 = reps+1;
 					for (int i=0; i<dataPoints[0].length; i++)
 					{
-						/** see @link{http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Higher-order_statistics}*/
+						/** Online approximations of the first 4 central moments from the population samples
+						 *  see @link{http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Higher-order_statistics}*/
 						double delta = curDataSamples[i] - incMoment[t][i][0];
 						double delta_n = delta / n1;
 						double delta_n2 = delta_n * delta_n;
@@ -206,7 +216,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 			// Compute confidence interval for sample mean and variance
 			TDistribution tDist = new TDistributionImpl(reps-1);
 			double maxRelCIChange = 0;
-			double ci = 1.96;
+			ci = 1.96;
 			try
 			{
 				ci = tDist.inverseCumulativeProbability(0.5+mCI/2);
@@ -214,26 +224,11 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 			catch (MathException e) {
 				e.printStackTrace();
 			}
-			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++)
+			for (int t = 0; t < timeSteps; t++)
 			{
 				for (int i=0; i<dataPoints[0].length; i++)
 				{
-					/** see @link{ http://mathworld.wolfram.com/SampleVarianceDistribution.html}*/
-					double sampleMean = incMoment[t][i][0];
-					double sampleVar  = incMoment[t][i][1]/reps; // Actually this is just sum(X_i-\mu)^2/n
-					double sampleKurt = incMoment[t][i][3]/reps; // Actually this is just sum(X_i-\mu)^4/n
-					double reps1Div=(reps-1)/reps;
-					double reps3Div=(reps-3)/reps;
-					double test1 = sampleKurt*reps1Div*reps1Div/reps;
-					double test2 = reps1Div*reps3Div*sampleVar*sampleVar/reps;
-					double sampleVarVar = test1 - test2;
-					
-					// Mean confidence interval
-					if (sampleMean > 1 && sampleVar > 1)
-					{
-						maxRelCIChange = Math.max(ci * Math.sqrt(sampleVar/reps)/ sampleMean,maxRelCIChange);
-						if(maxMomentOrder > 1) {maxRelCIChange = Math.max(ci * Math.sqrt(sampleVarVar/reps)/ sampleVar,maxRelCIChange);}
-					}
+					maxRelCIChange = Math.max(maxRelCIChange,getRelCIWidth(incMoment[t][i], ci, reps, maxMomentOrder));
 				}
 			}
 			
@@ -244,14 +239,95 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 			}
 		}
 		
-		for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++)
+		// Moment expectations
+		for (int t = 0; t < timeSteps; t++)
 		{
 			for (int i=0; i<dataPoints[0].length; i++)
 			{
 				dataPoints[t][i] /= reps;
 			}
 		}
+		
+		// Compute Confidence intervals for expressions (if possible)
+		// Currently we only support mean, var and stddev expressions
+		confidenceIntervalWidth = new double[plotDescriptions.size()][timeSteps][];
+		int i1 = 0;
+		for (PlotDescription pd : plotDescriptions)
+		{
+			AbstractExpressionEvaluator evals = getExpressionEvaluator(pd.getExpressions(), constants);
+			for (int t=0; t < timeSteps; t++)
+			{
+				confidenceIntervalWidth[i1][t] = new double[pd.getExpressions().size()];
+				double[] values = this.evaluateExpressions(evals,dataPoints[t],t,constants);
+				int i2 = 0;
+				for (AbstractExpression ae : pd.getExpressions())
+				{
+					confidenceIntervalWidth[i1][t][i2] = 0;
+					// TODO this work should be done by an expression visitor
+					//      rather than by a number of if, else if blocks 
+					if (ae instanceof MeanOfLinearCombinationExpression)
+					{
+						MeanOfLinearCombinationExpression m = (MeanOfLinearCombinationExpression)ae;
+						if (m.getCoefficients().size() == 1 && m.getCombinedProducts().size() == 1)
+						{
+							CombinedPopulationProduct cpp = m.getCombinedProducts().get(0);
+							int index = momentIndex.get(cpp);
+							double relCIWidth = getRelCIWidth(incMoment[t][index], ci, reps, maxMomentOrder);
+							confidenceIntervalWidth[i1][t][i2] = values[i2]*(relCIWidth);
+						}
+					}
+					else if (ae instanceof CentralMomentOfLinearCombinationExpression)
+					{
+						CentralMomentOfLinearCombinationExpression cm = (CentralMomentOfLinearCombinationExpression)ae;
+						if (cm.getOrder() == 2 && cm.getOriginalExpression() instanceof CombinedProductExpression)
+						{
+							CombinedPopulationProduct cpp = ((CombinedProductExpression)cm.getOriginalExpression()).getProduct();
+							int index = momentIndex.get(cpp);
+							double relCIWidth = getRelCIWidth(incMoment[t][index], ci, reps, maxMomentOrder);
+							confidenceIntervalWidth[i1][t][i2] = values[i2]*(relCIWidth);
+						}
+					}
+					else if (ae instanceof StandardisedCentralMomentOfLinearCombinationExpression)
+					{
+						StandardisedCentralMomentOfLinearCombinationExpression scm = (StandardisedCentralMomentOfLinearCombinationExpression)ae;
+						if (scm.getOrder() == 2 && scm.getOriginalExpression() instanceof CombinedProductExpression)
+						{
+							CombinedPopulationProduct cpp = ((CombinedProductExpression)scm.getOriginalExpression()).getProduct();
+							int index = momentIndex.get(cpp);
+							double relCIWidth = Math.sqrt(getRelCIWidth(incMoment[t][index], ci, reps, maxMomentOrder)+1)-1;
+							confidenceIntervalWidth[i1][t][i2] = values[i2]*(relCIWidth);
+						}
+					}
+					i2++;
+				}
+			}
+			i1++;
+		}
 		PCTMCLogging.decreaseIndent();
+	}
+
+	private double getRelCIWidth(final double[] _moments, final double _ci, final int _n, final int _maxMomentOrder)
+	{
+		/** Computation of Confidence Intervals for sample mean and sample variance of populations
+		* see @link{ http://mathworld.wolfram.com/SampleVarianceDistribution.html}*/
+		double sampleMean = _moments[0];
+		double sampleVar  = _moments[1]/_n; // Actually this is just sum(X_i-\mu)^2/n
+		double sampleKurt = _moments[3]/_n; // Actually this is just sum(X_i-\mu)^4/n
+		double reps1Div=(_n-1)/_n;
+		double reps3Div=(_n-3)/_n;
+		double test1 = sampleKurt*reps1Div*reps1Div/_n;
+		double test2 = reps1Div*reps3Div*sampleVar*sampleVar/_n;
+		double sampleVarVar = test1 - test2;
+		
+		// Mean confidence interval
+		double maxRelCIChangeMean = 0;
+		double maxRelCIChangeVar = 0;
+		if (sampleMean > 1 && sampleVar > 1)
+		{
+			maxRelCIChangeMean = _ci * Math.sqrt(sampleVar/_n)/ sampleMean;
+			maxRelCIChangeVar = (_maxMomentOrder > 1) ? _ci * Math.sqrt(sampleVarVar/_n)/ sampleVar : 0;
+		}
+		return Math.max(maxRelCIChangeMean, maxRelCIChangeVar);
 	}
 
 }

@@ -28,10 +28,21 @@ public class StandardisedCentralMomentOfLinearCombinationExpression extends
 		this.order = order;
 	}
 
+	public final AbstractExpression getOriginalExpression()
+	{
+		return originalExpression;
+	}
+
+	public final int getOrder()
+	{
+		return order;
+	}
+	
 	private static AbstractExpression createExpression(AbstractExpression e,
 			int order, Map<ExpressionVariable, AbstractExpression> var) {
 		MeanOfLinearCombinationExpression mean = new MeanOfLinearCombinationExpression(
 				e, var);
+		if (order == 2) {return PowerExpression.create(CentralMomentOfLinearCombinationExpression.createExpression(mean.getCoefficients(),mean.getCombinedProducts(),2),new DoubleExpression(0.5));}
 		return DivExpression.create(CentralMomentOfLinearCombinationExpression
 				.createExpression(mean.getCoefficients(), mean
 						.getCombinedProducts(), order), PowerExpression.create(
