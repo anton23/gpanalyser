@@ -276,7 +276,7 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
 }:
-  ^(ACCURATESIMULATION stop=expression COMMA step=expression COMMA maxRelChangePerRep=expression COMMA batchSize=integer COMMA ci=expression
+  ^(ACCURATESIMULATION stop=expression COMMA step=expression COMMA ci=expression COMMA maxRelCIWidth=expression COMMA batchSize=integer 
     (COMMA p=parameter {parameters.put($p.name, $p.value);})*
     LBRACE 
          ps=plotDescriptions 
@@ -288,15 +288,15 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
       $stop.e.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
       $step.e.accept(stepEval);
-      ExpressionEvaluatorWithConstants maxRelChangePerRepEval = new ExpressionEvaluatorWithConstants($constants);
-      $maxRelChangePerRep.e.accept(maxRelChangePerRepEval);
       ExpressionEvaluatorWithConstants ciEval = new ExpressionEvaluatorWithConstants($constants);
       $ci.e.accept(ciEval);
+      ExpressionEvaluatorWithConstants maxRelCIWidthEval = new ExpressionEvaluatorWithConstants($constants);
+      $maxRelCIWidth.e.accept(maxRelCIWidthEval);
       
       if (parameters.isEmpty()) {
-        $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),maxRelChangePerRepEval.getResult(),$batchSize.value,ciEval.getResult());
+        $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),ciEval.getResult(),maxRelCIWidthEval.getResult(),$batchSize.value);
       } else {
-        $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),maxRelChangePerRepEval.getResult(),$batchSize.value,ciEval.getResult(), parameters);
+        $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),ciEval.getResult(),maxRelCIWidthEval.getResult(),$batchSize.value, parameters);
       }
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 

@@ -141,9 +141,9 @@ public class ClosureComparison extends RangeRunner {
 				averageAverage[i][j] += errors[i][j].getAverageRelative();
 			}
 		}
-		simPostprocessor.plotData("Sim", constants, null, expressions, null);
+		simPostprocessor.plotData("Sim", constants, expressions, null);
 		for (int i = 0; i < postprocessors.size(); i++) {		
-			postprocessors.get(i).plotData(i+"", constants, null, expressions, null);
+			postprocessors.get(i).plotData(i+"", constants, expressions, null);
 		}
 		System.out.println(ErrorEvaluator.printSummary(errors));
 		System.out.println("Finished analyses");
