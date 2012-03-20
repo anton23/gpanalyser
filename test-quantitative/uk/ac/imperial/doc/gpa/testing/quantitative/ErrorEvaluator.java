@@ -8,8 +8,8 @@ import java.util.List;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 
 public class ErrorEvaluator {
 	
@@ -18,13 +18,13 @@ public class ErrorEvaluator {
 	List<AbstractExpressionEvaluator> evaluators;
 
 	// Simulation	
-	SimulationAnalysisNumericalPostprocessor simPostprocessor;
+	NumericalPostprocessor simPostprocessor;
 	AbstractExpressionEvaluator simEvaluator;
 	
 	public ErrorEvaluator(
 			List<ODEAnalysisNumericalPostprocessor> postprocessors,
 			List<AbstractExpressionEvaluator> evaluators,
-			SimulationAnalysisNumericalPostprocessor simPostprocessor,
+			NumericalPostprocessor simPostprocessor,
 			AbstractExpressionEvaluator simEvaluator) {
 		super();
 		this.postprocessors = postprocessors;
@@ -34,7 +34,7 @@ public class ErrorEvaluator {
 	}
 	
 	public ErrorEvaluator(List<ODEAnalysisNumericalPostprocessor> postprocessors,
-						  SimulationAnalysisNumericalPostprocessor simPostprocessor,
+						NumericalPostprocessor simPostprocessor,
 						  List<AbstractExpression> expressions, Constants constants) {
 		this(postprocessors, getEvaluators(postprocessors, expressions, constants),
 				simPostprocessor, simPostprocessor.getExpressionEvaluator(expressions,
@@ -51,34 +51,49 @@ public class ErrorEvaluator {
 		return evaluators;
 	}
 
-	public ErrorSummary[][] calculateErrors(Constants constants) {		
+	ErrorSummary[][] accumulatedErrors;
+	double[][][] transientErrors;
+	
+	public void calculateErrors(Constants constants) {		
 		simPostprocessor.calculateDataPoints(constants);
 		double[][] simValues = simPostprocessor.evaluateExpressions(simEvaluator, constants);
 		
-		ErrorSummary[][] ret = new ErrorSummary[postprocessors.size()][simValues[0].length];
-		
+		accumulatedErrors = new ErrorSummary[postprocessors.size()][simValues[0].length];
+		transientErrors = new double[postprocessors.size()][simValues.length][simValues[0].length];
+
 		for (int i = 0; i < postprocessors.size(); i++) {
+			double[][] transientError = new double[simValues.length][simValues[0].length];
 			ODEAnalysisNumericalPostprocessor postprocessor = postprocessors.get(i);
 			postprocessor.calculateDataPoints(constants);
 			AbstractExpressionEvaluator evaluator = evaluators.get(i);
 			double[][] values = postprocessor.evaluateExpressions(evaluator, constants);
 			for (int j = 0; j < simValues[0].length; j++ ) {
-				double totalError = 0.0;
-				double totalValue = 0.0;
-				double maxRelativeError = 0.0;
-				double averageError = 0.0; 
+				double totalAccError = 0.0;
+				double totalAccValue = 0.0;
+				double maxRelativeAccError = 0.0;
+				double averageAccError = 0.0; 
 				for (int t = 0; t < simValues.length; t++) {
-					totalValue += Math.abs(simValues[t][j]);
-					totalError += Math.abs(values[t][j] - simValues[t][j]);
-					averageError += simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]);
-					maxRelativeError = Math.max(simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]), maxRelativeError);
+					totalAccValue += Math.abs(simValues[t][j]);
+					totalAccError += Math.abs(values[t][j] - simValues[t][j]);
+					averageAccError += simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]);
+					maxRelativeAccError = Math.max(simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]), maxRelativeAccError);
+
+					transientError[t][j] = simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]);
 				}
-				ret[i][j] = new ErrorSummary(totalError/totalValue, maxRelativeError, averageError/simValues.length);
+				accumulatedErrors[i][j] = new ErrorSummary(totalAccError/totalAccValue, maxRelativeAccError, averageAccError/simValues.length);
 			}
+			transientErrors[i] = transientError;
 		}
-		return ret;
 	}
 	
+	public double[][][] getTransientErrors() {
+		return transientErrors;
+	}
+
+	public ErrorSummary[][] getAccumulatedErrors() {
+		return accumulatedErrors;
+	}
+
 	public static String printSummary(ErrorSummary[][] errors) {
 		StringBuilder out = new StringBuilder();
 		DecimalFormat df = new DecimalFormat("#.##");
