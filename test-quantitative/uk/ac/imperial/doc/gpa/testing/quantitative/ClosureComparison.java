@@ -67,6 +67,7 @@ public class ClosureComparison extends RangeRunner {
 			newPlotIndices.add(expressions.size());
 			expressions.addAll(pd.getExpressions());
 		}
+		newPlotIndices.add(expressions.size());
 		this.constants = constants;
 		prepareEvaluators();
 		this.parts = split(nParts);
@@ -138,7 +139,7 @@ public class ClosureComparison extends RangeRunner {
 		DecimalFormat df = new DecimalFormat("#.##");
 		for (int i = 0; i < postprocessors.size(); i++) {
 			int k = -1;
-			double[][] maxAggregateT = new double[maxT[0].length][plots.size()]; // 0 - maxmax, 1 - avgavg
+			double[][] maxAggregateT = new double[maxT[0].length][plots.size()]; 
 			double[][] avgAggregateT = new double[maxT[0].length][plots.size()];
 			
 			System.out.println("Analysis " + i);
@@ -169,19 +170,34 @@ public class ClosureComparison extends RangeRunner {
 					avgAggregateT[t][l] /= plots.get(l).getExpressions().size() * totalIterations;
 				}
 			}
-			String[] names = new String[expressions.size()];
-			for (int e = 0; e < expressions.size(); e++) {
-				names[e] = expressions.get(e).toString();
-			}
-			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(maxT[i],
-					simPostprocessor.getStepSize(), names);
-			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Max",
-					i + "");
 			
-			XYSeriesCollection dataset2 = AnalysisUtils.getDatasetFromArray(avgT[i],
-					simPostprocessor.getStepSize(), names);
-			PCTMCChartUtilities.drawChart(dataset2, "time", "count", "Avg",
-					i + "");
+			for (int l = 0; l < plots.size(); l++) {
+				double[][] dataMax = new double[maxT[0].length][plots.get(l).getExpressions().size()];
+				double[][] dataAvg = new double[maxT[0].length][plots.get(l).getExpressions().size()];
+				Integer start = newPlotIndices.get(l);
+				for (int j = start; j < newPlotIndices.get(l+1); j++) {
+					for (int t = 0; t < dataMax.length; t++) {
+						dataMax[t][j - start] = maxT[i][t][j];
+						dataAvg[t][j - start] = avgT[i][t][j];
+					}
+				}
+				String[] names = new String[plots.get(l).getExpressions().size()];
+				int eI = 0;
+				for (AbstractExpression e : plots.get(l).getExpressions()) {
+					names[eI++] = e.toString();
+				}
+				XYSeriesCollection datasetMax = AnalysisUtils.getDatasetFromArray(dataMax,
+						simPostprocessor.getStepSize(), names);
+				PCTMCChartUtilities.drawChart(datasetMax, "time", "count", "Max",
+						i + "");
+				
+				XYSeriesCollection datasetAvg = AnalysisUtils.getDatasetFromArray(dataAvg,
+						simPostprocessor.getStepSize(), names);
+				PCTMCChartUtilities.drawChart(datasetAvg, "time", "count", "Avg",
+						i + "");
+			}
+			
+			
 			for (int l = 0; l < plots.size(); l++) {
 				double[][] data = new double[maxAggregateT.length][2];
 				for (int t = 0; t < data.length; t++) {
