@@ -3,7 +3,6 @@ package uk.ac.imperial.doc.gpa.fsm;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
 import java.util.*;
 
@@ -78,18 +77,6 @@ public class NFAState
         return this;
     }
 
-	public NFAState advanceWithTransition (ITransition transition,
-        List<AbstractExpression> statesCountExpressions,
-        Map<String, AbstractExpression> mapping, double[] data)
-	{
-        if (predicate == null || predicate.eval
-            (statesCountExpressions, mapping, data))
-        {
-            return advanceWithTransition (transition);
-        }
-        return this;
-	}
-
     public Multimap<ITransition, NFAState> getSignalTransitions ()
     {
         Multimap<ITransition, NFAState> signalTransitions
@@ -105,18 +92,6 @@ public class NFAState
         return Multimaps.unmodifiableMultimap (signalTransitions);
     }
 
-    public Set<ITransition> getAvailableNonSignalTransitions ()
-    {
-        Multimap<ITransition, NFAState> transitions = HashMultimap.create ();
-        transitions.putAll (outgoings);
-        Multimap<ITransition, NFAState> signals = getSignalTransitions ();
-        for (ITransition signal : signals.keySet ())
-        {
-            transitions.removeAll (signal);
-        }
-        return transitions.keySet ();
-    }
-    
 	public Multimap<ITransition, NFAState> getTransitions ()
 	{
 		return Multimaps.unmodifiableMultimap (outgoings);

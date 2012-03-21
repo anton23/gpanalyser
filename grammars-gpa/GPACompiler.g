@@ -946,10 +946,6 @@ logical_op returns [String operator]
     :   op=LOGICAL_OR
             {
                 $operator = " " + $op.text + " ";
-            }
-        | op=LOGICAL_AND
-            {
-                $operator = " " + $op.text + " ";
             } ;
 
 pred_single returns [String predicate]
@@ -1036,8 +1032,7 @@ concrete_r_expr returns [String predicate]
 	:	gp=groupComponentPair
 	        {
 	            GPEPAState gps = new GPEPAState ($gp.gp);
-                $predicate = "data [statesCountExpressions.indexOf"
-                    + "(mapping.get (\"" + gps.toString () + "\"))]";
+                $predicate = "data [mapping.get (\"" + gps.toString () + "\")]";
 	        }
 	    | expr=expression
 	        {

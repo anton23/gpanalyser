@@ -31,9 +31,9 @@ public abstract class AbstractProbeRunner
 
     protected abstract CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping,
-         GroupedModel model, Set<GPEPAState> stateObservers,
-         PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
+         Map<String, Integer> mapping, GroupedModel model,
+         Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
+         PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
@@ -41,9 +41,8 @@ public abstract class AbstractProbeRunner
 
     protected abstract CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping,
-         GroupedModel model, Set<GPEPAState> stateObservers,
-         PEPAComponentDefinitions mainDef,
+         Map<String, Integer> mapping, GroupedModel model,
+         Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
@@ -52,7 +51,7 @@ public abstract class AbstractProbeRunner
     protected abstract CDF globalPassages
         (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, Set<String> countActions,
+         Map<String, Integer> mapping, Set<String> countActions,
          ComponentId accepting, Constants constants,
          PEPAComponentDefinitions mainDef,
          double stopTime, double stepSize, int parameter);
@@ -70,8 +69,8 @@ public abstract class AbstractProbeRunner
         Set<String> countActionStrings = convertObjectsToStrings (alphabet);
         List<AbstractExpression> statesCountExpressions
             = new LinkedList<AbstractExpression> ();
-        Map<String, AbstractExpression> mapping
-            = new HashMap<String, AbstractExpression> ();
+        Map<String, Integer> mapping
+            = new HashMap<String, Integer> ();
         ExpressionEvaluatorWithConstants stopEval
                 = new ExpressionEvaluatorWithConstants (constants);
         stopTime.accept (stopEval);
@@ -97,7 +96,7 @@ public abstract class AbstractProbeRunner
     private CDF dispatchEvaluation
         (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, Set<String> countActions,
+         Map<String, Integer> mapping, Set<String> countActions,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
@@ -145,9 +144,7 @@ public abstract class AbstractProbeRunner
         (LinkedHashMap<GroupComponentPair, AbstractExpression> crates,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          PEPAComponentDefinitions definitions, GroupedModel model,
-         List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping,
-         double[] matchVal, double[] origVal)
+         Map<String, Integer> mapping, double[] matchVal, double[] origVal)
     {
         Map<GroupComponentPair, AbstractExpression> newCounts
             = new HashMap<GroupComponentPair, AbstractExpression> ();
@@ -171,8 +168,7 @@ public abstract class AbstractProbeRunner
             else
             {
                 newCounts.put (gc, new DoubleExpression
-                    (origVal[statesCountExpressions.indexOf
-                            (mapping.get (gc.toString ()))]));
+                    (origVal[mapping.get(gc.toString())]));
             }
             ++i;
         }
@@ -193,8 +189,7 @@ public abstract class AbstractProbeRunner
 
     protected double[] passageTimeCDF
         (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
-         ComponentId accepting, List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping)
+         ComponentId accepting, Map<String, Integer> mapping)
     {
         double[] cdf = new double[obtainedMeasurements.length];
         for (GroupComponentPair gp : pairs)
@@ -204,8 +199,7 @@ public abstract class AbstractProbeRunner
                 for (int i = 0; i < obtainedMeasurements.length; ++i)
                 {
                     cdf[i] += obtainedMeasurements[i]
-                            [statesCountExpressions.indexOf
-                            (mapping.get (gp.toString ()))];
+                        [mapping.get(gp.toString())];
                 }
             }
         }
@@ -391,16 +385,18 @@ public abstract class AbstractProbeRunner
              Constants constants, Set<String> countActionsSet,
              Collection<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> stateCombPopMapping,
+             Map<String, Integer> stateCombPopMapping,
              double stopTime, double stepSize, int parameter, PCTMC[] pctmcs)
     {
         List<CombinedPopulationProduct> moments
             = new ArrayList<CombinedPopulationProduct> ();
+        int index = 0;
         for (GPEPAState state : stateObservers)
         {
             Multiset<State> states = HashMultiset.create ();
             setStateObserver (states, state, state.toString (), moments,
-                statesCountExpressions, stateCombPopMapping);
+                    statesCountExpressions, stateCombPopMapping, index);
+            ++index;
         }
 
         Set<String> initActions = countActionsSet;
@@ -411,7 +407,9 @@ public abstract class AbstractProbeRunner
                 GPEPAActionCount gpepaAction = new GPEPAActionCount (action);
                 Multiset<State> cooperationActions = HashMultiset.create ();
                 setStateObserver (cooperationActions, gpepaAction, action,
-                        moments, statesCountExpressions, stateCombPopMapping);
+                        moments, statesCountExpressions,
+                        stateCombPopMapping, index);
+                ++index;
             }
         }
         else
@@ -456,7 +454,7 @@ public abstract class AbstractProbeRunner
         (Multiset<State> statesSet, State state, String mappingString,
          List<CombinedPopulationProduct> moments,
          List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> stateCombPopMapping)
+         Map<String, Integer> stateCombPopMapping, int index)
     {
         statesSet.add (state);
         CombinedPopulationProduct combinedPopulation
@@ -465,7 +463,7 @@ public abstract class AbstractProbeRunner
         AbstractExpression combProd
             = CombinedProductExpression.create (combinedPopulation);
         statesCountExpressions.add (combProd);
-        stateCombPopMapping.put (mappingString, combProd);
+        stateCombPopMapping.put (mappingString, index);
     }
 
     private NumericalPostprocessor getPostprocessor

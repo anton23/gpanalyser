@@ -33,9 +33,9 @@ public class SimProbeRunner extends AbstractProbeRunner
     @Override
     protected CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping,
-         GroupedModel model, Set<GPEPAState> stateObservers,
-         PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
+         Map<String, Integer> mapping, GroupedModel model,
+         Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
+         PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
@@ -78,8 +78,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         List<AbstractExpression> altStatesCountExpressions
             = new ArrayList<AbstractExpression> ();
-        Map<String, AbstractExpression> altMapping
-            = new HashMap<String, AbstractExpression> ();
+        Map<String, Integer> altMapping = new HashMap<String, Integer> ();
         PCTMC[] pctmc = new PCTMC[1];
         NumericalPostprocessor postprocessorA = runTheProbedSystem
             (model, altDef, constants, null, altStateObservers,
@@ -98,7 +97,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
             // setting the absorbing model with new initial values
             assignNewCounts (crates, definitionsMap, mainDef, model,
-                    statesCountExpressions, mapping, cratesVal, steadyVal);
+                    mapping, cratesVal, steadyVal);
             GPEPAToPCTMC.updatePCTMC (pctmc[0], altDef, model);
             postprocessorA.calculateDataPoints (constants);
             double[][] obtainedMeasurements = postprocessorA.evaluateExpressions
@@ -130,14 +129,14 @@ public class SimProbeRunner extends AbstractProbeRunner
         }
 
         double[] cdf = passageTimeCDF (overallMeasurements, pairs, accepting,
-                altStatesCountExpressions, altMapping);
+                altMapping);
         return new CDF (name, stepSize, cdf);
     }
 
     @Override
     protected CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, GroupedModel model,
+         Map<String, Integer> mapping, GroupedModel model,
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants, double stopTime,
@@ -146,11 +145,11 @@ public class SimProbeRunner extends AbstractProbeRunner
         double[][] overallMeasurements = null;
 
         // obtaining the ratios for steady state component distribution
-        NumericalPostprocessor postprocessor = runTheProbedSystem (model,
-                mainDef, constants, null, stateObservers,
-                new ArrayList<AbstractExpression> (),
-                new HashMap<String, AbstractExpression> (), steadyStateTime,
-                stepSize, parameter, new PCTMC[1]);
+        NumericalPostprocessor postprocessor = runTheProbedSystem
+            (model, mainDef, constants, null, stateObservers,
+             new ArrayList<AbstractExpression> (),
+             new HashMap<String, Integer> (), steadyStateTime,
+             stepSize, parameter, new PCTMC[1]);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
         double[][] matchVal = getStartingStates
@@ -163,7 +162,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         List<AbstractExpression> beginActionExpr
             = new ArrayList<AbstractExpression> ();
         beginActionExpr.add (CombinedProductExpression.createMeanExpression
-                (new GPEPAActionCount (BEGIN_SIGNAL)));
+            (new GPEPAActionCount (BEGIN_SIGNAL)));
 
         // initial upto begin signal
         postprocessor = runTheProbedSystem
@@ -178,8 +177,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         List<AbstractExpression> statesCountExpressionsA
             = new ArrayList<AbstractExpression> ();
-        Map<String, AbstractExpression> mappingA
-            = new HashMap<String, AbstractExpression> ();
+        Map<String, Integer> mappingA = new HashMap<String, Integer> ();
         // main after begin signal
         NumericalPostprocessor postprocessorA = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
@@ -217,7 +215,7 @@ public class SimProbeRunner extends AbstractProbeRunner
                 (evaluator, times, constants);
 
             assignNewCounts (crates, definitionsMap, mainDef, model,
-                    statesCountExpressions, mapping, matchVal[i], transientVal);
+                    mapping, matchVal[i], transientVal);
             GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
             postprocessorA.calculateDataPoints (constants);
 
@@ -251,8 +249,8 @@ public class SimProbeRunner extends AbstractProbeRunner
             }
         }
 
-        double[] cdf = passageTimeCDF (overallMeasurements, pairs,
-                accepting, statesCountExpressionsA, mappingA);
+        double[] cdf = passageTimeCDF (overallMeasurements,
+                pairs, accepting, mappingA);
         return new CDF (name, stepSize, cdf);
     }
 
@@ -260,33 +258,30 @@ public class SimProbeRunner extends AbstractProbeRunner
         (GlobalProbe gprobe, GroupedModel model,
          Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, Set<String> countActions,
+         Map<String, Integer> mapping, Set<String> countActions,
          ComponentId accepting, Constants constants,
          PEPAComponentDefinitions mainDef,
          double stopTime, double stepSize, int parameter)
     {
-        NumericalPostprocessor postprocessor = runTheProbedSystem (model,
-                mainDef, constants, null, stateObservers,
-                statesCountExpressions, mapping, stopTime, stepSize, parameter,
-                new PCTMC[1]);
+        NumericalPostprocessor postprocessor = runTheProbedSystem
+            (model, mainDef, constants, null, stateObservers,
+             statesCountExpressions, mapping, stopTime, stepSize, parameter,
+             new PCTMC[1]);
 
         double[][] values = postprocessor
             .evaluateExpressions (statesCountExpressions, constants);
 
         double[] cdf = passageTimeCDF (values,
-                model.getGroupComponentPairs (mainDef),
-                accepting, statesCountExpressions, mapping);
+                model.getGroupComponentPairs (mainDef), accepting, mapping);
         return new CDF (gprobe.getName (), stepSize, cdf);
     }
 
     @Override
     protected void assignNewCounts
-            (LinkedHashMap<GroupComponentPair, AbstractExpression> crates,
-             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-             PEPAComponentDefinitions definitions, GroupedModel model,
-             List<AbstractExpression> statesCountExpressions,
-             Map<String, AbstractExpression> mapping,
-             double[] matchVal, double[] origVal)
+        (LinkedHashMap<GroupComponentPair, AbstractExpression> crates,
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+         PEPAComponentDefinitions definitions, GroupedModel model,
+         Map<String, Integer> mapping, double[] matchVal, double[] origVal)
     {
         Map<GroupComponentPair, AbstractExpression> newCounts
             = new HashMap<GroupComponentPair, AbstractExpression> ();
@@ -316,8 +311,7 @@ public class SimProbeRunner extends AbstractProbeRunner
             else
             {
                 newCounts.put (gc, new DoubleExpression
-                    (origVal[statesCountExpressions.indexOf
-                            (mapping.get (gc.toString ()))]));
+                    (origVal[mapping.get(gc.toString())]));
             }
             ++i;
         }

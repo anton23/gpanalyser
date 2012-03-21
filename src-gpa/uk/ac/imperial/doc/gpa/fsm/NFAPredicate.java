@@ -11,10 +11,7 @@ public abstract class NFAPredicate
 {
     protected String predicateString = "";
 
-    public abstract boolean eval (
-        List<AbstractExpression> statesCountExpressions,
-        Map<String, AbstractExpression> mapping, double[] data
-    );
+    public abstract boolean eval (Map<String, Integer> mapping, double[] data);
 
     public String getPredicateString ()
     {

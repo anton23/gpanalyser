@@ -2,29 +2,23 @@ package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
 import uk.ac.imperial.doc.gpa.fsm.NFAPredicate;
 import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class UExpressionVisitor
 {
-    double[][] states;
-    double stopTime;
-    double stepSize;
-    List<AbstractExpression> statesCountExpressions;
-    Map<String, AbstractExpression> mapping;
+    private double[][] states;
+    private double stopTime;
+    private double stepSize;
+    private Map<String, Integer> mapping;
 
-    public UExpressionVisitor
-        (double[][] states, double stopTime, double stepSize,
-         List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping)
+    public UExpressionVisitor (double[][] states,
+        double stopTime, double stepSize, Map<String, Integer> mapping)
     {
         this.states = states;
         this.stopTime = stopTime;
         this.stepSize = stepSize;
-        this.statesCountExpressions = statesCountExpressions;
         this.mapping = mapping;
     }
 
@@ -54,7 +48,7 @@ public class UExpressionVisitor
         AbstractUExpression R2 = expression.getR2 ();
         R2.accept (this, time);
         expression.setEvaluatedTime
-                (Math.min (R1.getEvaluatedTime (), R2.getEvaluatedTime ()));
+            (Math.min (R1.getEvaluatedTime (), R2.getEvaluatedTime ()));
     }
 
     public void visit (PredUExpression expression, double time)
@@ -62,7 +56,7 @@ public class UExpressionVisitor
         AbstractUExpression R = expression.getR ();
         R.accept (this, time);
         expression.setEvaluatedTime
-                (evalPred (expression.getPredicate(), R.getEvaluatedTime()));
+            (evalPred (expression.getPredicate(), R.getEvaluatedTime()));
     }
 
     public void visit (ActionsUExpression expression, double time)
@@ -99,7 +93,7 @@ public class UExpressionVisitor
 
     private double evalPred (NFAPredicate predicate, double startingTime)
     {
-        while (!predicate.eval (statesCountExpressions, mapping,
+        while (!predicate.eval (mapping,
             states[getTimeIndex (startingTime)]) && startingTime <= stopTime)
         {
             startingTime += stepSize;
@@ -114,11 +108,9 @@ public class UExpressionVisitor
         for (GPEPAActionCount action : actions)
         {
             atCurrent += states[getTimeIndex (time)]
-                    [statesCountExpressions.indexOf
-                    (mapping.get (action.getName ()))];
+                    [mapping.get(action.getName())];
             atStart += states[getTimeIndex (startingTime)]
-                    [statesCountExpressions.indexOf
-                    (mapping.get(action.getName ()))];
+                    [mapping.get(action.getName())];
         }
 
         return (atCurrent - atStart) >= n;

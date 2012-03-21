@@ -1,25 +1,32 @@
 rt  = 0.5;
-rg  = 0.3;
-rc  = 1.2;
-ri  = 0.7;
-rp  = 0.1;
+rg  = 0.4;
+rgp = 0.5;
+rs  = 0.9;
+rti = 0.05;
+ru  = 0.8;
+ri  = 0.6;
+rp  = 0.2;
 rcl = 0.4;
 
-nc = 10;
-np = 6;
+nc = 84;
+np = 28;
 
 Consumer			= (think, rt).Consumer_decided;
 Consumer_decided	= (get_product, rg).Consumer_prep;
-Consumer_prep		= (consume, rc).Consumer;
+Consumer_prep		= (use, ru).Consumer;
+
+Terminal			= (setup, rs).Terminal_get;
+Terminal_get		= (get_product, T).Terminal
+					+ (timeout, rti).Terminal;
 
 Producer			= (init, ri).Producer_inited;
 Producer_inited		= (produce, rp).Producer_full;
-Producer_full		= (get_product, T).Producer
+Producer_full		= (get_product, rgp).Producer
 					+ (clear, rcl).Producer;
 
-Consumers {Consumer[nc]} <get_product> Producers {Producer[np]}
+Consumers {Consumer [nc]} <get_product> Producers {(Producer <get_product> Terminal)[np]}
 
-SimProbe ["global10-6.dat"] (stopTime=300, stepSize=1, replications=5000)
+SimProbe ["globalNew84.dat"] (stopTime=500, stepSize=1, replications=5000)
 {
 	GPT = eE : start, end[nc * 0.3] : stop
 	observes
