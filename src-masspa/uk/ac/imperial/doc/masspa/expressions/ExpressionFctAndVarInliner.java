@@ -8,7 +8,6 @@ import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionTransformer;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
@@ -74,14 +73,17 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 		// Bound variable substitution failed
 		if (result == ce)
 		{
-			// Find global variable
+			// Local variable
 			Double value = m_constants.getConstantValue(localConstName);
-			value = (value == null) ? m_constants.getConstantValue(localConstName.replace(l.toString(), VarLocation.getInstance().toString())) : value;
-			if (value == null)
-			{
-				throw new AssertionError(String.format(Messages.s_COMPILER_CONST_UNDEFINED, localConstName));
-			}
-			result = new DoubleExpression(value);			
+			if (value != null) {result = new ConstantExpression(localConstName); return;}
+			
+			// Global variable
+			String varname = localConstName.replace(l.toString(), VarLocation.getInstance().toString());
+			value = m_constants.getConstantValue(varname);
+			if (value != null) {result = new ConstantExpression(varname); return;}
+			
+			// Variable doesn't exist
+			throw new AssertionError(String.format(Messages.s_COMPILER_CONST_UNDEFINED, localConstName));
 		}
 	}
 	

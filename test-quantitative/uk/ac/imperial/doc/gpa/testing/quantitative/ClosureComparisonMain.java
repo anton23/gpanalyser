@@ -2,11 +2,9 @@ package uk.ac.imperial.doc.gpa.testing.quantitative;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -27,8 +25,6 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessorC
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
-
-import com.google.common.collect.Lists;
 
 public class ClosureComparisonMain {
 
