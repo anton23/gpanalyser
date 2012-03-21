@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
@@ -16,7 +15,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
-import uk.ac.imperial.doc.masspa.expressions.ExpressionEvaluatorWithLocationConstants;
 import uk.ac.imperial.doc.masspa.expressions.ExpressionFctAndVarInliner;
 import uk.ac.imperial.doc.masspa.expressions.ExpressionPopProductCreator;
 import uk.ac.imperial.doc.masspa.language.Messages;
@@ -64,7 +62,18 @@ public class MASSPAToPCTMC
 		inlineVariables(_model, _variables, _constants);
 		List<EvolutionEvent> events = createEvolutionEvents(agentPops, actionCounts, initCounts, _variables, _constants, _model);	
 
+		
 		/*
+		for (Entry<String, Double> e : _constants.getConstantsMap().entrySet())
+		{
+			System.out.println (e.getKey() + "=" + e.getValue());
+		}
+		
+		for (Entry<ExpressionVariable, AbstractExpression> e : _variables.entrySet())
+		{
+			System.out.println (e.getKey() + "=" + e.getValue());
+		}
+
 		for (MASSPAAgentPop pop : agentPops)
 		{
 			System.out.println(pop.getNameAndInitPop());
@@ -135,18 +144,7 @@ public class MASSPAToPCTMC
 			String[] cnstNameSplit = cnst.split("@");
 			
 			// This constant may have placeholders in its expression
-			if (VarLocation.getInstance().toString().endsWith(cnstNameSplit[1]))
-			{
-				for (Location loc : _model.getAllLocations())
-				{
-					String localName = cnstNameSplit[0]+loc.toString();
-					if (_constants.getConstantValue(localName)==null)
-					{
-						_constants.setConstantValue(localName, _constants.getConstantValue(cnst));
-					}
-				}
-			}
-			else
+			if (!VarLocation.getInstance().toString().endsWith(cnstNameSplit[1]))
 			{
 				Location loc = LocationHelper.getLocalisedLocation(cnst, null);
 				if (!_model.getAllLocations().contains(loc))
@@ -228,20 +226,6 @@ public class MASSPAToPCTMC
 			return ProductExpression.create(eCreator.getResult(), new PopulationExpression(_pop));
 		}
 		return eCreator.getResult();
-	}
-	
-	public static double simplifyRate(AbstractExpression _rate, Constants _constants)
-	{
-		ExpressionEvaluatorWithConstants eval = new ExpressionEvaluatorWithConstants(_constants);
-		_rate.accept(eval);
-		return eval.getResult();
-	}
-
-	protected static double simplifyRateUsingLocationConsts(AbstractExpression _rate, Constants _constants, Location _loc)
-	{
-		ExpressionEvaluatorWithConstants eval = new ExpressionEvaluatorWithLocationConstants(_constants,_loc);
-		_rate.accept(eval);
-		return eval.getResult();
 	}
 	
 	protected static List<EvolutionEvent> createEvolutionEvents(
@@ -334,14 +318,10 @@ public class MASSPAToPCTMC
 											List<State> decreasing = new LinkedList<State>();
 
 											AbstractExpression msgEmissionRateExpr = ProductExpression.create(sp.getRate(),sp.getNofMsgsSent());
-											double msgEmissionRate = simplifyRateUsingLocationConsts(msgEmissionRateExpr,_constants,chan.getSender().getLocation());
-											double msgAccProb = simplifyRateUsingLocationConsts(rp.getAcceptanceProbability(),_constants,pop.getLocation());
 											AbstractExpression intensity = (AbstractExpression)chan.getIntensity();
 											
 											// Simplify acc prob * Intensity * msg emission rate expression
-											AbstractExpression rateExpr = ProductExpression.create(new DoubleExpression(msgAccProb),new DoubleExpression(msgEmissionRate));
-											double rate = simplifyRate(rateExpr,_constants);
-											if (rate == 0) {continue;}
+											AbstractExpression rateExpr = ProductExpression.create(msgEmissionRateExpr,rp.getAcceptanceProbability());
 
 											// Add any countActions to increasing set
 											addCountActions(increasing,decreasing,rp.getAction(),contPop.getLocation(),_actionCounts);
@@ -372,13 +352,13 @@ public class MASSPAToPCTMC
 													map2.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
 													ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
 													*/
-													ae = ProductExpression.create(ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))))),intensity);
+													ae = ProductExpression.create(ProductExpression.create(rateExpr,MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))))),intensity);
 					
 												}
 												else
 												{
-													rate *= simplifyRate(intensity,_constants);
-													ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
+													rateExpr = ProductExpression.create(intensity,rateExpr);
+													ae = ProductExpression.create(rateExpr,MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
 												}
 											}
 											else if (chan.getRateType() == MASSPAChannel.RateType.MASSACTION_ASYNC)
@@ -398,8 +378,8 @@ public class MASSPAToPCTMC
 //												}
 //												else
 //												{
-													rate *= simplifyRate(intensity,_constants);
-													ae = ProductExpression.create(new DoubleExpression(rate),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));
+													rateExpr = ProductExpression.create(intensity,rateExpr);
+													ae = ProductExpression.create(rateExpr,CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));
 //												}
 											}
 											events.add(new EvolutionEvent(decreasing, increasing, ae));
