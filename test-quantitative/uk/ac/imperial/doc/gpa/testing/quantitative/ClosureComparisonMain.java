@@ -2,11 +2,9 @@ package uk.ac.imperial.doc.gpa.testing.quantitative;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -28,13 +26,11 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPos
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
-import com.google.common.collect.Lists;
-
 public class ClosureComparisonMain {
 
 	protected String modelFile;// =
 								// "src-examples/scripts/closurecomparison/models/clientServer.gpepa";
-	protected String outputFile;
+	protected String outputFolder;
 
 	protected PCTMCInterpreter interpreter;
 	protected PCTMCFileRepresentation fileRepresentation;
@@ -64,8 +60,8 @@ public class ClosureComparisonMain {
 		OptionSet options = optionParser.parse(args);
 		this.interpreter = GPAPMain.processOptions(optionParser, options);
 		if (options.has("output")) {
-			outputFile = options.valueOf("output").toString();
-			System.out.println("Output file: " + outputFile);
+			outputFolder = options.valueOf("output").toString();
+			System.out.println("Output file: " + outputFolder);
 		}
 		modelFile = options.nonOptionArguments().iterator().next();
 	}
@@ -182,12 +178,13 @@ public class ClosureComparisonMain {
 		loadAnalyses();
 		compareInitial();
 		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, plots,
-				constants, ranges);
+				constants, ranges, outputFolder);
+
 		closureComparison.run(constants);
 		System.out.println("Finished.");
 		StringBuilder out = new StringBuilder();
-		if (outputFile != null) {
-			System.out.println("Saving results in the file " + outputFile);
+		if (outputFolder != null) {
+			System.out.println("Saving results in the file " + outputFolder);
 			double[][] maxAverage = closureComparison.getMaxAverage();
 			double[][] averageAverage = closureComparison.getAverageAverage();
 			for (int i = 0; i < maxAverage[0].length; i++) {
@@ -197,7 +194,7 @@ public class ClosureComparisonMain {
 				}
 				out.append("\n");
 			}
-			FileUtils.writeGeneralFile(out.toString(), outputFile);
+			FileUtils.writeGeneralFile(out.toString(), outputFolder+"/summary");
 		}
 
 	}
