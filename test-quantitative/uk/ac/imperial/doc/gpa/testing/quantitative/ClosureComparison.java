@@ -4,11 +4,16 @@ import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jfree.data.xy.XYSeriesCollection;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
+import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
-import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
@@ -22,45 +27,70 @@ public class ClosureComparison extends RangeRunner {
 
 	protected List<ODEAnalysisNumericalPostprocessor> postprocessors;
 
+	
+	protected List<PlotDescription> plots;
+	
 	protected List<AbstractExpression> expressions;
+	protected List<Integer> newPlotIndices;
+	
 
 	// Simulation
 	protected PCTMCSimulation simulation;
-	protected SimulationAnalysisNumericalPostprocessor simPostprocessor;
+	protected NumericalPostprocessor simPostprocessor;
 
 
 	protected ErrorEvaluator errorEvaluator;
 
-	// Results
-	protected double[][] maxAverage;
+	// Accumulated Results
+	protected double[][] maxAverage;  // postprocessor x expression
 	protected double[][] averageAverage;
 	protected int totalIterations;
+	
+	// Transient results
+	
+	protected double[][][] maxT; // postprocessor x expression x t  
+	protected double[][][] avgT; // postprocessor x expression x t
 
 	public ClosureComparison(
 			List<ODEAnalysisNumericalPostprocessor> postprocessors,
-			SimulationAnalysisNumericalPostprocessor simPostprocessor,
-			List<AbstractExpression> expressions,
+			NumericalPostprocessor simPostprocessor,
+			List<PlotDescription> plots,
 			Constants constants,
 			List<RangeSpecification> ranges, int nParts, boolean toplevel) {
 		super(ranges, toplevel);
 		this.postprocessors = postprocessors;
 		this.simPostprocessor = simPostprocessor;
-		this.expressions = expressions;
+		this.plots = plots;
+		this.expressions = new LinkedList<AbstractExpression>();
+		newPlotIndices = new LinkedList<Integer>();		
+		for (PlotDescription pd : plots) {
+			newPlotIndices.add(expressions.size());
+			expressions.addAll(pd.getExpressions());
+		}
+		newPlotIndices.add(expressions.size());
 		this.constants = constants;
 		prepareEvaluators();
 		this.parts = split(nParts);
 		maxAverage = new double[postprocessors.size()][expressions.size()];
 		averageAverage = new double[postprocessors.size()][expressions.size()];
+		maxT = new double[postprocessors.size()]
+		                 [(int)Math.ceil(simPostprocessor.getStopTime()/simPostprocessor.getStepSize())]
+		                 [expressions.size()]
+		                ;
+		avgT = new double[postprocessors.size()]
+		                 [(int)Math.ceil(simPostprocessor.getStopTime()/simPostprocessor.getStepSize())] 
+		                 [expressions.size()]
+		                ;
 		totalIterations = 0;
 	}
 	
 	public ClosureComparison(
 			List<ODEAnalysisNumericalPostprocessor> postprocessors,
-			SimulationAnalysisNumericalPostprocessor simPostprocessor,
-			List<AbstractExpression> expressions,
+			NumericalPostprocessor simPostprocessor,
+			List<PlotDescription> plots,			
 			Constants constants,
 			List<RangeSpecification> ranges) {
-		this(postprocessors, simPostprocessor, expressions, constants, ranges, PCTMCOptions.nthreads, true);
+		this(postprocessors, simPostprocessor, plots, constants, ranges, PCTMCOptions.nthreads, true);
 	}
 
 	@Override
@@ -71,9 +101,9 @@ public class ClosureComparison extends RangeRunner {
 			newPostprocessors.add((ODEAnalysisNumericalPostprocessor) p
 					.getNewPreparedPostprocessor(constants));
 		}
-		SimulationAnalysisNumericalPostprocessor newSimPostprocessor = (SimulationAnalysisNumericalPostprocessor) simPostprocessor
+		NumericalPostprocessor newSimPostprocessor = simPostprocessor
 				.getNewPreparedPostprocessor(constants);
-		return new ClosureComparison(newPostprocessors, newSimPostprocessor, expressions,
+		return new ClosureComparison(newPostprocessors, newSimPostprocessor, plots,
 				constants, ranges, nParts, false);
 	}
 
@@ -85,11 +115,14 @@ public class ClosureComparison extends RangeRunner {
 			totalIterations += part.getTotalIterations();
 			for (int i = 0; i < postprocessors.size(); i++) {
 				for (int j = 0; j < expressions.size(); j++) {
-					if (maxAverage[i][j] < part.getMaxAverage()[i][j]) {
-						maxAverage[i][j] = part.getMaxAverage()[i][j];
-					}
+					maxAverage[i][j] = Math.max(maxAverage[i][j], part.getMaxAverage()[i][j]);
 					averageAverage[i][j] += part.getAverageAverage()[i][j];
-				}
+					
+					for (int t = 0; t < part.getMaxT()[0][0].length; t++) {
+						maxT[i][t][j] = Math.max(maxT[i][t][j], part.getMaxT()[i][t][j]);
+						avgT[i][t][j] += part.getAvgT()[i][t][j];
+					}
+				}				
 			}
 		}
 
@@ -105,8 +138,15 @@ public class ClosureComparison extends RangeRunner {
 		System.out.println("Final summary:");
 		DecimalFormat df = new DecimalFormat("#.##");
 		for (int i = 0; i < postprocessors.size(); i++) {
+			int k = -1;
+			double[][] maxAggregateT = new double[maxT[0].length][plots.size()]; 
+			double[][] avgAggregateT = new double[maxT[0].length][plots.size()];
+			
 			System.out.println("Analysis " + i);
 			for (int j = 0; j < expressions.size(); j++) {
+				if (k + 1 < newPlotIndices.size() && j == newPlotIndices.get(k+1)) {
+					k++;
+				}
 				averageAverage[i][j] /= totalIterations;
 				System.out
 				.println(j
@@ -115,7 +155,59 @@ public class ClosureComparison extends RangeRunner {
 						+ "\t average: "
 						+ df
 								.format(averageAverage[i][j] * 100.0)
-);
+				);
+
+				for (int t = 0; t < maxT[0].length; t++) {					
+					maxAggregateT[t][k] = Math.max(maxAggregateT[t][k], maxT[i][t][j]);
+					avgAggregateT[t][k] += avgT[i][t][j];
+					
+					avgT[i][t][j] /= totalIterations;
+				}
+				
+			}
+			for (int t = 0; t < maxT[0].length; t++) {
+				for (int l = 0; l < plots.size(); l++) {
+					avgAggregateT[t][l] /= plots.get(l).getExpressions().size() * totalIterations;
+				}
+			}
+			
+			for (int l = 0; l < plots.size(); l++) {
+				double[][] dataMax = new double[maxT[0].length][plots.get(l).getExpressions().size()];
+				double[][] dataAvg = new double[maxT[0].length][plots.get(l).getExpressions().size()];
+				Integer start = newPlotIndices.get(l);
+				for (int j = start; j < newPlotIndices.get(l+1); j++) {
+					for (int t = 0; t < dataMax.length; t++) {
+						dataMax[t][j - start] = maxT[i][t][j];
+						dataAvg[t][j - start] = avgT[i][t][j];
+					}
+				}
+				String[] names = new String[plots.get(l).getExpressions().size()];
+				int eI = 0;
+				for (AbstractExpression e : plots.get(l).getExpressions()) {
+					names[eI++] = e.toString();
+				}
+				XYSeriesCollection datasetMax = AnalysisUtils.getDatasetFromArray(dataMax,
+						simPostprocessor.getStepSize(), names);
+				PCTMCChartUtilities.drawChart(datasetMax, "time", "count", "Max",
+						i + "");
+				
+				XYSeriesCollection datasetAvg = AnalysisUtils.getDatasetFromArray(dataAvg,
+						simPostprocessor.getStepSize(), names);
+				PCTMCChartUtilities.drawChart(datasetAvg, "time", "count", "Avg",
+						i + "");
+			}
+			
+			
+			for (int l = 0; l < plots.size(); l++) {
+				double[][] data = new double[maxAggregateT.length][2];
+				for (int t = 0; t < data.length; t++) {
+					data[t][0] = maxAggregateT[t][l];
+					data[t][1] = avgAggregateT[t][l];
+				}
+				XYSeriesCollection dataset3 = AnalysisUtils.getDatasetFromArray(data,
+						simPostprocessor.getStepSize(), new String[]{plots.get(l).toString() + " max max", plots.get(l).toString() + " avg avg"});
+				PCTMCChartUtilities.drawChart(dataset3, "time", "count", "Aggregate",
+						i + "");
 			}
 		}
 
@@ -132,18 +224,27 @@ public class ClosureComparison extends RangeRunner {
 	public void runAnalyses(Constants constants) {
 		System.out.println("Running analyses");
 		totalIterations++;
-		ErrorSummary[][] errors = errorEvaluator.calculateErrors(constants);
+		errorEvaluator.calculateErrors(constants);
+		ErrorSummary[][] errors = errorEvaluator.getAccumulatedErrors();
+		double[][][] transientErrors = errorEvaluator.getTransientErrors();
 		for (int i = 0; i < errors.length; i++) {
 			for (int j = 0; j < errors[0].length; j++) {
-				if (maxAverage[i][j] < errors[i][j].getAverageRelative()) {
-					maxAverage[i][j] = errors[i][j].getAverageRelative();
-				}
+				maxAverage[i][j] = Math.max(maxAverage[i][j], errors[i][j].getAverageRelative());
 				averageAverage[i][j] += errors[i][j].getAverageRelative();
+				
+				for (int t = 0; t < transientErrors[0].length; t++) {
+					maxT[i][t][j] = Math.max(maxT[i][t][j], transientErrors[i][t][j]);
+					avgT[i][t][j] += transientErrors[i][t][j];
+				}
 			}
 		}
-		simPostprocessor.plotData("Sim", constants, expressions, null);
-		for (int i = 0; i < postprocessors.size(); i++) {		
-			postprocessors.get(i).plotData(i+"", constants, expressions, null);
+		for (PlotDescription pd : plots) {
+			simPostprocessor.plotData("Sim", constants, pd.getExpressions(), null);
+		}
+		for (int i = 0; i < postprocessors.size(); i++) {
+			for (PlotDescription pd : plots) {
+				postprocessors.get(i).plotData(i+"", constants, pd.getExpressions(), null);
+			}
 		}
 		System.out.println(ErrorEvaluator.printSummary(errors));
 		System.out.println("Finished analyses");
@@ -157,7 +258,20 @@ public class ClosureComparison extends RangeRunner {
 		return averageAverage;
 	}
 
+	
+	
+	
+	public double[][][] getMaxT() {
+		return maxT;
+	}
+
+	public double[][][] getAvgT() {
+		return avgT;
+	}
+
 	public int getTotalIterations() {
 		return totalIterations;
 	}
+	
+	
 }

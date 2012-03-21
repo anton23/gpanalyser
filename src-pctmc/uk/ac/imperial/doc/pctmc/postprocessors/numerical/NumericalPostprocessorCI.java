@@ -27,6 +27,10 @@ public abstract class NumericalPostprocessorCI extends NumericalPostprocessor {
 	
 	protected List<PlotDescription> plotDescriptions;
 	
+	public void setPlotDescriptions(List<PlotDescription> plotDescriptions) {
+		this.plotDescriptions = plotDescriptions;
+	}
+
 	@Override
 	public final void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
@@ -52,7 +56,7 @@ public abstract class NumericalPostprocessorCI extends NumericalPostprocessor {
 			}
 		}
 	}
-
+	
 	protected Map<PlotDescription, double[][]> resultsCI;	
 	
 	public Map<PlotDescription, double[][]> getResultsCI() {
