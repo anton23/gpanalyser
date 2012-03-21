@@ -367,8 +367,7 @@ rga_action
 // Predicates for global
 
 pred
-	:	(logical_pred | negation)
-		((LOGICAL_OR | LOGICAL_AND) pred)? ;
+	:	(logical_pred | negation) (LOGICAL_OR pred)? ;
 
 negation
 	:	LOGICAL_NEGATION logical_pred

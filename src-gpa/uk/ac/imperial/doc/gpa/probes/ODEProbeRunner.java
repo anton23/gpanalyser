@@ -29,7 +29,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
     @Override
     protected CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, GroupedModel model,
+         Map<String, Integer> mapping, GroupedModel model,
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
@@ -58,9 +58,9 @@ public class ODEProbeRunner extends AbstractProbeRunner
         int sindex = (int) (maxTime / stepSize) - 1;
         // setting the absorbing model with new initial values and measuring
         assignNewCounts (crates, definitionsMap, mainDef, model,
-                statesCountExpressions, mapping, cratesVal[sindex], steadyVal);
+                mapping, cratesVal[sindex], steadyVal);
         statesCountExpressions = new LinkedList<AbstractExpression> ();
-        mapping = new HashMap<String, AbstractExpression> ();
+        mapping = new HashMap<String, Integer> ();
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (altDef);
         stateObservers = new HashSet<GPEPAState> ();
         for (GroupComponentPair pair : pairs)
@@ -74,8 +74,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
-        double[] cdf = passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                statesCountExpressions, mapping);
+        double[] cdf = passageTimeCDF (obtainedMeasurements,
+                pairs, accepting, mapping);
 
         return new CDF (name, stepSize, cdf);
     }
@@ -83,7 +83,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
     @Override
     protected CDF transientIndividual
         (List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, GroupedModel model,
+         Map<String, Integer> mapping, GroupedModel model,
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants, double stopTime,
@@ -120,7 +120,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             if (s > 0)
             {
                 assignNewCounts (crates, definitionsMap, mainDef, model,
-                        statesCountExpressions, mapping,
+                        mapping,
                         matchVal[i], transientVal[i]);
             }
 
@@ -129,8 +129,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
             double[][] obtainedMeasurements = postprocessor.evaluateExpressions
                 (evaluator, constants);
 
-            cdf[i] = passageTimeCDF (obtainedMeasurements, pairs, accepting,
-                    statesCountExpressions, mapping);
+            cdf[i] = passageTimeCDF (obtainedMeasurements,
+                    pairs, accepting, mapping);
             ++i;
             System.out.println ("Ran transient iteration " + i);
         }
@@ -158,7 +158,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
     protected CDF globalPassages
         (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
-         Map<String, AbstractExpression> mapping, Set<String> countActions,
+         Map<String, Integer> mapping, Set<String> countActions,
          ComponentId accepting, Constants constants,
          PEPAComponentDefinitions mainDef,
          double stopTime, double stepSize, int parameter)
@@ -171,7 +171,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             (statesCountExpressions, constants);
         AbstractUExpression u = gprobe.getU ();
         UExpressionVisitor visitor = new UExpressionVisitor
-            (states, stopTime, stepSize, statesCountExpressions, mapping);
+            (states, stopTime, stepSize, mapping);
 
         u.accept (visitor, 0);
 

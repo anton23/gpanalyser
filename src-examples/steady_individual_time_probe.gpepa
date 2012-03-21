@@ -76,3 +76,18 @@ Probe ["steady.txt"]
     		Clients {CB <data_tfr, cont_tfr, clt_shutdown> LProbe | CB[nc-1]}
     }
 }
+
+SimProbe ["steadySim.txt"]
+	(stopTime=350, stepSize=1, replications=5000) steady 500
+{
+    SIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = ((data_tfr; cont_tfr) / clt_shutdown) : begin, clt_shutdown : end <-
+    }
+    where
+    {
+    	Clients {CB[nc]} =>
+    		Clients {CB <data_tfr, cont_tfr, clt_shutdown> LProbe | CB[nc-1]}
+    }
+}

@@ -62,7 +62,7 @@ ChanBusy2 = (cont_tfr, rcont).Chan
 
 Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
 
-SimProbe (stopTime=150, stepSize=1, replications=5000) transient 165
+Probe (stopTime=150, stepSize=1, density=10) transient 165
 {
 	TIPT = begin : start, end : stop
 	observes
@@ -76,7 +76,7 @@ SimProbe (stopTime=150, stepSize=1, replications=5000) transient 165
 	}
 }
 
-Probe (stopTime=150, stepSize=1, density=10) transient 165
+SimProbe (stopTime=150, stepSize=1, replications=5000) transient 165
 {
 	TIPT = begin : start, end : stop
 	observes
