@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.jfree.data.xy.XYSeriesCollection;
 
+import com.google.common.collect.Lists;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
@@ -15,6 +17,7 @@ import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class ClosureComparison extends RangeRunner {
@@ -50,18 +53,23 @@ public class ClosureComparison extends RangeRunner {
 	
 	protected double[][][] maxT; // postprocessor x expression x t  
 	protected double[][][] avgT; // postprocessor x expression x t
+	
+	protected String outputFolder;
 
 	public ClosureComparison(
 			List<ODEAnalysisNumericalPostprocessor> postprocessors,
 			NumericalPostprocessor simPostprocessor,
 			List<PlotDescription> plots,
 			Constants constants,
-			List<RangeSpecification> ranges, int nParts, boolean toplevel) {
+			List<RangeSpecification> ranges, 
+			String outputFolder,
+			int nParts, boolean toplevel) {
 		super(ranges, toplevel);
 		this.postprocessors = postprocessors;
 		this.simPostprocessor = simPostprocessor;
 		this.plots = plots;
 		this.expressions = new LinkedList<AbstractExpression>();
+		this.outputFolder = outputFolder;
 		newPlotIndices = new LinkedList<Integer>();		
 		for (PlotDescription pd : plots) {
 			newPlotIndices.add(expressions.size());
@@ -89,8 +97,9 @@ public class ClosureComparison extends RangeRunner {
 			NumericalPostprocessor simPostprocessor,
 			List<PlotDescription> plots,			
 			Constants constants,
-			List<RangeSpecification> ranges) {
-		this(postprocessors, simPostprocessor, plots, constants, ranges, PCTMCOptions.nthreads, true);
+			List<RangeSpecification> ranges,
+			String outputFolder) {
+		this(postprocessors, simPostprocessor, plots, constants, ranges, outputFolder, PCTMCOptions.nthreads, true);
 	}
 
 	@Override
@@ -104,7 +113,7 @@ public class ClosureComparison extends RangeRunner {
 		NumericalPostprocessor newSimPostprocessor = simPostprocessor
 				.getNewPreparedPostprocessor(constants);
 		return new ClosureComparison(newPostprocessors, newSimPostprocessor, plots,
-				constants, ranges, nParts, false);
+				constants, ranges, outputFolder, nParts, false);
 	}
 
 	@Override
@@ -134,10 +143,14 @@ public class ClosureComparison extends RangeRunner {
 	}
 
 	@Override
-	protected void processData(Constants constants) {	
+	protected void processData(Constants constants) {
+		
 		System.out.println("Final summary:");
 		DecimalFormat df = new DecimalFormat("#.##");
 		for (int i = 0; i < postprocessors.size(); i++) {
+			if (outputFolder != null) {
+				FileUtils.createNeededDirectories(outputFolder+"/" + i + "/tmp");
+			}
 			int k = -1;
 			double[][] maxAggregateT = new double[maxT[0].length][plots.size()]; 
 			double[][] avgAggregateT = new double[maxT[0].length][plots.size()];
@@ -195,6 +208,14 @@ public class ClosureComparison extends RangeRunner {
 						simPostprocessor.getStepSize(), names);
 				PCTMCChartUtilities.drawChart(datasetAvg, "time", "count", "Avg",
 						i + "");
+				
+				if (outputFolder != null) {
+					FileUtils.writeCSVfile(outputFolder + "/" + i + "/max" + l, datasetMax);
+					FileUtils.writeGnuplotFile(outputFolder  + "/" + i + "/max" + l, "", Lists.newArrayList(names), "time", "count");
+					
+					FileUtils.writeCSVfile(outputFolder + "/" + i + "/avg" + l, datasetAvg);
+					FileUtils.writeGnuplotFile(outputFolder  + "/" + i + "/avg" + l, "", Lists.newArrayList(names), "time", "count");
+				}
 			}
 			
 			
@@ -204,10 +225,17 @@ public class ClosureComparison extends RangeRunner {
 					data[t][0] = maxAggregateT[t][l];
 					data[t][1] = avgAggregateT[t][l];
 				}
-				XYSeriesCollection dataset3 = AnalysisUtils.getDatasetFromArray(data,
-						simPostprocessor.getStepSize(), new String[]{plots.get(l).toString() + " max max", plots.get(l).toString() + " avg avg"});
-				PCTMCChartUtilities.drawChart(dataset3, "time", "count", "Aggregate",
+				String[] names = new String[]{plots.get(l).toString() + " max max", plots.get(l).toString() + " avg avg"};
+				XYSeriesCollection datasetAggregate = AnalysisUtils.getDatasetFromArray(data,
+						simPostprocessor.getStepSize(), names);
+				PCTMCChartUtilities.drawChart(datasetAggregate, "time", "count", "Aggregate",
 						i + "");
+				
+				if (outputFolder != null) {
+					FileUtils.writeCSVfile(outputFolder + "/" + i + "/aggregate" + l, datasetAggregate);
+					FileUtils.writeGnuplotFile(outputFolder  + "/" + i + "/aggregate" + l, "", Lists.newArrayList(names), "time", "count");
+
+				}
 			}
 		}
 
