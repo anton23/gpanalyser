@@ -140,6 +140,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 	public void calculateDataPoints(Constants constants) {
 		if (mSimulation != null) {
 			simulate(constants);
+			setResults(constants, plotDescriptions);
 		}
 	}
 
