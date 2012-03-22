@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.math.MathException;
@@ -164,10 +165,14 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 		mAccUpdater.setRates(constants.getFlatConstants());
 		mUpdaterNoAdd.setRates(constants.getFlatConstants());
 
+		Map<Integer,CombinedPopulationProduct> momentIndexInverse = new HashMap<Integer,CombinedPopulationProduct>();
+		
 		int maxMomentOrder = 1;
+		int ind=0;
 		for (CombinedPopulationProduct cpp : momentIndex.keySet())
 		{
 			maxMomentOrder = Math.max(maxMomentOrder, cpp.getOrder());
+			momentIndexInverse.put(ind++, cpp);
 		}
 		
 		// Repeat simulation until moments are sufficiently accurate
@@ -192,23 +197,11 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 				{
 					mUpdater.update(dataPoints[t], tmp[t]);
 					mUpdaterNoAdd.update(curDataSamples, tmp[t]);
-					
-					//double n0 = reps;
-					//double n1 = reps+1;
+
 					for (int i=0; i<dataPoints[0].length; i++)
 					{
 						/** Online approximations of the first 4 central moments from the population samples
 						 *  see @link{http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Higher-order_statistics}*/
-						/*
-						double delta = curDataSamples[i] - incMoment[t][i][0];
-						double delta_n = delta / n1;
-						double delta_n2 = delta_n * delta_n;
-						double term1 = delta * delta_n * n0;
-						incMoment[t][i][0] += delta_n;
-						incMoment[t][i][3] += term1 * delta_n2 * (n1*n1 - 3*n1 + 3) + 6 * delta_n2 * incMoment[t][i][1] - 4 * delta_n * incMoment[t][i][2];
-						incMoment[t][i][2] += term1 * delta_n * (n1 - 2) - 3 * delta_n * incMoment[t][i][1];
-						incMoment[t][i][1] += term1;
-						*/
 						// Compute \sumX^4,\sumX^3,\sumX^2
 						double curDataSamplesSq =  curDataSamples[i] * curDataSamples[i];
 						incMoment[t][i][0] += curDataSamples[i];
@@ -236,7 +229,20 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 			{
 				for (int i=0; i<dataPoints[0].length; i++)
 				{
-					maxRelCIChange = Math.max(maxRelCIChange,getRelCIWidth(incMoment[t][i], ci, reps, maxMomentOrder));
+					CombinedPopulationProduct cpp = momentIndexInverse.get(i);
+					if (cpp.getOrder() == 1)
+					{
+						cpp=CombinedPopulationProduct.getProductOf(cpp, cpp);
+						Integer index = momentIndex.get(cpp);
+						if (index == null)
+						{
+							maxRelCIChange = Math.max(maxRelCIChange,getRelCIWidthMean(incMoment[t][i], ci, reps, maxMomentOrder));
+						}
+						else
+						{
+							maxRelCIChange = Math.max(maxRelCIChange,getRelCIWidthVar(incMoment[t][i], ci, reps, maxMomentOrder));
+						}
+					}
 				}
 			}
 			
@@ -280,7 +286,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 						{
 							CombinedPopulationProduct cpp = m.getCombinedProducts().get(0);
 							int index = momentIndex.get(cpp);
-							double relCIWidth = getRelCIWidth(incMoment[t][index], ci, reps, maxMomentOrder);
+							double relCIWidth = getRelCIWidthMean(incMoment[t][index], ci, reps, maxMomentOrder);
 							confidenceIntervalWidth[i1][t][i2] = values[i2]*(relCIWidth);
 						}
 					}
@@ -291,7 +297,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 						{
 							CombinedPopulationProduct cpp = ((CombinedProductExpression)cm.getOriginalExpression()).getProduct();
 							int index = momentIndex.get(cpp);
-							double relCIWidth = getRelCIWidth(incMoment[t][index], ci, reps, maxMomentOrder);
+							double relCIWidth = getRelCIWidthVar(incMoment[t][index], ci, reps, maxMomentOrder);
 							confidenceIntervalWidth[i1][t][i2] = values[i2]*(relCIWidth);
 						}
 					}
@@ -302,7 +308,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 						{
 							CombinedPopulationProduct cpp = ((CombinedProductExpression)scm.getOriginalExpression()).getProduct();
 							int index = momentIndex.get(cpp);
-							double relCIWidth = Math.sqrt(getRelCIWidth(incMoment[t][index], ci, reps, maxMomentOrder)+1)-1;
+							double relCIWidth = Math.sqrt(getRelCIWidthVar(incMoment[t][index], ci, reps, maxMomentOrder)+1)-1;
 							confidenceIntervalWidth[i1][t][i2] = values[i2]*(relCIWidth);
 						}
 					}
@@ -314,28 +320,38 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 		PCTMCLogging.decreaseIndent();
 	}
 
-	private double getRelCIWidth(final double[] _moments, final double _ci, final double _n, final int _maxMomentOrder)
+	private double getRelCIWidthMean(final double[] _moments, final double _ci, final double _n, final int _maxMomentOrder)
 	{
-		/** Computation of Confidence Intervals for sample mean and sample variance of populations
-		* see @link{ http://mathworld.wolfram.com/SampleVarianceDistribution.html}*/
+		double sampleMean = _moments[0]/_n;
+		double sampleVar  = (_moments[1] - _n*sampleMean*sampleMean)/(_n-1); // Actually this is just sum(X_i-\mu)^2/n
+		
+		// Mean confidence interval
+		if (sampleMean > 1 && sampleVar > 1)
+		{
+			return _ci * Math.sqrt(sampleVar/_n)/ sampleMean;
+		}
+		return 0;
+	}
+	
+	private double getRelCIWidthVar(final double[] _moments, final double _ci, final double _n, final int _maxMomentOrder)
+	{
 		double sampleMean = _moments[0]/_n;
 		double sampleVar  = (_moments[1] - _n*sampleMean*sampleMean)/(_n-1); // Actually this is just sum(X_i-\mu)^2/n
 		double sample4thCM = _moments[3]/_n - 4*sampleMean*_moments[2]/_n + 6*sampleMean*sampleMean*_moments[1]/_n - 3*sampleMean*sampleMean*sampleMean*sampleMean; // Actually this is just sum(X_i-\mu)^4/n
 		double reps1Div=(_n-1)/_n;
 		double reps3Div=(_n-3)/_n;
-		double term1 = reps1Div*reps1Div*sample4thCM/_n;
-		double term2 = reps1Div*reps3Div*sampleVar*sampleVar/_n;
-		double sampleVarVar = term1 - term2;
+		double term1 = reps1Div*reps1Div*sample4thCM;
+		double term2 = reps1Div*reps3Div*sampleVar*sampleVar;
+		double distSqSampleVar = (term1 - term2);
 		
 		// Mean confidence interval
 		double maxRelCIChangeMean = 0;
 		double maxRelCIChangeVar = 0;
-		if (sampleMean > 1 && sampleVar > 0.1)
+		if (sampleMean > 1 && sampleVar > 1)
 		{
 			maxRelCIChangeMean = _ci * Math.sqrt(sampleVar/_n)/ sampleMean;
-			maxRelCIChangeVar = (_maxMomentOrder > 1) ? _ci * Math.sqrt(sampleVarVar/_n)/ sampleVar : 0;
+			maxRelCIChangeVar = (_maxMomentOrder > 1) ? _ci * Math.sqrt(distSqSampleVar/_n)/ sampleVar : 0;
 		}
 		return Math.max(maxRelCIChangeMean, maxRelCIChangeVar);
 	}
-
 }
