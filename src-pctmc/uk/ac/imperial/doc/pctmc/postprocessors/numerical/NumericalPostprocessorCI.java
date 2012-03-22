@@ -23,7 +23,7 @@ public abstract class NumericalPostprocessorCI extends NumericalPostprocessor {
 	}
 
 
-	protected double[][][] confidenceIntervalWidth;
+	protected double[][][] absHalfCIWidth;
 	
 	protected List<PlotDescription> plotDescriptions;
 	
@@ -46,9 +46,9 @@ public abstract class NumericalPostprocessorCI extends NumericalPostprocessor {
 			for (PlotDescription pd:plotDescriptions)
 			{
 				double[][] ci = null;
-				if (confidenceIntervalWidth!=null)
+				if (absHalfCIWidth!=null)
 				{
-					ci = confidenceIntervalWidth[index++];
+					ci = absHalfCIWidth[index++];
 					resultsCI.put(pd, ci);
 				}
 				double[][] data = plotData(analysis.toString(), constants, ci, pd.getExpressions(), pd.getFilename());
