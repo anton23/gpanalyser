@@ -30,7 +30,7 @@ public class ClosureComparisonMain {
 
 	protected String modelFile;// =
 								// "src-examples/scripts/closurecomparison/models/clientServer.gpepa";
-	protected String outputFile;
+	protected String outputFolder;
 
 	protected PCTMCInterpreter interpreter;
 	protected PCTMCFileRepresentation fileRepresentation;
@@ -60,8 +60,8 @@ public class ClosureComparisonMain {
 		OptionSet options = optionParser.parse(args);
 		this.interpreter = GPAPMain.processOptions(optionParser, options);
 		if (options.has("output")) {
-			outputFile = options.valueOf("output").toString();
-			System.out.println("Output file: " + outputFile);
+			outputFolder = options.valueOf("output").toString();
+			System.out.println("Output file: " + outputFolder);
 		}
 		modelFile = options.nonOptionArguments().iterator().next();
 	}
@@ -178,12 +178,13 @@ public class ClosureComparisonMain {
 		loadAnalyses();
 		compareInitial();
 		ClosureComparison closureComparison = new ClosureComparison(postprocessors, simPostprocessor, plots,
-				constants, ranges);
+				constants, ranges, outputFolder);
+
 		closureComparison.run(constants);
 		System.out.println("Finished.");
 		StringBuilder out = new StringBuilder();
-		if (outputFile != null) {
-			System.out.println("Saving results in the file " + outputFile);
+		if (outputFolder != null) {
+			System.out.println("Saving results in the file " + outputFolder);
 			double[][] maxAverage = closureComparison.getMaxAverage();
 			double[][] averageAverage = closureComparison.getAverageAverage();
 			for (int i = 0; i < maxAverage[0].length; i++) {
@@ -193,7 +194,7 @@ public class ClosureComparisonMain {
 				}
 				out.append("\n");
 			}
-			FileUtils.writeGeneralFile(out.toString(), outputFile);
+			FileUtils.writeGeneralFile(out.toString(), outputFolder+"/summary");
 		}
 
 	}
