@@ -246,7 +246,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 				}
 			}
 			
-			PCTMCLogging.info("Max relative CI width: " + maxRelCIChange + " Max relative CI width tol: " + mMaxRelCIWidth);
+			PCTMCLogging.info("Max relative "+mCI*100+"%-CI width: " + maxRelCIChange + ", convergence threshold <" + mMaxRelCIWidth);
 			if (maxRelCIChange < mMaxRelCIWidth)
 			{
 				accurate=true;
