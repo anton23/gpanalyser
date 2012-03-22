@@ -1,0 +1,15 @@
+
+syntax: regexp
+^build$
+syntax: regexp
+^genSrc$
+syntax: regexp
+^tmp$
+syntax: regexp
+^matlab$
+syntax: regexp
+^debug$
+syntax: regexp
+^reports$
+syntax: regexp
+^test-build$
