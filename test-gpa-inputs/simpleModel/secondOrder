@@ -1,0 +1,7 @@
+E[As:A^2];
+		
+dE[As:A]/dt = - E[As:A] * ra + E[As:B] * rb;
+dE[As:B]/dt = E[As:A] * ra - E[As:B] * rb;		
+dE[As:A^2]/dt = -2*E[As:A^2] * ra + E[As:A] * ra + 2*E[As:A As:B] * rb + E[As:B] * rb;
+dE[As:B^2]/dt = -2*E[As:B^2] * rb + E[As:B] * rb + 2*E[As:A As:B] * ra + E[As:A] * ra;
+dE[As:A As:B]/dt = E[As:A^2] * ra - E[As:A As:B] * ra - E[As:A] * ra + E[As:B^2] * rb - E[As:A As:B] * rb - E[As:B] * rb;
