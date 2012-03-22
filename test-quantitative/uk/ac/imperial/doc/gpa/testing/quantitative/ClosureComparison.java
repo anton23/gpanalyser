@@ -15,6 +15,7 @@ import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessorCI;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
@@ -267,7 +268,11 @@ public class ClosureComparison extends RangeRunner {
 			}
 		}
 		for (PlotDescription pd : plots) {
-			simPostprocessor.plotData("Sim", constants, pd.getExpressions(), null);
+			if (simPostprocessor instanceof NumericalPostprocessorCI) {
+				((NumericalPostprocessorCI)simPostprocessor).plotData("Sim", constants, ((NumericalPostprocessorCI) simPostprocessor).getResultsCI().get(pd), pd.getExpressions(), null);
+			} else {
+				simPostprocessor.plotData("Sim", constants, pd.getExpressions(), null);
+			}				
 		}
 		for (int i = 0; i < postprocessors.size(); i++) {
 			for (PlotDescription pd : plots) {
