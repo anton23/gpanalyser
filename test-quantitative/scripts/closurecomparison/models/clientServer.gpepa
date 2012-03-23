@@ -1,0 +1,51 @@
+rr = 2.0; 
+rtmt = 0.3; 
+rt = 0.27;
+rb = 0.1; 
+rd = 1.0; 
+rrst = 2.0; 
+
+n = 100; 
+m = 60;
+
+scale = 1;
+
+Client = (request,rr).Client_waiting; 
+Client_waiting = (data,rd).Client_think + (timeout, rtmt).Client; 
+Client_think = (think,rt).Client; 
+
+Server = (request,rr).Server_get + (break,rb).Server_broken;
+Server_get = (data,rd).Server + (break,rb).Server_broken;
+Server_broken = (reset,rrst).Server; 
+
+Clients{Client[n * scale]}<request,data>Servers{Server[m * scale]}
+
+ODEs[momentClosure=NormalClosure, maxOrder=2](stopTime=200.2,stepSize=0.2,density=10){
+	E[Clients:Client], E[Clients:Client_waiting], E[Clients:Client_think];
+	E[Servers:Server], E[Servers:Server_get], E[Servers:Server_broken];
+	
+	Var[Clients:Client], Var[Clients:Client_waiting], Var[Clients:Client_think];
+	Var[Servers:Server], Var[Servers:Server_get], Var[Servers:Server_broken];	
+}
+
+ODEs[momentClosure=NormalClosureMinApproximation, maxOrder=2](stopTime=200.2,stepSize=0.2,density=10){
+	E[Clients:Client], E[Clients:Client_waiting], E[Clients:Client_think];
+	E[Servers:Server], E[Servers:Server_get], E[Servers:Server_broken];
+	
+	Var[Clients:Client], Var[Clients:Client_waiting], Var[Clients:Client_think];
+	Var[Servers:Server], Var[Servers:Server_get], Var[Servers:Server_broken];
+}
+
+Simulation(stopTime=200.2, stepSize=0.2, replications=10000) {
+	E[Clients:Client], E[Clients:Client_waiting], E[Clients:Client_think];
+	E[Servers:Server], E[Servers:Server_get], E[Servers:Server_broken];
+	
+	Var[Clients:Client], Var[Clients:Client_waiting], Var[Clients:Client_think];
+	Var[Servers:Server], Var[Servers:Server_get], Var[Servers:Server_broken];
+}
+
+Iterate n from 40.0 to 100.0 with step 20.0
+        rtmt from 0.0 to 1.0 in 2 steps
+ODEs(stopTime=200.2,stepSize=0.2,density=10){} plot {
+	1.0 at 1.0;
+}

@@ -1,0 +1,20 @@
+mu = 2.0;
+pa = 0.1;
+pu = 0.1;
+scale = 100.0;
+
+gamma = 1.0;
+lambda = 0.5;
+
+$maxC = 100*scale;
+
+{B} -> {A} @ {B}*mu;
+{A} -> {U} @ {A}*pu;
+{U} -> {A} @ {U}*pa;
+
+{A} + {C} -> {B} @ [{C} > 0]*{A}*gamma;
+
+-> {C} @ [$maxC > {C}]*{A}*lambda;
+
+{C} = 50.0*scale;
+{U} = 150.0*scale;
