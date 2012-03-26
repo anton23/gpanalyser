@@ -1,6 +1,6 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +37,11 @@ public abstract class NumericalPostprocessorCI extends NumericalPostprocessor {
 			List<PlotDescription> _plotDescriptions){
 		plotDescriptions = _plotDescriptions;
 		prepare(analysis, constants);
-		calculateDataPoints(constants); 
+		calculateDataPoints(constants);
 		if (dataPoints!=null)
 		{
-			results = new HashMap<PlotDescription, double[][]>();
-			resultsCI = new HashMap<PlotDescription, double[][]>();
+			results = new LinkedHashMap<PlotDescription, double[][]>();
+			resultsCI = new LinkedHashMap<PlotDescription, double[][]>();
 			int index=0;
 			for (PlotDescription pd:plotDescriptions)
 			{
@@ -55,6 +55,28 @@ public abstract class NumericalPostprocessorCI extends NumericalPostprocessor {
 				results.put(pd, data);
 			}
 		}
+		setResults(constants, _plotDescriptions);
+	}
+	
+	public void setResults(Constants constants,			
+			List<PlotDescription> _plotDescriptions) {
+		if (dataPoints!=null)
+		{
+			results = new LinkedHashMap<PlotDescription, double[][]>();
+			resultsCI = new LinkedHashMap<PlotDescription, double[][]>();
+			int index=0;
+			for (PlotDescription pd:plotDescriptions)
+			{
+				double[][] ci = null;
+				if (absHalfCIWidth!=null)
+				{
+					ci = absHalfCIWidth[index++];
+					resultsCI.put(pd, ci);
+				}
+				results.put(pd, evaluateExpressions(pd.getExpressions(), constants));
+			}
+		}
+		
 	}
 	
 	protected Map<PlotDescription, double[][]> resultsCI;	
@@ -80,7 +102,7 @@ public abstract class NumericalPostprocessorCI extends NumericalPostprocessor {
 			double[][] data = evaluateExpressions(expressions, constants);
 			XYDataset dataset = AnalysisUtils.getDatasetFromArray(data, dataCI, stepSize, names);
 			PCTMCChartUtilities.drawDeviationChart(dataset, "time", "count", "",	analysisTitle+this.toString());
-			if (!filename.equals("")) {
+			if (filename != null && !filename.equals("")) {
 				List<String> labels = new LinkedList<String>();
 				for (AbstractExpression e : expressions) {
 					labels.add(e.toString());
