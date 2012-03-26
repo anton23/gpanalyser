@@ -4,11 +4,15 @@ package uk.ac.imperial.doc.gpa.testing.quantitative;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessorCI;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 
 public class ErrorEvaluator {
@@ -57,7 +61,22 @@ public class ErrorEvaluator {
 	public void calculateErrors(Constants constants) {		
 		simPostprocessor.calculateDataPoints(constants);
 		double[][] simValues = simPostprocessor.evaluateExpressions(simEvaluator, constants);
-		
+		double[][] simCI = null;
+		if (simPostprocessor instanceof NumericalPostprocessorCI) {
+			// Retreives the CI data. This is quite messy and relies on preserved ordering of PlotDescriptions
+			// in the resultsCI map.
+			Map<PlotDescription, double[][]> resultsCI = ((NumericalPostprocessorCI) simPostprocessor).getResultsCI();
+			simCI = new double[simValues.length][simValues[0].length];
+			int i = 0;
+			for (Entry<PlotDescription, double[][]> e : resultsCI.entrySet()) {			
+				for (int j = 0; j < e.getValue()[0].length; j++){
+					for (int t = 0; t < e.getValue().length; t++) {
+						simCI[t][i] = e.getValue()[t][j];
+					}
+					i++;
+				}				
+			}		
+		}
 		accumulatedErrors = new ErrorSummary[postprocessors.size()][simValues[0].length];
 		transientErrors = new double[postprocessors.size()][simValues.length][simValues[0].length];
 
@@ -74,11 +93,23 @@ public class ErrorEvaluator {
 				double averageAccError = 0.0; 
 				for (int t = 0; t < simValues.length; t++) {
 					totalAccValue += Math.abs(simValues[t][j]);
-					totalAccError += Math.abs(values[t][j] - simValues[t][j]);
-					averageAccError += simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]);
-					maxRelativeAccError = Math.max(simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]), maxRelativeAccError);
+					double absError = Math.abs(values[t][j] - simValues[t][j]);
+					if (simCI != null) {
+						double ci = simCI[t][j];
+						if (values[t][j] < simValues[t][j] - ci) {
+							absError =  (simValues[t][j] - ci) - values[t][j];
+						} else 
+						if (values[t][j] > simValues[t][j] + ci) {
+							absError = values[t][j] - (simValues[t][j] + ci);
+						} else {
+							absError = 0.0;
+						}
+					}
+					totalAccError += absError;
+					averageAccError += simValues[t][j] == 0 ? 0.0 : absError/Math.abs(simValues[t][j]);
+					maxRelativeAccError = Math.max(simValues[t][j] == 0 ? 0.0 : absError/Math.abs(simValues[t][j]), maxRelativeAccError);
 
-					transientError[t][j] = simValues[t][j] == 0 ? 0.0 : Math.abs(values[t][j] - simValues[t][j])/Math.abs(simValues[t][j]);
+					transientError[t][j] = simValues[t][j] == 0 ? 0.0 : absError/Math.abs(simValues[t][j]);
 				}
 				accumulatedErrors[i][j] = new ErrorSummary(totalAccError/totalAccValue, maxRelativeAccError, averageAccError/simValues.length);
 			}
