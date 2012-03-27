@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public abstract class RangeRunner {
 	protected List<RangeSpecification> ranges;
@@ -94,7 +95,7 @@ public abstract class RangeRunner {
 			rangesArray[r] = ra;
 			r++;
 		}
-		int show = Math.max(totalSteps / 5, 1);
+		int show = PCTMCOptions.showIterations == 0 ? 0 : Math.max(totalSteps / PCTMCOptions.showIterations, 1);
 		int iterations = 0;
 		do {
 			for (int s = 0; s < step.length; s++) {
@@ -103,7 +104,7 @@ public abstract class RangeRunner {
 			}
 			runSingle(constants);
 			iterations++;
-			if ((iterations) % show == 0) {
+			if (show == 0 || (iterations) % show == 0) {
 				PCTMCLogging.infoForce(iterations + " out of " + totalSteps + " iterations finished.");
 			}
 		} while (next(step, steps));

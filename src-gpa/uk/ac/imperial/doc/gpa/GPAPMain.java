@@ -56,6 +56,9 @@ public class GPAPMain {
 				accepts("nthreads", "number of threads available to analyses")
 				.withRequiredArg().ofType(Integer.class)
 						.describedAs("number of threads");
+				accepts("showIterations", "proportion of iterations after which the number of finished iterations is shown")
+						.withRequiredArg().ofType(Integer.class)
+						.describedAs("1/proportion, e.g. 5 means the number of finished iterations is reported 4 times. 0 value reports after each iteration");
 
 				accepts("help", "show help");
 			}
@@ -108,6 +111,10 @@ public class GPAPMain {
 					PCTMCLogging.info("Using more threads (" + nthreads + ") than available processors (" + Runtime.getRuntime().availableProcessors() + ")");
 				}
 				PCTMCOptions.nthreads = nthreads;
+			}
+			if (options.has("showIterations")) {
+				Integer showIterations = (Integer)options.valueOf("showIterations");
+				PCTMCOptions.showIterations = showIterations;
 			}
 			if (options.has("plain")) {
 				interpreter = createPlainPCTMCInterpreter();
