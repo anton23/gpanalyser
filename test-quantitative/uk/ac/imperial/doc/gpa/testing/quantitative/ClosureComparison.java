@@ -19,6 +19,7 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessorC
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class ClosureComparison extends RangeRunner {
@@ -139,7 +140,7 @@ public class ClosureComparison extends RangeRunner {
 	}
 
 	@Override
-	protected void runSingle(Constants constants) {
+	protected void runSingle(Constants constants) {	
 		runAnalyses(constants);
 	}
 

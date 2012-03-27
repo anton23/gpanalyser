@@ -14,4 +14,6 @@ public class PCTMCOptions {
 	public static String debugFolder = "tmp";
 	
 	public static int maxVariables = 100000;
+	
+	public static int showIterations = 5;
 }
