@@ -19,6 +19,7 @@ import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisit
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
+import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;

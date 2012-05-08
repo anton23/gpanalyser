@@ -9,6 +9,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.LognormalMomentClosure;
+import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosureMinApproximation;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
