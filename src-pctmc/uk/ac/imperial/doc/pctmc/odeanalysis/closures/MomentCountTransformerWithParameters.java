@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.pctmc.odeanalysis;
+package uk.ac.imperial.doc.pctmc.odeanalysis.closures;
 
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionTransformerWithConstants;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;

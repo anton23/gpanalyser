@@ -33,7 +33,6 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
-import uk.ac.imperial.doc.pctmc.odeanalysis.MomentCountTransformerWithParameters;
 import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.representation.State;
 

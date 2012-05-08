@@ -8,7 +8,6 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
-import uk.ac.imperial.doc.pctmc.odeanalysis.MomentClosure;
 
 public class NormalMomentClosureMinApproximation extends NormalMomentClosure
 {
