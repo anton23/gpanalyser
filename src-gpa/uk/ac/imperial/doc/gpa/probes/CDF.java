@@ -24,8 +24,10 @@ public class CDF
         StringBuilder output = new StringBuilder ();
         for (int i = 0; i < values.length; ++i)
         {
-            output.append (name + "\t" + (i * stepSize)
-                + "\t" + values[i] + "\n");
+            output.append (i * stepSize);
+            output.append ('\t');
+            output.append (values[i]);
+            output.append ('\n');
         }
         return output.toString ();
     }
