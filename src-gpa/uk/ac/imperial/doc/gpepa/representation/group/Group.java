@@ -7,10 +7,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class representing a component group.
@@ -44,6 +41,10 @@ public class Group {
 		if (!counts.containsKey(component)) return DoubleExpression.ZERO; 
 		return counts.get(component); 
 	}
+
+    public Map<PEPAComponent,AbstractExpression> getCounts() {
+        return Collections.unmodifiableMap(counts);
+    }
 
     void setCounts(Map<PEPAComponent, AbstractExpression> counts) {
         this.counts = counts;

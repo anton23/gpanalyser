@@ -171,4 +171,18 @@ public class LabelledComponentGroup extends GroupedModel {
         (Map<GroupedModel, GroupedModel> groupedModels, GroupedModel owner) {
         groupedModels.put (this, owner);
     }
+
+    @Override
+    public Set<PEPAComponent> getInitialComponents() {
+        Map<PEPAComponent,AbstractExpression> counts = group.getCounts();
+        Set<PEPAComponent> pepaComponents = new HashSet<PEPAComponent>();
+        for (PEPAComponent component : counts.keySet())
+        {
+            if (!counts.get(component).equals(DoubleExpression.ZERO))
+            {
+                 pepaComponents.add(component);
+            }
+        }
+        return pepaComponents;
+    }
 }

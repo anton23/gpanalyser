@@ -90,4 +90,6 @@ public abstract class GroupedModel {
 	
 	public abstract void enumerateGroupedModelParents
         (Map<GroupedModel, GroupedModel> groupedModels, GroupedModel owner);
+
+    public abstract Set<PEPAComponent> getInitialComponents();
 }
