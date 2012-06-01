@@ -1,0 +1,54 @@
+r_think = 0.05;
+r_request = 0.8;
+r_timeout = 0.02;
+
+r_allocate = 0.5;
+r_allocate_helper = 0.5;
+
+r_solve_fast = 0.3;
+r_req_alloc = 0.8;
+r_solve_slow = 0.1;
+allocate_fast = 0.95;
+allocate_split = 0.05;
+
+nc = 100;
+ns = 60;
+
+Client			= (think, r_think).Client_think;
+Client_think	= (request, r_request).Client
+				+ (timeout, r_timeout).Client;
+
+Web_server				= (request, r_request).Web_server_request
+						+ (req_alloc, T).Web_server_req_alloc;
+Web_server_request		= check.Web_server_check;
+Web_server_check		= (allocate, r_allocate).Web_server
+						+ (timeout, r_timeout).Web_server;
+Web_server_req_alloc	= (allocate_helper, r_allocate_helper).Web_server;
+
+Server				= (allocate, T, allocate_fast).Server_solve_fast
+					+ (allocate, T, allocate_split).Server_split
+					+ (allocate_helper, T).Server_solve_slow;
+Server_solve_fast	= (solve_fast, r_solve_fast).Server;
+Server_split		= (req_alloc, r_req_alloc).Server_solve_slow;
+Server_solve_slow	= (solve_slow, r_solve_slow).Server;
+
+Clients {Client[nc]} <request, timeout>
+Servers{(Web_server <allocate, allocate_helper, req_alloc> Server)[ns]}
+
+/*
+ODEs (stopTime=5000.0, stepSize=0.1, density=10)
+{
+    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_solve_fast],
+    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_split],
+    E[%Servers:Web_server<allocate, allocate_helper, req_alloc>_],
+    E[Clients:Client];
+}
+*/
+
+Simulation (stopTime=2500.0, stepSize=0.1, replications=2000)
+{
+    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_solve_fast],
+    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_split],
+    E[%Servers:Web_server<allocate, allocate_helper, req_alloc>_],
+    E[Clients:Client];
+}

@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.gpepa.representation.model;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
@@ -319,5 +320,12 @@ public class GroupCooperation extends GroupedModel {
     {
         left.enumerateGroupedModelParents(groupedModels, this);
         right.enumerateGroupedModelParents(groupedModels, this);
+    }
+
+    @Override
+    public Set<PEPAComponent> getInitialComponents() {
+        Set<PEPAComponent> result = left.getInitialComponents();
+        result.addAll(right.getInitialComponents());
+        return result;
     }
 }

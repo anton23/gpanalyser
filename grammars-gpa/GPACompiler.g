@@ -215,7 +215,10 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   }
   (ca=countActions {cooperationActions=$countActions.cooperationActions;})?
   {
-    $pctmc  = GPEPAToPCTMC.getPCTMC(new PEPAComponentDefinitions($cd.componentDefinitions),$m.model,cooperationActions);
+  	PEPAComponentDefinitions nonvanish = new PEPAComponentDefinitions($cd.componentDefinitions)
+  		.removeVanishingStates($m.model.getInitialComponents());
+    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions);
+    System.out.println($pctmc);
   }
 ;
 
