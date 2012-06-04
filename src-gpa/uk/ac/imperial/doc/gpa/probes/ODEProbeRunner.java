@@ -55,7 +55,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         double[] steadyVal = postprocessor.evaluateExpressionsAtTimes
             (evaluator, times, constants);
 
-        int sindex = (int) (maxTime / stepSize) - 1;
+        int sindex = (int) (maxTime / stepSize);
         // setting the absorbing model with new initial values and measuring
         assignNewCounts (crates, definitionsMap, mainDef, model,
                 mapping, cratesVal[sindex], steadyVal);

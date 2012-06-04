@@ -1,0 +1,62 @@
+r_think = 0.5;
+r_request = 2;
+r_timeout = 0.07;
+
+r_prepare = 2;
+r_fail = 0.5;
+r_recover = 0.2;
+prepare_fast = 0.2;
+prepare_slow = 0.8;
+
+r_solve_fast = 0.7;
+r_solve_slow = 0.4;
+
+nc = 10;
+ns = 3;
+
+Client					= (think, r_think).Client_think;
+Client_think			= (request, r_request).Client
+						+ (timeout, r_timeout).Client;
+
+Server					= (prepare, r_prepare).Server_prepare
+						+ (fail, r_fail).Server_fail;
+Server_prepare			= randomize.Server_randomize;
+Server_randomize		= (request, r_request).Server;
+Server_fail				= (recover, r_recover).Server;
+
+Solver					= (prepare, T, prepare_fast).Solver_fast
+						+ (prepare, T, prepare_slow).Solver_slow;
+Solver_fast				= (request, r_solve_fast).Solver;
+Solver_slow				= (request, r_solve_slow).Solver;
+
+Complete_server = Solver <prepare, request> Server;
+
+Clients{Client[nc]} <request> Servers{Complete_server[ns]}
+
+Probe (stopTime=350.0, stepSize=0.1, density=10) steady 1000
+{
+    SIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = think : begin, request[10] : end <-
+    }
+    where
+    {
+    	Clients {Client[nc]} =>
+    		Clients {Client <think, request> LProbe | Client[nc-1]}
+    }
+}
+
+Probe (stopTime=350.0, stepSize=1, density=10) transient 500
+{
+    SIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = think : begin, timeout[10] : end
+    }
+    where
+    {
+    	Clients {Client[nc]} =>
+    		Clients {Client <think, timeout> LProbe | Client[nc-1]}
+    }
+}
