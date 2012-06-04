@@ -20,12 +20,12 @@ public class GPEPAToPCTMC {
     public static void updatePCTMC (PCTMC pctmc,
             PEPAComponentDefinitions componentDefinitions, GroupedModel model) {
 
-        BiMap<State,Integer> stateIndexes = pctmc.getStateIndex();
+        BiMap<State,Integer> stateIndices = pctmc.getStateIndex();
         AbstractExpression[] counts = pctmc.getInitCounts();
         for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
             GPEPAState state = new GPEPAState(p);
             AbstractExpression count = model.getCountExpression(p);
-            counts[stateIndexes.get(state)] = count;
+            counts[stateIndices.get(state)] = count;
             pctmc.getInitMap().put(state, count);
         }
         // here we should assign model to this GPEPAPCTMC, but not for testing

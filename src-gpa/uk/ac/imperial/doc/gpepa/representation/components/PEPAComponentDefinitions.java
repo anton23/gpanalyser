@@ -151,7 +151,7 @@ public class PEPAComponentDefinitions {
                 // if this component has no predecessor,
                 // it might be the first one and we will cheat - make its
                 // signal go immediately
-                if (!predecessorExists) {
+                if (!predecessorExists && initialComponent.contains(shorthand)) {
                     choicesToRemove.remove (shorthand.toString());
                     choice.getChoices().remove(imm);
                     choice.getChoices().add(new Prefix(imm.getAction(),
