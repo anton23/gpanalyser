@@ -1,10 +1,10 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.io.File;
 import java.util.Map;
@@ -55,8 +55,8 @@ public class AccumulatorUpdaterPrinter
         classOutput.append("public class " + nativeClassName + " extends "
                 + NativeAccumulatorUpdater.class.getSimpleName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
-        classOutput.append("static { System.loadLibrary (\""
-                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
+        classOutput.append("static { System.load (\""
+                + CPPClassCompiler.getNativeLibraryPath(nativeClassName) + "\"); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[] updateI(double[] counts,"
                 + " double delta, double[] r);\n");

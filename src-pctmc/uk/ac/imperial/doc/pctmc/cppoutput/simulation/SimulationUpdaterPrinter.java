@@ -3,10 +3,10 @@ package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 import com.google.common.collect.BiMap;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.io.File;
 import java.util.Map;
@@ -62,8 +62,8 @@ public class SimulationUpdaterPrinter
             classOutput.append("public class " + nativeClassName + " extends "
                     + NativeSimulationUpdater.class.getSimpleName() + "\n{\n");
             classOutput.append("public " + nativeClassName + "() {}\n");
-            classOutput.append("static { System.loadLibrary (\""
-                    + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
+            classOutput.append("static { System.load (\""
+                    + CPPClassCompiler.getNativeLibraryPath(nativeClassName) + "\"); }\n");
             classOutput.append("@Override\n");
             classOutput.append("protected native void updateI"
                     + " (double[] values, double[] tmp, double[] r);\n");

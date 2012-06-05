@@ -35,6 +35,20 @@ public class CPPClassCompiler {
         }
     }
 
+    public static String getNativeLibraryPath(String nativeLibrary)
+    {
+        if (windows)
+        {
+            return new File(PCTMCOptions.cppFolder + "/" + nativeLibrary + ".dll")
+                    .getAbsolutePath().replace('\\', '/');
+        }
+        else
+        {
+            return new File(PCTMCOptions.cppFolder + "/lib" + nativeLibrary + ".so")
+                    .getAbsolutePath().replace('\\', '/');
+        }
+    }
+
 	public static Object getInstance(String javaCode, String className,
              String nativeCode, String nativeFile, String packageName) {
 		return new CPPClassCompiler().getInstancePrivate

@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
@@ -60,8 +61,8 @@ public class AggregatedStateNextEventGeneratorPrinter
         classOutput.append("public class " + nativeClassName + " extends "
                 + NativeAggregatedStateNextEventGenerator.class.getName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
-        classOutput.append("static { System.loadLibrary (\""
-                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
+        classOutput.append("static { System.load (\""
+                + CPPClassCompiler.getNativeLibraryPath(nativeClassName) + "\"); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double recalculateWeightsI"
                 + "(double[] counts, double[] weights, double[] r);\n");
