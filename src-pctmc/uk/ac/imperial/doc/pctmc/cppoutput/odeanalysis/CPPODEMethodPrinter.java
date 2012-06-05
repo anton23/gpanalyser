@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.cppoutput.analysis.CPPStatementPrinterCombinedProductBased;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.IODEMethodVisitor;
@@ -88,8 +89,8 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         classOutput.append("public class " + nativeClassName + " extends "
                 + NativeSystemOfODEs.class.getSimpleName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
-        classOutput.append("static { System.loadLibrary (\""
-                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
+        classOutput.append("static { System.load (\""
+                + CPPClassCompiler.getNativeLibraryPath(nativeClassName) + "\"); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[][] solve"
                 + " (double[] initial, double stopTime, double stepSize,"

@@ -9,11 +9,11 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.statements.AbstractStatement;
 import uk.ac.imperial.doc.pctmc.cppoutput.statements.CPPStatementPrinter;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
 import com.google.common.collect.BiMap;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 /**
  * Java printer for expression evaluator methods.
@@ -63,8 +63,8 @@ public class CPPMethodPrinter {
 
         classOutput.append("    public native double[] update(double[] r, " +
                 "double[] values, double t);\n");
-        classOutput.append("static { System.loadLibrary (\""
-                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
+        classOutput.append("static { System.load (\""
+                + CPPClassCompiler.getNativeLibraryPath(nativeClassName) + "\"); }\n");
         classOutput.append("}\n");
 
         jniCode.append("#include \"" + PACKAGE.replace(".", "_") + "_"
