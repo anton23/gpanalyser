@@ -61,7 +61,7 @@ public class AggregatedStateNextEventGeneratorPrinter
                 + NativeAggregatedStateNextEventGenerator.class.getName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
         classOutput.append("static { System.loadLibrary (\""
-                + nativeClassName + "\"); }\n");
+                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double recalculateWeightsI"
                 + "(double[] counts, double[] weights, double[] r);\n");
@@ -69,7 +69,8 @@ public class AggregatedStateNextEventGeneratorPrinter
         header.append("#include \"" + PACKAGE.replace(".", "_") + "_"
                 + nativeClassName + ".h\"\n");
         header.append("#include <cmath>\n");
-        header.append("#include \"src-jexpressions/uk/ac/imperial/doc/"
+        header.append("#include \"" + new File("").getAbsolutePath()
+                + "/src-jexpressions/uk/ac/imperial/doc/"
                 + "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
 
         jniCode.append("JNIEXPORT jdouble JNICALL " +

@@ -89,7 +89,7 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
                 + NativeSystemOfODEs.class.getSimpleName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
         classOutput.append("static { System.loadLibrary (\""
-                + nativeClassName + "\"); }\n");
+                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[][] solve"
                 + " (double[] initial, double stopTime, double stepSize,"
@@ -98,9 +98,11 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         header.append("#include \"" + PACKAGE.replace(".", "_") + "_"
                 + nativeClassName + ".h\"\n");
         header.append("#include <cmath>\n");
-        header.append("#include \"src-jexpressions/uk/ac/imperial/doc/"
+        header.append("#include \"" + new File("").getAbsolutePath()
+                + "/src-jexpressions/uk/ac/imperial/doc/"
                 + "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
-        header.append("#include \"src-pctmc/uk/ac/imperial/doc/"
+        header.append("#include \"" + new File("").getAbsolutePath()
+                + "/src-pctmc/uk/ac/imperial/doc/"
                 + "pctmc/cppoutput/utils/RungeKutta.h\"\n");
         header.append(cppMomentODEs[cppMomentODEs.length - 1]);
         int line = 0;

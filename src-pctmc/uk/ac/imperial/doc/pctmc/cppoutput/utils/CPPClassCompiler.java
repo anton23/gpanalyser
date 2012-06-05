@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
@@ -20,16 +21,15 @@ import java.util.List;
 
 public class CPPClassCompiler {
 
-    private static final String tmp = "tmp";
     private static URLClassLoader classLoader;
     private static boolean windows = System.getProperty("os.name")
             .toLowerCase().contains("win");
 
     static {
         try {
-            File currentDir = new File("./" + tmp);
+            File filesDir = new File(PCTMCOptions.cppFolder);
             classLoader = new URLClassLoader
-                    (new URL[] {currentDir.toURI().toURL()});
+                    (new URL[] {filesDir.toURI().toURL()});
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -45,7 +45,8 @@ public class CPPClassCompiler {
             (String libName, String nativeFile, String javaInclude) {
         String command = "g++ -D_JNI_IMPLEMENTATION_ "
             + "-Wl,--kill-at -shared -Wall -O3 -o "
-            + libName + " " + nativeFile + ".cpp "
+            + PCTMCOptions.cppFolder + "/" + libName
+            + " " + PCTMCOptions.cppFolder + "/" + nativeFile + ".cpp"
             + " -I\"" + javaInclude + "include\""
             + " -I\"" + javaInclude + "include/win32\"";
 /*
@@ -61,8 +62,9 @@ public class CPPClassCompiler {
 
     private static void linuxCompile
             (String libName, String nativeFile, String javaInclude) {
-        String command = "g++ -B/usr/bin -Wall -shared -fPIC -O3 -o " + libName
-            + " " + nativeFile + ".cpp"
+        String command = "g++ -B/usr/bin -Wall -shared -fPIC -O3 -o "
+            + PCTMCOptions.cppFolder + "/" + libName
+            + " " + PCTMCOptions.cppFolder + "/" + nativeFile + ".cpp"
             + " -I\"" + javaInclude + "include\""
             + " -I\"" + javaInclude + "include/linux\"";
         ExecProcess.main(command, 3);
@@ -93,12 +95,13 @@ public class CPPClassCompiler {
         String filePath = packageName.replace(".", "/") ;
         String file = filePath + "/" + className;
         String fullClassName = packageName + "." + className;
-		files.add(new CharSequenceJavaFileObject(tmp + "/" + file, src));
+		files.add(new CharSequenceJavaFileObject
+                (PCTMCOptions.cppFolder + "/" + file, src));
 
         String[] options = new String[] {};
         if (!windows)
         {
-            options = new String[] {"-d", tmp};
+            options = new String[] {"-d", PCTMCOptions.cppFolder};
         }
 		compiler.getTask(null, fileManager, null,
                 Arrays.asList(options), null, files).call();
@@ -112,11 +115,13 @@ public class CPPClassCompiler {
                 javaInclude = javaHome.substring(0, indexJre);
             }
 
-            String command = "javah -jni -d . -classpath "
-                    + tmp + " " + fullClassName;
+            String command = "javah -jni -d " + PCTMCOptions.cppFolder
+                    + " -classpath " + PCTMCOptions.cppFolder
+                    + " " + fullClassName;
             ExecProcess.main(command, 1);
 
-            File nativeFileObj =  new File(nativeFile + ".cpp");
+            File nativeFileObj =  new File
+                    (PCTMCOptions.cppFolder + "/" + nativeFile + ".cpp");
             
             FileUtils.writeGeneralFile(nativeCode, nativeFileObj.getAbsolutePath());
             String libName = System.mapLibraryName(nativeFile);
@@ -131,7 +136,8 @@ public class CPPClassCompiler {
 
             // cleanup
             nativeFileObj.delete();
-            File headerFile = new File(fullClassName.replace(".","_") + ".h");
+            File headerFile = new File(PCTMCOptions.cppFolder
+                    + "/" + fullClassName.replace(".","_") + ".h");
             headerFile.delete();
 
             if (windows)

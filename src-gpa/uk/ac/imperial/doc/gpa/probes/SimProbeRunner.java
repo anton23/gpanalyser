@@ -17,8 +17,10 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionE
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CPPSimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.util.*;
 
@@ -27,7 +29,15 @@ public class SimProbeRunner extends AbstractProbeRunner
     public SimProbeRunner ()
     {
         analysisType = PCTMCSimulation.class;
-        postprocessorType = CPPSimulationAnalysisNumericalPostprocessor.class;
+        if (PCTMCOptions.cpp)
+        {
+            postprocessorType
+                = CPPSimulationAnalysisNumericalPostprocessor.class;
+        }
+        else
+        {
+            postprocessorType = SimulationAnalysisNumericalPostprocessor.class;
+        }
     }
 
     @Override

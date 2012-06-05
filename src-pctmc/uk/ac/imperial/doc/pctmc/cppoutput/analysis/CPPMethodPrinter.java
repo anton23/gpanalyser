@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.analysis;
 
+import java.io.File;
 import java.util.Map;
 import java.util.UUID;
 
@@ -12,6 +13,7 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
 import com.google.common.collect.BiMap;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 /**
  * Java printer for expression evaluator methods.
@@ -62,13 +64,14 @@ public class CPPMethodPrinter {
         classOutput.append("    public native double[] update(double[] r, " +
                 "double[] values, double t);\n");
         classOutput.append("static { System.loadLibrary (\""
-                + nativeClassName + "\"); }\n");
+                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
         classOutput.append("}\n");
 
         jniCode.append("#include \"" + PACKAGE.replace(".", "_") + "_"
                 + nativeClassName + ".h\"\n");
         jniCode.append("#include <cmath>\n");
-        jniCode.append("#include \"src-jexpressions/uk/ac/imperial/doc/" +
+        jniCode.append("#include \"" + new File("").getAbsolutePath()
+                + "/src-jexpressions/uk/ac/imperial/doc/" +
                 "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
         jniCode.append("double* updateI (double *r, double *values, double t)\n{\n");
         for (AbstractStatement s : method.getBody()) {
