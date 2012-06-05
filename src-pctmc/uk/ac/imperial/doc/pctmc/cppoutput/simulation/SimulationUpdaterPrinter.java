@@ -6,7 +6,9 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
+import java.io.File;
 import java.util.Map;
 import java.util.UUID;
 
@@ -61,7 +63,7 @@ public class SimulationUpdaterPrinter
                     + NativeSimulationUpdater.class.getSimpleName() + "\n{\n");
             classOutput.append("public " + nativeClassName + "() {}\n");
             classOutput.append("static { System.loadLibrary (\""
-                    + nativeClassName + "\"); }\n");
+                    + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
             classOutput.append("@Override\n");
             classOutput.append("protected native void updateI"
                     + " (double[] values, double[] tmp, double[] r);\n");
@@ -69,7 +71,8 @@ public class SimulationUpdaterPrinter
             header.append("#include \"" + PACKAGE.replace(".", "_") + "_"
                     + nativeClassName + ".h\"\n");
             header.append("#include <cmath>\n");
-            header.append("#include \"src-jexpressions/uk/ac/imperial/doc/"
+            header.append("#include \"" + new File("").getAbsolutePath()
+                    + "/src-jexpressions/uk/ac/imperial/doc/"
                     + "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
 
             jniCode.append("JNIEXPORT void JNICALL " +

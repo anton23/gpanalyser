@@ -18,6 +18,7 @@ import uk.ac.imperial.doc.masspa.syntax.MASSPALexer;
 import uk.ac.imperial.doc.masspa.syntax.MASSPAParser;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
+import uk.ac.imperial.doc.pctmc.postprocessors.languageoutput.CPPOutputAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.languageoutput.JavaOutputAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.languageoutput.MatlabAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -37,8 +38,13 @@ public class GPAPMain {
 						"generates matlab output, including source files")
 						.withRequiredArg().ofType(String.class)
 						.describedAs("output folder");
-				
-				accepts("java",
+
+                accepts("cpp",
+                        "generates c++ output, including source files, requires g++ set up")
+                        .withRequiredArg().ofType(String.class)
+                        .describedAs("output folder");
+
+                accepts("java",
 						"generates java output, including source files")
 						.withRequiredArg().ofType(String.class)
 						.describedAs("output folder");
@@ -119,15 +125,23 @@ public class GPAPMain {
 				interpreter = createGPEPAInterpreter();
 			}
 
-			if (options.has("matlab")) {
-				PCTMCOptions.matlab = true;
-				PCTMCOptions.matlabFolder = options.valueOf("matlab")
-						.toString();
-				PCTMCLogging.info("Generating matlab code, output folder is "
-						+ PCTMCOptions.matlabFolder + ".");
-				interpreter.addGlobalPostprocessor(new MatlabAnalysisPostprocessor());			
-			}
-			if (options.has("java")){
+            if (options.has("matlab")) {
+                PCTMCOptions.matlab = true;
+                PCTMCOptions.matlabFolder = options.valueOf("matlab")
+                        .toString();
+                PCTMCLogging.info("Generating matlab code, output folder is "
+                        + PCTMCOptions.matlabFolder + ".");
+                interpreter.addGlobalPostprocessor(new MatlabAnalysisPostprocessor());
+            }
+            if (options.has("cpp")) {
+                PCTMCOptions.cpp = true;
+                PCTMCOptions.cppFolder = options.valueOf("cpp")
+                        .toString();
+                PCTMCLogging.info("Generating c++ code, output folder is "
+                        + PCTMCOptions.cppFolder + ".");
+                interpreter.addGlobalPostprocessor(new CPPOutputAnalysisPostprocessor());
+            }
+            if (options.has("java")){
 				PCTMCOptions.javaFolder = options.valueOf("java").toString();
 				PCTMCLogging.info("Generating java code, output folder is " + PCTMCOptions.javaFolder);
 				interpreter.addGlobalPostprocessor(new JavaOutputAnalysisPostprocessor());

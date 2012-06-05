@@ -4,7 +4,9 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
+import java.io.File;
 import java.util.Map;
 import java.util.UUID;
 
@@ -54,7 +56,7 @@ public class AccumulatorUpdaterPrinter
                 + NativeAccumulatorUpdater.class.getSimpleName() + "\n{\n");
         classOutput.append("public " + nativeClassName + "() {}\n");
         classOutput.append("static { System.loadLibrary (\""
-                + nativeClassName + "\"); }\n");
+                + PCTMCOptions.cppFolder + "/" + nativeClassName + "\"); }\n");
         classOutput.append("@Override\n");
         classOutput.append("public native double[] updateI(double[] counts,"
                 + " double delta, double[] r);\n");
@@ -62,7 +64,8 @@ public class AccumulatorUpdaterPrinter
         header.append("#include \"" + PACKAGE.replace(".", "_") + "_"
                 + nativeClassName + ".h\"\n");
         header.append("#include <cmath>\n");
-        header.append("#include \"src-jexpressions/uk/ac/imperial/doc/"
+        header.append("#include \"" + new File("").getAbsolutePath()
+                + "/src-jexpressions/uk/ac/imperial/doc/"
                 + "jexpressions/cppoutput/utils/JExpressionsCPPUtils.h\"\n");
 
         jniCode.append("JNIEXPORT jdoubleArray JNICALL " +

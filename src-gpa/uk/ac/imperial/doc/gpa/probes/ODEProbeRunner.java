@@ -14,7 +14,9 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionE
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CPPODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.util.*;
 
@@ -23,7 +25,14 @@ public class ODEProbeRunner extends AbstractProbeRunner
     public ODEProbeRunner ()
     {
         analysisType = PCTMCODEAnalysis.class;
-        postprocessorType = CPPODEAnalysisNumericalPostprocessor.class;
+        if (PCTMCOptions.cpp)
+        {
+            postprocessorType = CPPODEAnalysisNumericalPostprocessor.class;
+        }
+        else
+        {
+            postprocessorType = ODEAnalysisNumericalPostprocessor.class;
+        }
     }
 
     @Override
