@@ -26,25 +26,17 @@ import org.jfree.data.xy.XYZDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.RefineryUtilities;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class PCTMCChartUtilities {
 
-	private static boolean gui = true;
-	public static boolean jogl = false;
+    public static boolean jogl = false;
 	private static double lastx = 0, lasty = 0;
 
 	private static Map<String, JFrame> windows = new HashMap<String, JFrame>();
 	private static Map<String, JTabbedPane> tabs = new HashMap<String, JTabbedPane>();
 
-	public static boolean isGui() {
-		return gui;
-	}
-
-	public static void setGui(boolean gui) {
-		PCTMCChartUtilities.gui = gui;
-	}
-
-	public static void nextBatch() {
+    public static void nextBatch() {
 		lasty = 0;
 		lastx += 0.1;
 	}
@@ -52,7 +44,7 @@ public class PCTMCChartUtilities {
 	public static void drawBlockChart(XYZDataset dataset, String xlabel,
 			String ylabel, String zlabel, double dx, double dy, double minz,
 			double maxz, String chartTitle, String windowTitle) {
-		if (!gui)
+		if (!PCTMCOptions.gui)
 			return;
 		NumberAxis xAxis = new NumberAxis(xlabel);
 		xAxis.setAutoRangeIncludesZero(false);
@@ -107,7 +99,7 @@ public class PCTMCChartUtilities {
 	}
 
 	public static void setWindow(String windowTitle) {
-		if (!gui)
+		if (!PCTMCOptions.gui)
 			return;
 		String mainClass = "";// System.getenv("JAVA_MAIN_CLASS");
 		JFrame frame;
@@ -130,7 +122,7 @@ public class PCTMCChartUtilities {
 	}
 
 	public static void addChart(Component component, String windowTitle) {
-		if (!gui)
+		if (!PCTMCOptions.gui)
 			return;
 		JTabbedPane tab;
 		if (!windows.containsKey(windowTitle))
@@ -143,7 +135,7 @@ public class PCTMCChartUtilities {
 
 	public static void drawChart(XYDataset dataset, String xlabel,
 			String ylabel, String chartTitle, String windowTitle) {
-		if (!gui)
+		if (!PCTMCOptions.gui)
 			return;
 
 		
@@ -175,7 +167,7 @@ public class PCTMCChartUtilities {
 
 	public static void drawChartPairs(XYDataset dataset, String xlabel,
 			String ylabel, String chartTitle, String windowTitle) {
-		if (!gui)
+		if (!PCTMCOptions.gui)
 			return;
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null, // chart //

@@ -351,7 +351,7 @@ extensions
 {
 	initExcluded ();
 }
-	:	^(PROBES (probe_def [true])*) ;
+	:	^(PROBES (probe_def)*) ;
 
 // Local_And_Global_Probe
 
@@ -1044,7 +1044,7 @@ concrete_r_expr returns [String predicate]
 
 // Probe_spec
 
-probe_def [boolean plot] returns [CDF measured_times]
+probe_def returns [CDF measured_times]
 scope
 {
 	GPAParser parser;
@@ -1066,7 +1066,7 @@ scope
 					$probe_def::step_size = $odeSettings.stepSize;
 					$probe_def::parameter = $odeSettings.density;
 				}
-			md=mode mt=probe_spec [false, $md.chosenMode, $md.par, $plot])
+			md=mode mt=probe_spec [false, $md.chosenMode, $md.par])
 			{
 				$measured_times = $mt.measured_times;
 				if (o != null)
@@ -1081,7 +1081,7 @@ scope
 					$probe_def::step_size = $simulationSettings.stepSize;
 					$probe_def::parameter = $simulationSettings.replications;
 				}
-			md=mode mt=probe_spec [true, $md.chosenMode, $md.par, $plot])
+			md=mode mt=probe_spec [true, $md.chosenMode, $md.par])
 			{
 				$measured_times = $mt.measured_times;
 				if (o != null)
@@ -1123,7 +1123,7 @@ out returns [String name]
 			$name = $FILENAME.text.replace ("\"", "");
 		} ;
 
-probe_spec [boolean simulate, int mode, double modePar, boolean plot]
+probe_spec [boolean simulate, int mode, double modePar]
 	returns [CDF measured_times]
 scope
 {
@@ -1241,7 +1241,7 @@ scope
 							 globalDef, null, null, accepting,
  							 mainConstants, $probe_def::stop_time,
 							 $probe_def::step_size, $probe_def::parameter,
-							 $probe_spec::alphabet, $mode, $modePar, $plot);
+							 $probe_spec::alphabet, $mode, $modePar);
 					}
 					else
 					{
@@ -1252,7 +1252,7 @@ scope
 							 $probe_spec::localAcceptingState,
 							 mainConstants, $probe_def::stop_time,
 							 $probe_def::step_size, $probe_def::parameter,
-							 $probe_spec::alphabet, $mode, $modePar, $plot);
+							 $probe_spec::alphabet, $mode, $modePar);
 					}
 				}
 				else
@@ -1263,7 +1263,7 @@ scope
 						 $probe_spec::localAcceptingState,
 						 mainConstants, $probe_def::stop_time,
 						 $probe_def::step_size, $probe_def::parameter,
-						 $probe_spec::alphabet, $mode, $modePar, $plot);
+						 $probe_spec::alphabet, $mode, $modePar);
 				}
             } ;
 

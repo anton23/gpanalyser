@@ -91,7 +91,7 @@ public class GPAPMain {
 			}
 
 			if (options.has("noGUI")) {
-				PCTMCChartUtilities.setGui(false);
+				PCTMCOptions.gui = false;
 				PCTMCLogging.info("Running without GUI.");
 			}
 
