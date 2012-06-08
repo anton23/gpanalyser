@@ -19,6 +19,7 @@ import uk.ac.imperial.doc.pctmc.expressions.*;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.util.*;
 
@@ -63,8 +64,7 @@ public abstract class AbstractProbeRunner
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          ComponentId accepting, Constants constants,
          AbstractExpression stopTime, AbstractExpression stepSize,
-         int parameter, Set<ITransition> alphabet,
-         int mode, double modePar, boolean plot)
+         int parameter, Set<ITransition> alphabet, int mode, double modePar)
     {
         Set<String> countActionStrings = convertObjectsToStrings (alphabet);
         List<AbstractExpression> statesCountExpressions
@@ -85,7 +85,7 @@ public abstract class AbstractProbeRunner
                 mainDef, altDef, definitionsMap, accepting, constants,
                 stopTimeVal, stepSizeVal, parameter, mode, modePar);
 
-        if (plot)
+        if (PCTMCOptions.gui)
         {
             plotGraph (gprobe.getName (), cdf, stepSizeVal);
         }

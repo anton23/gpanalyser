@@ -1,6 +1,9 @@
 package uk.ac.imperial.doc.pctmc.utils;
 
 public class PCTMCOptions {
+
+    public static boolean gui = true;
+
     public static boolean matlab = false;
 
     public static String matlabFolder = "matlab";
