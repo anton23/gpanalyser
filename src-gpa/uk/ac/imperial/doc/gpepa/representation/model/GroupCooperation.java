@@ -249,7 +249,7 @@ public class GroupCooperation extends GroupedModel {
 		return right;
 	}
 
-    private void refreshComponentGroups() {
+    public void refreshComponentGroups() {
         componentGroups = new HashMap<String, LabelledComponentGroup>();
         componentGroups.putAll(left.getComponentGroups());
         componentGroups.putAll(right.getComponentGroups());
@@ -264,6 +264,23 @@ public class GroupCooperation extends GroupedModel {
 		this.right = right;
         refreshComponentGroups();
 	}
+
+    public List<GroupCooperation> getParentsList(Map<GroupedModel, GroupedModel> owners) {
+        GroupedModel parent = owners.get(this);
+        List<GroupCooperation> ancestors = null;
+
+        // if root group cooperation
+        if (parent == null)
+        {
+            ancestors = new ArrayList<GroupCooperation>();
+        }
+        else
+        {
+            ancestors = ((GroupCooperation) parent).getParentsList(owners);
+            ancestors.add(0, (GroupCooperation) parent);
+        }
+        return ancestors;
+    }
 
 	public String toString() {
 		String leftString = left.toString();
@@ -320,6 +337,8 @@ public class GroupCooperation extends GroupedModel {
     {
         left.enumerateGroupedModelParents(groupedModels, this);
         right.enumerateGroupedModelParents(groupedModels, this);
+        groupedModels.put(left, this);
+        groupedModels.put(right, this);
     }
 
     @Override

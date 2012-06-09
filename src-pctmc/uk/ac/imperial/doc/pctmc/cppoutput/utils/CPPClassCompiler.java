@@ -58,7 +58,7 @@ public class CPPClassCompiler {
     private static void winCompile
             (String libName, String nativeFile, String javaInclude) {
         String command = "g++ -D_JNI_IMPLEMENTATION_ "
-            + "-Wl,--kill-at -shared -Wall -O3 -o "
+            + "-Wl,--kill-at -shared -Wall -O1 -o "
             + PCTMCOptions.cppFolder + "/" + libName
             + " " + PCTMCOptions.cppFolder + "/" + nativeFile + ".cpp"
             + " -I\"" + javaInclude + "include\""
@@ -76,7 +76,7 @@ public class CPPClassCompiler {
 
     private static void linuxCompile
             (String libName, String nativeFile, String javaInclude) {
-        String command = "g++ -B/usr/bin -Wall -shared -fPIC -O3 -o "
+        String command = "g++ -B/usr/bin -Wall -shared -fPIC -O1 -o "
             + PCTMCOptions.cppFolder + "/" + libName
             + " " + PCTMCOptions.cppFolder + "/" + nativeFile + ".cpp"
             + " -I\"" + javaInclude + "include\""
