@@ -26,12 +26,12 @@ public class CPPExpressionPrinter implements IExpressionVisitor {
 	@Override
 	public void visit(FunctionCallExpression e) {
 		if (e.getName().equals("ifpos")) {
-			output.append("JExpressionsCPPUtils::ifpos(");
+			output.append("J::ifpos(");
 		} else if (e.getName().equals("chebyshev")) {
 			output
-					.append("JExpressionsCPPUtils::chebyshev(");
+					.append("J::chebyshev(");
 		} else if (e.getName().equals("div")) {
-			output.append("JExpressionsCPPUtils::div(");
+			output.append("J::div(");
 		} else {
             String str = e.getName() + "(";
 			output.append(str);
@@ -57,7 +57,7 @@ public class CPPExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivExpression e) {
-		output.append("JExpressionsCPPUtils::div(");
+		output.append("J::div(");
 		e.getNumerator().accept(this);
 		output.append(", ");
 		e.getDenominator().accept(this);
@@ -103,7 +103,7 @@ public class CPPExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(PEPADivExpression e) {
-		output.append("JExpressionsCPPUtils::div(");
+		output.append("J::div(");
 		e.getNumerator().accept(this);
 		output.append(",");
 		e.getDenominator().accept(this);
@@ -130,7 +130,7 @@ public class CPPExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivMinExpression e) {
-		output.append("JExpressionsCPPUtils::divmin(");
+		output.append("J::divmin(");
 		e.getA().accept(this);
 		output.append(",");
 		e.getB().accept(this);
@@ -141,7 +141,7 @@ public class CPPExpressionPrinter implements IExpressionVisitor {
 
 	@Override
 	public void visit(DivDivMinExpression e) {
-		output.append("JExpressionsCPPUtils::divdivmin(");
+		output.append("J::divdivmin(");
 		e.getA().accept(this);
 		output.append(",");
 		e.getB().accept(this);

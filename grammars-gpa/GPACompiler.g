@@ -1293,10 +1293,10 @@ location
 	:	^(SUBSTITUTE m1=model m2=model)
 			{
 				$probe_def::model = deepCloner.deepClone ($probe_def::model);
-				Map<GroupedModel, GroupedModel> gmodels
+				Map<GroupedModel, GroupedModel> owners
 					= new HashMap<GroupedModel, GroupedModel> ();
-				$probe_def::model.enumerateGroupedModelParents (gmodels, null);
-				GroupedModel ownerOfTheSought = gmodels.get ($m1.model);
+				$probe_def::model.enumerateGroupedModelParents (owners, null);
+				GroupedModel ownerOfTheSought = owners.get ($m1.model);
 
 				if (ownerOfTheSought == null)
 				{
@@ -1310,6 +1310,8 @@ location
 				else if (ownerOfTheSought instanceof GroupCooperation)
 				{
 					GroupCooperation gc = (GroupCooperation) ownerOfTheSought;
+					List<GroupCooperation> parentsUpdate
+						= gc.getParentsList (owners);
 					if (gc.getLeft ().equals ($m1.model))
 					{
 						gc.setLeft ($m2.model);
@@ -1317,6 +1319,10 @@ location
 					else
 					{
 						gc.setRight ($m2.model);
+					}
+					for (GroupCooperation p : parentsUpdate)
+					{
+						p.refreshComponentGroups();
 					}
 				}
 				else

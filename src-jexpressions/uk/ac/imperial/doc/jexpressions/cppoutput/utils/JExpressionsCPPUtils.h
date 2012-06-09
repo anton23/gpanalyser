@@ -1,6 +1,6 @@
 #include <algorithm>
 
-namespace JExpressionsCPPUtils
+namespace J
 {
 	inline double div (double a, double b)
 	{
