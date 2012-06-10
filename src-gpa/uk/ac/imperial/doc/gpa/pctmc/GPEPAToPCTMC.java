@@ -22,7 +22,7 @@ public class GPEPAToPCTMC {
 
         BiMap<State,Integer> stateIndices = pctmc.getStateIndex();
         AbstractExpression[] counts = pctmc.getInitCounts();
-        for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
+        for (GroupComponentPair p : model.getGroupComponentPairs(componentDefinitions)){
             GPEPAState state = new GPEPAState(p);
             AbstractExpression count = model.getCountExpression(p);
             counts[stateIndices.get(state)] = count;
@@ -31,12 +31,18 @@ public class GPEPAToPCTMC {
         // here we should assign model to this GPEPAPCTMC, but not for testing
     }
     
-	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,GroupedModel model,Set<String> countActions){
+	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,
+                 GroupedModel model, Set<String> countActions, Collection<GroupComponentPair> optionalPairs) {
 		Map<State,AbstractExpression> initCounts = new LinkedHashMap<State,AbstractExpression>();
-		for (GroupComponentPair p:model.getGroupComponentPairs(componentDefinitions)){
+		for (GroupComponentPair p : model.getGroupComponentPairs(componentDefinitions)) {
 			initCounts.put(new GPEPAState(p), model.getCountExpression(p));
 		}
-		for (String a:countActions){
+        if (optionalPairs != null) {
+            for (GroupComponentPair p : optionalPairs) {
+                initCounts.put(new GPEPAState(p), model.getCountExpression(p));
+            }
+        }
+		for (String a:countActions) {
 			initCounts.put(new GPEPAActionCount(a), DoubleExpression.ZERO);
 		}
 		

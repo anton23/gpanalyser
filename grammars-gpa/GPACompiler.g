@@ -217,7 +217,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   {
   	PEPAComponentDefinitions nonvanish = new PEPAComponentDefinitions($cd.componentDefinitions)
   		.removeVanishingStates($m.model.getInitialComponents());
-    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions);
+    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions, null);
     System.out.println($pctmc);
   }
 ;
@@ -1292,7 +1292,6 @@ locations
 location
 	:	^(SUBSTITUTE m1=model m2=model)
 			{
-				$probe_def::model = deepCloner.deepClone ($probe_def::model);
 				Map<GroupedModel, GroupedModel> owners
 					= new HashMap<GroupedModel, GroupedModel> ();
 				$probe_def::model.enumerateGroupedModelParents (owners, null);
