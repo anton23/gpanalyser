@@ -3,10 +3,7 @@ package uk.ac.imperial.doc.gpa.probes;
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
 import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.AbstractUExpression;
 import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.UExpressionVisitor;
-import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
-import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
+import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
@@ -113,9 +110,6 @@ public class ODEProbeRunner extends AbstractProbeRunner
         double[][] transientVal = postprocessor.evaluateExpressions
                 (evaluator, constants);
 
-        statesCountExpressions.clear ();
-        mapping.clear ();
-
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
         double[][] K = getProbabilitiesComponentStateAfterBegin
             (pairs, mainDef, postprocessor, constants);
@@ -132,6 +126,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
         double[][] cdf = new double[indices][];
 
         // obtaining the system values for various times
+        statesCountExpressions.clear ();
+        mapping.clear ();
         PCTMC[] pctmcs = new PCTMC[1];
         postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
@@ -282,7 +278,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
             for (AbstractPrefix prefix : prefices)
             {
                 if (prefix.getImmediates ().contains (BEGIN_SIGNAL)
-                    || prefix.getAction().equals(BEGIN_SIGNAL))
+                    || (prefix.getAction().equals(BEGIN_SIGNAL)
+                        && prefix instanceof Prefix))
                 {
                     afterBeginsC.add (prefix.getContinuation ());
                 }
@@ -321,22 +318,23 @@ public class ODEProbeRunner extends AbstractProbeRunner
         for (GroupComponentPair hc : pairs)
         {
             Collection<String> actions = hc.getComponent ()
-                    .getActions (definitions);
+                .getActions(definitions);
             Collection<AbstractPrefix> prefices
-                    = hc.getComponent ().getPrefixes (definitions);
+                = hc.getComponent ().getPrefixes (definitions);
             for (String action : actions)
             {
                 for (AbstractPrefix prefix : prefices)
                 {
                     if (prefix.getAction ().equals (action)
                             && (prefix.getImmediates ().contains (BEGIN_SIGNAL)
-                            || action.equals(BEGIN_SIGNAL)))
+                            || (prefix.getAction ().equals (BEGIN_SIGNAL)
+                                && prefix instanceof Prefix)))
                     {
                         AbstractExpression arate
-                                = definitions.getApparentRateExpression
+                            = definitions.getApparentRateExpression
                                 (action, hc.getComponent ());
                         AbstractExpression crate
-                                = model.getComponentRateExpression
+                            = model.getComponentRateExpression
                                 (action, definitions, hc);
                         summands.add (ProductExpression.create
                                 (prefix.getRate(),
@@ -360,9 +358,9 @@ public class ODEProbeRunner extends AbstractProbeRunner
                 for (GroupComponentPair hc : pairs)
                 {
                     Collection<String> actions
-                            = hc.getComponent ().getActions (definitions);
+                        = hc.getComponent ().getActions (definitions);
                     Collection<AbstractPrefix> prefices
-                            = hc.getComponent ().getPrefixes (definitions);
+                        = hc.getComponent ().getPrefixes (definitions);
                     for (String action : actions)
                     {
                         for (AbstractPrefix prefix : prefices)
@@ -372,17 +370,18 @@ public class ODEProbeRunner extends AbstractProbeRunner
                                     .equals (q.getComponent ())
                                     && (prefix.getImmediates ()
                                     .contains (BEGIN_SIGNAL)
-                                    || action.equals (BEGIN_SIGNAL)))
+                                    || (action.equals (BEGIN_SIGNAL)
+                                        && prefix instanceof Prefix)))
                             {
                                 AbstractExpression arate
-                                        = definitions.getApparentRateExpression
+                                    = definitions.getApparentRateExpression
                                         (action, hc.getComponent ());
                                 AbstractExpression crate
-                                        = model.getComponentRateExpression
+                                    = model.getComponentRateExpression
                                         (action, definitions, hc);
                                 summands.add (ProductExpression.create
-                                        (prefix.getRate (),
-                                                DivExpression.create (crate, arate)));
+                                        (prefix.getRate (), DivExpression
+                                                .create(crate, arate)));
                             }
                         }
                     }
