@@ -4,16 +4,19 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
-import uk.ac.imperial.doc.gpepa.representation.components.*;
+import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
-import uk.ac.imperial.doc.jexpressions.expressions.*;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.expressions.*;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -170,7 +173,7 @@ public abstract class AbstractProbeRunner
              Collection<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
              Map<String, Integer> stateCombPopMapping,
-             double stopTime, double stepSize, int parameter, PCTMC[] pctmcs, Collection<GroupComponentPair> pairs)
+             double stopTime, double stepSize, int parameter, PCTMC[] pctmcs)
     {
         List<CombinedPopulationProduct> moments
             = new ArrayList<CombinedPopulationProduct> ();
@@ -202,7 +205,7 @@ public abstract class AbstractProbeRunner
         }
 
         pctmcs[0] = GPEPAToPCTMC.getPCTMC
-            (definitions, model, initActions, pairs);
+            (definitions, model, initActions);
         System.out.println (pctmcs[0]);
         AbstractPCTMCAnalysis analysis
             = getPreparedAnalysis (pctmcs[0], moments, constants);

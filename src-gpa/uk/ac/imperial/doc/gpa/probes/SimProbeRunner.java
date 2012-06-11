@@ -51,7 +51,6 @@ public class SimProbeRunner extends AbstractProbeRunner
          double stopTime, double stepSize, int parameter,
          double steadyStateTime, String name)
     {
-        double[][] overallMeasurements = null;
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
 
         //steady-state runner
@@ -61,7 +60,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessorS = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressionsS, mappingS, steadyStateTime,
-             stepSize, 1, new PCTMC[1], null);
+             stepSize, 1, new PCTMC[1]);
         AbstractExpressionEvaluator evaluatorS = postprocessorS
             .getExpressionEvaluator(statesCountExpressionsS, constants);
 
@@ -78,7 +77,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, beginActionCount, stateObservers,
              statesCountExpressions, mapping, steadyStateTime,
-             stepSize, 1, pctmcs, null);
+             stepSize, 1, pctmcs);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
         AbstractExpressionEvaluator beginEvaluator = postprocessor
@@ -98,11 +97,17 @@ public class SimProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessorA = runTheProbedSystem
             (model, altDef, constants, null, stateObservers,
              statesCountExpressionsA, mappingA, stopTime, stepSize,
-             1, pctmcsA, pairs);
+             1, pctmcsA);
         AbstractExpressionEvaluator evaluatorA = postprocessorA
             .getExpressionEvaluator (statesCountExpressionsA, constants);
 
         double[] times = new double[statesCountExpressions.size ()];
+        int timesIndex = (int) (stopTime / stepSize);
+        double[][] overallMeasurements = new double[timesIndex][];
+        for (int j = 0; j < timesIndex; j++)
+        {
+            overallMeasurements[j] = new double[stateObservers.size()];
+        }
         for (int p = 0; p < parameter; ++p)
         {
             double[] steadyVal = postprocessorS.evaluateExpressionsAtTimes
@@ -122,7 +127,6 @@ public class SimProbeRunner extends AbstractProbeRunner
                 if (beginSignalled[i][0] == 1)
                 {
                     time = i * stepSize;
-                    Arrays.fill (times, time);
                     break;
                 }
             }
@@ -132,10 +136,38 @@ public class SimProbeRunner extends AbstractProbeRunner
                 throw new Error ("No begin action in the given time occurred.");
             }
 
-            // calculate state of art after begin signal and rerun the model
-            // with new component counts
-            double[] beginVal = postprocessor.evaluateExpressionsAtTimes
-                (evaluator, times, constants);
+            double[] beginVal = null;
+            double afterBeginTime = time;
+            GroupComponentPair active = null;
+            while (time < steadyStateTime)
+            {
+                // calculate state of art after begin signal and rerun the model
+                // with new component counts
+                Arrays.fill (times, time);
+                beginVal = postprocessor.evaluateExpressionsAtTimes
+                    (evaluator, times, constants);
+                for (GroupComponentPair gc : pairsA)
+                {
+                    for (ComponentId comp : definitionsMap.get (mainDef))
+                    {
+                        if (gc.getComponent ().containsComponent (comp)
+                                && beginVal[mapping.get (gc.toString ())] > 0)
+                        {
+                            active = gc;
+                            break;
+                        }
+                    }
+                    if (active != null) break;
+                }
+                if (pairsA.contains (active)) break;
+                time += stepSize;
+            }
+
+            if (active == null)
+            {
+                throw new Error ("Not enough time to reach " +
+                    "an absorbing probe state.");
+            }
 
             assignNewCounts (mainDef, model, mapping, pairs, beginVal);
             GPEPAToPCTMC.updatePCTMC (pctmcsA[0], mainDef, model);
@@ -144,18 +176,13 @@ public class SimProbeRunner extends AbstractProbeRunner
             double[][] obtainedMeasurements = postprocessorA
                 .evaluateExpressions (evaluatorA, constants);
 
-            if (overallMeasurements == null)
+            int delay = (int)((time - afterBeginTime) / stepSize);
+            for (int x = delay; x < overallMeasurements.length; ++x)
             {
-                overallMeasurements = obtainedMeasurements;
-            }
-            else
-            {
-                for (int x = 0; x < overallMeasurements.length; ++x)
+                for (int y = 0; y < stateObservers.size (); ++y)
                 {
-                    for (int y = 0; y < stateObservers.size (); ++y)
-                    {
-                        overallMeasurements[x][y] += obtainedMeasurements[x][y];
-                    }
+                    overallMeasurements[x][y]
+                        += obtainedMeasurements[x - delay][y];
                 }
             }
 
@@ -200,7 +227,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, beginActionCount, stateObservers,
              statesCountExpressions, mapping, steadyStateTime,
-             stepSize, 1, new PCTMC[1], null);
+             stepSize, 1, new PCTMC[1]);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
         AbstractExpressionEvaluator beginEvaluator = postprocessor
@@ -214,7 +241,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessorA = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressionsA, mappingA, stopTime, stepSize,
-             1, pctmcs, null);
+             1, pctmcs);
         AbstractExpressionEvaluator evaluatorA = postprocessor
             .getExpressionEvaluator (statesCountExpressionsA, constants);
 
@@ -298,7 +325,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressions, mapping, stopTime, stepSize, parameter,
-             new PCTMC[1], null);
+             new PCTMC[1]);
 
         double[][] values = postprocessor
             .evaluateExpressions (statesCountExpressions, constants);
@@ -318,7 +345,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         for (GroupComponentPair gc : pairs)
         {
             newCounts.put (gc, new DoubleExpression
-                    (origVal[mapping.get(gc.toString ())]));
+                    (origVal[mapping.get (gc.toString ())]));
         }
 
         // setting initial number of components for the next analysis

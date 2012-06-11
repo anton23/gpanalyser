@@ -217,7 +217,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   {
   	PEPAComponentDefinitions nonvanish = new PEPAComponentDefinitions($cd.componentDefinitions)
   		.removeVanishingStates($m.model.getInitialComponents());
-    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions, null);
+    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions);
   }
 ;
 
