@@ -51,7 +51,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressions, mapping,
-             steadyStateTime, stepSize, parameter, new PCTMC[1], null);
+             steadyStateTime, stepSize, parameter, new PCTMC[1]);
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
 
@@ -81,7 +81,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         postprocessor = runTheProbedSystem
             (model, altDef, constants, null, stateObservers,
              statesCountExpressions, mapping, stopTime, stepSize, parameter,
-             new PCTMC[1], null);
+             new PCTMC[1]);
 
         double[][] obtainedMeasurements = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
@@ -104,7 +104,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressions, mapping, steadyStateTime + stepSize,
-             stepSize, parameter, new PCTMC[1], null);
+             stepSize, parameter, new PCTMC[1]);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator(statesCountExpressions, constants);
         double[][] transientVal = postprocessor.evaluateExpressions
@@ -132,7 +132,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressions, mapping, stopTime,
-             stepSize, parameter, pctmcs, null);
+             stepSize, parameter, pctmcs);
         evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
 
@@ -186,7 +186,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, countActions, stateObservers,
              statesCountExpressions, mapping, stopTime, stepSize, parameter,
-             new PCTMC[1], null);
+             new PCTMC[1]);
         double states[][] = postprocessor.evaluateExpressions
             (statesCountExpressions, constants);
         AbstractUExpression u = gprobe.getU ();

@@ -1,7 +1,5 @@
 package uk.ac.imperial.doc.gpa.pctmc;
 
-import java.util.*;
-
 import com.google.common.collect.BiMap;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -15,6 +13,8 @@ import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
+import java.util.*;
+
 public class GPEPAToPCTMC {
 
     public static void updatePCTMC (PCTMC pctmc,
@@ -25,23 +25,28 @@ public class GPEPAToPCTMC {
         for (GroupComponentPair p : model.getGroupComponentPairs(componentDefinitions)){
             GPEPAState state = new GPEPAState(p);
             AbstractExpression count = model.getCountExpression(p);
-            counts[stateIndices.get(state)] = count;
+            Integer index = stateIndices.get (state);
+            if (index == null)
+            {
+                if (!count.equals (DoubleExpression.ZERO))
+                    throw new Error("State " + state + " is not inside " +
+                            "the PCTMC you are trying to update.");
+            }
+            else
+            {
+                counts[index] = count;
+            }
             pctmc.getInitMap().put(state, count);
         }
         // here we should assign model to this GPEPAPCTMC, but not for testing
     }
     
 	public static PCTMC getPCTMC(PEPAComponentDefinitions componentDefinitions,
-                 GroupedModel model, Set<String> countActions, Collection<GroupComponentPair> optionalPairs) {
+                 GroupedModel model, Set<String> countActions) {
 		Map<State,AbstractExpression> initCounts = new LinkedHashMap<State,AbstractExpression>();
 		for (GroupComponentPair p : model.getGroupComponentPairs(componentDefinitions)) {
 			initCounts.put(new GPEPAState(p), model.getCountExpression(p));
 		}
-        if (optionalPairs != null) {
-            for (GroupComponentPair p : optionalPairs) {
-                initCounts.put(new GPEPAState(p), model.getCountExpression(p));
-            }
-        }
 		for (String a:countActions) {
 			initCounts.put(new GPEPAActionCount(a), DoubleExpression.ZERO);
 		}
