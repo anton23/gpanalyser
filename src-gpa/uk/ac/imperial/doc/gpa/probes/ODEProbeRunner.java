@@ -103,16 +103,18 @@ public class ODEProbeRunner extends AbstractProbeRunner
          ComponentId accepting, Constants constants, double stopTime,
          double stepSize, int parameter, double steadyStateTime, String name)
     {
-        // obtaining the system values for various times
-        PCTMC[] pctmcs = new PCTMC[1];
+        // the main postprocessor
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
              statesCountExpressions, mapping, steadyStateTime + stepSize,
-             stepSize, parameter, pctmcs, null);
+             stepSize, parameter, new PCTMC[1], null);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator(statesCountExpressions, constants);
         double[][] transientVal = postprocessor.evaluateExpressions
-            (evaluator, constants);
+                (evaluator, constants);
+
+        statesCountExpressions.clear ();
+        mapping.clear ();
 
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
         double[][] K = getProbabilitiesComponentStateAfterBegin
@@ -128,6 +130,15 @@ public class ODEProbeRunner extends AbstractProbeRunner
         final int indices = (int) Math.ceil (steadyStateTime / stepSize);
         int i = 0;
         double[][] cdf = new double[indices][];
+
+        // obtaining the system values for various times
+        PCTMC[] pctmcs = new PCTMC[1];
+        postprocessor = runTheProbedSystem
+            (model, mainDef, constants, null, stateObservers,
+             statesCountExpressions, mapping, stopTime,
+             stepSize, parameter, pctmcs, null);
+        evaluator = postprocessor
+            .getExpressionEvaluator (statesCountExpressions, constants);
 
         for (double s = 0; s < steadyStateTime; s += stepSize)
         {
@@ -270,7 +281,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
                     = hq.getComponent ().getPrefixes (definitions);
             for (AbstractPrefix prefix : prefices)
             {
-                if (prefix.getImmediates ().contains (BEGIN_SIGNAL))
+                if (prefix.getImmediates ().contains (BEGIN_SIGNAL)
+                    || prefix.getAction().equals(BEGIN_SIGNAL))
                 {
                     afterBeginsC.add (prefix.getContinuation ());
                 }
@@ -317,7 +329,8 @@ public class ODEProbeRunner extends AbstractProbeRunner
                 for (AbstractPrefix prefix : prefices)
                 {
                     if (prefix.getAction ().equals (action)
-                            && prefix.getImmediates ().contains (BEGIN_SIGNAL))
+                            && (prefix.getImmediates ().contains (BEGIN_SIGNAL)
+                            || action.equals(BEGIN_SIGNAL)))
                     {
                         AbstractExpression arate
                                 = definitions.getApparentRateExpression
@@ -357,8 +370,9 @@ public class ODEProbeRunner extends AbstractProbeRunner
                             if (prefix.getAction ().equals (action)
                                     && prefix.getContinuation ()
                                     .equals (q.getComponent ())
-                                    && prefix.getImmediates ()
-                                    .contains (BEGIN_SIGNAL))
+                                    && (prefix.getImmediates ()
+                                    .contains (BEGIN_SIGNAL)
+                                    || action.equals (BEGIN_SIGNAL)))
                             {
                                 AbstractExpression arate
                                         = definitions.getApparentRateExpression

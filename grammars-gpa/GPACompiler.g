@@ -218,7 +218,6 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   	PEPAComponentDefinitions nonvanish = new PEPAComponentDefinitions($cd.componentDefinitions)
   		.removeVanishingStates($m.model.getInitialComponents());
     $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions, null);
-    System.out.println($pctmc);
   }
 ;
 
@@ -1224,6 +1223,8 @@ scope
 
 						globalComponents.putAll ($probe_spec::origComponents);
 						globalComponents.putAll (newComp);
+						$probe_spec::initialStates.add
+							(new ComponentId (gprobe.getName ()));
 						PEPAComponentDefinitions globalDef
 							= new PEPAComponentDefinitions (globalComponents)
 							.removeVanishingStates ($probe_spec::initialStates);
