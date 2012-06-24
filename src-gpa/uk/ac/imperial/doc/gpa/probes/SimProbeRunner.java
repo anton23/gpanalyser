@@ -40,7 +40,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         }
     }
 
-    @Override
+   @Override
     protected CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, Integer> mapping, GroupedModel model,
@@ -51,155 +51,99 @@ public class SimProbeRunner extends AbstractProbeRunner
          double stopTime, double stepSize, int parameter,
          double steadyStateTime, String name)
     {
-        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
+        double[][] overallMeasurements = null;
 
-        //steady-state runner
-        List<AbstractExpression> statesCountExpressionsS
-                = new ArrayList<AbstractExpression> ();
-        Map<String, Integer> mappingS = new HashMap<String, Integer> ();
-        NumericalPostprocessor postprocessorS = runTheProbedSystem
-            (model, mainDef, constants, null, stateObservers,
-             statesCountExpressionsS, mappingS, steadyStateTime,
-             stepSize, 1, new PCTMC[1]);
-        AbstractExpressionEvaluator evaluatorS = postprocessorS
-            .getExpressionEvaluator(statesCountExpressionsS, constants);
-
-        // we use this to measure when the begin signal fires
-        Set<String> beginActionCount = new HashSet<String> ();
-        beginActionCount.add (BEGIN_SIGNAL);
-        List<AbstractExpression> beginActionExpr
-            = new ArrayList<AbstractExpression> ();
-        beginActionExpr.add (CombinedProductExpression.createMeanExpression
-            (new GPEPAActionCount (BEGIN_SIGNAL)));
-
-        PCTMC[] pctmcs = new PCTMC[1];
-        // initial upto begin signal
+        // creating the steady-state postprocessor and evaluator
         NumericalPostprocessor postprocessor = runTheProbedSystem
-            (model, mainDef, constants, beginActionCount, stateObservers,
-             statesCountExpressions, mapping, steadyStateTime,
-             stepSize, 1, pctmcs);
+            (model, mainDef, constants, null, stateObservers,
+             statesCountExpressions, mapping, steadyStateTime + stepSize,
+             stepSize, 1, new PCTMC[1]);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
-        AbstractExpressionEvaluator beginEvaluator = postprocessor
-            .getExpressionEvaluator (beginActionExpr, constants);
 
-        // main after begin signal
-        List<AbstractExpression> statesCountExpressionsA
+        LinkedHashMap<GroupComponentPair, AbstractExpression> crates
+            = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
+        getProbabilitiesAfterBegin (model, altDef, crates);
+        double[] times = new double[crates.size ()];
+        Arrays.fill (times, steadyStateTime);
+
+        mapping.clear ();
+        statesCountExpressions.clear ();
+        NumericalPostprocessor postprocessorC = runTheProbedSystem
+            (model, mainDef, constants, null, stateObservers,
+             statesCountExpressions, mapping, steadyStateTime + stepSize,
+             stepSize, parameter, new PCTMC[1]);
+        List<AbstractExpression> cratesExpr
+            = new LinkedList<AbstractExpression> (crates.values ());
+        AbstractExpressionEvaluator cratesEval = postprocessorC
+            .getExpressionEvaluator (cratesExpr, constants);
+        // obtaining the ratios for steady state component distribution
+        double[] cratesVal = postprocessorC
+            .evaluateExpressionsAtTimes (cratesEval, times, constants);
+
+        // creating the absorbing postprocessor and evaluator
+        Set<GroupComponentPair> pairs = model.getGroupComponentPairs (altDef);
+        Set<GPEPAState> altStateObservers = new HashSet<GPEPAState> ();
+        for (GroupComponentPair pair : pairs)
+        {
+            altStateObservers.add (new GPEPAState (pair));
+        }
+
+        List<AbstractExpression> altStatesCountExpressions
             = new ArrayList<AbstractExpression> ();
-        Map<String, Integer> mappingA = new HashMap<String, Integer> ();
-        Set<GroupComponentPair> pairsA = model.getGroupComponentPairs (altDef);
-        stateObservers = new HashSet<GPEPAState> ();
-        for (GroupComponentPair pair : pairsA)
-        {
-            stateObservers.add (new GPEPAState (pair));
-        }
-        PCTMC[] pctmcsA = new PCTMC[1];
+        Map<String, Integer> altMapping = new HashMap<String, Integer> ();
+        PCTMC[] pctmc = new PCTMC[1];
         NumericalPostprocessor postprocessorA = runTheProbedSystem
-            (model, altDef, constants, null, stateObservers,
-             statesCountExpressionsA, mappingA, stopTime, stepSize,
-             1, pctmcsA);
-        AbstractExpressionEvaluator evaluatorA = postprocessorA
-            .getExpressionEvaluator (statesCountExpressionsA, constants);
+            (model, altDef, constants, null, altStateObservers,
+             altStatesCountExpressions, altMapping, stopTime, stepSize, 1,
+             pctmc);
+        AbstractExpressionEvaluator altEvaluator = postprocessorA
+            .getExpressionEvaluator (altStatesCountExpressions, constants);
 
-        double[] times = new double[statesCountExpressions.size ()];
-        int timesIndex = (int) (stopTime / stepSize);
-        double[][] overallMeasurements = new double[timesIndex][];
-        for (int j = 0; j < timesIndex; j++)
+        // repeating the experiment
+        for (int i = 0; i < parameter; ++i)
         {
-            overallMeasurements[j] = new double[stateObservers.size()];
-        }
-        for (int p = 0; p < parameter; ++p)
-        {
-            double[] steadyVal = postprocessorS.evaluateExpressionsAtTimes
-                    (evaluatorS, times, constants);
-
-            assignNewCounts (mainDef, model, mappingS, pairs, steadyVal);
-            GPEPAToPCTMC.updatePCTMC (pctmcs[0], mainDef, model);
-
-            // detect when begin signal fired
-            double time = 0;
+            // running the steady-state repeating model
             postprocessor.calculateDataPoints (constants);
-            double[][] beginSignalled = postprocessor
-                .evaluateExpressions (beginEvaluator, constants);
-            int i = 0;
-            for (; i < beginSignalled.length; ++i)
-            {
-                if (beginSignalled[i][0] == 1)
-                {
-                    time = i * stepSize;
-                    break;
-                }
-            }
+            double[] steadyVal = postprocessor.evaluateExpressionsAtTimes
+                (evaluator, times, constants);
 
-            if (i >= beginSignalled.length)
-            {
-                throw new Error ("No begin action in the given time occurred.");
-            }
-
-            double[] beginVal = null;
-            double afterBeginTime = time;
-            GroupComponentPair active = null;
-            while (time < steadyStateTime)
-            {
-                // calculate state of art after begin signal and rerun the model
-                // with new component counts
-                Arrays.fill (times, time);
-                beginVal = postprocessor.evaluateExpressionsAtTimes
-                    (evaluator, times, constants);
-                for (GroupComponentPair gc : pairsA)
-                {
-                    for (ComponentId comp : definitionsMap.get (mainDef))
-                    {
-                        if (gc.getComponent ().containsComponent (comp)
-                                && beginVal[mapping.get (gc.toString ())] > 0)
-                        {
-                            active = gc;
-                            break;
-                        }
-                    }
-                    if (active != null) break;
-                }
-                if (pairsA.contains (active)) break;
-                time += stepSize;
-            }
-
-            if (active == null)
-            {
-                throw new Error ("Not enough time to reach " +
-                    "an absorbing probe state.");
-            }
-
-            assignNewCounts (mainDef, model, mapping, pairs, beginVal);
-            GPEPAToPCTMC.updatePCTMC (pctmcsA[0], mainDef, model);
+            // setting the absorbing model with new initial values
+            assignNewCounts (crates, definitionsMap, altDef, model,
+                   mapping, cratesVal, steadyVal);
+            GPEPAToPCTMC.updatePCTMC (pctmc[0], altDef, model);
             postprocessorA.calculateDataPoints (constants);
+            double[][] obtainedMeasurements = postprocessorA.evaluateExpressions
+                (altEvaluator, constants);
 
-            double[][] obtainedMeasurements = postprocessorA
-                .evaluateExpressions (evaluatorA, constants);
-
-            int delay = (int)((time - afterBeginTime) / stepSize);
-            for (int x = delay; x < overallMeasurements.length; ++x)
+            if (overallMeasurements == null)
             {
-                for (int y = 0; y < stateObservers.size (); ++y)
+                overallMeasurements = obtainedMeasurements;
+            }
+            else
+            {
+                for (int x = 0; x < overallMeasurements.length; ++x)
                 {
-                    overallMeasurements[x][y]
-                        += obtainedMeasurements[x - delay][y];
+                    for (int y = 0; y < altStateObservers.size (); ++y)
+                    {
+                        overallMeasurements[x][y] += obtainedMeasurements[x][y];
+                    }
                 }
             }
-
-            System.out.println ("Ran steady replication " + p);
+            System.out.println("ran steady replication " + i);
         }
 
         // averaging the obtained measurements
         for (int x = 0; x < overallMeasurements.length; ++x)
         {
-            for (int y = 0; y < stateObservers.size (); ++y)
+            for (int y = 0; y < altStateObservers.size (); ++y)
             {
                 overallMeasurements[x][y] /= parameter;
             }
         }
 
-        double[] cdf = passageTimeCDF (overallMeasurements,
-                pairsA, accepting, mappingA);
+        double[] cdf = passageTimeCDF (overallMeasurements, pairs, accepting,
+                altMapping);
         return new CDF (name, stepSize, cdf);
     }
 
@@ -358,6 +302,79 @@ public class SimProbeRunner extends AbstractProbeRunner
             {
                 g.setCountExpression (c, newCounts.get
                         (new GroupComponentPair (label, c)));
+            }
+        }
+    }
+
+    protected void assignNewCounts
+            (LinkedHashMap<GroupComponentPair, AbstractExpression> crates,
+             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
+             PEPAComponentDefinitions definitions, GroupedModel model,
+             Map<String, Integer> mapping, double[] matchVal, double[] origVal)
+    {
+        Map<GroupComponentPair, AbstractExpression> newCounts
+                = new HashMap<GroupComponentPair, AbstractExpression> ();
+        int i = 0;
+        double totalWeight = 0;
+        List<Double> weights = new ArrayList<Double> ();
+        List<GroupComponentPair> gcs = new ArrayList<GroupComponentPair> ();
+        for (GroupComponentPair gc : crates.keySet ())
+        {
+            boolean containsComp = false;
+            for (ComponentId comp : definitionsMap.get (definitions))
+            {
+                if (gc.getComponent ().containsComponent (comp))
+                {
+                    containsComp = true;
+                    break;
+                }
+            }
+
+            if (containsComp)
+            {
+                weights.add (matchVal[i]);
+                totalWeight += matchVal[i];
+                gcs.add (gc);
+                newCounts.put (gc, DoubleExpression.ZERO);
+            }
+            else
+            {
+                newCounts.put (gc, new DoubleExpression
+                        (origVal[mapping.get (gc.toString ())]));
+            }
+            ++i;
+        }
+
+        double pick = totalWeight * Math.random ();
+        double currentWeight = 0;
+        GroupComponentPair chosen = null;
+        i = 0;
+        for (double d : weights)
+        {
+            currentWeight += d;
+            if (currentWeight >= pick)
+            {
+                chosen = gcs.get (i);
+                break;
+            }
+            ++i;
+        }
+
+        // setting initial number of components for the next analysis
+        Map<String, LabelledComponentGroup> lgs = model.getComponentGroups ();
+        for (LabelledComponentGroup lg : lgs.values ())
+        {
+            Group g = lg.getGroup ();
+            String label = lg.getLabel ();
+            for (PEPAComponent c : g.getComponentDerivatives (definitions))
+            {
+                g.setCountExpression (c, newCounts.get
+                        (new GroupComponentPair (label, c)));
+            }
+            if (label.equals (chosen.getGroup ()))
+            {
+                g.setCountExpression (chosen.getComponent (),
+                        DoubleExpression.ONE);
             }
         }
     }
