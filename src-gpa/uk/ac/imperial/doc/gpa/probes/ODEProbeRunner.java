@@ -10,7 +10,9 @@ import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.representation.model.LabelledComponentGroup;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.jexpressions.expressions.*;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
@@ -303,93 +305,6 @@ public class ODEProbeRunner extends AbstractProbeRunner
         List<AbstractExpression> sum = new ArrayList<AbstractExpression> ();
         sum.add (SumExpression.create(afterBegins));
         return postprocessor.evaluateExpressions (sum, constants);
-    }
-
-    protected void getProbabilitiesAfterBegin
-            (GroupedModel model, PEPAComponentDefinitions definitions,
-             LinkedHashMap<GroupComponentPair, AbstractExpression> result)
-    {
-        Set<GroupComponentPair> pairs
-                = model.getGroupComponentPairs (definitions);
-
-        // total expected rate of all transitions firing begin signals
-        Collection<AbstractExpression> summands
-                = new ArrayList<AbstractExpression> ();
-        for (GroupComponentPair hc : pairs)
-        {
-            Collection<String> actions = hc.getComponent ()
-                .getActions(definitions);
-            Collection<AbstractPrefix> prefices
-                = hc.getComponent ().getPrefixes (definitions);
-            for (String action : actions)
-            {
-                for (AbstractPrefix prefix : prefices)
-                {
-                    if (prefix.getAction ().equals (action)
-                            && (prefix.getImmediates ().contains (BEGIN_SIGNAL)
-                            || (prefix.getAction ().equals (BEGIN_SIGNAL)
-                                && prefix instanceof Prefix)))
-                    {
-                        AbstractExpression arate
-                            = definitions.getApparentRateExpression
-                                (action, hc.getComponent ());
-                        AbstractExpression crate
-                            = model.getComponentRateExpression
-                                (action, definitions, hc);
-                        summands.add (ProductExpression.create
-                                (prefix.getRate(),
-                                        DivExpression.create(crate, arate)));
-                    }
-                }
-            }
-        }
-        AbstractExpression totalBeginRate = SumExpression.create (summands);
-
-        // probability for each Q
-        for (GroupComponentPair q : pairs)
-        {
-            if (totalBeginRate.equals (DoubleExpression.ZERO))
-            {
-                result.put (q, DoubleExpression.ZERO);
-            }
-            else
-            {
-                summands = new ArrayList<AbstractExpression> ();
-                for (GroupComponentPair hc : pairs)
-                {
-                    Collection<String> actions
-                        = hc.getComponent ().getActions (definitions);
-                    Collection<AbstractPrefix> prefices
-                        = hc.getComponent ().getPrefixes (definitions);
-                    for (String action : actions)
-                    {
-                        for (AbstractPrefix prefix : prefices)
-                        {
-                            if (prefix.getAction ().equals (action)
-                                    && prefix.getContinuation ()
-                                    .equals (q.getComponent ())
-                                    && (prefix.getImmediates ()
-                                    .contains (BEGIN_SIGNAL)
-                                    || (action.equals (BEGIN_SIGNAL)
-                                        && prefix instanceof Prefix)))
-                            {
-                                AbstractExpression arate
-                                    = definitions.getApparentRateExpression
-                                        (action, hc.getComponent ());
-                                AbstractExpression crate
-                                    = model.getComponentRateExpression
-                                        (action, definitions, hc);
-                                summands.add (ProductExpression.create
-                                        (prefix.getRate (), DivExpression
-                                                .create(crate, arate)));
-                            }
-                        }
-                    }
-                }
-                result.put (q, DivExpression.create
-                        (SumExpression.create (summands), totalBeginRate));
-            }
-        }
     }
 
     protected void findClosureOnAnyActions

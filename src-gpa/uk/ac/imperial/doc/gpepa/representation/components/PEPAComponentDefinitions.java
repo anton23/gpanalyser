@@ -155,7 +155,7 @@ public class PEPAComponentDefinitions {
                     choicesToRemove.remove (shorthand.toString());
                     choice.getChoices().remove(imm);
                     choice.getChoices().add(new Prefix(imm.getAction(),
-                        new DoubleExpression(50.0), null,
+                        new DoubleExpression(25.0), null,
                         imm.getContinuation(), imm.getImmediatesRaw()));
                 }
             }

@@ -1187,10 +1187,16 @@ scope
 				PEPAComponentDefinitions altDef = null;
 				if ($probe_def::steady)
 				{
+					Set<ComponentId> altComps = new HashSet<ComponentId> ();
+					for (String name : altComp.keySet ())
+					{
+						altComps.add (new ComponentId (name));
+					}
 					// we can reuse altComp now
 					altComp.putAll ($probe_spec::origComponents);
 					altDef = new PEPAComponentDefinitions (altComp)
 						.removeVanishingStates ($probe_spec::initialStates);
+					defMap.put (altDef, altComps);
 				}
 				if ($simulate)
 				{
