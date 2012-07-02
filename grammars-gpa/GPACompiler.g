@@ -169,7 +169,7 @@ import PCTMCCompilerPrototype;
 		NFAUtils.removeAnyTransitions (allActions, startingState);
 		NFAUtils.extendStatesWithSelfLoops
 			(allActions, startingState);
-		NFAUtils.removeSurplusSelfLoops (startingState);
+		//NFAUtils.removeSurplusSelfLoops (startingState);
 		alphabet.addAll (NFADetectors.detectAlphabet
 				(startingState, true, excluded));
 
@@ -368,7 +368,7 @@ probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
 				if (steady)
 				{
 					NFAState nonrepeating = deepCloner.deepClone
-						($proberl.starting_state);
+						(starting_state);
 					$altProbeComponents = new HashMap<String, PEPAComponent> ();
 					$acceptingComponent = generateProbeComponent
 						($name, nonrepeating, false, allActions, alphabet,
@@ -844,7 +844,7 @@ rg [NFAState current_state, Set<ITransition> allActions]
 	                new_starting_state1.setPredicate ($pred1.predicate);
 	            }
 	        }
-			(rg2=rg [new_starting_state2, $allActions] op=rl_bin_operators
+			(rg2=rg [new_starting_state2, $allActions] op = rl_bin_operators
 				[new_starting_state1, $rl_single.reached_state,
 				new_starting_state2, $rg2.reached_state,
 				$allActions, null, null])?)
@@ -869,10 +869,10 @@ rg [NFAState current_state, Set<ITransition> allActions]
 				if (pred1 != null)
 				{
 					new_starting_state1.setPredicate ($pred1.predicate);
-					$U =new PredUExpression ($U, $pred1.predicate);
+					$U = new PredUExpression ($U, $pred1.predicate);
 				}
 			}
-			(rg2=rg [new_starting_state2, $allActions] op=rl_bin_operators
+			(rg2=rg [new_starting_state2, $allActions] op = rl_bin_operators
 				[new_starting_state1, new NFAState (t),
 				new_starting_state2, $rg2.reached_state,
 				$allActions, $U, $rg2.U])?)
@@ -911,20 +911,13 @@ rga returns [UPrimeExpression U]
 {
 	Set<GPEPAActionCount> actions = new HashSet<GPEPAActionCount> ();
 }
-	:	^(RGA (a=eventual_specific_action [new NFAState (t)]
-			{actions.add ($a.action);}) (PAR b=eventual_specific_action
+	:	^(RGA (a = eventual_specific_action [new NFAState (t)]
+			{actions.add ($a.action);}) (PAR b = eventual_specific_action
 			[new NFAState (t)] {actions.add ($b.action);})*)
 		{
 			actions.remove (null);
 			$U = new UPrimeExpression (actions);
 		} ;
-
-rga_action [NFAState dummy_state] returns [GPEPAActionCount action]
-	: eventual_specific_action [dummy_state]
-		{
-			$action = $eventual_specific_action.action;
-		}
-	| empty_action [dummy_state] ;
 
 // Predicates for global
 main_pred returns [NFAPredicate predicate]
@@ -1206,11 +1199,14 @@ scope
 							= new HashSet<ITransition> ();
 						Map<String, PEPAComponent> globalComponents
 							= new HashMap<String, PEPAComponent> ();
+						Set<ITransition> monitoring
+							= NFADetectors.detectAlphabet
+							(gprobe.getStartingState (), true, excluded);
+						monitoring.remove (new AnyTransition ());
 						ComponentId accepting = generateProbeComponent
 							(gprobe.getName (), gprobe.getStartingState (),
-								false, $probe_spec::allActions,
-								observedActions, globalComponents,
-								$probe_def::parser);
+								false, monitoring, observedActions,
+								globalComponents, $probe_def::parser);
 
 						Multimap<PEPAComponent, AbstractExpression> counts
 							= HashMultimap.create ();
@@ -1223,7 +1219,8 @@ scope
                         {
                         	syncActions.add (trans.toString ());
                         }
-						GroupedModel globalModel = new GroupCooperation
+						GroupedModel globalModel
+							= new GlobalProbeSimGroupCooperation
 							($probe_def::model, new LabelledComponentGroup
 								(label, group), syncActions);
 

@@ -3,6 +3,7 @@ rs = 0.15;
 ri = 0.6;
 rf = 0.1;
 rr = 0.35;
+
 n = 100.0;
 m = 60.0;
 
@@ -15,9 +16,23 @@ Serv2 = (recover, rr).Serv0;
 
 Clients {Client0[n]} <fetch> Servers {Serv0[m]}
 
-Probe (stopTime=50, stepSize=1, density=10) steady 250
+Probe ["ss-indiv.dat"] (stopTime=50, stepSize=0.5, density=10) steady 250
 {
     PM6 = begin : start, end : stop <-
+    observes
+    {
+        LProbe = recover : begin, (fetch[2] / fail) : end <-
+    }
+    where
+    {
+        Servers {Serv0[m]}
+    	    => Servers {Serv0 <recover,fetch,fail> LProbe | Serv0[m-1]}
+    }
+}
+
+SimProbe ["ss-indiv-100-60.dat"] (stopTime=50, stepSize=0.5, replications=3000) steady 250
+{
+    PM7 = begin : start, end : stop <-
     observes
     {
         LProbe = recover : begin, (fetch[2] / fail) : end <-

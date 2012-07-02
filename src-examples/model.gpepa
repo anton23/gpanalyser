@@ -1,0 +1,255 @@
+// Rates
+r_on = 0.3;
+r_off = 0.6;
+r_init = 0.5;
+r_cont = 0.85;
+r_radio = 0.4;
+//r_radio = 0.16;
+//r_charge = 0.02;
+r_charge = 0.1;
+r_shutdown = 1.5;
+r_timeout = 0.2;
+
+// Weights
+init = 0.07;
+tfr = 0.15;
+
+// Population counts
+n_c = 20.0;
+n_h = 12.0;
+
+// Model
+
+// --- PbStart derivative states ---
+
+// // Clients and batteries
+
+// // // BH3
+
+CH_BH3 = (client_on, r_on).CS_BH3;
+
+CS_BH3 = (client_off, r_off).CH_BH3
+       + (radio_init, (init / (1.0 + init)) * r_init).CRU_BH2
+       + (radio_init, (1.0 / (1.0 + init)) * r_init).CRU_BH3
+       + (cont_tfr, (tfr / (1.0 + tfr)) * r_cont).CS_BH2
+       + (cont_tfr, (1.0 / (1.0 + tfr)) * r_cont).CS_BH3;
+
+CRU_BH3 = (data_tfr, (tfr / (1.0 + tfr)) * r_radio).CS_BH2
+        + (data_tfr, (1.0 / (1.0 + tfr)) * r_radio).CS_BH3;
+
+// // // BH2
+
+CH_BH2 = (client_on, r_on).CS_BH2
+       + (client_charge, r_charge).CH_BH3;
+
+CS_BH2 = (client_off, r_off).CH_BH2
+       + (radio_init, (init / (1.0 + init)) * r_init).CRU_BH1
+       + (radio_init, (1.0 / (1.0 + init)) * r_init).CRU_BH2
+       + (cont_tfr, (tfr / (1.0 + tfr)) * r_cont).CS_BH1
+       + (cont_tfr, (1.0 / (1.0 + tfr)) * r_cont).CS_BH2
+       + (client_charge, r_charge).CS_BH3;
+
+CRU_BH2 = (data_tfr, (tfr / (1.0 + tfr)) * r_radio).CS_BH1
+        + (data_tfr, (1.0 / (1.0 + tfr)) * r_radio).CS_BH2
+        + (client_charge, r_charge).CRU_BH3;
+
+// // // BH1
+
+CH_BH1 = (client_on, r_on).CS_BH1
+       + (client_charge, r_charge).CH_BH2;
+
+CS_BH1 = (client_off, r_off).CH_BH1
+       + (radio_init, (init / (1.0 + init)) * r_init).CRU_BH0
+       + (radio_init, (1.0 / (1.0 + init)) * r_init).CRU_BH1
+       + (cont_tfr, (tfr / (1.0 + tfr)) * r_cont).CS_BH0
+       + (cont_tfr, (1.0 / (1.0 + tfr)) * r_cont).CS_BH1
+       + (client_charge, r_charge).CS_BH2;
+
+
+CRU_BH1 = (data_tfr, (tfr / (1.0 + tfr)) * r_radio).CS_BH0
+        + (data_tfr, (1.0 / (1.0 + tfr)) * r_radio).CS_BH1
+        + (client_charge, r_charge).CRU_BH2;
+
+// // // BH0
+
+CS_BH0 = (client_shutdown, r_shutdown).CH_BE_PbStop;
+
+CRU_BH0 = (client_shutdown, r_shutdown).CH_BE_PbStop;
+
+// // // BE
+
+CH_BE = (client_charge, r_charge).CH_BH1;
+
+// --- PbStop derivative states ---
+
+// // Clients and batteries
+
+// // // BH3
+
+CH_BH3_PbStop = (client_on, r_on).CS_BH3_PbStop;
+
+CS_BH3_PbStop = (client_off, r_off).CH_BH3_PbStop
+       + (radio_init, (init / (1.0 + init)) * r_init).CRU_BH2_PbStop
+       + (radio_init, (1.0 / (1.0 + init)) * r_init).CRU_BH3_PbStop
+       + (cont_tfr, (tfr / (1.0 + tfr)) * r_cont).CS_BH2_PbStop
+       + (cont_tfr, (1.0 / (1.0 + tfr)) * r_cont).CS_BH3_PbStop;
+
+CRU_BH3_PbStop = (data_tfr, (tfr / (1.0 + tfr)) * r_radio).CS_BH2_PbStop
+        + (data_tfr, (1.0 / (1.0 + tfr)) * r_radio).CS_BH3_PbStop;
+
+// // // BH2
+
+CH_BH2_PbStop = (client_on, r_on).CS_BH2_PbStop
+       + (client_charge, r_charge).CH_BH3_PbStop;
+
+CS_BH2_PbStop = (client_off, r_off).CH_BH2_PbStop
+       + (radio_init, (init / (1.0 + init)) * r_init).CRU_BH1_PbStop
+       + (radio_init, (1.0 / (1.0 + init)) * r_init).CRU_BH2_PbStop
+       + (cont_tfr, (tfr / (1.0 + tfr)) * r_cont).CS_BH1_PbStop
+       + (cont_tfr, (1.0 / (1.0 + tfr)) * r_cont).CS_BH2_PbStop
+       + (client_charge, r_charge).CS_BH3_PbStop;
+
+CRU_BH2_PbStop = (data_tfr, (tfr / (1.0 + tfr)) * r_radio).CS_BH1_PbStop
+        + (data_tfr, (1.0 / (1.0 + tfr)) * r_radio).CS_BH2_PbStop
+        + (client_charge, r_charge).CRU_BH3_PbStop;
+
+// // // BH1
+
+CH_BH1_PbStop = (client_on, r_on).CS_BH1_PbStop
+       + (client_charge, r_charge).CH_BH2_PbStop;
+
+CS_BH1_PbStop = (client_off, r_off).CH_BH1_PbStop
+       + (radio_init, (init / (1.0 + init)) * r_init).CRU_BH0_PbStop
+       + (radio_init, (1.0 / (1.0 + init)) * r_init).CRU_BH1_PbStop
+       + (cont_tfr, (tfr / (1.0 + tfr)) * r_cont).CS_BH0_PbStop
+       + (cont_tfr, (1.0 / (1.0 + tfr)) * r_cont).CS_BH1_PbStop
+       + (client_charge, r_charge).CS_BH2_PbStop;
+
+
+CRU_BH1_PbStop = (data_tfr, (tfr / (1.0 + tfr)) * r_radio).CS_BH0_PbStop
+        + (data_tfr, (1.0 / (1.0 + tfr)) * r_radio).CS_BH1_PbStop
+        + (client_charge, r_charge).CRU_BH2_PbStop;
+
+// // // BH0
+
+CS_BH0_PbStop = (client_shutdown, r_shutdown).CH_BE_PbStop;
+
+CRU_BH0_PbStop = (client_shutdown, r_shutdown).CH_BE_PbStop;
+
+// // // BE
+
+CH_BE_PbStop = (client_charge, r_charge).CH_BH1_PbStop;
+
+// // Network channels
+
+Channel = (data_tfr, r_radio).ChannelBusy1
+        + (cont_tfr, r_cont).ChannelBusy2;
+
+ChannelBusy1 = (data_tfr, r_radio).Channel
+             + (timeout, r_timeout).Channel;
+
+ChannelBusy2 = (cont_tfr, r_cont).Channel
+             + (timeout, r_timeout).Channel;
+
+// // Actual model
+
+Clients{CH_BH3[n_c]} <data_tfr,cont_tfr> Channels{Channel[n_h]}
+
+ODEs(stopTime=400.0,stepSize=1.0,density=10){
+//    plotSwitchpoints(1);
+
+//Var[Clients:CH_BH3_PbStop]);
+
+    // Used for determ approx
+    ((E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] +
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop]) / n_c)->"odes-determ.tsv";
+/*
+    // Markov lower bound
+    plot(1.0 - (n_c - (E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] + 
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop])) / (n_c / 2.0 + 1.0))->"odes-markov-lb.tsv";
+
+    // Markov upper bound
+    plot((E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] + 
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop]) / (n_c / 2.0))->"odes-markov-ub.tsv";
+
+    // Chebyshev lower bound
+    plot(1.0 - Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] / (Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] + ((E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] + 
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop]) - (n_c / 2.0))^2.0))->"odes-cheby-lb.tsv";
+
+    // Chebyshev upper bound
+    plot(Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] / (Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] + ((E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] + 
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop]) - (n_c / 2.0))^2.0))->"odes-cheby-ub.tsv";
+}
+
+simulation(stopTime=400.0,stepSize=1.0,replications=10000){
+
+    // Markov lower bound
+    plot(1.0 - (n_c - (E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] + 
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop])) / (n_c / 2.0 + 1.0));
+
+
+    // Chebyshev lower bound
+    plot(1.0 - Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] / (Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] + ((E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] + 
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop]) - (n_c / 2.0))^2.0))->"sim-cheby-lb.tsv";
+
+    // Chebyshev upper bound
+    plot(Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] / (Central[(1.0)**Clients:CH_BH3_PbStop + (1.0)**Clients:CS_BH3_PbStop + (1.0)**Clients:CRU_BH3_PbStop + 
+          (1.0)**Clients:CH_BH2_PbStop + (1.0)**Clients:CS_BH2_PbStop + (1.0)**Clients:CRU_BH2_PbStop +
+          (1.0)**Clients:CH_BH1_PbStop + (1.0)**Clients:CS_BH1_PbStop + (1.0)**Clients:CRU_BH1_PbStop +
+          (1.0)**Clients:CS_BH0_PbStop + (1.0)**Clients:CRU_BH0_PbStop +
+          (1.0)**Clients:CH_BE_PbStop, 2] + ((E[Clients:CH_BH3_PbStop] + E[Clients:CS_BH3_PbStop] + E[Clients:CRU_BH3_PbStop] + 
+          E[Clients:CH_BH2_PbStop] + E[Clients:CS_BH2_PbStop] + E[Clients:CRU_BH2_PbStop] +
+          E[Clients:CH_BH1_PbStop] + E[Clients:CS_BH1_PbStop] + E[Clients:CRU_BH1_PbStop] +
+          E[Clients:CS_BH0_PbStop] + E[Clients:CRU_BH0_PbStop] +
+          E[Clients:CH_BE_PbStop]) - (n_c / 2.0))^2.0))->"sim-cheby-ub.tsv";
+*/
+}

@@ -61,8 +61,21 @@ ChanBusy2 = (cont_tfr, rcont).Chan
 	+ (tmt, rtmt).Chan;
 
 Clients {CB[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
+/*
+LProbe = (tmt, T, 1.0).LProbe+(cont_tfr, T, 1.0).LProbe+(clt_off, T, 1.0).LProbe+(clt_charge, T, 1.0).LProbe+(radio_init, T, 1.0).LProbe+(clt_shutdown, T, 1.0).LProbe1+(data_tfr, T, 1.0).LProbe+(clt_on, T, 1.0).LProbe+(end, T, 1.0).LProbe;
+LProbe1 = end.LProbe2;
+LProbe2=(tmt, T, 1.0).LProbe2+(cont_tfr, T, 1.0).LProbe2+(clt_off, T, 1.0).LProbe2+(clt_charge, T, 1.0).LProbe2+(clt_shutdown, T, 1.0).LProbe2+(radio_init, T, 1.0).LProbe2+(data_tfr, T, 1.0).LProbe2+(clt_on, T, 1.0).LProbe2+(end, T, 1.0).LProbe2;
 
-Probe (stopTime=400, stepSize=1, density=10)
+Clients {(CB<clt_shutdown>LProbe)[nc]} <data_tfr, cont_tfr> Net {Chan[nh]}
+Count end;
+
+Simulation (stopTime=400, stepSize=1, replications=2500)
+{
+	E[#end];
+}
+*/
+
+Probe ["global-worked.dat"] (stopTime=400, stepSize=1, density=10)
 {
     GPT = eE : start, end [nc/2] : stop
     observes
@@ -76,7 +89,7 @@ Probe (stopTime=400, stepSize=1, density=10)
     }
 }
 
-SimProbe (stopTime=400, stepSize=1, replications=5000)
+SimProbe ["global-worked.dat"] (stopTime=400, stepSize=1, replications=2500)
 {
     GPT = eE : start, end [nc/2] : stop
     observes

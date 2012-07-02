@@ -92,7 +92,6 @@ public class NFAtoDFA
 
         Multimap<ITransition, NFAState> newJointTransitions
             = HashMultimap.create ();
-        Set<ITransition> signals = new HashSet<ITransition> ();
         Collection<NFAState> closure = invMergers.get (state);
         for (NFAState s : closure)
         {
@@ -101,10 +100,6 @@ public class NFAtoDFA
             {
                 newJointTransitions.putAll
                     (pair.getTransition (), pair.getStates ());
-                if (pair.getTransition () instanceof SignalTransition)
-                {
-                    signals.add (pair.getTransition ());
-                }
             }
         }
 
@@ -112,15 +107,7 @@ public class NFAtoDFA
         {
             NFAState merged = getMerger (mergers,
                     newJointTransitions.get (transition), naming);
-            if (signals.contains (transition))
-            {
-                state.addTransition
-                    (new SignalTransition (transition.toString()), merged);
-            }
-            else
-            {
-                state.addTransition (transition, merged);
-            }
+            state.addTransition (transition.getCopy (), merged);
             addTransitions (merged, mergers, invMergers, newTransitions,
                     naming, visited);
         }
@@ -133,7 +120,7 @@ public class NFAtoDFA
         String predicate = "";
         for (NFAState s : states)
         {
-            createAccepting = createAccepting || s.isAccepting ();
+            createAccepting = s.isAccepting () || createAccepting;
             NFAPredicate pred = s.getPredicate ();
             if (pred != null && !pred.getPredicateString ().equals (""))
             {
