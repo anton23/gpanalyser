@@ -108,9 +108,9 @@ public class UExpressionVisitor
         for (GPEPAActionCount action : actions)
         {
             atCurrent += states[getTimeIndex (time)]
-                    [mapping.get(action.getName())];
+                    [mapping.get (action.getName ())];
             atStart += states[getTimeIndex (startingTime)]
-                    [mapping.get(action.getName())];
+                    [mapping.get (action.getName())];
         }
 
         return (atCurrent - atStart) >= n;

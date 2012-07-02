@@ -1,18 +1,18 @@
-r_think = 0.5;
-r_request = 2;
-r_timeout = 0.07;
+r_think = 0.05;
+r_request = 0.2;
+r_timeout = 0.007;
 
-r_prepare = 2;
-r_fail = 0.5;
-r_recover = 0.2;
-prepare_fast = 0.2;
-prepare_slow = 0.8;
+r_prepare = 0.2;
+r_fail = 0.05;
+r_recover = 0.02;
+prepare_fast = 0.02;
+prepare_slow = 0.08;
 
-r_solve_fast = 0.7;
-r_solve_slow = 0.4;
+r_solve_fast = 0.07;
+r_solve_slow = 0.04;
 
-nc = 10;
-ns = 3;
+nc = 100;
+ns = 30;
 
 Client					= (think, r_think).Client_think;
 Client_think			= (request, r_request).Client
@@ -33,12 +33,13 @@ Complete_server = Solver <prepare, request> Server;
 
 Clients{Client[nc]} <request> Servers{Complete_server[ns]}
 
-Probe (stopTime=350.0, stepSize=0.1, density=10) steady 1000
+/*
+SimProbe ["sample-steady-request5.dat"] (stopTime=150.0, stepSize=0.5, replications=10) steady 1000
 {
     SIPT = begin : start, end : stop <-
     observes
     {
-    	LProbe = think : begin, request[10] : end <-
+    	LProbe = think : begin, request[5] : end <-
     }
     where
     {
@@ -47,16 +48,59 @@ Probe (stopTime=350.0, stepSize=0.1, density=10) steady 1000
     }
 }
 
-Probe (stopTime=350.0, stepSize=1, density=10) transient 500
+Probe (stopTime=550.0, stepSize=0.5, density=10) steady 2000
 {
     SIPT = begin : start, end : stop <-
     observes
     {
-    	LProbe = think : begin, timeout[10] : end
+    	LProbe = think : begin, timeout : end <-
     }
     where
     {
     	Clients {Client[nc]} =>
     		Clients {Client <think, timeout> LProbe | Client[nc-1]}
+    }
+}
+
+SimProbe (stopTime=550.0, stepSize=0.5, replications=5000) steady 2000
+{
+    SIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = think : begin, timeout : end <-
+    }
+    where
+    {
+    	Clients {Client[nc]} =>
+    		Clients {Client <think, timeout> LProbe | Client[nc-1]}
+    }
+}
+*/
+
+Probe ["sample-global-request-10.dat"] (stopTime=650.0, stepSize=0.5, density=10)
+{
+    GPT = eE : start, end[ns/2] : stop
+    observes
+    {
+    	LProbe = request[10] : end
+    }
+    where
+    {
+    	Servers {Complete_server [ns]} =>
+    		Servers {Complete_server <request> LProbe [ns]}
+    }
+}
+
+Probe ["sample-global-request-5.dat"] (stopTime=300.0, stepSize=0.5, density=10)
+{
+    GPT = eE : start, end[ns/2] : stop
+    observes
+    {
+    	LProbe = request[5] : end
+    }
+    where
+    {
+    	Servers {Complete_server [ns]} =>
+    		Servers {Complete_server <request> LProbe [ns]}
     }
 }

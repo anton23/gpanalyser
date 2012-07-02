@@ -20,6 +20,7 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.util.*;
@@ -63,7 +64,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
-        getProbabilitiesAfterBegin (model, altDef, crates);
+        getProbabilitiesAfterBegin (model, mainDef, crates);
         double[] times = new double[crates.size ()];
         Arrays.fill (times, steadyStateTime);
 
@@ -109,7 +110,7 @@ public class SimProbeRunner extends AbstractProbeRunner
                 (evaluator, times, constants);
 
             // setting the absorbing model with new initial values
-            assignNewCounts (crates, definitionsMap, altDef, model,
+            assignNewCounts (crates, definitionsMap, mainDef, model,
                    mapping, cratesVal, steadyVal);
             GPEPAToPCTMC.updatePCTMC (pctmc[0], altDef, model);
             postprocessorA.calculateDataPoints (constants);
@@ -210,7 +211,10 @@ public class SimProbeRunner extends AbstractProbeRunner
 
             if (i >= beginSignalled.length)
             {
-                throw new Error ("No begin action in the given time occurred.");
+                PCTMCLogging.info("No begin action occurred"
+                    + " in the given time, repeating simulation " + p + ".");
+                --p;
+                continue;
             }
 
             // calculate state of art after begin signal and rerun the model

@@ -1,54 +1,76 @@
 r_think = 0.05;
 r_request = 0.8;
-r_timeout = 0.02;
+r_timeout = 0.01;
 
 r_allocate = 0.5;
 r_allocate_helper = 0.5;
 
-r_solve_fast = 0.3;
+r_schedule = 1;
+
+r_solve_fast = 0.2;
 r_req_alloc = 0.8;
-r_solve_slow = 0.1;
-allocate_fast = 0.95;
-allocate_split = 0.05;
+r_solve_slow = 0.05;
+schedule_fast = 0.6;
+schedule_split = 0.4;
 
-nc = 100;
-ns = 60;
+nc = 300;
+nw = 8;
+ns = 30;
 
-Client			= (think, r_think).Client_think;
-Client_think	= (request, r_request).Client
-				+ (timeout, r_timeout).Client;
+Client					= (think, r_think).Client_think;
+Client_think			= (request, r_request).Client_request
+						+ (timeout, r_timeout).Client;
+Client_request			= (wait, r_wait).Client;
 
 Web_server				= (request, r_request).Web_server_request
-						+ (req_alloc, T).Web_server_req_alloc;
+						+ (req_alloc, r_req_alloc).Web_server_req_alloc;
 Web_server_request		= check.Web_server_check;
 Web_server_check		= (allocate, r_allocate).Web_server
 						+ (timeout, r_timeout).Web_server;
 Web_server_req_alloc	= (allocate_helper, r_allocate_helper).Web_server;
 
-Server				= (allocate, T, allocate_fast).Server_solve_fast
-					+ (allocate, T, allocate_split).Server_split
-					+ (allocate_helper, T).Server_solve_slow;
-Server_solve_fast	= (solve_fast, r_solve_fast).Server;
-Server_split		= (req_alloc, r_req_alloc).Server_solve_slow;
-Server_solve_slow	= (solve_slow, r_solve_slow).Server;
+Scheduler				= (allocate, r_allocate).Scheduler_allocate;
+Scheduler_allocate		= (schedule, r_schedule).Scheduler;
 
-Clients {Client[nc]} <request, timeout>
-Servers{(Web_server <allocate, allocate_helper, req_alloc> Server)[ns]}
+Server					= (schedule, T, schedule_fast).Server_solve_fast
+						+ (schedule, T, schedule_split).Server_split
+						+ (allocate_helper, r_allocate_helper).Server_solve_slow;
+Server_solve_fast		= (solve_fast, r_solve_fast).Server;
+Server_split			= (req_alloc, r_req_alloc).Server_solve_slow;
+Server_solve_slow		= (solve_slow, r_solve_slow).Server;
+
+CompleteServer = Server <schedule> Scheduler;
+
+(Clients {Client[nc]} <request, timeout> Web_servers{Web_server[nw]})
+<allocate, req_alloc, allocate_helper> Servers{CompleteServer[ns]}
 
 /*
-ODEs (stopTime=5000.0, stepSize=0.1, density=10)
+ODEs (stopTime=100.0, stepSize=0.1, density=10)
 {
-    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_solve_fast],
-    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_split],
-    E[%Servers:Web_server<allocate, allocate_helper, req_alloc>_],
-    E[Clients:Client];
+    E[%Servers:Server_solve_fast<schedule>_],
+    E[%Servers:Server_split<schedule>_],
+    E[%Web_servers:Web_server];
+}
+
+Simulation (stopTime=100.0, stepSize=0.1, replications=2000)
+{
+    E[%Servers:Server_solve_fast<schedule>_],
+    E[%Servers:Server_split<schedule>_],
+    E[%Web_servers:Web_server];
 }
 */
 
-Simulation (stopTime=2500.0, stepSize=0.1, replications=2000)
+Probe ["steady-worked.dat"]
+	(stopTime=200, stepSize=1, density=10) steady 500
 {
-    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_solve_fast],
-    E[%Servers:_<allocate, allocate_helper, req_alloc>Server_split],
-    E[%Servers:Web_server<allocate, allocate_helper, req_alloc>_],
-    E[Clients:Client];
+    SIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe =  : begin, clt_shutdown : end <-
+    }
+    where
+    {
+    	Clients {CB[nc]} =>
+    		Clients {CB <data_tfr, cont_tfr, clt_shutdown> LProbe | CB[nc-1]}
+    }
 }

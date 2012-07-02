@@ -55,8 +55,9 @@ public class NFADetectors
         return nonaccepting;
     }
 
-    public static void detectStates(NFAState startingState,
-                                    Set<NFAState> detected, Set<NFAState> visited, StateFilter filter)
+    public static void detectStates
+        (NFAState startingState, Set<NFAState> detected,
+         Set<NFAState> visited, StateFilter filter)
 	{
 		if (filter.accept (startingState))
 		{

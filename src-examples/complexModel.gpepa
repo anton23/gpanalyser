@@ -1,0 +1,20 @@
+Client = (think, r_think).Client_think;
+Client_think = (request, r_request).Client;
+
+Web_server = (request, T).Web_server_request
+		   +(req alloc, T).Web_server_req_alloc;
+Web_server_request = check.Web_server_check;
+Web_server_check = (allocate, r_allocate).Web_server;
+Web_server_req_alloc = (allocate_helper, r_allocate_helper).Web_server;
+
+Server = (allocate, T, w_allocate_fast).Server_solve_fast
+	   + (allocate, T, w_allocate_split).Server_split
+	   + (allocate_helper, T).Server_solve_slow;
+Server_solve_fast = (solve_fast, r_solve_fast).Server;
+Server_split = (allocate_helper, r_allocate_helper).Server_solve_slow;
+Server_solve_slow = (solve_slow; r_solve_slow).Server;
+
+Clients{Client[Nc]} <request>
+	(Web_servers{Web server[Nw]}
+		<allocate, allocate_helper, req_alloc> Servers{Server[Ns]})
+

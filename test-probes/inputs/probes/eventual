@@ -1,1 +1,1 @@
-(fail, ~fetch, recover):begin
+fail : begin
