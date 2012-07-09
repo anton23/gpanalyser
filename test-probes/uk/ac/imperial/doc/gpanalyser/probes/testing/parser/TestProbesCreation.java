@@ -1260,4 +1260,108 @@ public class TestProbesCreation
 
         assertEquals (probeExpected, probeGiven);
     }
+
+    @Test
+    public void testResetProbe ()
+    {
+        Map<String, PEPAComponent> probeGiven = parseProbe ("reset");
+        Map<String, PEPAComponent> probeExpected
+            = new HashMap<String, PEPAComponent> ();
+
+        probeExpected.put ("LProbe", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe1", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe2", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe3", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new ImmediatePrefix ("begin",
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"))
+        )));
+
+        probeExpected.put ("LProbe4", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        assertEquals (probeExpected, probeGiven);
+    }
 }
