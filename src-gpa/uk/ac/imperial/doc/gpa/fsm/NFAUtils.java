@@ -3,7 +3,9 @@ package uk.ac.imperial.doc.gpa.fsm;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class NFAUtils
 {
@@ -16,7 +18,7 @@ public class NFAUtils
             NFAState state1 = cstate.getState1 ();
             NFAState state2 = cstate.getState2 ();
             Multimap<ITransition, NFAState> transitions
-                = HashMultimap.<ITransition, NFAState>create ();
+                = HashMultimap.create ();
             transitions.putAll (state1.getTransitions ());
             transitions.putAll (state2.getTransitions ());
 
@@ -60,7 +62,7 @@ public class NFAUtils
             }
 
             Multimap<ITransition, NFAState> transitions
-                    = HashMultimap.<ITransition, NFAState>create ();
+                    = HashMultimap.create ();
             transitions.putAll (state1.getTransitions ());
             transitions.putAll (state2.getTransitions ());
 
@@ -69,9 +71,12 @@ public class NFAUtils
                 NFAState new_state1 = state1.advanceWithTransition (transition);
                 NFAState new_state2 = state2.advanceWithTransition (transition);
 
-                if (new_state2.isAccepting ())
+                if (new_state2.isAccepting())
                 {
-                    cstate.addTransition (transition, startingCartesian);
+                    if (!new_state1.isAccepting())
+                    {
+                        cstate.addTransition (transition, startingCartesian);
+                    }
                 }
                 else
                 {
@@ -116,7 +121,7 @@ public class NFAUtils
             NFAState state2 = cstate.getState2 ();
 
             Multimap<ITransition, NFAState> transitions
-                    = HashMultimap.<ITransition, NFAState>create ();
+                    = HashMultimap.create ();
             transitions.putAll (state1.getTransitions ());
             transitions.putAll (state2.getTransitions ());
 
@@ -198,6 +203,7 @@ public class NFAUtils
         }
     }
 
+    /*
     public static void removeSurplusSelfLoops (NFAState startingState)
     {
         Set<NFAState> states = NFADetectors.detectAllStates (startingState);
@@ -235,6 +241,7 @@ public class NFAUtils
         }
 
     }
+    */
 
     public static void extendStatesWithSelfLoops
             (Set<ITransition> alphabet, NFAState startingState)
