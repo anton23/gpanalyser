@@ -37,4 +37,6 @@ public abstract class Clock {
 		remainingTime -= time;
 	}
 	
+	//need transition method for when clock reaches zero
+	//should return state randomly using transition probs
 }
