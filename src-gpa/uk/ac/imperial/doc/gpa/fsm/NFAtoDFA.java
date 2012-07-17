@@ -21,7 +21,8 @@ public class NFAtoDFA
         {
             Multimap<ITransition, NFAState> transitions
                 = state.getTransitions ();
-            
+
+            // we find the set of states this transition could lead to
             for (ITransition transition : transitions.keySet ())
             {
                 if (!(transition instanceof EmptyTransition))
@@ -30,7 +31,7 @@ public class NFAtoDFA
                         = transitions.get (transition);
                     Collection <NFAState> closure
                         = findClosure (reachedStates, closures);
-                    newTransitions.put(state, new TransitionStatesPair
+                    newTransitions.put (state, new TransitionStatesPair
                             (transition, closure));
                 }
             }
@@ -40,8 +41,8 @@ public class NFAtoDFA
             = mergeStates (closures.get (startingState), naming);
         mergers.put (closures.get (startingState), newStartingState);
 
-        addTransitions (newStartingState, mergers, mergers.inverse (),
-                newTransitions, naming, new HashSet<NFAState> ());
+        addTransitions (newStartingState, mergers, newTransitions,
+                naming, new HashSet<NFAState> ());
 
 		return minimise (newStartingState, naming);
 	}
@@ -80,7 +81,6 @@ public class NFAtoDFA
 
     private static void addTransitions
         (NFAState state, BiMap<Collection<NFAState>, NFAState> mergers,
-         BiMap<NFAState, Collection<NFAState>> invMergers,
          Multimap<NFAState, TransitionStatesPair> newTransitions, String naming,
          Set<NFAState> visited)
     {
@@ -92,7 +92,7 @@ public class NFAtoDFA
 
         Multimap<ITransition, NFAState> newJointTransitions
             = HashMultimap.create ();
-        Collection<NFAState> closure = invMergers.get (state);
+        Collection<NFAState> closure = mergers.inverse ().get(state);
         for (NFAState s : closure)
         {
             Collection<TransitionStatesPair> pairs = newTransitions.get (s);
@@ -108,7 +108,7 @@ public class NFAtoDFA
             NFAState merged = getMerger (mergers,
                     newJointTransitions.get (transition), naming);
             state.addTransition (transition.getCopy (), merged);
-            addTransitions (merged, mergers, invMergers, newTransitions,
+            addTransitions (merged, mergers, newTransitions,
                     naming, visited);
         }
     }
@@ -142,19 +142,19 @@ public class NFAtoDFA
         (Collection<NFAState> states, Multimap<NFAState, NFAState> closures)
     {
         Collection<NFAState> closure = new HashSet<NFAState> ();
-        closure.addAll(states);
+        closure.addAll (states);
         for (NFAState state : states)
         {
             closure.addAll (closures.get (state));
         }
 
-        if (states.equals(closure))
+        if (states.equals (closure))
         {
             return states;
         }
         else
         {
-            return findClosure(closure, closures);
+            return findClosure (closure, closures);
         }
     }
 

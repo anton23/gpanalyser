@@ -145,40 +145,45 @@ import PCTMCCompilerPrototype;
 		return newComponents;
 	}
 
-	private ComponentId generateProbeComponent
+	private void generateProbeComponent
 		(String name, NFAState startingState, boolean repeating,
 		Set<ITransition> allActions, Set<ITransition> alphabet,
-		Map<String, PEPAComponent> probeComponents, GPAParser parser)
+		Map<String, PEPAComponent> probeComponents, Set<ComponentId> accepting,
+		GPAParser parser)
 		throws Exception
 	{
-		NFAState accepting = NFADetectors.detectSingleAcceptingState
+		NFAState acceptingTemp = NFADetectors.detectSingleAcceptingState
 			(startingState);
 		if (repeating)
 		{
-			accepting.addTransition (new EmptyTransition (), startingState);
+			acceptingTemp.addTransition (new EmptyTransition (), startingState);
 		}
 		else
 		{
 			for (ITransition transition : allActions)
 			{
-				accepting.addTransitionIfNotExisting
-					(transition.getSimpleTransition (), accepting);
+				acceptingTemp.addTransitionIfNotExisting
+					(transition.getSimpleTransition (), acceptingTemp);
 			}
 		}
 		startingState = NFAtoDFA.convertToDFA (startingState, t);
 		NFAUtils.removeAnyTransitions (allActions, startingState);
-		NFAUtils.extendStatesWithSelfLoops
-			(allActions, startingState);
-		//NFAUtils.removeSurplusSelfLoops (startingState);
+		// NFAUtils.extendStatesWithSelfLoops
+		// 	(allActions, startingState);
+		// NFAUtils.removeSurplusSelfLoops (startingState);
 		alphabet.addAll (NFADetectors.detectAlphabet
 				(startingState, true, excluded));
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 		NFAStateToPEPA.HybridDFAtoPEPA
 			(startingState, name, 0, new PrintStream (stream));
-		accepting = NFADetectors.detectSingleAcceptingState (startingState);
+		Set<NFAState> acceptingStates
+			= NFADetectors.detectAllAcceptingStates (startingState);
+		for (NFAState state : acceptingStates)
+		{
+			accepting.add (new ComponentId (state.getName ()));
+		}
 		probeComponents.putAll (loadProbe (stream.toString (), parser));
-		return new ComponentId (accepting.getName ());
 	}
 }
 
@@ -360,7 +365,11 @@ probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
 		boolean steady, GPAParser parser]
 		returns [Map<String, PEPAComponent> probeComponents,
 				 Map<String, PEPAComponent> altProbeComponents,
-				 ComponentId acceptingComponent]
+				 Set<ComponentId> acceptingComponents]
+@init
+{
+	$acceptingComponents = new HashSet<ComponentId> ();
+}
 	:	^(PROBEL proberl=rl_signal [allActions] rp=REPETITION?)
 			{
 				NFAState starting_state = NFAtoDFA.convertToDFA
@@ -370,17 +379,18 @@ probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
 					NFAState nonrepeating = deepCloner.deepClone
 						(starting_state);
 					$altProbeComponents = new HashMap<String, PEPAComponent> ();
-					$acceptingComponent = generateProbeComponent
+					generateProbeComponent
 						($name, nonrepeating, false, allActions, alphabet,
-							$altProbeComponents, parser);
+							$altProbeComponents, $acceptingComponents, parser);
 				}
 				$probeComponents = new HashMap<String, PEPAComponent> ();
-				ComponentId thisAccepting = generateProbeComponent
+				Set<ComponentId> thisAccepting = new HashSet<ComponentId>();
+				generateProbeComponent
 					($name, starting_state, rp != null, allActions, alphabet,
-						$probeComponents, parser);
+						$probeComponents, thisAccepting, parser);
 				if (!steady)
 				{
-					$acceptingComponent = thisAccepting;
+					$acceptingComponents = thisAccepting;
 				}
 			} ;
 
@@ -652,13 +662,8 @@ rl_un_operators [NFAState sub_starting_state,
 			{
 				$starting_state
 					= NFAtoDFA.convertToDFA ($sub_starting_state, t);
-				NFAState failure = new NFAState (t);
+				NFAState failure = NFAUtils.getNewFailureState ($allActions);
 				NFAUtils.unifyAcceptingStates ($starting_state, failure);
-				for (ITransition transition : $allActions)
-				{
-					failure.replaceTransition
-						(transition.getSimpleTransition (), failure);
-				}
 				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
 				NFAUtils.invertAcceptingStates ($starting_state);
 				NFAState permitted = new NFAState (t);
@@ -752,14 +757,9 @@ subsequent_specific_action [NFAState current_state, Set<ITransition> allActions]
 				$current_state.addTransition
 					(new Transition ($action), $reached_state);
 				$current_state.setAccepting (false);
-				NFAState failure = new NFAState (t);
+				NFAState failure = NFAUtils.getNewFailureState (allActions);
 				$current_state.addTransition
 					(new AnyTransition (), failure);
-				for (ITransition transition : $allActions)
-				{
-					failure.addTransition
-						(transition.getSimpleTransition (), failure);
-				}
 			} ;
 
 any_action [NFAState current_state]
@@ -1122,7 +1122,7 @@ scope
     Set<ITransition> alphabet;
     Set<ITransition> allActions;
     Map<String, PEPAComponent> origComponents;
-    ComponentId localAcceptingState;
+    Set<ComponentId> localAcceptingStates;
     Set<PEPAComponent> initialStates;
 }
 @init
@@ -1139,6 +1139,7 @@ scope
 	$probe_spec::origComponents = deepCloner.deepClone (components);
 	Map<String, PEPAComponent> newComp = new HashMap<String, PEPAComponent> ();
 	Map<String, PEPAComponent> altComp = new HashMap<String, PEPAComponent> ();
+	$probe_spec::localAcceptingStates = new HashSet<ComponentId> ();
 }
 	:	^(DEF signalNames=SIGNALS
 				{
@@ -1203,10 +1204,13 @@ scope
 							= NFADetectors.detectAlphabet
 							(gprobe.getStartingState (), true, excluded);
 						monitoring.remove (new AnyTransition ());
-						ComponentId accepting = generateProbeComponent
+						Set<ComponentId> accepting
+							= new HashSet<ComponentId> ();
+						generateProbeComponent
 							(gprobe.getName (), gprobe.getStartingState (),
 								false, monitoring, observedActions,
-								globalComponents, $probe_def::parser);
+								globalComponents, accepting,
+								$probe_def::parser);
 
 						Multimap<PEPAComponent, AbstractExpression> counts
 							= HashMultimap.create ();
@@ -1253,7 +1257,7 @@ scope
 							.executeProbedModel
 							(gprobe, $probe_def::model, stateObservers,
 							 definitions, altDef, defMap,
-							 $probe_spec::localAcceptingState,
+							 $probe_spec::localAcceptingStates,
 							 mainConstants, $probe_def::stop_time,
 							 $probe_def::step_size, $probe_def::parameter,
 							 $probe_spec::alphabet, $mode, $modePar);
@@ -1264,7 +1268,7 @@ scope
 					$measured_times = new ODEProbeRunner ().executeProbedModel
 						(gprobe, $probe_def::model, stateObservers,
 						 definitions, altDef, defMap,
-						 $probe_spec::localAcceptingState,
+						 $probe_spec::localAcceptingStates,
 						 mainConstants, $probe_def::stop_time,
 						 $probe_def::step_size, $probe_def::parameter,
 						 $probe_spec::alphabet, $mode, $modePar);
@@ -1286,7 +1290,8 @@ local_probe_ass [Map<String, PEPAComponent> newComp,
 			 	{
 			 		$altComp.putAll ($probe.altProbeComponents);
 			 	}
-			 	$probe_spec::localAcceptingState = ($probe.acceptingComponent);
+			 	$probe_spec::localAcceptingStates
+			 		= ($probe.acceptingComponents);
 			 	$probe_spec::initialStates.add (new ComponentId ($name.text));
 			 };
 
