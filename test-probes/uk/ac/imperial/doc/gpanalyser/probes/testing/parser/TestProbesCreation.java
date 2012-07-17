@@ -1015,19 +1015,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe", new Choice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new PassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new PassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new PassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new PassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                      new ImmediatePrefix ("begin",
+                    (new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe1"))
         )));
 
@@ -1223,19 +1211,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe2", new Choice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new PassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new PassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new PassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new PassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new ImmediatePrefix ("begin",
+                    (new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe3"))
         )));
 

@@ -48,7 +48,7 @@ public class SimProbeRunner extends AbstractProbeRunner
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
+         Set<ComponentId> accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
          double steadyStateTime, String name)
     {
@@ -154,7 +154,7 @@ public class SimProbeRunner extends AbstractProbeRunner
          Map<String, Integer> mapping, GroupedModel model,
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants, double stopTime,
+         Set<ComponentId> accepting, Constants constants, double stopTime,
          double stepSize, int parameter, double steadyStateTime, String name)
     {
         double[][] overallMeasurements = null;
@@ -266,7 +266,7 @@ public class SimProbeRunner extends AbstractProbeRunner
          Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
          Map<String, Integer> mapping, Set<String> countActions,
-         ComponentId accepting, Constants constants,
+         Set<ComponentId> accepting, Constants constants,
          PEPAComponentDefinitions mainDef,
          double stopTime, double stepSize, int parameter)
     {

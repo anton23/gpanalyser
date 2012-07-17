@@ -10,8 +10,8 @@ import java.util.Set;
 public class NFAUtils
 {
     public static NFAState getBothCombination
-            (CartesianUtils.CartesianState startingCartesian,
-             List<CartesianUtils.CartesianState> cartesianStates, String naming)
+        (CartesianUtils.CartesianState startingCartesian,
+         List<CartesianUtils.CartesianState> cartesianStates, String naming)
     {
         for (CartesianUtils.CartesianState cstate : cartesianStates)
         {
@@ -29,7 +29,7 @@ public class NFAUtils
 
                 cstate.addTransition (transition,
                         CartesianUtils.getCartesianState
-                                (new_state1, new_state2, cartesianStates));
+                            (new_state1, new_state2, cartesianStates));
             }
         }
 
@@ -47,8 +47,8 @@ public class NFAUtils
     }
 
     public static NFAState getResetCombination
-            (CartesianUtils.CartesianState startingCartesian,
-             List<CartesianUtils.CartesianState> cartesianStates, String naming)
+        (CartesianUtils.CartesianState startingCartesian,
+         List<CartesianUtils.CartesianState> cartesianStates, String naming)
     {
         for (CartesianUtils.CartesianState cstate : cartesianStates)
         {
@@ -82,28 +82,28 @@ public class NFAUtils
                 {
                     cstate.addTransition (transition,
                             CartesianUtils.getCartesianState
-                                    (new_state1, new_state2, cartesianStates));
+                                (new_state1, new_state2, cartesianStates));
                 }
             }
         }
 
         return CartesianUtils.convertCartesianToDFA
-                (startingCartesian, cartesianStates, naming,
-                        new CartesianUtils.AcceptingCartesianStateFilter ()
+            (startingCartesian, cartesianStates, naming,
+                    new CartesianUtils.AcceptingCartesianStateFilter ()
+                    {
+                        public boolean isAccepting
+                                (CartesianUtils.CartesianState cstate)
                         {
-                            public boolean isAccepting
-                                    (CartesianUtils.CartesianState cstate)
-                            {
-                                return (cstate.getState1 ().isAccepting ()
-                                        && !cstate.getState2 ().isAccepting ());
-                            }
-                        });
+                        return (cstate.getState1 ().isAccepting ()
+                                && !cstate.getState2 ().isAccepting ());
+                        }
+                    });
     }
 
     public static NFAState getFailCombination
-            (CartesianUtils.CartesianState startingCartesian,
-             List<CartesianUtils.CartesianState> cartesianStates,
-             String naming, Set<ITransition> alphabet)
+        (CartesianUtils.CartesianState startingCartesian,
+         List<CartesianUtils.CartesianState> cartesianStates,
+         String naming, Set<ITransition> alphabet)
     {
         for (CartesianUtils.CartesianState cstate : cartesianStates)
         {
@@ -112,7 +112,7 @@ public class NFAUtils
                 for (ITransition action : alphabet)
                 {
                     cstate.addTransitionIfNotExisting
-                            (action.getSimpleTransition (), cstate);
+                        (action.getSimpleTransition (), cstate);
                 }
                 continue;
             }
@@ -132,33 +132,33 @@ public class NFAUtils
 
                 cstate.addTransition (transition,
                         CartesianUtils.getCartesianState
-                                (new_state1, new_state2, cartesianStates));
+                            (new_state1, new_state2, cartesianStates));
             }
         }
 
         return CartesianUtils.convertCartesianToDFA
-                (startingCartesian, cartesianStates, naming,
-                        new CartesianUtils.AcceptingCartesianStateFilter ()
+            (startingCartesian, cartesianStates, naming,
+                    new CartesianUtils.AcceptingCartesianStateFilter ()
+                    {
+                        public boolean isAccepting
+                                (CartesianUtils.CartesianState cstate)
                         {
-                            public boolean isAccepting
-                                    (CartesianUtils.CartesianState cstate)
-                            {
-                                return (cstate.getState1 ().isAccepting ()
-                                        && !cstate.getState2 ().isAccepting ());
-                            }
-                        });
+                            return (cstate.getState1 ().isAccepting ()
+                                    && !cstate.getState2 ().isAccepting ());
+                        }
+                    });
     }
 
-    public static void unifyAcceptingStates (NFAState starting_state,
-                                       NFAState new_reached_state)
+    public static void unifyAcceptingStates
+        (NFAState starting_state, NFAState new_reached_state)
     {
         Set<NFAState> accepting_states
-                = NFADetectors.detectAllAcceptingStates (starting_state);
+            = NFADetectors.detectAllAcceptingStates (starting_state);
         for (NFAState state : accepting_states)
         {
             state.setAccepting (false);
             state.addTransition
-                    (new EmptyTransition (), new_reached_state);
+                (new EmptyTransition (), new_reached_state);
         }
         new_reached_state.setAccepting (true);
     }
@@ -173,7 +173,7 @@ public class NFAUtils
     }
 
     public static void removeAnyTransitions
-            (Set<ITransition> alphabet, NFAState startingState)
+        (Set<ITransition> alphabet, NFAState startingState)
     {
         Set<NFAState> states = NFADetectors.detectAllStates (startingState);
         Set<NFAState> statesWithAny = new HashSet<NFAState>();
@@ -197,7 +197,7 @@ public class NFAUtils
             for (ITransition newTransition : alphabet)
             {
                 state.addTransitionIfNotExisting
-                        (newTransition.getSimpleTransition (), other);
+                    (newTransition.getSimpleTransition (), other);
             }
             state.getRawTransitions().removeAll (any);
         }
@@ -244,7 +244,7 @@ public class NFAUtils
     */
 
     public static void extendStatesWithSelfLoops
-            (Set<ITransition> alphabet, NFAState startingState)
+        (Set<ITransition> alphabet, NFAState startingState)
     {
         Set<NFAState> states = NFADetectors.detectAllStates (startingState);
         for (NFAState state : states)
@@ -252,8 +252,19 @@ public class NFAUtils
             for (ITransition transition : alphabet)
             {
                 state.addTransitionIfNotExisting
-                        (transition.getSimpleTransition (), state);
+                    (transition.getSimpleTransition (), state);
             }
         }
+    }
+
+    public static NFAState getNewFailureState (Set<ITransition> allActions)
+    {
+        NFAState failure = new NFAState ("failure");
+        for (ITransition transition : allActions)
+        {
+            failure.addTransition (transition.getSimpleTransition (), failure);
+        }
+        failure.setAccepting (false);
+        return failure;
     }
 }

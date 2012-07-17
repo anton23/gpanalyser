@@ -39,7 +39,7 @@ public abstract class AbstractProbeRunner
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
+         Set<ComponentId> accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
          double steadyStateTime, String name);
 
@@ -48,7 +48,7 @@ public abstract class AbstractProbeRunner
          Map<String, Integer> mapping, GroupedModel model,
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
+         Set<ComponentId> accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
          double steadyStateTime, String name);
 
@@ -56,7 +56,7 @@ public abstract class AbstractProbeRunner
         (GlobalProbe gprobe, GroupedModel model, Set<GPEPAState> stateObservers,
          List<AbstractExpression> statesCountExpressions,
          Map<String, Integer> mapping, Set<String> countActions,
-         ComponentId accepting, Constants constants,
+         Set<ComponentId> accepting, Constants constants,
          PEPAComponentDefinitions mainDef,
          double stopTime, double stepSize, int parameter);
 
@@ -65,7 +65,7 @@ public abstract class AbstractProbeRunner
          Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
+         Set<ComponentId> accepting, Constants constants,
          AbstractExpression stopTime, AbstractExpression stepSize,
          int parameter, Set<ITransition> alphabet, int mode, double modePar)
     {
@@ -102,7 +102,7 @@ public abstract class AbstractProbeRunner
          Map<String, Integer> mapping, Set<String> countActions,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         ComponentId accepting, Constants constants,
+         Set<ComponentId> accepting, Constants constants,
          double stopTime, double stepSize, int parameter,
          int mode, double modePar)
     {
@@ -133,17 +133,20 @@ public abstract class AbstractProbeRunner
 
     protected double[] passageTimeCDF
         (double[][] obtainedMeasurements, Set<GroupComponentPair> pairs,
-         ComponentId accepting, Map<String, Integer> mapping)
+         Set<ComponentId> accepting, Map<String, Integer> mapping)
     {
         double[] cdf = new double[obtainedMeasurements.length];
-        for (GroupComponentPair gp : pairs)
+        for (ComponentId absorbingState : accepting)
         {
-            if (gp.getComponent ().containsComponent (accepting))
+            for (GroupComponentPair gp : pairs)
             {
-                for (int i = 0; i < obtainedMeasurements.length; ++i)
+                if (gp.getComponent ().containsComponent (absorbingState))
                 {
-                    cdf[i] += obtainedMeasurements[i]
-                        [mapping.get (gp.toString ())];
+                    for (int i = 0; i < obtainedMeasurements.length; ++i)
+                    {
+                        cdf[i] += obtainedMeasurements[i]
+                            [mapping.get (gp.toString ())];
+                    }
                 }
             }
         }
