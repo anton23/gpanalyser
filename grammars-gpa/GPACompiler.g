@@ -152,22 +152,25 @@ import PCTMCCompilerPrototype;
 		GPAParser parser)
 		throws Exception
 	{
-		NFAState acceptingTemp = NFADetectors.detectSingleAcceptingState
-			(startingState);
-		if (repeating)
+		Set<NFAState> acceptingStates
+			= NFADetectors.detectAllAcceptingStates (startingState);
+		for (NFAState accState : acceptingStates)
 		{
-			acceptingTemp.addTransition (new EmptyTransition (), startingState);
-		}
-		else
-		{
-			for (ITransition transition : allActions)
+			if (repeating)
 			{
-				acceptingTemp.addTransitionIfNotExisting
-					(transition.getSimpleTransition (), acceptingTemp);
+				accState.addTransition (new EmptyTransition (), startingState);
+			}
+			else
+			{
+				for (ITransition transition : allActions)
+				{
+					accState.addTransitionIfNotExisting
+						(transition.getSimpleTransition (), accState);
+				}
 			}
 		}
 		startingState = NFAtoDFA.convertToDFA (startingState, t);
-		NFAUtils.removeAnyTransitions (allActions, startingState);
+		// NFAUtils.removeAnyTransitions (allActions, startingState);
 		// NFAUtils.extendStatesWithSelfLoops
 		// 	(allActions, startingState);
 		// NFAUtils.removeSurplusSelfLoops (startingState);
@@ -177,8 +180,6 @@ import PCTMCCompilerPrototype;
 		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 		NFAStateToPEPA.HybridDFAtoPEPA
 			(startingState, name, 0, new PrintStream (stream));
-		Set<NFAState> acceptingStates
-			= NFADetectors.detectAllAcceptingStates (startingState);
 		for (NFAState state : acceptingStates)
 		{
 			accepting.add (new ComponentId (state.getName ()));
@@ -706,7 +707,7 @@ signal returns [String name]
 
 immediateActions [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state]
-	:	eventual_specific_action [$current_state]
+	:	eventual_specific_action [$current_state, $allActions]
 			{
 				$reached_state = $eventual_specific_action.reached_state;
 			}
@@ -714,7 +715,7 @@ immediateActions [NFAState current_state, Set<ITransition> allActions]
 			{
 				$reached_state = $subsequent_specific_action.reached_state;
 			}
-		| any_action [$current_state]
+		| any_action [$current_state, $allActions]
 			{
 				$reached_state = $any_action.reached_state;
 			}
@@ -723,18 +724,17 @@ immediateActions [NFAState current_state, Set<ITransition> allActions]
 				$reached_state = $empty_action.reached_state;
 			} ;
 
-eventual_specific_action [NFAState current_state]
+eventual_specific_action [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state, GPEPAActionCount action]
 @init
 {
 	NFAState new_starting_state1 = new NFAState (t);
-	new_starting_state1.setAccepting (false);
 	NFAState new_starting_state2 = new NFAState (t);
-	new_starting_state2.setAccepting (false);
 }
-	:	^(EVENTUAL dot1=any_action [new_starting_state1]
+	:	^(EVENTUAL dot1=any_action [new_starting_state1, $allActions]
 			t1=times [new_starting_state1, $dot1.reached_state]
-			action_name=LOWERCASENAME dot2=any_action [new_starting_state2]
+			action_name=LOWERCASENAME dot2=any_action
+			[new_starting_state2, $allActions]
 			t2=times [new_starting_state2, $dot2.reached_state])
 			{
 				$current_state.addTransition (new EmptyTransition (),
@@ -758,18 +758,28 @@ subsequent_specific_action [NFAState current_state, Set<ITransition> allActions]
 					(new Transition ($action), $reached_state);
 				$current_state.setAccepting (false);
 				NFAState failure = NFAUtils.getNewFailureState (allActions);
-				$current_state.addTransition
-					(new AnyTransition (), failure);
+				// $current_state.addTransition
+				// 	(new AnyTransition (), failure);
+				for (ITransition transition : $allActions)
+				{
+					$current_state.addTransitionIfNotExisting
+						(transition.getSimpleTransition (), failure);
+				}
 			} ;
 
-any_action [NFAState current_state]
+any_action [NFAState current_state, Set<ITransition> allActions]
 	returns [NFAState reached_state]
 	:	DOT
 			{
 				$reached_state = new NFAState (t);
 				$reached_state.setAccepting (true);
-				$current_state.addTransition (new AnyTransition (),
-					$reached_state);
+				// $current_state.addTransition (new AnyTransition (),
+				// 	$reached_state);
+				for (ITransition transition : $allActions)
+				{
+					$current_state.addTransitionIfNotExisting
+						(transition.getSimpleTransition (), $reached_state);
+				}
 				$current_state.setAccepting (false);
 			} ;
 
@@ -863,7 +873,7 @@ rg [NFAState current_state, Set<ITransition> allActions]
 				}
 			}
 		// for fluid flow, we need no state machine
-		| ^(RG rg_sub pred1=main_pred?
+		| ^(RG rg_sub [$allActions] pred1=main_pred?
 			{
 				$U = $rg_sub.U;
 				if (pred1 != null)
@@ -892,8 +902,9 @@ rg [NFAState current_state, Set<ITransition> allActions]
 				}
 			} ;
 
-rg_sub returns [NFAState reached_state, AbstractUExpression U]
-	:	^(RGA_ALL rga expr=expression?)
+rg_sub [Set<ITransition> allActions]
+	returns [NFAState reached_state, AbstractUExpression U]
+	:	^(RGA_ALL rga [$allActions] expr=expression?)
 			{
 				int times = 1;
 				if (expr != null)
@@ -906,14 +917,14 @@ rg_sub returns [NFAState reached_state, AbstractUExpression U]
 				$U = new ActionsUExpression ($rga.U, times);
 			} ;
 
-rga returns [UPrimeExpression U]
+rga [Set<ITransition> allActions] returns [UPrimeExpression U]
 @init
 {
 	Set<GPEPAActionCount> actions = new HashSet<GPEPAActionCount> ();
 }
-	:	^(RGA (a = eventual_specific_action [new NFAState (t)]
+	:	^(RGA (a = eventual_specific_action [new NFAState (t), $allActions]
 			{actions.add ($a.action);}) (PAR b = eventual_specific_action
-			[new NFAState (t)] {actions.add ($b.action);})*)
+			[new NFAState (t), $allActions] {actions.add ($b.action);})*)
 		{
 			actions.remove (null);
 			$U = new UPrimeExpression (actions);
@@ -1203,7 +1214,7 @@ scope
 						Set<ITransition> monitoring
 							= NFADetectors.detectAlphabet
 							(gprobe.getStartingState (), true, excluded);
-						monitoring.remove (new AnyTransition ());
+						// monitoring.remove (new AnyTransition ());
 						Set<ComponentId> accepting
 							= new HashSet<ComponentId> ();
 						generateProbeComponent
