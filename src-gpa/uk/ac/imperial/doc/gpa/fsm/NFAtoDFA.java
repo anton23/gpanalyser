@@ -92,6 +92,7 @@ public class NFAtoDFA
 
         Multimap<ITransition, NFAState> newJointTransitions
             = HashMultimap.create ();
+        Set<ITransition> signals = new HashSet<ITransition> ();
         Collection<NFAState> closure = mergers.inverse ().get(state);
         for (NFAState s : closure)
         {
@@ -100,6 +101,10 @@ public class NFAtoDFA
             {
                 newJointTransitions.putAll
                     (pair.getTransition (), pair.getStates ());
+                if (pair.getTransition () instanceof SignalTransition)
+                {
+                    signals.add (pair.getTransition ());
+                }
             }
         }
 
@@ -107,7 +112,15 @@ public class NFAtoDFA
         {
             NFAState merged = getMerger (mergers,
                     newJointTransitions.get (transition), naming);
-            state.addTransition (transition.getCopy (), merged);
+            if (signals.contains (transition))
+            {
+                state.addTransition
+                    (new SignalTransition (transition.toString ()), merged);
+            }
+            else
+            {
+                state.addTransition (transition, merged);
+            }
             addTransitions (merged, mergers, newTransitions,
                     naming, visited);
         }
