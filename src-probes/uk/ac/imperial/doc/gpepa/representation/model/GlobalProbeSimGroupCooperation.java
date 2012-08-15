@@ -1,12 +1,9 @@
-package uk.ac.imperial.doc.gpa.probes;
+package uk.ac.imperial.doc.gpepa.representation.model;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
-import uk.ac.imperial.doc.gpepa.representation.model.GroupCooperation;
-import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
-import uk.ac.imperial.doc.gpepa.representation.model.PEPAEvolutionEvent;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -42,11 +39,11 @@ public class GlobalProbeSimGroupCooperation extends GroupCooperation
         List<PEPAEvolutionEvent> leftEvents = left.getEvolutionEvents
                 (definitions, restrictedActions);
         List<PEPAEvolutionEvent> rightEvents = right.getEvolutionEvents
-            (definitions, restrictedActions);
+                (definitions, restrictedActions);
         Multimap<String, PEPAEvolutionEvent> leftActionmap = LinkedHashMultimap
-                .<String, PEPAEvolutionEvent> create ();
+                . create ();
         Multimap<String, PEPAEvolutionEvent> rightActionmap = LinkedHashMultimap
-                .<String, PEPAEvolutionEvent> create ();
+                . create ();
 
         for (PEPAEvolutionEvent le : leftEvents)
         {

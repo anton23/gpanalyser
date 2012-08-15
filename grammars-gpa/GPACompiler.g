@@ -825,15 +825,22 @@ probeg [boolean simulate, GlobalProbe gprobe, Set<ITransition> allActions]
 					final_acc_state.setAccepting (true);
 					acc_state.replaceTransition
 						(new StopTransition (), final_acc_state);
-					starting_state1 = NFAtoDFA.convertToDFA (starting_state1, t);
-					acc_state = NFADetectors.detectSingleAcceptingState
-						(starting_state1);
+					starting_state1 = NFAtoDFA.convertToDFA
+						(starting_state1, t);
 					Set<ITransition> alphabet = NFADetectors.detectAlphabet
-						(starting_state1, false, new LinkedList<ITransition> ());
+						(starting_state1, false,
+							new LinkedList<ITransition> ());
+
 					if (rp != null)
 					{
-						acc_state.addTransition
-							(new EmptyTransition (), starting_state1);
+						Set<NFAState> accepting
+							= NFADetectors.detectAllAcceptingStates
+							(starting_state1);
+						for (NFAState acc : accepting)
+						{
+							acc.addTransition
+								(new EmptyTransition (), starting_state1);
+						}
 						starting_state1 = NFAtoDFA.convertToDFA
 							(starting_state1, $gprobe.getName ());
 					}
