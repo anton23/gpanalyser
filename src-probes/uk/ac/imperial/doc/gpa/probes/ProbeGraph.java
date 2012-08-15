@@ -21,7 +21,7 @@ public class ProbeGraph extends JFrame
         super (title);
         final ChartPanel chartPanel = createDemoPanel ();
         this.add (chartPanel, BorderLayout.CENTER);
-        setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation (WindowConstants.EXIT_ON_CLOSE);
         setSize (new Dimension(640, 480));
         setLocationRelativeTo (null);
         setVisible (true);

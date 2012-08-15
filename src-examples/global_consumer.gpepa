@@ -8,8 +8,8 @@ ri  = 0.6;
 rp  = 0.2;
 rcl = 0.4;
 
-nc = 21;
-np = 7;
+nc = 84;
+np = 28;
 
 Consumer			= (think, rt).Consumer_decided;
 Consumer_decided	= (get_product, rg).Consumer_prep;
@@ -26,7 +26,21 @@ Producer_full		= (get_product, rgp).Producer
 
 Consumers {Consumer [nc]} <get_product> Producers {(Producer <get_product> Terminal)[np]}
 
-Probe ["globalNew84.dat"] (stopTime=500, stepSize=1, density=10)
+Probe (stopTime=500, stepSize=1, density=10)
+{
+	GPT = eE : start, end[nc * 0.3] : stop
+	observes
+	{
+		LProbe = get_product[10] : end
+	}
+	where
+	{
+		Consumers {Consumer[nc]} =>
+			Consumers {(Consumer <get_product> LProbe)[nc]}
+	}
+}
+
+SimProbe (stopTime=500, stepSize=1, replications=2000)
 {
 	GPT = eE : start, end[nc * 0.3] : stop
 	observes
