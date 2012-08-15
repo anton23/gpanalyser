@@ -1224,6 +1224,8 @@ scope
 							= new HashSet<ITransition> ();
 						Map<String, PEPAComponent> globalComponents
 							= new HashMap<String, PEPAComponent> ();
+						NFAUtils.removeSurplusSelfLoops
+							(gprobe.getStartingState ());
 						Set<ITransition> monitoring
 							= NFADetectors.detectAlphabet
 							(gprobe.getStartingState (), true, excluded);

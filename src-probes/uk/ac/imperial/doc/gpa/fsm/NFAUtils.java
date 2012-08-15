@@ -3,8 +3,7 @@ package uk.ac.imperial.doc.gpa.fsm;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class NFAUtils
 {
@@ -171,43 +170,11 @@ public class NFAUtils
         }
     }
 
-    /*
-    public static void removeAnyTransitions
-        (Set<ITransition> alphabet, NFAState startingState)
-    {
-        Set<NFAState> states = NFADetectors.detectAllStates (startingState);
-        Set<NFAState> statesWithAny = new HashSet<NFAState>();
-        for (NFAState state : states)
-        {
-            Multimap<ITransition, NFAState> transitions
-                = state.getRawTransitions ();
-            for (ITransition transition : transitions.keySet ())
-            {
-                if (transition instanceof AnyTransition)
-                {
-                    statesWithAny.add(state);
-                }
-            }
-        }
-
-        ITransition any = new AnyTransition ();
-        for (NFAState state : statesWithAny)
-        {
-            NFAState other = state.advanceWithTransition (any);
-            for (ITransition newTransition : alphabet)
-            {
-                state.addTransitionIfNotExisting
-                    (newTransition.getSimpleTransition (), other);
-            }
-            state.getRawTransitions().removeAll (any);
-        }
-    }
-
     public static void removeSurplusSelfLoops (NFAState startingState)
     {
         Set<NFAState> states = NFADetectors.detectAllStates (startingState);
         Map<ITransition, Boolean> usedTransitions
-            = new HashMap<ITransition, Boolean> ();
+            = new HashMap<ITransition, Boolean>();
         for (NFAState state : states)
         {
             Multimap<ITransition, NFAState> transitions
@@ -239,6 +206,38 @@ public class NFAUtils
             }
         }
 
+    }
+
+    /*
+    public static void removeAnyTransitions
+        (Set<ITransition> alphabet, NFAState startingState)
+    {
+        Set<NFAState> states = NFADetectors.detectAllStates (startingState);
+        Set<NFAState> statesWithAny = new HashSet<NFAState>();
+        for (NFAState state : states)
+        {
+            Multimap<ITransition, NFAState> transitions
+                = state.getRawTransitions ();
+            for (ITransition transition : transitions.keySet ())
+            {
+                if (transition instanceof AnyTransition)
+                {
+                    statesWithAny.add(state);
+                }
+            }
+        }
+
+        ITransition any = new AnyTransition ();
+        for (NFAState state : statesWithAny)
+        {
+            NFAState other = state.advanceWithTransition (any);
+            for (ITransition newTransition : alphabet)
+            {
+                state.addTransitionIfNotExisting
+                    (newTransition.getSimpleTransition (), other);
+            }
+            state.getRawTransitions().removeAll (any);
+        }
     }
 
     public static void extendStatesWithSelfLoops
