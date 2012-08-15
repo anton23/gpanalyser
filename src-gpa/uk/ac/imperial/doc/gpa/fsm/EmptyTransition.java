@@ -9,7 +9,7 @@ public class EmptyTransition implements ITransition
 
     public String toPEPAString ()
     {
-        throw new Error("EmptyTransition cannot be converted to PEPA String.");
+        throw new Error ("EmptyTransition cannot be converted to PEPA String.");
     }
 
     public ITransition getCopy ()
@@ -19,7 +19,7 @@ public class EmptyTransition implements ITransition
 
     public ITransition getSimpleTransition ()
     {
-        throw new Error("EmptyTransition cannot create a simple transition.");
+        throw new Error ("EmptyTransition cannot create a simple transition.");
     }
 
     @Override

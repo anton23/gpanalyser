@@ -272,12 +272,12 @@ extensions
 // Local
 
 probel
-	:	rl_signal REPETITION?
-			-> ^(PROBEL rl_signal REPETITION?) ;
+	:	f=rl_signal (COMMA rl_signal)* REPETITION?
+			-> ^(PROBEL $f rl_signal* REPETITION?) ;
 
 rl_signal
-	:	rl_single INGROUP signal (COMMA rl_signal)?
-			-> ^(RLS rl_single signal rl_signal?) ;
+	:	rl_single INGROUP signal
+			-> ^(RLS rl_single signal) ;
 
 rl_single
 	:	rl_single_bracketed

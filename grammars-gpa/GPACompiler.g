@@ -154,13 +154,33 @@ import PCTMCCompilerPrototype;
 	{
 		Set<NFAState> acceptingStates
 			= NFADetectors.detectAllAcceptingStates (startingState);
-		for (NFAState accState : acceptingStates)
+
+		if (repeating)
 		{
-			if (repeating)
+			Set<NFAState> allStates
+				= NFADetectors.detectAllStates (startingState);
+			statesLabel : for (NFAState state : allStates)
 			{
-				accState.addTransition (new EmptyTransition (), startingState);
+				Multimap<ITransition, NFAState> transitions
+					= state.getTransitions ();
+				for (ITransition transition : transitions.keySet ())
+				{
+					Collection<NFAState> reachables
+						= transitions.get (transition);
+					for (NFAState reachable : reachables)
+					{
+						if (acceptingStates.contains (reachable))
+						{
+							state.replaceTransition (transition, startingState);
+							continue statesLabel;
+						}
+					}
+				}
 			}
-			else
+		}
+		else
+		{
+			for (NFAState accState : acceptingStates)
 			{
 				for (ITransition transition : allActions)
 				{
@@ -169,7 +189,8 @@ import PCTMCCompilerPrototype;
 				}
 			}
 		}
-		startingState = NFAtoDFA.convertToDFA (startingState, t);
+
+		// startingState = NFAtoDFA.convertToDFA (startingState, t);
 		// NFAUtils.removeAnyTransitions (allActions, startingState);
 		// NFAUtils.extendStatesWithSelfLoops
 		// 	(allActions, startingState);
@@ -367,14 +388,19 @@ probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
 		returns [Map<String, PEPAComponent> probeComponents,
 				 Map<String, PEPAComponent> altProbeComponents,
 				 Set<ComponentId> acceptingComponents]
+scope
+{
+	List<NFAUtils.Signaller> signallers;
+}
 @init
 {
 	$acceptingComponents = new HashSet<ComponentId> ();
+	$probel::signallers = new ArrayList<NFAUtils.Signaller> ();
 }
-	:	^(PROBEL proberl=rl_signal [allActions] rp=REPETITION?)
+	:	^(PROBEL (rl_signal [allActions])+ rp=REPETITION?)
 			{
-				NFAState starting_state = NFAtoDFA.convertToDFA
-					($proberl.starting_state, t);
+				NFAState starting_state = NFAUtils.mergeSignallers
+					($probel::signallers);
 				if (steady)
 				{
 					NFAState nonrepeating = deepCloner.deepClone
@@ -395,27 +421,17 @@ probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
 				}
 			} ;
 
-rl_signal [Set<ITransition> allActions] returns [NFAState starting_state]
+rl_signal [Set<ITransition> allActions]
 @init
 {
-	$starting_state = new NFAState (t);
+	NFAState starting_state = new NFAState (t);
 }
-	:	^(RLS rl_single [$starting_state, $allActions] sig=signal
-				next_rl=rl_signal [$allActions]?)
+	:	^(RLS rl_single [starting_state, $allActions] sig=signal)
 			{
-				ITransition signal = new SignalTransition ($sig.name);
-				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
-				NFAState acc_state = new NFAState (t);
-				NFAUtils.unifyAcceptingStates ($starting_state, acc_state);
-				NFAState new_acc_state = new NFAState (t);
-				new_acc_state.setAccepting (next_rl == null);
-				acc_state.replaceTransition (signal, new_acc_state);
-				acc_state.setAccepting (false);
-				if (next_rl != null)
-				{
-					new_acc_state.addTransition
-						(new EmptyTransition (), $next_rl.starting_state);
-				}
+				SignalTransition signal = new SignalTransition ($sig.name);
+				starting_state = NFAtoDFA.convertToDFA (starting_state, t);
+				$probel::signallers.add (new NFAUtils.Signaller
+						(starting_state, signal));
 			} ;
 
 rl_single [NFAState current_state, Set<ITransition> allActions]
@@ -667,17 +683,7 @@ rl_un_operators [NFAState sub_starting_state,
 				NFAUtils.unifyAcceptingStates ($starting_state, failure);
 				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
 				NFAUtils.invertAcceptingStates ($starting_state);
-				NFAState permitted = new NFAState (t);
-				NFAUtils.unifyAcceptingStates ($starting_state, permitted);
-				$starting_state = NFAtoDFA.convertToDFA ($starting_state, t);
-				permitted = NFADetectors.detectSingleAcceptingState
-					($starting_state);
-				for (ITransition transition : $allActions)
-				{
-					permitted.addTransitionIfNotExisting
-						(transition.getSimpleTransition (), $reached_state);
-				}
-				permitted.setAccepting (false);
+				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
 			} ;
 
 times [NFAState sub_starting_state, NFAState sub_current_state]

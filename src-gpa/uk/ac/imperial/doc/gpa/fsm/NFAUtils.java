@@ -3,7 +3,6 @@ package uk.ac.imperial.doc.gpa.fsm;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -172,6 +171,7 @@ public class NFAUtils
         }
     }
 
+    /*
     public static void removeAnyTransitions
         (Set<ITransition> alphabet, NFAState startingState)
     {
@@ -203,7 +203,6 @@ public class NFAUtils
         }
     }
 
-    /*
     public static void removeSurplusSelfLoops (NFAState startingState)
     {
         Set<NFAState> states = NFADetectors.detectAllStates (startingState);
@@ -241,7 +240,6 @@ public class NFAUtils
         }
 
     }
-    */
 
     public static void extendStatesWithSelfLoops
         (Set<ITransition> alphabet, NFAState startingState)
@@ -256,6 +254,7 @@ public class NFAUtils
             }
         }
     }
+    */
 
     public static NFAState getNewFailureState (Set<ITransition> allActions)
     {
@@ -266,5 +265,59 @@ public class NFAUtils
         }
         failure.setAccepting (false);
         return failure;
+    }
+
+    public static class Signaller
+    {
+        private NFAState startingState;
+        private SignalTransition signal;
+
+        public Signaller (NFAState startingState, SignalTransition signal)
+        {
+            this.startingState = startingState;
+            this.signal = signal;
+        }
+
+        public NFAState getStartingState ()
+        {
+            return startingState;
+        }
+
+        public SignalTransition getSignal ()
+        {
+            return signal;
+        }
+    }
+
+    public static NFAState mergeSignallers (List<Signaller> signallers)
+    {
+        int i = 1;
+        Signaller signaller = signallers.get (0);
+        while (i < signallers.size ())
+        {
+            NFAState acc_state = signallers.get (i).getStartingState ();
+            Set<NFAState> accepting = NFADetectors.detectAllAcceptingStates
+                (signaller.getStartingState ());
+            for (NFAState acc : accepting)
+            {
+                acc.replaceTransition (signaller.getSignal (), acc_state);
+                acc.setAccepting (false);
+            }
+
+            signaller = signallers.get (i);
+            i++;
+        }
+
+        NFAState final_acc_state = new NFAState ("final");
+        final_acc_state.setAccepting (true);
+        Set<NFAState> accepting = NFADetectors.detectAllAcceptingStates
+                (signaller.getStartingState ());
+        for (NFAState acc : accepting)
+        {
+            acc.replaceTransition (signaller.getSignal (), final_acc_state);
+            acc.setAccepting (false);
+        }
+
+        return signallers.get (0).getStartingState ();
     }
 }

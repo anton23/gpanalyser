@@ -50,9 +50,9 @@ public class NFAtoDFA
 	private static NFAState minimise (NFAState startingState, String naming)
 	{
         Set<NFAState> acceptingStates
-            = NFADetectors.detectAllAcceptingStates(startingState);
+            = NFADetectors.detectAllAcceptingStates (startingState);
         Set<NFAState> nonacceptingStates
-            = NFADetectors.detectAllNonAcceptingStates(startingState);
+            = NFADetectors.detectAllNonAcceptingStates (startingState);
         Collection<Set<NFAState>> sets
             = new HashSet<Set<NFAState>> ();
         sets.add (acceptingStates);
@@ -62,7 +62,7 @@ public class NFAtoDFA
         partition = sortPartitionSetsByTransitions (partition, startingState);
         startingState = createNewDFAFromPartition (partition, naming);
 
-		return startingState;
+        return startingState;
 	}
 
     private static NFAState getMerger
@@ -92,7 +92,6 @@ public class NFAtoDFA
 
         Multimap<ITransition, NFAState> newJointTransitions
             = HashMultimap.create ();
-        Set<ITransition> signals = new HashSet<ITransition> ();
         Collection<NFAState> closure = mergers.inverse ().get(state);
         for (NFAState s : closure)
         {
@@ -101,10 +100,6 @@ public class NFAtoDFA
             {
                 newJointTransitions.putAll
                     (pair.getTransition (), pair.getStates ());
-                if (pair.getTransition () instanceof SignalTransition)
-                {
-                    signals.add (pair.getTransition ());
-                }
             }
         }
 
@@ -112,15 +107,7 @@ public class NFAtoDFA
         {
             NFAState merged = getMerger (mergers,
                     newJointTransitions.get (transition), naming);
-            if (signals.contains (transition))
-            {
-                state.addTransition
-                    (new SignalTransition (transition.toString ()), merged);
-            }
-            else
-            {
-                state.addTransition (transition, merged);
-            }
+            state.addTransition (transition, merged);
             addTransitions (merged, mergers, newTransitions,
                     naming, visited);
         }
