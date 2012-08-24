@@ -204,6 +204,73 @@ public class TestProbesCreation
     }
 
     @Test
+    public void testAnyThenSubsequentProbe ()
+    {
+        Map<String, PEPAComponent> probeGiven
+            = parseProbe ("any_then_subsequent");
+        Map<String, PEPAComponent> probeExpected
+            = new HashMap<String, PEPAComponent> ();
+
+        probeExpected.put ("LProbe", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe1", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new ImmediatePrefix ("begin",
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"))
+        )));
+
+        probeExpected.put ("LProbe2", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        assertEquals (probeExpected, probeGiven);
+    }
+
+        @Test
     public void testSequenceProbe ()
     {
         Map<String, PEPAComponent> probeGiven = parseProbe ("sequence");
@@ -1057,13 +1124,13 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                              new ArrayList<ImmediatePrefix> ())
         )));
 
@@ -1073,16 +1140,16 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"))
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"))
         )));
 
         probeExpected.put ("LProbe2", new Choice
@@ -1107,7 +1174,7 @@ public class TestProbesCreation
         probeExpected.put ("LProbe3", new Choice
                 (Lists.<AbstractPrefix>newArrayList
                     (new PassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
@@ -1120,6 +1187,25 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ()),
                      new PassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                             new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe4", new Choice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new PassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new PassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
                              new ArrayList<ImmediatePrefix> ())
         )));
 
