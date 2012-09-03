@@ -53,13 +53,32 @@ options{
   Map<ExpressionVariable,AbstractExpression> vars; 
 }
 
+completeSystem returns[Constants constants,
+               Map<ExpressionVariable,AbstractExpression> unfoldedVariables,
+               PCTMC pctmc,
+               Multimap<AbstractPCTMCAnalysis,PlotDescription> plots,
+               List<PCTMCExperiment> experiments
+	]
+:
+  system extensions EOF
+{
+  $constants = $system.constants;
+  $unfoldedVariables = $system.unfoldedVariables;
+  $pctmc = $system.pctmc;
+  $plots = $system.plots;
+  $experiments = $system.experiments;
+}
+;
+
+extensions: ;
+
 system returns[Constants constants, 
                Map<ExpressionVariable,AbstractExpression> unfoldedVariables,
                PCTMC pctmc,                
                Multimap<AbstractPCTMCAnalysis,PlotDescription> plots,
                List<PCTMCExperiment> experiments
     ]
-@init{       
+@init{
   Map<String,Double> constantMap = new LinkedHashMap<String,Double>();      
   vars = new LinkedHashMap<ExpressionVariable,AbstractExpression>();
   $plots = LinkedHashMultimap.<AbstractPCTMCAnalysis,PlotDescription>create();
@@ -84,61 +103,61 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
 
    (d=eventDefinition {eventSpecifications.add($d.e);})*
    initDefinition[initCounts]*
-   
-   {      
-      Set<State> states = new HashSet<State>(); 
+
+   {
+      Set<State> states = new HashSet<State>();
       List<EvolutionEvent> events = new LinkedList<EvolutionEvent>();
       for (EventSpecification es:eventSpecifications){
-        List<State> decreasing = new LinkedList<State>(); 
+        List<State> decreasing = new LinkedList<State>();
         for (State t:es.getDecreasing()){
-          states.add(t); 
-          decreasing.add(t); 
+          states.add(t);
+          decreasing.add(t);
         }
         List<State> increasing = new LinkedList<State>();
         for (State t:es.getIncreasing()){
-          states.add(t);  
-          increasing.add(t); 
+          states.add(t);
+          increasing.add(t);
         }
-        ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC($unfoldedVariables); 
-        es.getRate().accept(setter); 
+        ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC($unfoldedVariables);
+        es.getRate().accept(setter);
         EvolutionEvent event = new EvolutionEvent(decreasing, increasing, es.getRate());
         events.add(event);
       }
-      Map<State,AbstractExpression> initMap = new HashMap<State, AbstractExpression>(); 
+      Map<State,AbstractExpression> initMap = new HashMap<State, AbstractExpression>();
       for (State t:states){
         if (!initCounts.containsKey(t)){
-          initMap.put(t, DoubleExpression.ZERO); 
+          initMap.put(t, DoubleExpression.ZERO);
         } else {
           ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC($unfoldedVariables);
-          initCounts.get(t).accept(setter); 
-          initMap.put(t, initCounts.get(t)); 
+          initCounts.get(t).accept(setter);
+          initMap.put(t, initCounts.get(t));
         }
       }
-      
+
       $pctmc = new PCTMC(initMap, events);
 };
 
 
 experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment iterate]
-@init{  
-  List<RangeSpecification> ranges = new LinkedList<RangeSpecification>(); 
-  List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>(); 
-  Map<String,AbstractExpression> reEvaluation = new HashMap<String,AbstractExpression>(); 
+@init{
+  List<RangeSpecification> ranges = new LinkedList<RangeSpecification>();
+  List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>();
+  Map<String,AbstractExpression> reEvaluation = new HashMap<String,AbstractExpression>();
   List<RangeSpecification> minRanges = new LinkedList<RangeSpecification>();;
-  PlotAtDescription minSpecification=null; 
+  PlotAtDescription minSpecification=null;
 }
 :
   ^(ITERATE (r=rangeSpecification {ranges.add($r.range);})*
     (MINIMISE m=plotAtSpecification[$constants]  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
-   (WHERE 
+   (WHERE
        ((c=constant rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
-  
-    a=analysis[$pctmc,$constants, null]   
+
+    a=analysis[$pctmc,$constants, null]
     (p=plotAtSpecification[$constants] {plots.add($p.p);})*
    )
   {$iterate = new PCTMCIterate(ranges,minSpecification,minRanges,reEvaluation,$a.analysis,$a.postprocessor,plots,$unfoldedVariables);}
 | ^(TRANSIENT_ITERATE (r=rangeSpecification {ranges.add($r.range);})+
-   (WHERE 
+   (WHERE
        ((c=constant rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
       a=analysis[$pctmc,$constants, null]
       ps=plotDescriptions
@@ -147,40 +166,40 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
 ;
 
 rangeSpecification returns[RangeSpecification range]:
-  ^(RANGE c=constant from=realnumber to=realnumber 
-    ((IN steps=integer STEPS) {$range = new RangeSpecification($c.text,$from.value,$to.value,$steps.value); } 
+  ^(RANGE c=constant from=realnumber to=realnumber
+    ((IN steps=integer STEPS) {$range = new RangeSpecification($c.text,$from.value,$to.value,$steps.value); }
     | (STEP step=realnumber) {$range = new RangeSpecification($c.text,$from.value,$to.value,$step.value);}
     ))
-  
+
 ;
 
 plotAtSpecification[Constants constants] returns [PlotAtDescription p]
 @init{
-  String f=""; 
-  List<PlotConstraint> constraints = new LinkedList<PlotConstraint>(); 
-}: 
+  String f="";
+  List<PlotConstraint> constraints = new LinkedList<PlotConstraint>();
+}:
   ^(PLOT pl=plotAt[$constants]
-      ( WHEN 
+      ( WHEN
         (pa=plotAt[$constants] GEQ prob=realnumber {
              constraints.add(new PlotConstraint($pa.e,$pa.t,$prob.value));})+
-      )?      
+      )?
        (file=FILENAME {f=$file.text.replace("\"","");})?)
   {
-    $p = new PlotAtDescription($pl.e,$pl.t,constraints,f); 
+    $p = new PlotAtDescription($pl.e,$pl.t,constraints,f);
   }
 ;
 
 plotAt[Constants constants] returns [AbstractExpression e, double t]:
    exp=expression ATTIME
-   time=expression 
-  
+   time=expression
+
    {$e = $exp.e;
     ExpressionEvaluatorWithConstants timeEval = new ExpressionEvaluatorWithConstants($constants);
     $time.e.accept(timeEval);
-    $t = timeEval.getResult();} 
+    $t = timeEval.getResult();}
 ;
 
-analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
 :
    o=odeAnalysis[pctmc,constants, plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
@@ -189,39 +208,37 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
  | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 ;
 
-compare[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+compare[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
 ^(COMPARE a1=analysis[pctmc, constants, plots] a2=analysis[pctmc, constants, plots] ps=plotDescriptions)
 {
-  $analysis = new PCTMCCompareAnalysis($a1.analysis,$a2.analysis); 
+  $analysis = new PCTMCCompareAnalysis($a1.analysis,$a2.analysis);
   $postprocessor = new CompareAnalysisNumericalPostprocessor($a1.postprocessor,$a2.postprocessor);
-  $analysis.addPostprocessor($postprocessor); 
-  if ($plots!=null) $plots.putAll($analysis,$ps.p);   
+  $analysis.addPostprocessor($postprocessor);
+  if ($plots!=null) $plots.putAll($analysis,$ps.p);
 }
 ;
-odeAnalysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+odeAnalysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
   Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
-  ^(ODES  
+  ^(ODES
          (LBRACK
-             p1=parameter {parameters.put($p1.name, $p1.value);} 
-             (COMMA p=parameter 
-                          {parameters.put($p.name, $p.value);})* 
+             p1=parameter {parameters.put($p1.name, $p1.value);}
+             (COMMA p=parameter
+                          {parameters.put($p.name, $p.value);})*
           RBRACK)?
-         stop=expression COMMA step=expression COMMA den=integer 
-          (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*         
-         LBRACE 
-         ps=plotDescriptions 
-    RBRACE    
-   ){
+         settings=odeSettings LBRACE
+          (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*
+         ps=plotDescriptions
+    RBRACE   ){
       $analysis = new PCTMCODEAnalysis($pctmc, parameters);
       ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
-      $stop.e.accept(stopEval);
+      $settings.stopTime.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-      $step.e.accept(stepEval);
+      $settings.stepSize.accept(stepEval);
       if (postprocessorParameters.isEmpty()) {
         $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
             stepEval.getResult(),$den.value);
@@ -230,9 +247,20 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
            stepEval.getResult(),$den.value, postprocessorParameters);
       }
       $analysis.addPostprocessor($postprocessor);
-      if ($plots!=null) $plots.putAll($analysis,$ps.p); 
+      if ($plots!=null) $plots.putAll($analysis,$ps.p);
    }
-  
+
+;
+
+odeSettings returns
+  [AbstractExpression stopTime, AbstractExpression stepSize, int density]:
+  ^(ODESETTINGS stopExpr=expression COMMA
+  	stepExpr=expression COMMA dens=INTEGER)
+  {
+      $stopTime = $stopExpr.e;
+      $stepSize = $stepExpr.e;
+      $density = Integer.parseInt ($dens.text);
+  }
 ;
 
 parameter returns [String name, Object value]:
@@ -243,23 +271,22 @@ parameter returns [String name, Object value]:
               |f=FILENAME {$value=$f.text.replace("\"","");})
 ;
 
-simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
-returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
+simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
 }:
-  ^(SIMULATION stop=expression COMMA step=expression COMMA replications=integer 
+  ^(SIMULATION settings=simulationSettings
     (COMMA p=parameter {parameters.put($p.name, $p.value);})*
     LBRACE 
          ps=plotDescriptions 
     RBRACE    
    ){
       $analysis = new PCTMCSimulation($pctmc);
-      
+
       ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
-      $stop.e.accept(stopEval);
+      $settings.stopTime.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-      $step.e.accept(stepEval);
+      $settings.stepSize.accept(stepEval);
       if (parameters.isEmpty()) {
         $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$replications.value);
       } else {
@@ -270,7 +297,6 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
 ;
-
 accuratesimulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
 returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
 @init{
@@ -299,23 +325,34 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
         $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),ciEval.getResult(),maxRelCIWidthEval.getResult(),$batchSize.value, parameters);
       }
       $analysis.addPostprocessor($postprocessor);
-      if ($plots!=null) $plots.putAll($analysis,$ps.p); 
+      if ($plots!=null) $plots.putAll($analysis,$ps.p);
    }
+;
+
+simulationSettings returns
+  [AbstractExpression stopTime, AbstractExpression stepSize, int replications]:
+  ^(SIMULATIONSETTINGS stopExpr=expression
+  	COMMA stepExpr=expression COMMA repl=INTEGER)
+  {
+      $stopTime = $stopExpr.e;
+      $stepSize = $stepExpr.e;
+      $replications = Integer.parseInt ($repl.text);
+  }
 ;
 
 plotDescriptions returns [List<PlotDescription> p]
 @init{
-  String file; 
+  String file;
   $p = new LinkedList<PlotDescription>();
 }:
   ({file="";}l=expressionList (TO s=FILENAME {file=$s.text.replace("\"","");})?{
-      $p.add(new PlotDescription($l.e,file)); 
+      $p.add(new PlotDescription($l.e,file));
   } SEMI )*
 ;
 
 expressionList returns [List<AbstractExpression> e]
 @init{
-  $e = new LinkedList<AbstractExpression>(); 
+  $e = new LinkedList<AbstractExpression>();
 }:
   exp = expression {$e.add($exp.e);} (COMMA exp2 = expression {$e.add($exp2.e); })*
 ;
@@ -343,7 +380,7 @@ eventDefinition returns [EventSpecification e]:
 
 initDefinition[Map<State,AbstractExpression> map]:
   ^(INIT t=state DEF e=expression {$map.put($t.t,$e.e);})
-; 
+;
 
 state returns [State t]:
   ^(STATE n=UPPERCASENAME) {$t = new PlainState($n.text);}
@@ -363,7 +400,7 @@ primary_expression returns[AbstractExpression e]:
  | TIME {$e = new TimeExpression();}
  | c=constant {$e = new ConstantExpression($c.text);}
  | cp=combinedPowerProduct {$e = CombinedProductExpression.create($cp.c);}
- | m=mean {$e = $m.m;} 
+ | m=mean {$e = $m.m;}
  | eg = generalExpectation {$e = $eg.e;}  
  | cm=central {$e = $cm.c;}
  | cov = covariance {$e = $cov.c;}
@@ -371,15 +408,15 @@ primary_expression returns[AbstractExpression e]:
  | scm=scentral {$e = $scm.c;}
  | ^(MIN exp1=expression COMMA exp2=expression) {$e = MinExpression.create($exp1.e,$exp2.e); }
  | ^(MAX exp1=expression COMMA exp2=expression) {$e = MaxExpression.create($exp1.e,$exp2.e); }
- |  {List<AbstractExpression> args = new LinkedList<AbstractExpression>(); }        
+ |  {List<AbstractExpression> args = new LinkedList<AbstractExpression>(); }
    ^(FUN name=LOWERCASENAME firstArg=expression {args.add($firstArg.e);} (COMMA arg=expression {args.add($arg.e);})*) {$e = FunctionCallExpression.create($name.text,args);}
  | ^(PATTERN s=state) {$e = new PatternPopulationExpression($s.t);}
- | ^(INDICATORFUNCTION con=condition) {$e = new IndicatorFunction($con.c);}  
+ | ^(INDICATORFUNCTION con=condition) {$e = new IndicatorFunction($con.c);}
 ;
 
 condition returns [ExpressionCondition c]:
     e1=expression o=comparisonOperator e2=expression
-    {$c = new ExpressionCondition($e1.e, $o.o, $e2.e);} 
+    {$c = new ExpressionCondition($e1.e, $o.o, $e2.e);}
 ;
 
 comparisonOperator returns [ComparisonOperator o]:
@@ -417,7 +454,7 @@ scentral returns [StandardisedCentralMomentOfLinearCombinationExpression c]:
 
 combinedPowerProduct returns [CombinedPopulationProduct c]
 @init{
-  PopulationProduct nakedProduct = null; 
+  PopulationProduct nakedProduct = null;
 }:
  ^(COMBINEDPRODUCT (n=product {nakedProduct = $n.p;})?
   ps=accPowers {c=new CombinedPopulationProduct(nakedProduct,$ps.a);} )
@@ -425,70 +462,70 @@ combinedPowerProduct returns [CombinedPopulationProduct c]
 
 accPowers returns [Multiset<PopulationProduct> a]
 @init{
-  $a = HashMultiset.<PopulationProduct>create(); 
+  $a = HashMultiset.<PopulationProduct>create();
 }:
-  ( ^(ACC p=product) 
-          (n=integer {$a.add($p.p,$n.value-1);})? 
+  ( ^(ACC p=product)
+          (n=integer {$a.add($p.p,$n.value-1);})?
       {$a.add($p.p,1);}
   )*
 ;
 
 product returns [PopulationProduct p]
-@init{ 
-  Multiset<State> tmp = HashMultiset.<State>create(); 
+@init{
+  Multiset<State> tmp = HashMultiset.<State>create();
 }
-@after{ 
-  $p = new PopulationProduct(tmp); 
+@after{
+  $p = new PopulationProduct(tmp);
 }:
-  ^(PRODUCT (s=state 
-         (n=integer {tmp.add($s.t,$n.value-1);})? 
+  ^(PRODUCT (s=state
+         (n=integer {tmp.add($s.t,$n.value-1);})?
         {tmp.add($s.t,1);}
   )+ )
 ;
 
 expression returns [AbstractExpression e]
 @init{
-  List<AbstractExpression> positiveTerms = new LinkedList<AbstractExpression>(); 
-  List<AbstractExpression> negativeTerms = new LinkedList<AbstractExpression>(); 
+  List<AbstractExpression> positiveTerms = new LinkedList<AbstractExpression>();
+  List<AbstractExpression> negativeTerms = new LinkedList<AbstractExpression>();
 }
 @after{
   if (negativeTerms.isEmpty()){
     $e = SumExpression.create(positiveTerms);
   } else if (positiveTerms.isEmpty()){
-    $e = new UMinusExpression(SumExpression.create(negativeTerms)); 
+    $e = new UMinusExpression(SumExpression.create(negativeTerms));
   } else {
-     $e = new MinusExpression(SumExpression.create(positiveTerms),SumExpression.create(negativeTerms)); 
+     $e = new MinusExpression(SumExpression.create(positiveTerms),SumExpression.create(negativeTerms));
   }
 }:
   f=mult_expression {positiveTerms.add($f.e);} ( (PLUS p=mult_expression {positiveTerms.add($p.e);})
-                   |(MINUS n=mult_expression {negativeTerms.add($n.e);}))*;    
+                   |(MINUS n=mult_expression {negativeTerms.add($n.e);}))*;
 
 mult_expression returns [AbstractExpression e]
 @init{
-  List<AbstractExpression> numTerms = new LinkedList<AbstractExpression>(); 
-  List<AbstractExpression> denTerms = new LinkedList<AbstractExpression>(); 
+  List<AbstractExpression> numTerms = new LinkedList<AbstractExpression>();
+  List<AbstractExpression> denTerms = new LinkedList<AbstractExpression>();
 }
 @after{
   if (denTerms.isEmpty()){
     $e = ProductExpression.create(numTerms);
   } else {
-     $e = DivExpression.create(ProductExpression.create(numTerms),ProductExpression.create(denTerms)); 
+     $e = DivExpression.create(ProductExpression.create(numTerms),ProductExpression.create(denTerms));
   }
-}: 
-  f=power_expression {numTerms.add($f.e);} ((TIMES n=power_expression {numTerms.add($n.e);}) 
+}:
+  f=power_expression {numTerms.add($f.e);} ((TIMES n=power_expression {numTerms.add($n.e);})
                     |(DIVIDE d=power_expression {denTerms.add($d.e);})
-                    )*; 
+                    )*;
 
 power_expression returns [AbstractExpression e]:
   e1 = sign_expression {$e = $e1.e;}(POWER e2=sign_expression {$e= new PowerExpression($e,$e2.e); })*;
 
-  
+
 sign_expression returns [AbstractExpression e]
-  : 
+  :
   (MINUS p1=primary_expression {$e = new UMinusExpression($p1.e); })
   |p2=primary_expression {$e = $p2.e; };
-  
-  
+
+
 realnumber returns [Double value]:
   r=REALNUMBER
   {$value = Double.parseDouble($r.text);}
