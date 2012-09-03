@@ -47,34 +47,14 @@ public class GPEPAToPCTMC {
 		for (GroupComponentPair p : model.getGroupComponentPairs(componentDefinitions)) {
 			initCounts.put(new GPEPAState(p), model.getCountExpression(p));
 		}
-		for (String a:countActions) {
+		for (String a : countActions) {
 			initCounts.put(new GPEPAActionCount(a), DoubleExpression.ZERO);
 		}
 		
 		List<PEPAEvolutionEvent> observableEvolutionEvents = model.getObservableEvolutionEvents(componentDefinitions);
 		List<EvolutionEvent> events = new LinkedList<EvolutionEvent>(); 
-		for (PEPAEvolutionEvent event:observableEvolutionEvents){
-			List<State> increasing = new LinkedList<State>();			
-			List<State> decreasing = new LinkedList<State>();
-			for (GroupComponentPair p : event.getDecreases()){
-				decreasing.add(new GPEPAState(p));
-			}
-			for (GroupComponentPair p : event.getIncreases()){
-				increasing.add(new GPEPAState(p));
-			}
-			if (countActions.contains(event.getAction())){
-				increasing.add(new GPEPAActionCount(event.getAction()));
-			}
-
-            List<String> actions = event.getImmediateActions();
-            for (String action : actions)
-            {
-                if (countActions.contains(action)){
-                    increasing.add(new GPEPAActionCount(action));
-                }
-            }
-
-			events.add(new EvolutionEvent(decreasing, increasing, event.getRate()));
+		for (PEPAEvolutionEvent event : observableEvolutionEvents) {
+			events.add(event.getEvolutionEvent(countActions));
 		}
 
         // remove duplicate events

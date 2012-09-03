@@ -1,14 +1,8 @@
 package uk.ac.imperial.doc.gpanalyser.testing.compiler;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.junit.Test;
-
 import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -19,14 +13,18 @@ import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestCompilerSimpleInput extends BaseCompilerTest {
 	
@@ -50,8 +48,8 @@ public class TestCompilerSimpleInput extends BaseCompilerTest {
 	public void testComponentDefinitions() {
 		Map<String, PEPAComponent> definitions = pctmc.getComponentDefinitions().getDefinitions();
 		Map<String, PEPAComponent> definitionsExpected = new HashMap<String, PEPAComponent>();
-		definitionsExpected.put("A", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("a", new ConstantExpression("ra"), null, new ComponentId("B"), new LinkedList<ImmediatePrefix>()))));
-		definitionsExpected.put("B", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("b", new ConstantExpression("rb"), null, new ComponentId("A"), new LinkedList<ImmediatePrefix>()))));
+		definitionsExpected.put("A", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("a", new ConstantExpression("ra"), null, new ComponentId("B")))));
+		definitionsExpected.put("B", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("b", new ConstantExpression("rb"), null, new ComponentId("A")))));
 		assertEquals(definitionsExpected, definitions);
 	}
 	
@@ -75,10 +73,10 @@ public class TestCompilerSimpleInput extends BaseCompilerTest {
 		Collection<EvolutionEvent> evolutionEvents = tmp.getEvolutionEvents();
 		Collection<EvolutionEvent> evolutionEventsExpected = new LinkedList<EvolutionEvent>();
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sAsA), Lists.newArrayList(sAsB),
-				ProductExpression.create(new PopulationExpression(sAsA), new ConstantExpression("ra"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sAsA), new ConstantExpression("ra"))));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sAsB), Lists.newArrayList(sAsA),
-				ProductExpression.create(new PopulationExpression(sAsB), new ConstantExpression("rb"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sAsB), new ConstantExpression("rb"))));
 
 		assertEquals(evolutionEventsExpected, evolutionEvents);
 	}

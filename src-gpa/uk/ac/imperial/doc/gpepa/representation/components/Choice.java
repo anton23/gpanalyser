@@ -57,10 +57,10 @@ public class Choice extends PEPAComponent {
 					.getContinuation());
             try {
 			    ret.add(p.getClass().getDeclaredConstructor
-                        (String.class, AbstractExpression.class, AbstractExpression.class,
-                                PEPAComponent.class, List.class)
+                        (String.class, AbstractExpression.class,
+                                AbstractExpression.class, PEPAComponent.class)
                         .newInstance(p.getAction(), p.getRate(), p.getWeight(),
-                                newContinuation, p.getImmediatesRaw()));
+                                newContinuation));
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -104,7 +104,7 @@ public class Choice extends PEPAComponent {
 		this.choices = choices;
 	}
 
-	private List<AbstractPrefix> choices;
+	protected List<AbstractPrefix> choices;
 
 	public List<AbstractPrefix> getChoices() {
 		return choices;
@@ -113,14 +113,4 @@ public class Choice extends PEPAComponent {
 	public String toString() {
 		return ToStringUtils.iterableToSSV(choices, "+");
 	}
-
-    public ImmediatePrefix getImmediate() {
-        for (AbstractPrefix choice : choices) {
-            if (choice instanceof ImmediatePrefix)
-            {
-                return (ImmediatePrefix)choice;
-            }
-        }
-        return null;
-    }
 }

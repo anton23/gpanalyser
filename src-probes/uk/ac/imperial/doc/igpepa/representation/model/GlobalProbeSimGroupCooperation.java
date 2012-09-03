@@ -1,9 +1,12 @@
-package uk.ac.imperial.doc.gpepa.representation.model;
+package uk.ac.imperial.doc.igpepa.representation.model;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
+import uk.ac.imperial.doc.gpepa.representation.model.GroupCooperation;
+import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
+import uk.ac.imperial.doc.gpepa.representation.model.PEPAEvolutionEvent;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
@@ -51,7 +54,8 @@ public class GlobalProbeSimGroupCooperation extends GroupCooperation
             {
                 leftActionmap.put (le.getAction (), le);
             }
-            for (String immediateAction : le.getImmediateActions ())
+            for (String immediateAction
+                    : ((iPEPAEvolutionEvent) le).getImmediateActions ())
             {
                 if (actions.contains (immediateAction))
                 {
@@ -82,7 +86,8 @@ public class GlobalProbeSimGroupCooperation extends GroupCooperation
 
                     List<String> immediateActions
                         = new LinkedList<String> () ;
-                    immediateActions.addAll (le.getImmediateActions ());
+                    immediateActions.addAll (((iPEPAEvolutionEvent) le)
+                            .getImmediateActions ());
                     if (!le.getAction ().equals (action))
                     {
                         immediateActions.remove (action);
@@ -99,7 +104,7 @@ public class GlobalProbeSimGroupCooperation extends GroupCooperation
                     AbstractExpression rate
                         = ProductExpression.create (decreasingStates);
 
-                    events.add (new PEPAEvolutionEvent
+                    events.add (new iPEPAEvolutionEvent
                             (action, immediateActions, rate,
                                 increases, decreases));
                 }

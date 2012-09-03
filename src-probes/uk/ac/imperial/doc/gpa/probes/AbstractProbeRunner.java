@@ -12,6 +12,7 @@ import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
+import uk.ac.imperial.doc.igpepa.representation.components.iPEPAPrefix;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.*;
@@ -193,7 +194,8 @@ public abstract class AbstractProbeRunner
                 for (AbstractPrefix prefix : prefices)
                 {
                     if (prefix.getAction ().equals (action)
-                            && (prefix.getImmediates ().contains (BEGIN_SIGNAL)
+                            && (((iPEPAPrefix) prefix).getImmediates ()
+                                .contains (BEGIN_SIGNAL)
                             || (prefix.getAction ().equals (BEGIN_SIGNAL)
                                 && prefix instanceof Prefix)))
                     {
@@ -235,7 +237,7 @@ public abstract class AbstractProbeRunner
                             if (prefix.getAction ().equals (action)
                                     && prefix.getContinuation ()
                                     .equals (q.getComponent ())
-                                    && (prefix.getImmediates ()
+                                    && (((iPEPAPrefix) prefix).getImmediates ()
                                     .contains (BEGIN_SIGNAL)
                                     || (action.equals (BEGIN_SIGNAL)
                                         && prefix instanceof Prefix)))
