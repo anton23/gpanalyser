@@ -1,16 +1,12 @@
 package uk.ac.imperial.doc.gpepa.representation.model;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+
+import java.util.*;
 
 
 
@@ -38,9 +34,7 @@ public abstract class GroupedModel {
 	public Set<PEPAComponent> getComponentDerivatives(String group,
 			PEPAComponentDefinitions definitions) {
 		Group g = componentGroups.get(group).getGroup();
-		Set<PEPAComponent> componentDerivatives = g
-				.getComponentDerivatives(definitions);
-		return componentDerivatives;
+		return g.getComponentDerivatives(definitions);
 	}
 
 	public Set<GroupComponentPair> getGroupComponentPairs(
@@ -65,10 +59,14 @@ public abstract class GroupedModel {
 	public AbstractExpression getCountExpression(GroupComponentPair pair) {
 		return componentGroups.get(pair.getGroup()).getGroup().getCountExpression(pair.getComponent());
 	}
-	
+
 	public abstract AbstractExpression getMomentOrientedRateExpression(
 			String action, 
 			PEPAComponentDefinitions definitions);
+
+    public abstract AbstractExpression getComponentRateExpression(
+            String action, PEPAComponentDefinitions definitions,
+            GroupComponentPair groupComponentPair);
 
 	public abstract List<PEPAEvolutionEvent> getEvolutionEvents(
 			PEPAComponentDefinitions definitions,
@@ -90,5 +88,8 @@ public abstract class GroupedModel {
 	@Override
 	public abstract boolean equals(Object obj);
 	
+	public abstract void enumerateGroupedModelParents
+        (Map<GroupedModel, GroupedModel> groupedModels, GroupedModel owner);
 
+    public abstract Set<PEPAComponent> getInitialComponents();
 }

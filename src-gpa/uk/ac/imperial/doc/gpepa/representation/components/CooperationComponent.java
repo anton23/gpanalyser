@@ -1,16 +1,14 @@
 package uk.ac.imperial.doc.gpepa.representation.components;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
-
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 
 public class CooperationComponent extends PEPAComponent {
 
@@ -28,7 +26,13 @@ public class CooperationComponent extends PEPAComponent {
 				&& right.matchPattern(asCoop.getRight());
 	}
 
-	protected PEPAComponent left;
+    @Override
+    public boolean containsComponent(ComponentId component) {
+        return (left.containsComponent(component)
+                    || right.containsComponent(component));
+    }
+
+    protected PEPAComponent left;
 	protected PEPAComponent right;
 	protected Set<String> cooperationSet;
 
@@ -77,7 +81,7 @@ public class CooperationComponent extends PEPAComponent {
 		Set<String> ret = new HashSet<String>();
 		ret.addAll(left.getActions(definitions));
 		ret.addAll(right.getActions(definitions));
-		return null;
+		return ret;
 	}
 
 	@Override
@@ -90,69 +94,96 @@ public class CooperationComponent extends PEPAComponent {
 		ret.add(shorthand);
 		known.add(shorthand);
 		known.add(this);
-		for (Prefix p : getPrefixes(definitions)) {
+		for (AbstractPrefix p : getPrefixes(definitions)) {
 			ret.addAll(p.getContinuation().getDerivativeStates(known,
 					definitions));
 		}
 		return ret;
 	}
 
-	@Override
-	public List<Prefix> getPrefixes(PEPAComponentDefinitions definitions) {
-		List<Prefix> leftPrefixes = left.getPrefixes(definitions);
-		List<Prefix> rightPrefixes = right.getPrefixes(definitions);
-		List<Prefix> ret = new LinkedList<Prefix>();
+    @Override
+	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
+		List<AbstractPrefix> leftPrefixes = left.getPrefixes(definitions);
+		List<AbstractPrefix> rightPrefixes = right.getPrefixes(definitions);
+		List<AbstractPrefix> ret = new LinkedList<AbstractPrefix>();
 
-		Multimap<String, Prefix> leftActionmap = LinkedHashMultimap
-				.<String, Prefix> create();
+		Multimap<String, AbstractPrefix> leftActionmap = LinkedHashMultimap
+				.create();
 
-		Multimap<String, Prefix> rightActionmap = LinkedHashMultimap
-				.<String, Prefix> create();
+		Multimap<String, AbstractPrefix> rightActionmap = LinkedHashMultimap
+				.create();
 
-		// only left evolves
-		for (Prefix leftPrefix : leftPrefixes) {
-			String action = leftPrefix.getAction();
-			if (!cooperationSet.contains(action)) {
-				PEPAComponent newContinuation = definitions
-						.getShorthand(new CooperationComponent(leftPrefix
-								.getContinuation(), right, cooperationSet));
-				ret.add(new Prefix(action, leftPrefix.getRate(),
-						newContinuation));
-			} else {
-				leftActionmap.put(action, leftPrefix);
-			}
-		}
-		// only right evolves
-		for (Prefix rightPrefix : rightPrefixes) {
-			String action = rightPrefix.getAction();
-			if (!cooperationSet.contains(action)) {
-				PEPAComponent newContinuation = definitions
-						.getShorthand(new CooperationComponent(left,
-								rightPrefix.getContinuation(), cooperationSet));
-				ret.add(new Prefix(action, rightPrefix.getRate(),
-						newContinuation));
-			} else {
-				rightActionmap.put(action, rightPrefix);
-			}
-		}
+        // only left evolves
+        for (AbstractPrefix leftPrefix : leftPrefixes) {
+            String action = leftPrefix.getAction();
+            if (!cooperationSet.contains(action)) {
+                    PEPAComponent newContinuation = definitions
+                                    .getShorthand(new CooperationComponent(leftPrefix
+                                                    .getContinuation(), right, cooperationSet));
+                try {
+                    ret.add (leftPrefix.getClass().getDeclaredConstructor
+                        (String.class, AbstractExpression.class,
+                                AbstractExpression.class, PEPAComponent.class)
+                        .newInstance(leftPrefix.getAction(),
+                                leftPrefix.getRate(),
+                                leftPrefix.getWeight(), newContinuation));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                leftActionmap.put(action, leftPrefix);
+            }
+        }
+        // only right evolves
+        for (AbstractPrefix rightPrefix : rightPrefixes) {
+            String action = rightPrefix.getAction();
+            if (!cooperationSet.contains(action)) {
+                    PEPAComponent newContinuation = definitions
+                                    .getShorthand(new CooperationComponent(left,
+                                                    rightPrefix.getContinuation(), cooperationSet));
+                try {
+                    ret.add (rightPrefix.getClass().getDeclaredConstructor
+                            (String.class, AbstractExpression.class,
+                                    AbstractExpression.class,
+                                    PEPAComponent.class)
+                            .newInstance(rightPrefix.getAction(),
+                                    rightPrefix.getRate(),
+                                    rightPrefix.getWeight(), newContinuation));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                    rightActionmap.put(action, rightPrefix);
+            }
+        }
+
+        Set<String> cooperationActions = new HashSet<String>();
+        cooperationActions.addAll(leftActionmap.keySet());
+        cooperationActions.addAll(rightActionmap.keySet());
+        
 		// both evolve
-		for (String action : leftActionmap.keySet()) {
-			for (Prefix leftPrefix : leftActionmap.get(action)) {
-				for (Prefix rightPrefix : rightActionmap.get(action)) {
+		for (String action : cooperationActions) {
+			for (AbstractPrefix leftPrefix : leftActionmap.get(action)) {
+				for (AbstractPrefix rightPrefix : rightActionmap.get(action)) {
+
 					PEPAComponent newContinuation = definitions
 							.getShorthand(new CooperationComponent(leftPrefix
 									.getContinuation(), rightPrefix
 									.getContinuation(), cooperationSet));
-					AbstractExpression leftRate = leftPrefix.getRate();
-					AbstractExpression rightRate = rightPrefix.getRate();
-					AbstractExpression leftApparentRate = definitions
-							.getApparentRateExpression(action, left);
-					AbstractExpression rightApparentRate = definitions
-							.getApparentRateExpression(action, right);
-					AbstractExpression rate = DivDivMinExpression.create(
-							leftRate, rightRate, leftApparentRate,
-							rightApparentRate);
-					ret.add(new Prefix(action, rate, newContinuation));
+                    PEPAComponentDefinitions.RateWeightPair leftRateWeight
+                            = definitions.getApparentRateWeightExpressions
+                            (leftPrefix.getAction(), left);
+                    PEPAComponentDefinitions.RateWeightPair rightRateWeight
+                            = definitions.getApparentRateWeightExpressions
+                            (rightPrefix.getAction(), right);
+                    AbstractPrefix newPrefix = leftPrefix.getCooperation
+                            (action, rightPrefix, rightRateWeight.getRate(),
+                                rightRateWeight.getWeight(),
+                                leftRateWeight.getRate(),
+                                leftRateWeight.getWeight(), newContinuation);
+                    if (newPrefix != null) {
+                        ret.add(newPrefix);
+                    }
 				}
 			}
 		}

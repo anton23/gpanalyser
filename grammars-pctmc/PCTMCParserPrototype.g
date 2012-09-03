@@ -30,8 +30,6 @@ tokens{
   GT;
   LT;}
 
-
-
 @members{
 
     protected Stack<String> hint = new Stack<String>();
@@ -422,8 +420,8 @@ accuratesimulation:
   RPAR LBRACE
     plotDescription*
   RBRACE
-  -> ^(ACCURATESIMULATION $stopTime COMMA $stepSize COMMA $ci COMMA $maxRelCIWidth COMMA $batchSize LBRACE plotDescription* RBRACE )
-;
+  -> ^(ACCURATESIMULATION $stopTime COMMA $stepSize COMMA $ci COMMA $maxRelCIWidth COMMA $batchSize LBRACE plotDescription* RBRACE );
+
 plotDescription:
  {hint.push("each plot description has to be of the form\n   'e1,...,en (optional ->\"filename\");\n" +
             "where e1,...,en are expectation based expressions");}

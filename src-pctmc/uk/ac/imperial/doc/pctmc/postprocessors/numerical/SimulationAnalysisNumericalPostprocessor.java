@@ -1,15 +1,5 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -35,6 +25,12 @@ import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
+
+import java.io.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class SimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
@@ -125,6 +121,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	}
 	
 	protected String productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode ;
+    private PCTMCSimulation simulation;
 	
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
@@ -132,7 +129,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		prepared = false;
 		if (analysis instanceof PCTMCSimulation) {
 			prepared = true;
-			PCTMCSimulation simulation = (PCTMCSimulation) analysis;
+			simulation = (PCTMCSimulation) analysis;
 
 			
 			productUpdaterCode = getProductUpdaterCode(simulation, constants, false);
@@ -182,6 +179,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	
 	
 	private void simulate(Constants constants) {
+        prepare(simulation, constants);
 		
 		eventGenerator.setRates(constants.getFlatConstants());
 

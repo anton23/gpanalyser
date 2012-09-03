@@ -1,14 +1,12 @@
 package uk.ac.imperial.doc.gpanalyser.testing.parser;
 
-import java.util.LinkedList;
-
+import com.google.common.collect.Lists;
 import org.junit.Test;
-
 import uk.ac.imperial.doc.gpa.GPAPMain;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.testing.BaseTestPCTMCParser;
 
-import com.google.common.collect.Lists;
+import java.util.LinkedList;
 
 public class TestGPAParser extends BaseTestPCTMCParser {
 	
@@ -275,7 +273,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"A = (a, ra).B + (c,rb).A;\n" +
 				"B = (b, rb).A;\n" +
 				"As{A[n]}\n" + 
-				"odes(stopTime=10.0, stepSize=0.1, density=10){\n"+
+				"ODEs(stopTime=10.0, stepSize=0.1, density=10){\n"+
 				"E[As:A];}"
 				, 
 				Lists.newArrayList(

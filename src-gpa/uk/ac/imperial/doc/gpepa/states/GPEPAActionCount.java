@@ -4,13 +4,17 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 
 
 public class GPEPAActionCount extends State{
-	
-	String name;
+
+    String name;
 
 	public GPEPAActionCount(String name) {
 		super();
 		this.name = name;
 	}
+
+    public String getName() {
+        return name;
+    }
 
 	@Override
 	public int hashCode() {
@@ -39,9 +43,6 @@ public class GPEPAActionCount extends State{
 			return false;
 		return true;
 	}
-	
-	
-	
-	
+
 
 }

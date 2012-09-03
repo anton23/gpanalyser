@@ -1,0 +1,119 @@
+r_think = 0.1;
+r_request = 0.4;
+
+r_check_success = 0.7;
+r_check_fail = 0.3;
+r_add = 0.8;
+
+r_serve = 0.4;
+r_init = 0.7;
+r_overload = 0.2;
+
+r_reset = 1;
+init_success = 0.9;
+init_fail = 0.1;
+
+nc = 10;
+nb = 1;
+ns = 3;
+
+Client				= (think, r_think).Client_think;
+Client_think		= (request, r_request).Client;
+
+Scheduler			= (request, r_request).Scheduler_request;
+Scheduler_request	= (check, r_check_success).Scheduler_check
+					+ (check, r_check_fail).Scheduler;
+Scheduler_check		= (add, r_add).Scheduler;
+
+Buffer0				= (add, T).Buffer1;
+Buffer1				= (add, T).Buffer2 + (serve, r_serve).Buffer0;
+Buffer2				= (add, T).Buffer3 + (serve, r_serve).Buffer1;
+Buffer3				= (add, T).Buffer4 + (serve, r_serve).Buffer2;
+Buffer4				= (add, T).Buffer5 + (serve, r_serve).Buffer3;
+Buffer5				= (serve, r_serve).Buffer4;
+
+ManagedBuffer = Scheduler <add> Buffer0;
+
+Server				= (initialise, r_init).Server_init;
+Server_init			= (serve, r_serve).Server_init
+                    + (reset, T).Server
+                    + (overload, r_overload).Server_overload;
+Server_overload		= reset.Server;
+
+DatabaseDriver		= (initialise, T, init_success).DatabaseDriver_init
+					+ (initialise, T, init_fail).DatabaseDriver_fail;
+DatabaseDriver_fail	= (reset, r_reset).DatabaseDriver;
+DatabaseDriver_init = (serve, T).DatabaseDriver_init
+					+ (reset, T).DatabaseDriver;
+
+CompleteServer = Server <initialise, serve, reset> DatabaseDriver;
+
+(Clients{Client[nc]} <request> Buffers{ManagedBuffer[nb]}) <serve> Servers{CompleteServer[ns]}
+/*
+Probe ["database-steady-serve.dat"] (stopTime=250, stepSize=0.5, density=10) steady 750
+{
+    SIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = initialise : begin, serve[4] : end <-
+    }
+    where
+    {
+    	Servers {CompleteServer[ns]} =>
+    		Servers {CompleteServer <initialise, serve> LProbe
+    				 | CompleteServer[ns - 1]}
+    }
+}
+*/
+
+/*
+SimProbe (stopTime=150, stepSize=0.5, replications=2000) steady 350
+//Probe ["database-steady-add.dat"] (stopTime=150, stepSize=0.5, density=10) steady 350
+{
+    HIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = check : begin, add[15] : end <-
+    }
+    where
+    {
+    	Buffers {ManagedBuffer[nb]} =>
+    		Buffers {ManagedBuffer <check, add> LProbe
+    				 | ManagedBuffer[nb - 1]}
+    }
+}
+*/
+
+Probe ["database-steady-add.dat"] (stopTime=150, stepSize=0.5, density=10) steady 350
+{
+    HIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = check : begin, add[15] : end <-
+    }
+    where
+    {
+    	Buffers {ManagedBuffer[nb]} =>
+    		Buffers {ManagedBuffer <check, add> LProbe
+    				 | ManagedBuffer[nb - 1]}
+    }
+}
+
+
+
+/*
+Probe (stopTime=250, stepSize=0.5, density=10) transient 750
+{
+    SIPT = begin : start, end : stop
+    observes
+    {
+    	LProbe = initialise : begin, serve[5] : end
+    }
+    where
+    {
+    	Servers {CompleteServer[ns]} =>
+    		Servers {CompleteServer <initialise, serve> LProbe
+    				 | CompleteServer[ns - 1]}
+    }
+}
+*/

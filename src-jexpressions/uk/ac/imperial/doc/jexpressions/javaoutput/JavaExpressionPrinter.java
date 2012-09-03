@@ -1,23 +1,6 @@
 package uk.ac.imperial.doc.jexpressions.javaoutput;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
-import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
-import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.*;
 import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 
 /**

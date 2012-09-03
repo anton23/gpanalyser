@@ -27,11 +27,11 @@ public class AnyComponent extends PEPAComponent {
 	}
 
 	@Override
-	public List<Prefix> getPrefixes(PEPAComponentDefinitions definitions) {
+	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
 		return null;
 	}
 
-	@Override
+    @Override
 	public int hashCode() {
 		return 0;
 	}
@@ -41,7 +41,12 @@ public class AnyComponent extends PEPAComponent {
 		return true;
 	}
 
-	@Override
+    @Override
+    public boolean containsComponent(ComponentId component) {
+        return true;
+    }
+
+    @Override
 	public String toString() {
 		return "_";
 	}

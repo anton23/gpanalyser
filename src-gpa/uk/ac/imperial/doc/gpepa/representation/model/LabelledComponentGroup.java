@@ -1,13 +1,8 @@
 package uk.ac.imperial.doc.gpepa.representation.model;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
-import uk.ac.imperial.doc.gpepa.representation.components.Prefix;
 import uk.ac.imperial.doc.gpepa.representation.components.Stop;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -16,7 +11,9 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+
+import java.util.*;
 
 /**
  * Representation of the labelled component group structure of a model.
@@ -30,44 +27,45 @@ public class LabelledComponentGroup extends GroupedModel {
 		return group.getActions(definitions);
 	}
 
-	
 
-	@Override
-	public List<PEPAEvolutionEvent> getEvolutionEvents(
 
-			final PEPAComponentDefinitions definitions,
-			Set<String> restrictedActions) {
-		List<PEPAEvolutionEvent> events = new LinkedList<PEPAEvolutionEvent>();
-		for (final PEPAComponent derivative : group
-				.getComponentDerivatives(definitions)) {
-			/*
-			 * PEPAComponent s = definitions
-			 * .getComponentDefinition(derivative);
-			 */
-			for (final Prefix prefix : derivative.getPrefixes(definitions)) {
-				if (!restrictedActions.contains(prefix.getAction())) {
+    @Override
+    public List<PEPAEvolutionEvent> getEvolutionEvents(
 
-					AbstractExpression parameter = prefix.getRate();
-					AbstractExpression rate = ProductExpression.create(
-							new PopulationExpression(new GPEPAState(new GroupComponentPair(label,
-									derivative))), parameter);
+            final PEPAComponentDefinitions definitions,
+            Set<String> restrictedActions) {
+        List<PEPAEvolutionEvent> events = new LinkedList<PEPAEvolutionEvent>();
+        for (final PEPAComponent derivative : group
+                .getComponentDerivatives(definitions)) {
+            /*
+            * PEPAComponent s = definitions
+            * .getComponentDefinition(derivative);
+            */
+            for (final AbstractPrefix prefix : derivative.getPrefixes(definitions)) {
+                if (!restrictedActions.contains(prefix.getAction())) {
 
-					List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
-					PEPAComponent continuation = prefix.getContinuation();
-					if (!(continuation instanceof Stop))
-						increases.add(new GroupComponentPair(label,
-								continuation));
-					List<GroupComponentPair> decreases = new LinkedList<GroupComponentPair>();
-					decreases.add(new GroupComponentPair(label, derivative));
-					events.add(new PEPAEvolutionEvent(prefix.getAction(), rate,
-							increases, decreases));
-				}
-			}
-		}
-		return events;
-	}
+					AbstractExpression rate
+                        = ProductExpression.create(CombinedProductExpression
+                            .createMeanExpression(new GPEPAState
+                                (new GroupComponentPair(label, derivative))),
+                            prefix.getRate());
 
-	@Override
+                    List<GroupComponentPair> increases = new LinkedList<GroupComponentPair>();
+                    PEPAComponent continuation = prefix.getContinuation();
+                    if (!(continuation instanceof Stop))
+                        increases.add(new GroupComponentPair(label,
+                                continuation));
+                    List<GroupComponentPair> decreases = new LinkedList<GroupComponentPair>();
+                    decreases.add(new GroupComponentPair(label, derivative));
+                    events.add(new PEPAEvolutionEvent(prefix.getAction(), rate,
+                            increases, decreases));
+                }
+            }
+        }
+        return events;
+    }
+
+    @Override
 	public AbstractExpression getMomentOrientedRateExpression(String action,
 				PEPAComponentDefinitions definitions) {
 		Set<PEPAComponent> componentDerivatives = getComponentDerivatives(
@@ -75,17 +73,35 @@ public class LabelledComponentGroup extends GroupedModel {
 		List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
 		for (PEPAComponent p : componentDerivatives) {
 			AbstractExpression rate = definitions.getApparentRateExpression(
-					action, p);
+                    action, p);
 			if (!(rate.equals(DoubleExpression.ZERO))) {
-				summands.add(ProductExpression.create(new PopulationExpression(
-						new GPEPAState(new GroupComponentPair(label, p))), rate));
+				summands.add(ProductExpression.create(CombinedProductExpression
+                        .createMeanExpression(new GPEPAState
+                                (new GroupComponentPair(label, p))), rate));
 			}
 		}
 		return SumExpression.create(summands);
 	}
 
+    @Override
+    public AbstractExpression getComponentRateExpression
+            (String action, PEPAComponentDefinitions definitions,
+             GroupComponentPair groupComponentPair) {
+        if (groupComponentPair.getGroup().equals(label)
+                && group.getComponentDerivatives(definitions)
+                    .contains(groupComponentPair.getComponent())) {
+            AbstractExpression rate = definitions.getApparentRateExpression(
+                    action, groupComponentPair.getComponent());
+            return ProductExpression.create(CombinedProductExpression
+                    .createMeanExpression(new GPEPAState(groupComponentPair)),
+                    rate);
+        }
+        else {
+            return DoubleExpression.ZERO;
+        }
+    }
 
-	public LabelledComponentGroup(String label, Group group) {
+    public LabelledComponentGroup(String label, Group group) {
 		super();
 		this.label = label;
 		this.group = group;
@@ -93,7 +109,7 @@ public class LabelledComponentGroup extends GroupedModel {
 		componentGroups.put(label, this);
 	}
 
-	private String label;
+	protected String label;
 
 	/**
 	 * Returns the label of this labelled component group.
@@ -104,7 +120,7 @@ public class LabelledComponentGroup extends GroupedModel {
 		return label;
 	}
 
-	private Group group;
+	protected Group group;
 
 	public Group getGroup() {
 		return group;
@@ -146,4 +162,24 @@ public class LabelledComponentGroup extends GroupedModel {
 			return false;
 		return true;
 	}
+
+    @Override
+    public void enumerateGroupedModelParents
+        (Map<GroupedModel, GroupedModel> groupedModels, GroupedModel owner) {
+        groupedModels.put (this, owner);
+    }
+
+    @Override
+    public Set<PEPAComponent> getInitialComponents() {
+        Map<PEPAComponent,AbstractExpression> counts = group.getCounts();
+        Set<PEPAComponent> pepaComponents = new HashSet<PEPAComponent>();
+        for (PEPAComponent component : counts.keySet())
+        {
+            if (!counts.get(component).equals(DoubleExpression.ZERO))
+            {
+                 pepaComponents.add(component);
+            }
+        }
+        return pepaComponents;
+    }
 }

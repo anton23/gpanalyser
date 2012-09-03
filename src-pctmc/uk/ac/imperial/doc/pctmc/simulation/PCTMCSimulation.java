@@ -1,10 +1,5 @@
 package uk.ac.imperial.doc.pctmc.simulation;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
@@ -13,6 +8,11 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
@@ -64,9 +64,9 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
 	int n;
 
+    @Override
 	public void prepare(Constants variables) {		
 		prepareAccumulatedIndex();
 		prepareGeneralExpectationIndex();
-
-			}	
+	}
 }

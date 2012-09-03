@@ -1,6 +1,6 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis.utils;
 
-public abstract class SystemOfODEs {
+public abstract class SystemOfODEs implements ISystemOfODEs {
 	protected double[] r;
 
 	public void setRates(double[] r) {

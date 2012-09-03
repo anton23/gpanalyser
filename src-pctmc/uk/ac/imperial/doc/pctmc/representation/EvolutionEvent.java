@@ -1,11 +1,11 @@
 package uk.ac.imperial.doc.pctmc.representation;
 
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 
 
 public class EvolutionEvent {
@@ -67,7 +67,7 @@ public class EvolutionEvent {
 	public String toString() {
 		return ToStringUtils.iterableToSSV(decreasing, "+")+"->"
 		           +  ToStringUtils.iterableToSSV(increasing, "+")+" @ "+
-		        rate.toString();
+		        rate.toString() + "\n";
 	}
 	@Override
 	public int hashCode() {

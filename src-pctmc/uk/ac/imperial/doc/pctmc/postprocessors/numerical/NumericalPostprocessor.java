@@ -1,12 +1,6 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.jfree.data.xy.XYSeriesCollection;
-
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
@@ -24,6 +18,11 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocessor {
 	
@@ -128,7 +127,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	
 	public abstract void calculateDataPoints(Constants constants);
 
-	private static String evaluatorClassName = "GeneratedExpressionEvaluator";
+	protected static String evaluatorClassName = "GeneratedExpressionEvaluator";
 	
 	/**
 	 * Returns an object providing updates to expressions from moment data. 
@@ -139,10 +138,9 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	public AbstractExpressionEvaluator getExpressionEvaluator(
 			final List<AbstractExpression> plotExpressions, Constants constants) {
 		EvaluatorMethod updaterMethod = getEvaluatorMethod(plotExpressions, constants);
-		AbstractExpressionEvaluator evaluator = new PCTMCJavaImplementationProvider()
+		return new PCTMCJavaImplementationProvider()
 				.getEvaluatorImplementation(updaterMethod, evaluatorClassName,
 						constants, momentIndex,generalExpectationIndex);
-		return evaluator;
 	}
 
 	/**
@@ -180,13 +178,16 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 		return (int) Math.floor(time/stepSize);
 	}
 	
-	public double[] evaluateExpressionsAtTimes(AbstractExpressionEvaluator evaluator, double[] times,Constants constants){
+	public double[] evaluateExpressionsAtTimes(AbstractExpressionEvaluator evaluator,
+           double[] times, Constants constants){
 		//			evaluator.setRates(constants.getFlatConstants());
 		
 		double[] selectedData = new double[evaluator.getNumberOfExpressions()];
+        double[] flatConstants = constants.getFlatConstants();
 
-		for (int e = 0; e<evaluator.getNumberOfExpressions(); e++){
-			double[] tmp = evaluator.update(constants.getFlatConstants(),dataPoints[getTimeIndex(times[e])], getTimeIndex(times[e]) * stepSize);
+		for (int e = 0; e < evaluator.getNumberOfExpressions(); e++){
+            int timeIndex = getTimeIndex(times[e]);
+			double[] tmp = evaluator.update(flatConstants, dataPoints[timeIndex], timeIndex * stepSize);
 			selectedData[e] = tmp[e];
 		}
 		
