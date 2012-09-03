@@ -103,7 +103,6 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
 
    (d=eventDefinition {eventSpecifications.add($d.e);})*
    initDefinition[initCounts]*
-
    {
       Set<State> states = new HashSet<State>();
       List<EvolutionEvent> events = new LinkedList<EvolutionEvent>();
@@ -151,7 +150,6 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
     (MINIMISE m=plotAtSpecification[$constants]  {minSpecification = $m.p;}(mr=rangeSpecification {minRanges.add($mr.range);})+)?
    (WHERE
        ((c=constant rhs=expression) {reEvaluation.put($c.text,$rhs.e); })+ )?
-
     a=analysis[$pctmc,$constants, null]
     (p=plotAtSpecification[$constants] {plots.add($p.p);})*
    )
@@ -170,7 +168,6 @@ rangeSpecification returns[RangeSpecification range]:
     ((IN steps=integer STEPS) {$range = new RangeSpecification($c.text,$from.value,$to.value,$steps.value); }
     | (STEP step=realnumber) {$range = new RangeSpecification($c.text,$from.value,$to.value,$step.value);}
     ))
-
 ;
 
 plotAtSpecification[Constants constants] returns [PlotAtDescription p]
@@ -218,6 +215,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
   if ($plots!=null) $plots.putAll($analysis,$ps.p);
 }
 ;
+
 odeAnalysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 @init{
@@ -241,10 +239,10 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
       $settings.stepSize.accept(stepEval);
       if (postprocessorParameters.isEmpty()) {
         $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-            stepEval.getResult(),$den.value);
+            stepEval.getResult(),$settings.density);
       } else {
         $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-           stepEval.getResult(),$den.value, postprocessorParameters);
+           stepEval.getResult(),$settings.density, postprocessorParameters);
       }
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p);
@@ -272,6 +270,7 @@ parameter returns [String name, Object value]:
 ;
 
 simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
+returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
 }:
@@ -288,15 +287,27 @@ simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,Plot
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
       $settings.stepSize.accept(stepEval);
       if (parameters.isEmpty()) {
-        $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$replications.value);
+        $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$settings.replications);
       } else {
         $postprocessor = new SimulationAnalysisNumericalPostprocessor(
-            stopEval.getResult(),stepEval.getResult(),$replications.value, parameters);
+            stopEval.getResult(),stepEval.getResult(),$settings.replications, parameters);
       }
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
    }
 ;
+
+simulationSettings returns
+  [AbstractExpression stopTime, AbstractExpression stepSize, int replications]:
+  ^(SIMULATIONSETTINGS stopExpr=expression
+  	COMMA stepExpr=expression COMMA repl=INTEGER)
+  {
+      $stopTime = $stopExpr.e;
+      $stepSize = $stepExpr.e;
+      $replications = Integer.parseInt ($repl.text);
+  }
+;
+
 accuratesimulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
 returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
 @init{
@@ -327,17 +338,6 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
       $analysis.addPostprocessor($postprocessor);
       if ($plots!=null) $plots.putAll($analysis,$ps.p);
    }
-;
-
-simulationSettings returns
-  [AbstractExpression stopTime, AbstractExpression stepSize, int replications]:
-  ^(SIMULATIONSETTINGS stopExpr=expression
-  	COMMA stepExpr=expression COMMA repl=INTEGER)
-  {
-      $stopTime = $stopExpr.e;
-      $stepSize = $stepExpr.e;
-      $replications = Integer.parseInt ($repl.text);
-  }
 ;
 
 plotDescriptions returns [List<PlotDescription> p]

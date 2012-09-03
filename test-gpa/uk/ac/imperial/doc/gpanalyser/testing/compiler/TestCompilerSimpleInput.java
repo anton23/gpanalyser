@@ -1,19 +1,9 @@
 package uk.ac.imperial.doc.gpanalyser.testing.compiler;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.junit.Test;
-
-import uk.ac.imperial.doc.gpepa.representation.components.Choice;
-import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
-import uk.ac.imperial.doc.gpepa.representation.components.Prefix;
+import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
@@ -29,8 +19,12 @@ import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestCompilerSimpleInput extends BaseCompilerTest {
 	
@@ -54,8 +48,8 @@ public class TestCompilerSimpleInput extends BaseCompilerTest {
 	public void testComponentDefinitions() {
 		Map<String, PEPAComponent> definitions = pctmc.getComponentDefinitions().getDefinitions();
 		Map<String, PEPAComponent> definitionsExpected = new HashMap<String, PEPAComponent>();
-		definitionsExpected.put("A", new Choice((List<Prefix>)Lists.newArrayList(new Prefix("a", new ConstantExpression("ra"), new ComponentId("B")))));
-		definitionsExpected.put("B", new Choice((List<Prefix>)Lists.newArrayList(new Prefix("b", new ConstantExpression("rb"), new ComponentId("A")))));
+		definitionsExpected.put("A", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("a", new ConstantExpression("ra"), null, new ComponentId("B")))));
+		definitionsExpected.put("B", new Choice(Lists.newArrayList((AbstractPrefix) new Prefix("b", new ConstantExpression("rb"), null, new ComponentId("A")))));
 		assertEquals(definitionsExpected, definitions);
 	}
 	

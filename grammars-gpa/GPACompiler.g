@@ -118,6 +118,7 @@ import PCTMCCompilerPrototype;
 	private String t = "temp";
 	private GroupedModel mainModel;
 	private Constants mainConstants;
+	private Map<ExpressionVariable,AbstractExpression> mainUnfoldedVariables;
 	private PEPAComponentDefinitions mainDefinitions;
 	private Map<String, PEPAComponent> components;
 	private List<ITransition> excluded = new LinkedList<ITransition> ();
@@ -230,8 +231,10 @@ start:;
 
 modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Constants constants] returns [PCTMC pctmc]
 @init{
+  Set<String> actions = new HashSet<String>(); 
   Set<String> cooperationActions = new HashSet<String>();
   mainConstants = constants;
+  mainUnfoldedVariables = unfoldedVariables;
 }:
   cd = componentDefinitions
   {
@@ -239,15 +242,14 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
     mainDefinitions = new PEPAComponentDefinitions (components);
   }
   m=model
-  (ca=countActions {actions=$countActions.actions;})?  
-  {   
-    $pctmc  = GPEPAToPCTMC.getPCTMC(new PEPAComponentDefinitions($cd.componentDefinitions),$m.model,actions, $unfoldedVariables);
+  {
+    mainModel = $m.model;
   }
   (ca=countActions {cooperationActions=$countActions.cooperationActions;})?
   {
   	iPEPAComponentDefinitions nonvanish = new iPEPAComponentDefinitions($cd.componentDefinitions)
   		.removeVanishingStates($m.model.getInitialComponents());
-    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions);
+    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions, $unfoldedVariables);
   }
 ;
 
@@ -1272,35 +1274,39 @@ scope
 							stateObservers.add (new GPEPAState (g));
 						}
 
-						$measured_times = new SimProbeRunner ()
-							.executeProbedModel
-							(gprobe, globalModel, stateObservers,
-							 globalDef, null, null, accepting,
- 							 mainConstants, $probe_def::stop_time,
-							 $probe_def::step_size, $probe_def::parameter,
-							 $probe_spec::alphabet, $mode, $modePar);
+						$measured_times = new SimProbeRunner
+							(mainConstants, mainUnfoldedVariables)
+								.executeProbedModel
+								(gprobe, globalModel, stateObservers,
+								 globalDef, null, null, accepting,
+								 $probe_def::stop_time, $probe_def::step_size,
+								 $probe_def::parameter, $probe_spec::alphabet,
+								 $mode, $modePar);
 					}
 					else
 					{
-						$measured_times = new SimProbeRunner ()
+						$measured_times = new SimProbeRunner
+							(mainConstants, mainUnfoldedVariables)
 							.executeProbedModel
-							(gprobe, $probe_def::model, stateObservers,
-							 definitions, altDef, defMap,
-							 $probe_spec::localAcceptingStates,
-							 mainConstants, $probe_def::stop_time,
-							 $probe_def::step_size, $probe_def::parameter,
-							 $probe_spec::alphabet, $mode, $modePar);
+								(gprobe, $probe_def::model, stateObservers,
+								 definitions, altDef, defMap,
+								 $probe_spec::localAcceptingStates,
+								 $probe_def::stop_time, $probe_def::step_size,
+								 $probe_def::parameter, $probe_spec::alphabet,
+								 $mode, $modePar);
 					}
 				}
 				else
 				{
-					$measured_times = new ODEProbeRunner ().executeProbedModel
-						(gprobe, $probe_def::model, stateObservers,
-						 definitions, altDef, defMap,
-						 $probe_spec::localAcceptingStates,
-						 mainConstants, $probe_def::stop_time,
-						 $probe_def::step_size, $probe_def::parameter,
-						 $probe_spec::alphabet, $mode, $modePar);
+					$measured_times = new ODEProbeRunner
+						(mainConstants, mainUnfoldedVariables)
+						.executeProbedModel
+							(gprobe, $probe_def::model, stateObservers,
+							 definitions, altDef, defMap,
+							 $probe_spec::localAcceptingStates,
+							 $probe_def::stop_time, $probe_def::step_size,
+							 $probe_def::parameter, $probe_spec::alphabet,
+							 $mode, $modePar);
 				}
             } ;
 
