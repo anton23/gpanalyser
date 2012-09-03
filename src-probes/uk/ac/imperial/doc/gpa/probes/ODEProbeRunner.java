@@ -9,6 +9,7 @@ import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 import uk.ac.imperial.doc.gpepa.representation.model.LabelledComponentGroup;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
+import uk.ac.imperial.doc.igpepa.representation.components.iPEPAPrefix;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -57,7 +58,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         LinkedHashMap<GroupComponentPair, AbstractExpression> crates
             = new LinkedHashMap<GroupComponentPair, AbstractExpression> ();
 
-        // obtaining the ratios for steady state component distribution
+        // obtaining the ratios for steady state components distribution
         double[][] cratesVal = getStartingStates
             (model, mainDef, constants, postprocessor, crates);
         double[] times = new double[statesCountExpressions.size ()];
@@ -279,8 +280,14 @@ public class ODEProbeRunner extends AbstractProbeRunner
                     = hq.getComponent ().getPrefixes (definitions);
             for (AbstractPrefix prefix : prefices)
             {
-                if (prefix.getImmediates ().contains (BEGIN_SIGNAL)
-                    || (prefix.getAction().equals(BEGIN_SIGNAL)
+                if (!(prefix instanceof iPEPAPrefix))
+                {
+                    throw new Error ("Fluid flow approximation of probe passage"
+                        + " time running ith incompatible type of Prefix.");
+                }
+                if (((iPEPAPrefix)prefix).getImmediates ()
+                    .contains (BEGIN_SIGNAL)
+                    || (prefix.getAction().equals (BEGIN_SIGNAL)
                         && prefix instanceof Prefix))
                 {
                     afterBeginsC.add (prefix.getContinuation ());

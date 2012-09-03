@@ -52,8 +52,10 @@ import PCTMCCompilerPrototype;
 
 	import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
 	import uk.ac.imperial.doc.gpepa.representation.components.*;
+	import uk.ac.imperial.doc.igpepa.representation.components.*;
 	import uk.ac.imperial.doc.gpepa.representation.group.*;
-	import uk.ac.imperial.doc.gpepa.representation.model.*; 
+	import uk.ac.imperial.doc.gpepa.representation.model.*;
+	import uk.ac.imperial.doc.igpepa.representation.model.*;
 	import uk.ac.imperial.doc.gpepa.representation.*;
 	import uk.ac.imperial.doc.gpepa.states.*;
 	import uk.ac.imperial.doc.gpa.patterns.*; 
@@ -242,7 +244,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   }
   (ca=countActions {cooperationActions=$countActions.cooperationActions;})?
   {
-  	PEPAComponentDefinitions nonvanish = new PEPAComponentDefinitions($cd.componentDefinitions)
+  	iPEPAComponentDefinitions nonvanish = new iPEPAComponentDefinitions($cd.componentDefinitions)
   		.removeVanishingStates($m.model.getInitialComponents());
     $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions);
   }
@@ -267,10 +269,10 @@ componentDefinitions returns [Map<String,PEPAComponent> componentDefinitions]
 ;
 model returns [GroupedModel model]:
   ^(COOP l=model cooperationActions=coop r=model){
-    model = new GroupCooperation($l.model,$r.model,$cooperationActions.cooperationActions);
+    model = new iPEPAGroupCooperation($l.model,$r.model,$cooperationActions.cooperationActions);
   }
  | ^(LABELLEDGROUP label=UPPERCASENAME g=group){
-    $model = new LabelledComponentGroup($label.text,$g.group);
+    $model = new iPEPALabelledComponentGroup($label.text,$g.group);
    }  
 ;
 
@@ -316,7 +318,7 @@ component returns [PEPAComponent c]:
 
 coopComponent returns [PEPAComponent c]:
   ^(COOPCOMP l=component  a=coop r=component{
-        $c = new CooperationComponent($l.c,$r.c,$a.cooperationActions);
+        $c = new iCooperationComponent($l.c,$r.c,$a.cooperationActions);
     
     }  )  ;
   
@@ -325,7 +327,7 @@ choice returns [PEPAComponent c]
   List<AbstractPrefix> choices = new LinkedList<AbstractPrefix>();
 }
 @after{
-  $c=new Choice(choices); 
+  $c=new iChoice(choices);
 }:
   (p=prefix{
       choices.add($p.c); 
@@ -334,13 +336,13 @@ choice returns [PEPAComponent c]
 
 prefix returns [AbstractPrefix c]:
   ^(PREFIX r=expression a=LOWERCASENAME s=component){
-      AbstractPrefix prefix = new Prefix($a.text,$r.e,null,$s.c,
+      AbstractPrefix prefix = new iPrefix($a.text,$r.e,null,$s.c,
       	new LinkedList<ImmediatePrefix>());
       $c=prefix; 
    }
    | ^(PREFIX PASSIVE w=expression? a=LOWERCASENAME s=component){
       AbstractExpression tw = (w == null) ? DoubleExpression.ONE : $w.e;
-      AbstractPrefix prefix = new PassivePrefix($a.text,null,tw,$s.c,
+      AbstractPrefix prefix = new iPassivePrefix($a.text,null,tw,$s.c,
       	new LinkedList<ImmediatePrefix>());
       $c=prefix; 
    }
@@ -1183,7 +1185,7 @@ scope
 					= new HashMap<String, PEPAComponent> (newComp);
 				newDef.putAll ($probe_spec::origComponents);
 				PEPAComponentDefinitions definitions
-					= new PEPAComponentDefinitions (newDef)
+					= new iPEPAComponentDefinitions (newDef)
 					.removeVanishingStates ($probe_spec::initialStates);
 
 				Set<GPEPAState> stateObservers = new HashSet<GPEPAState> ();
@@ -1212,7 +1214,7 @@ scope
 					}
 					// we can reuse altComp now
 					altComp.putAll ($probe_spec::origComponents);
-					altDef = new PEPAComponentDefinitions (altComp)
+					altDef = new iPEPAComponentDefinitions (altComp)
 						.removeVanishingStates ($probe_spec::initialStates);
 					defMap.put (altDef, altComps);
 				}
@@ -1259,7 +1261,7 @@ scope
 						$probe_spec::initialStates.add
 							(new ComponentId (gprobe.getName ()));
 						PEPAComponentDefinitions globalDef
-							= new PEPAComponentDefinitions (globalComponents)
+							= new iPEPAComponentDefinitions (globalComponents)
 							.removeVanishingStates ($probe_spec::initialStates);
 
 						stateObservers.clear ();

@@ -55,21 +55,11 @@ public class GroupCooperation extends GroupedModel {
             if (actions.contains(le.getAction())) {
                 leftActionmap.put(le.getAction(), le);
             }
-            for (String immediateAction : le.getImmediateActions()) {
-                if (actions.contains(immediateAction)) {
-                    leftActionmap.put(immediateAction, le);
-                }
-            }
         }
 
         for (PEPAEvolutionEvent re : rightEvents) {
             if (actions.contains(re.getAction())) {
                 rightActionmap.put(re.getAction(), re);
-            }
-            for (String immediateAction : re.getImmediateActions()) {
-                if (actions.contains(immediateAction)) {
-                    rightActionmap.put(immediateAction, re);
-                }
             }
         }
 
@@ -86,17 +76,6 @@ public class GroupCooperation extends GroupedModel {
                     decreases.addAll(le.getDecreases());
                     decreases.addAll(re.getDecreases());
 
-                    List<String> immediates
-                            = new LinkedList<String>() ;
-                    immediates.addAll(le.getImmediateActions());
-                    if (!le.getAction().equals(action)) {
-                        immediates.remove(action);
-                    }
-                    immediates.addAll(re.getImmediateActions());
-                    if (!re.getAction().equals(action)) {
-                        immediates.remove(action);
-                    }
-
                     AbstractExpression leftApparentRate = left
                             .getMomentOrientedRateExpression(action,
                                     definitions);
@@ -110,7 +89,7 @@ public class GroupCooperation extends GroupedModel {
                     AbstractExpression rate = DivDivMinExpression.create(
                             leftRate, rightRate, leftApparentRate,
                             rightApparentRate);
-                    events.add(new PEPAEvolutionEvent(action, immediates,
+                    events.add(new PEPAEvolutionEvent(action,
                             rate, increases, decreases));
                 }
             }

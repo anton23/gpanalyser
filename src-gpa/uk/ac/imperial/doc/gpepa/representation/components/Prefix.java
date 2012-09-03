@@ -2,8 +2,6 @@ package uk.ac.imperial.doc.gpepa.representation.components;
 
 import uk.ac.imperial.doc.jexpressions.expressions.*;
 
-import java.util.List;
-
 /**
  * Class representing a (action,rate parameter).continuation triple.
  * 
@@ -29,13 +27,9 @@ public class Prefix extends AbstractPrefix {
 		return toString().hashCode();
 	}
 
-	private AbstractExpression rate;
+	protected AbstractExpression rate;
 
 	public AbstractExpression getRate() {
-        if (immediates.size() > 0)
-        {
-		    return ProductExpression.create(rate, immediateSum);
-        }
         return rate;
 	}
 
@@ -51,15 +45,14 @@ public class Prefix extends AbstractPrefix {
              AbstractExpression otherApparentWeight,
              AbstractExpression thisApparentRate,
              AbstractExpression thisApparentWeight,
-             PEPAComponent newContinuation,
-             List<ImmediatePrefix> newImmediates) {
+             PEPAComponent newContinuation) {
         if (otherAbstractPrefix instanceof Prefix)
         {
             AbstractExpression coopRate = DivDivMinExpression.create(
                     getRate(), otherAbstractPrefix.getRate(),
                     thisApparentRate, otherApparentRate);
             return new Prefix(newAction, coopRate, null,
-                    newContinuation, newImmediates);
+                    newContinuation);
         }
         if (otherAbstractPrefix instanceof PassivePrefix)
         {
@@ -68,20 +61,18 @@ public class Prefix extends AbstractPrefix {
                         (getRate(), DivExpression.create
                             (otherAbstractPrefix.getWeight(),
                             otherApparentWeight)),
-                    null, newContinuation, newImmediates);
+                    null, newContinuation);
         }
         throw new Error("Unsupported cooperation between Prefix and "
             + otherAbstractPrefix.getClass().getName());
     }
 
 	public Prefix(String action, AbstractExpression rate,
-            AbstractExpression weight, PEPAComponent continuation,
-            List<ImmediatePrefix> immediates) {
+            AbstractExpression weight, PEPAComponent continuation) {
 		super();
 		this.action = action;
 		this.rate = rate;
 		this.continuation = continuation;
-        addImmediates(immediates);
 	}
 
 	public String toString() {

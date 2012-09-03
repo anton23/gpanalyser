@@ -1,15 +1,8 @@
 package uk.ac.imperial.doc.gpanalyser.testing.compiler;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.junit.Test;
-
 import uk.ac.imperial.doc.gpepa.representation.components.*;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
@@ -22,14 +15,15 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class TestCompilerClientServer extends BaseCompilerTest {
@@ -58,19 +52,19 @@ public class TestCompilerClientServer extends BaseCompilerTest {
 		Map<String, PEPAComponent> definitions = pctmc.getComponentDefinitions().getDefinitions();
 		Map<String, PEPAComponent> definitionsExpected = new HashMap<String, PEPAComponent>();
 		definitionsExpected.put("Client", new Choice(Lists.newArrayList(
-                (AbstractPrefix) new Prefix("request", new ConstantExpression("rr"), null, new ComponentId("Client_waiting"), new LinkedList<ImmediatePrefix>()))));
+                (AbstractPrefix) new Prefix("request", new ConstantExpression("rr"), null, new ComponentId("Client_waiting")))));
 		definitionsExpected.put("Client_waiting", new Choice(Lists.newArrayList(
-                (AbstractPrefix) new Prefix("data", new ConstantExpression("rd"), null, new ComponentId("Client_think"), new LinkedList<ImmediatePrefix>()))));
+                (AbstractPrefix) new Prefix("data", new ConstantExpression("rd"), null, new ComponentId("Client_think")))));
 		definitionsExpected.put("Client_think", new Choice(Lists.newArrayList(
-                (AbstractPrefix) new Prefix("think", new ConstantExpression("rt"), null, new ComponentId("Client"), new LinkedList<ImmediatePrefix>()))));
+                (AbstractPrefix) new Prefix("think", new ConstantExpression("rt"), null, new ComponentId("Client")))));
 		
 		definitionsExpected.put("Server", new Choice(Lists.newArrayList(
-                (AbstractPrefix) new Prefix("request", new ConstantExpression("rr"), null, new ComponentId("Server_get"), new LinkedList<ImmediatePrefix>()),
-                (AbstractPrefix) new Prefix("break", new ConstantExpression("rb"), null, new ComponentId("Server_broken"), new LinkedList<ImmediatePrefix>()))));
+                (AbstractPrefix) new Prefix("request", new ConstantExpression("rr"), null, new ComponentId("Server_get")),
+                (AbstractPrefix) new Prefix("break", new ConstantExpression("rb"), null, new ComponentId("Server_broken")))));
 		definitionsExpected.put("Server_get", new Choice(Lists.newArrayList(
-                (AbstractPrefix) new Prefix("data", new ConstantExpression("rd"), null, new ComponentId("Server"), new LinkedList<ImmediatePrefix>()))));
+                (AbstractPrefix) new Prefix("data", new ConstantExpression("rd"), null, new ComponentId("Server")))));
 		definitionsExpected.put("Server_broken", new Choice(Lists.newArrayList(
-                (AbstractPrefix) new Prefix("reset", new ConstantExpression("rrst"), null, new ComponentId("Server"), new LinkedList<ImmediatePrefix>()))));
+                (AbstractPrefix) new Prefix("reset", new ConstantExpression("rrst"), null, new ComponentId("Server")))));
 
 		assertEquals(definitionsExpected, definitions);
 	}
@@ -112,23 +106,23 @@ public class TestCompilerClientServer extends BaseCompilerTest {
 		Collection<EvolutionEvent> evolutionEventsExpected = new LinkedList<EvolutionEvent>();
 
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sClient, sServer), Lists.newArrayList(sClientWaiting, sServerGet),
-				MinExpression.create(ProductExpression.create(new PopulationExpression(sClient), rr),
-					                 ProductExpression.create(new PopulationExpression(sServer), rr))
+				MinExpression.create(ProductExpression.create(CombinedProductExpression.createMeanExpression(sClient), rr),
+					                 ProductExpression.create(CombinedProductExpression.createMeanExpression(sServer), rr))
 						                 ));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sClientWaiting, sServerGet), Lists.newArrayList(sClientThink, sServer),
-				MinExpression.create(ProductExpression.create(new PopulationExpression(sClientWaiting), rd),
-						             ProductExpression.create(new PopulationExpression(sServerGet), rd))
+				MinExpression.create(ProductExpression.create(CombinedProductExpression.createMeanExpression(sClientWaiting), rd),
+						             ProductExpression.create(CombinedProductExpression.createMeanExpression(sServerGet), rd))
 			    ));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sClientThink), Lists.newArrayList(sClient),
-				ProductExpression.create(new PopulationExpression(sClientThink), new ConstantExpression("rt"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sClientThink), new ConstantExpression("rt"))));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sServer), Lists.newArrayList(sServerBroken),
-				ProductExpression.create(new PopulationExpression(sServer), new ConstantExpression("rb"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sServer), new ConstantExpression("rb"))));
 		
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(sServerBroken), Lists.newArrayList(sServer),
-				ProductExpression.create(new PopulationExpression(sServerBroken), new ConstantExpression("rrst"))));
+				ProductExpression.create(CombinedProductExpression.createMeanExpression(sServerBroken), new ConstantExpression("rrst"))));
 		assertEquals(new HashSet<EvolutionEvent>(evolutionEventsExpected), new HashSet<EvolutionEvent>(evolutionEvents));
 	}
 	
