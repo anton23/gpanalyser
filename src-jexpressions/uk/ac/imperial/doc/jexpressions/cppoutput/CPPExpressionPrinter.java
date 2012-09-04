@@ -1,242 +1,185 @@
-package uk.ac.imperial.doc.jexpressions.javaoutput;
+package uk.ac.imperial.doc.jexpressions.cppoutput;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
-import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
-import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
-import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
-import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
+import uk.ac.imperial.doc.jexpressions.expressions.*;
 
 /**
- * Expression visitor that prints the Java implementation of the given
+ * Expression visitor that prints the C++ implementation of the given
  * expression.
- * 
+ *
  * @author as1005
- * 
+ *
  */
-public class JavaExpressionPrinter implements IExpressionVisitor {
-	public static String utilsClassName;
-	{
-		utilsClassName = JExpressionsJavaUtils.class.getName();
-		String[] packagePath = utilsClassName.split("\\.");
-		utilsClassName = packagePath[packagePath.length - 1];
-		
-	}
-	
-	@Override
-	public void visit(IntegerExpression e) {
-		output.append(e.getValue());
-	}
+public class CPPExpressionPrinter implements IExpressionVisitor {
 
-	@Override
-	public void visit(UMinusExpression e) {
-		output.append("-(");
-		e.getE().accept(this);
-		output.append(")");
+    public void visit(IntegerExpression e) {
+        output.append(e.getValue());
+    }
 
-	}
+    public void visit(UMinusExpression e) {
+        output.append("-(");
+        e.getE().accept(this);
+        output.append(")");
 
-	@Override
-	public void visit(FunctionCallExpression e) {		
-		if (e.getName().equals("ifpos")) {
-			output.append(utilsClassName + ".ifpos(");
-		} else if (e.getName().equals("chebyshev")) {
-			output
-					.append(utilsClassName
-							+ ".chebyshev(");
-		} else if (e.getName().equals("div")) {
-			output.append(utilsClassName + ".div(");
-		} else if (e.getName().equals("phi")) {
-			output.append(utilsClassName
-							+ ".phi(");
-		} else if (e.getName().equals("phiC")) {
-			output.append(utilsClassName
-					+ ".Phi(");
-		} else if (e.getName().equals("safe_phi")) {
-			output.append(utilsClassName
-					+ ".safe_phi(");
-		} else if (e.getName().equals("safe_Phi")) {
-			output.append(utilsClassName
-			+ ".safe_Phi(");
-		} else if (e.getName().equals("normalMin")) {
-			output.append(utilsClassName
-					+ ".normalMin(");
-		} else if (e.getName().equals("normalMinProduct")) {
-			output.append(utilsClassName
-					+ ".normalMinProduct(");
-		} else {
-			output.append("Math." + e.getName() + "(");
-		}
-		boolean first = true;
-		for (AbstractExpression arg : e.getArguments()) {
-			if (first) {
-				first = false;
-			} else {
-				output.append(",");
-			}
-			arg.accept(this);
-		}
-		output.append(")");
+    }
 
-	}
+    public void visit(FunctionCallExpression e) {
+        if (e.getName().equals("ifpos")) {
+            output.append("J::ifpos(");
+        } else if (e.getName().equals("chebyshev")) {
+            output
+                    .append("J::chebyshev(");
+        } else if (e.getName().equals("div")) {
+            output.append("J::div(");
+        } else {
+            String str = e.getName() + "(";
+            output.append(str);
+        }
+        boolean first = true;
+        for (AbstractExpression arg : e.getArguments()) {
+            if (first) {
+                first = false;
+            } else {
+                output.append(",");
+            }
+            arg.accept(this);
+        }
+        output.append(")");
 
-	@Override
-	public void visit(TimeExpression e) {
-		output.append("t");
+    }
 
-	}
+    public void visit(TimeExpression e) {
+        output.append("t");
 
-	@Override
-	public void visit(DivExpression e) {
-		output.append("(");
-		e.getNumerator().accept(this);
-		output.append(")/(");
-		e.getDenominator().accept(this);
-		output.append(")");
-	}
+    }
 
-	@Override
-	public void visit(MinusExpression e) {
-		e.getA().accept(this);
-		output.append("-(");
-		e.getB().accept(this);
-		output.append(")");
-	}
+    public void visit(DivExpression e) {
+        output.append("J::div(");
+        e.getNumerator().accept(this);
+        output.append(", ");
+        e.getDenominator().accept(this);
+        output.append(")");
+    }
 
-	@Override
-	public void visit(PowerExpression e) {
-		output.append("Math.pow(");
-		e.getExpression().accept(this);
-		output.append(",");
-		e.getExponent().accept(this);
-		output.append(")");
-	}
+    public void visit(MinusExpression e) {
+        e.getA().accept(this);
+        output.append("-(");
+        e.getB().accept(this);
+        output.append(")");
+    }
 
-	protected StringBuilder output;
+    public void visit(PowerExpression e) {
+        output.append("pow(");
+        e.getExpression().accept(this);
+        output.append(",");
+        e.getExponent().accept(this);
+        output.append(")");
+    }
 
-	public String toString() {
-		return output.toString();
-	}
+    protected StringBuilder output;
 
-	public JavaExpressionPrinter() {
-		output = new StringBuilder();
-	}
+    public String toString() {
+        return output.toString();
+    }
 
-	@Override
-	public void visit(AbstractExpression e) {
-		throw new AssertionError("Unsupported printing");
-	}
+    public CPPExpressionPrinter() {
+        output = new StringBuilder();
+    }
 
-	@Override
-	public void visit(DoubleExpression e) {
-		output.append(e.getValue());
-	}
+    public void visit(AbstractExpression e) {
+        throw new AssertionError("Unsupported printing");
+    }
 
-	@Override
-	public void visit(PEPADivExpression e) {
-		output.append(utilsClassName + ".div(");
-		e.getNumerator().accept(this);
-		output.append(",");
-		e.getDenominator().accept(this);
-		output.append(")");
-	}
+    public void visit(DoubleExpression e) {
+        output.append(e.getValue());
+    }
 
-	@Override
-	public void visit(MinExpression e) {
-		output.append("Math.min(");
-		e.getA().accept(this);
-		output.append(",");
-		e.getB().accept(this);
-		output.append(")");
-	}
-	
-	@Override
-	public void visit(MaxExpression e) {
-		output.append("Math.max(");
-		e.getA().accept(this);
-		output.append(",");
-		e.getB().accept(this);
-		output.append(")");
-	}
+    public void visit(PEPADivExpression e) {
+        output.append("J::div(");
+        e.getNumerator().accept(this);
+        output.append(",");
+        e.getDenominator().accept(this);
+        output.append(")");
+    }
 
-	@Override
-	public void visit(DivMinExpression e) {
-		output.append(utilsClassName + ".divmin(");
-		e.getA().accept(this);
-		output.append(",");
-		e.getB().accept(this);
-		output.append(",");
-		e.getC().accept(this);
-		output.append(")");
-	}
+    public void visit(MinExpression e) {
+        output.append("std::min(");
+        e.getA().accept(this);
+        output.append(",");
+        e.getB().accept(this);
+        output.append(")");
+    }
 
-	@Override
-	public void visit(DivDivMinExpression e) {
-		output.append(utilsClassName + ".divdivmin(");
-		e.getA().accept(this);
-		output.append(",");
-		e.getB().accept(this);
-		output.append(",");
-		e.getC().accept(this);
-		output.append(",");
-		e.getD().accept(this);
-		output.append(")");
-	}
+    public void visit(MaxExpression e) {
+        output.append("std::max(");
+        e.getA().accept(this);
+        output.append(",");
+        e.getB().accept(this);
+        output.append(")");
+    }
 
-	@Override
-	public void visit(ProductExpression e) {
-		boolean first = true;
-		for (AbstractExpression t : e.getTerms()) {
-			if (first) {
-				first = false;
-			} else {
-				output.append("*");
-			}
-			output.append("(");
-			t.accept(this);
-			output.append(")");
-		}
-	}
+    public void visit(DivMinExpression e) {
+        output.append("J::divmin(");
+        e.getA().accept(this);
+        output.append(",");
+        e.getB().accept(this);
+        output.append(",");
+        e.getC().accept(this);
+        output.append(")");
+    }
 
-	@Override
-	public void visit(SumExpression e) {
-		if (e.getSummands().size() > 1) {
-			output.append("(");
-		}
-		boolean first = true;
-		for (AbstractExpression s : e.getSummands()) {
-			if (first) {
-				first = false;
-			} else {
-				output.append("+");
-			}
-			s.accept(this);
-		}
-		if (e.getSummands().size() > 1) {
-			output.append(")");
-		}
-	}
+    public void visit(DivDivMinExpression e) {
+        output.append("J::divdivmin(");
+        e.getA().accept(this);
+        output.append(",");
+        e.getB().accept(this);
+        output.append(",");
+        e.getC().accept(this);
+        output.append(",");
+        e.getD().accept(this);
+        output.append(")");
+    }
 
-	@Override
-	public void visit(IndicatorFunction e) {
-		output.append("(");
-		output.append("(");
-		e.getCondition().getLeft().accept(this);
-		output.append(e.getCondition().getOperator());
-		e.getCondition().getRight().accept(this);
-		output.append(") ? 1.0 : 0.0 )");
-	}
+    public void visit(ProductExpression e) {
+        boolean first = true;
+        for (AbstractExpression t : e.getTerms()) {
+            if (first) {
+                first = false;
+            } else {
+                output.append("*");
+            }
+            output.append("(");
+            t.accept(this);
+            output.append(")");
+        }
+    }
+
+    public void visit(SumExpression e) {
+        if (e.getSummands().size() > 1) {
+            output.append("(");
+        }
+        boolean first = true;
+        for (AbstractExpression s : e.getSummands()) {
+            if (first) {
+                first = false;
+            } else {
+                output.append("+");
+            }
+            s.accept(this);
+        }
+        if (e.getSummands().size() > 1) {
+            output.append(")");
+        }
+    }
+
+    public void visit(IndicatorFunction e) {
+        output.append("(");
+        output.append("(");
+        e.getCondition().getLeft().accept(this);
+        output.append(e.getCondition().getOperator());
+        e.getCondition().getRight().accept(this);
+        output.append(") ? 1.0 : 0.0 )");
+    }
+
+
+
 }

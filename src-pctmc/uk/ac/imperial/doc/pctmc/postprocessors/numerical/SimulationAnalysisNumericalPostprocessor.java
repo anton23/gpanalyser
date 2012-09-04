@@ -119,6 +119,14 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		}
 
 	}
+
+    private void setInitialExpressions() {
+        int n = simulation.getPCTMC().getStateIndex().size();
+        initialExpressions = new AbstractExpression[n];
+        for (int i = 0; i < n; i++) {
+            initialExpressions[i] = simulation.getPCTMC().getInitCounts()[i];
+        }
+    }
 	
 	protected String productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode ;
     private PCTMCSimulation simulation;
@@ -143,11 +151,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			}
 			compileUpdatersAndGenerator();
 			
-			int n = simulation.getPCTMC().getStateIndex().size();
-			initialExpressions = new AbstractExpression[n];
-			for (int i = 0; i < n; i++) {
-				initialExpressions[i] = simulation.getPCTMC().getInitCounts()[i];				
-			}
+            setInitialExpressions();
 
 			PCTMCLogging.info("Generating one step generator.");
 			PCTMCLogging.increaseIndent();
@@ -179,10 +183,9 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	
 	
 	private void simulate(Constants constants) {
-        prepare(simulation, constants);
-		
 		eventGenerator.setRates(constants.getFlatConstants());
 
+        setInitialExpressions();
 		double[] initial = new double[initialExpressions.length];
 		for (int i = 0; i < initialExpressions.length; i++) {
 			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(constants);
