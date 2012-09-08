@@ -5,6 +5,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" path="src-probes"/>
 	<classpathentry kind="src" path="test-quantitative"/>
 	<classpathentry kind="src" path="test-pctmc"/>
 	<classpathentry kind="src" path="src-masspa"/>
@@ -35,5 +36,7 @@
 	<classpathentry kind="lib" path="lib/ejml-0.17-nogui.jar"/>
 	<classpathentry kind="lib" path="lib/simple-xml-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-math-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/cloning-1.7.8.jar"/>
+	<classpathentry kind="lib" path="lib/objenesis-tck-1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
