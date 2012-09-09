@@ -1,15 +1,26 @@
 package uk.ac.imperial.doc.gpanalyser.testing.compiler;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+
 import org.junit.Test;
-import uk.ac.imperial.doc.gpepa.representation.components.*;
+
+import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
+import uk.ac.imperial.doc.gpepa.representation.components.Choice;
+import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
+import uk.ac.imperial.doc.gpepa.representation.components.Prefix;
 import uk.ac.imperial.doc.gpepa.representation.group.Group;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
-import uk.ac.imperial.doc.gpepa.representation.model.GroupCooperation;
 import uk.ac.imperial.doc.gpepa.representation.model.GroupedModel;
-import uk.ac.imperial.doc.gpepa.representation.model.LabelledComponentGroup;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
+import uk.ac.imperial.doc.igpepa.representation.model.iPEPAGroupCooperation;
+import uk.ac.imperial.doc.igpepa.representation.model.iPEPALabelledComponentGroup;
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -21,9 +32,8 @@ import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 
 public class TestCompilerClientServer extends BaseCompilerTest {
@@ -77,9 +87,9 @@ public class TestCompilerClientServer extends BaseCompilerTest {
 		
 		Map<PEPAComponent, AbstractExpression> initCountsServer= new HashMap<PEPAComponent, AbstractExpression>();
 		initCountsServer.put(new ComponentId("Server"), new ConstantExpression("m"));
-		GroupedModel modelExpected = new GroupCooperation(
-				new LabelledComponentGroup("Clients", new Group(initCountsClient)), 
-				new LabelledComponentGroup("Servers", new Group(initCountsServer)), 
+		GroupedModel modelExpected = new iPEPAGroupCooperation(
+				new iPEPALabelledComponentGroup("Clients", new Group(initCountsClient)), 
+				new iPEPALabelledComponentGroup("Servers", new Group(initCountsServer)), 
 				Sets.newHashSet("request", "data"));
 		
 		assertEquals(modelExpected, model);		
