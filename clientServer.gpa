@@ -1,0 +1,28 @@
+n = 100.0; 
+m = 60.0; 
+rr = 2.0; 
+rtmt = 0.3; 
+rt = 0.27;
+rb = 0.1; 
+rd = 1.0; 
+rrst = 1.0; 
+
+{Client} + {Server} -> {Client_waiting,Server_get} @ rr*min({Client},{Server}); 
+
+
+{Client_waiting,Server_get} -> {Client_think} + {Server} @ rd*{Client_waiting,Server_get};
+{Client_think} -> {Client} @ rt*{Client_think};
+
+//breaking 
+{Server} -> {Server_broken} @ rb*{Server};
+
+//reset 
+{Server_broken} -> {Server} @ rrst*{Server_broken};
+
+{Client} = n; 
+{Server} = m; 
+
+ODEs(stopTime = 40.0,stepSize = 0.1,density = 10){ 
+	E[{Client}],E[{Server}];
+}
+
