@@ -14,11 +14,11 @@ public class AnalysisUtils {
 	
 	public static XYSeriesCollection getDatasetFromArray(double[][] dataPoints,
             double stepSize, String[] names) {
-    return getDatasetFromArray(dataPoints, 0.0, stepSize, names);           
+    return getDatasetFromArray(dataPoints, 0.0, stepSize, names, 0);           
 }
 
 public static XYSeriesCollection getDatasetFromArray(double[][] dataPoints,
-            double min, double stepSize, String[] names) {
+            double min, double stepSize, String[] names, int rowSkip) {
     List<XYSeries> series = new ArrayList<XYSeries>();
 
     for (int i = 0; i < names.length; i++) {
@@ -31,7 +31,7 @@ public static XYSeriesCollection getDatasetFromArray(double[][] dataPoints,
 
     double currentTime = min;
 
-    for (int p = 0; p < dataPoints.length; p++) {
+    for (int p = rowSkip; p < dataPoints.length; p++) {
             for (int i = 0; i < dataPoints[p].length; i++) {
                     if (!Double.isInfinite(dataPoints[p][i]))series.get(i).add(currentTime, dataPoints[p][i]);
             }
