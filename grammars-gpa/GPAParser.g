@@ -6,6 +6,7 @@ options {
   ASTLabelType = CommonTree; 
   tokenVocab = GPALexer; 
   backtrack = true;
+  memoize=true;
 }
 
 import PCTMCParserPrototype;

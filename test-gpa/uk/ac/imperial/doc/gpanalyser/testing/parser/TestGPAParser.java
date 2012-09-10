@@ -78,14 +78,17 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 	
 	@Test
 	public void testReportsNoComponents() {
-		testReportsOneParseError(
+		testReportsMoreParseErrors(
 				"ra = 1.0;\n" +
 				"rb = 0.1;\n" +
 				"n = 10;\n" +
 				"\n" +
 				"As{A[n]}"
 				,
-				"[line 5:0] required list did not match anything at input 'As' (at least one PEPA component definition required)");		
+				Lists.newArrayList(
+					"[line 5:0] required list did not match anything at input 'As' (at least one PEPA component definition required)",
+					"[line 5:4] unknown component 'A' (missing system equation)")
+				);		
 	}
 	
 
@@ -273,11 +276,13 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"A = (a, ra).B + (c,rb).A;\n" +
 				"B = (b, rb).A;\n" +
 				"As{A[n]}\n" + 
-				"ODEs(stopTime=10.0, stepSize=0.1, density=10){\n"+
+				"odes(stopTime=10.0, stepSize=0.1, density=10){\n"+ 
 				"E[As:A];}"
 				, 
 				Lists.newArrayList(
-				   "[line 8:0] unknown command 'odes' (allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise')"));
+				   "[line 8:0] unknown command 'odes' (allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise')"
+				   // the parser tries to be too clever TODO fix, matches 'od' and reports 'es'   				    						
+				));
 	}
 	
 	@Test
