@@ -309,7 +309,7 @@ public abstract class AbstractProbeRunner
 
         pctmcs[0] = GPEPAToPCTMC.getPCTMC
             (definitions, model, initActions, unfoldedVariables);
-        System.out.println (pctmcs[0]);
+        //System.out.println (pctmcs[0]);
         AbstractPCTMCAnalysis analysis
             = getPreparedAnalysis (pctmcs[0], moments, constants);
 
