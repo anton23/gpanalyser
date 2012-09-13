@@ -23,19 +23,19 @@ import java.util.UUID;
  */
 public class CPPODEMethodPrinter implements IODEMethodVisitor {
 
-    private Constants constants;
-    private Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
-    private Map<AbstractExpression, Integer> generalExpectationIndex;
+    private final Constants constants;
+    private final Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+    private final Map<AbstractExpression, Integer> generalExpectationIndex;
 
     private int methodCharacters = 6000;
-    public static final String GENERATEDCLASSNAME = "GeneratedODEs";
+    private static final String GENERATEDCLASSNAME = "GeneratedODEs";
     public static final String PACKAGE = "uk.ac.imperial.doc.pctmc.cppoutput.utils";
     private static final String OLDY = "y";
     private static final String NEWY = "newy";
-    private String nativeClassName;
-    private UUID uuid;
+    private final String nativeClassName;
 
-    private StringBuilder output, classOutput;
+    private StringBuilder output;
+    private final StringBuilder classOutput;
 
     public CPPODEMethodPrinter(Constants constants,
             Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,
@@ -46,7 +46,7 @@ public class CPPODEMethodPrinter implements IODEMethodVisitor {
         this.generalExpectationIndex = generalExpectationIndex;
         output = new StringBuilder();
         classOutput = new StringBuilder();
-        uuid = UUID.randomUUID();
+        UUID uuid = UUID.randomUUID();
         nativeClassName = GENERATEDCLASSNAME + uuid.toString().replace("-","");
     }
 

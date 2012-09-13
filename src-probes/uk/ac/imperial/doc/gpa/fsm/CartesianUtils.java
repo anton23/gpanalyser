@@ -104,9 +104,9 @@ public class CartesianUtils
 
 	public static class CartesianState
 	{
-		private NFAState state1;
-		private NFAState state2;
-		private Map<ITransition, CartesianState> outgoings
+		private final NFAState state1;
+		private final NFAState state2;
+		private final Map<ITransition, CartesianState> outgoings
 			= new HashMap<ITransition, CartesianState> ();
 
 		public CartesianState (NFAState state1, NFAState state2)

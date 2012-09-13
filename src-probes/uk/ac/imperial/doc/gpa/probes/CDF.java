@@ -2,9 +2,9 @@ package uk.ac.imperial.doc.gpa.probes;
 
 public class CDF
 {
-    private double[] values;
-    private String name;
-    private double stepSize;
+    private final double[] values;
+    private final String name;
+    private final double stepSize;
 
     public double[] getValues ()
     {

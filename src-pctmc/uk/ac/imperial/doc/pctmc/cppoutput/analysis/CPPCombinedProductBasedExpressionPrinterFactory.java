@@ -17,10 +17,10 @@ import java.util.Map;
 public class CPPCombinedProductBasedExpressionPrinterFactory implements
         IExpressionPrinterFactory {
 
-    private Constants parameters;
-    private Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
-    private Map<AbstractExpression, Integer> generalExpectationIndex;
-    private String f;
+    private final Constants parameters;
+    private final Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+    private final Map<AbstractExpression, Integer> generalExpectationIndex;
+    private final String f;
 
     public CPPCombinedProductBasedExpressionPrinterFactory(
             Constants constants,

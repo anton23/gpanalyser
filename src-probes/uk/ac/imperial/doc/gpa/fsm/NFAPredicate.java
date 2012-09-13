@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public abstract class NFAPredicate
 {
-    protected String predicateString = "";
+    protected final String predicateString = "";
 
     public abstract boolean eval (Map<String, Integer> mapping, double[] data);
 

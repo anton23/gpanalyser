@@ -11,8 +11,8 @@ public class ExecProcess
 {
     static class StreamGobbler extends Thread
     {
-        InputStream is;
-        String type;
+        private final InputStream is;
+        private final String type;
 
         StreamGobbler (InputStream is, String type)
         {

@@ -2,7 +2,8 @@ package uk.ac.imperial.doc.gpa.fsm;
 
 public class StartTransition extends SignalTransition
 {
-    public static final String start = "start_signal";
+    private static final String start = "start_signal";
+
     public StartTransition ()
     {
         super (start);

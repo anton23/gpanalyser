@@ -67,9 +67,9 @@ public class GroupCooperation extends GroupedModel {
         List<PEPAEvolutionEvent> rightEvents = right.getEvolutionEvents(
                 definitions, restrictedActions);
         Multimap<String, PEPAEvolutionEvent> leftActionmap = LinkedHashMultimap
-                .<String, PEPAEvolutionEvent> create();
+                .create();
         Multimap<String, PEPAEvolutionEvent> rightActionmap = LinkedHashMultimap
-                .<String, PEPAEvolutionEvent> create();
+                .create();
 
         for (PEPAEvolutionEvent le : leftEvents) {
             if (actions.contains(le.getAction())) {

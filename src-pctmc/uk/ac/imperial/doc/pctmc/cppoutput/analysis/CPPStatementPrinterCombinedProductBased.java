@@ -22,7 +22,7 @@ import java.util.Map;
 public class CPPStatementPrinterCombinedProductBased extends
         CPPStatementPrinter implements IIncrementVisitor, IAssignmentVisitor {
 
-    protected IExpressionPrinterFactory lhsFactory;
+    private final IExpressionPrinterFactory lhsFactory;
 
     public CPPStatementPrinterCombinedProductBased(Constants parameters,
                                                    Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,

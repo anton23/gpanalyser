@@ -39,7 +39,7 @@ public class CPPSimulationAnalysisNumericalPostprocessor
     private Collection<EvolutionEvent> observableEvents;
 
 
-    protected int replications;
+    private final int replications;
 
 	@Override
 	public String toString() {
@@ -117,10 +117,8 @@ public class CPPSimulationAnalysisNumericalPostprocessor
 			simulate(constants);
 		}		
 	}
-	
-	private double[] initial;
-	
-	private void simulate(Constants constants) {
+
+    private void simulate(Constants constants) {
 
         if (initCoeff) {
             eventGenerator.setRates(constants.getFlatConstants());
@@ -128,7 +126,7 @@ public class CPPSimulationAnalysisNumericalPostprocessor
         }
 
 		int n = pctmc.getStateIndex().size();
-		initial = new double[n];
+        double[] initial = new double[n];
 		for (int i = 0; i < n; i++) {
 			ExpressionEvaluatorWithConstants evaluator
                     = new ExpressionEvaluatorWithConstants(constants);
@@ -152,7 +150,7 @@ public class CPPSimulationAnalysisNumericalPostprocessor
 			//	PCTMCLogging.info(r + " replications finished.");
 			//}
 			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
-					initial, stopTime, stepSize, accUpdater);
+                    initial, stopTime, stepSize, accUpdater);
 			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
 				updater.update(dataPoints[t], tmp[t]);				
 			}

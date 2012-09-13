@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class iPEPAEvolutionEvent extends PEPAEvolutionEvent
 {
-    private List<String> immediateActions;
+    private final List<String> immediateActions;
 
 	public iPEPAEvolutionEvent (String action, List<String> immediateActions,
            AbstractExpression rate, List<GroupComponentPair> increases,

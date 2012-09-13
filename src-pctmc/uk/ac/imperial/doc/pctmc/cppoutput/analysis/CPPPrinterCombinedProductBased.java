@@ -17,10 +17,9 @@ public class CPPPrinterCombinedProductBased extends CPPPrinterWithConstants
         implements ICombinedProductExpressionVisitor,
         IGeneralExpectationExpressionVisitor {
 
-    protected Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
-    protected Map<AbstractExpression, Integer> generalExpectationIndex;
-
-    private String f;
+    private final Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+    private final Map<AbstractExpression, Integer> generalExpectationIndex;
+    private final String f;
 
     public CPPPrinterCombinedProductBased(Constants parameters,
                                           Map<CombinedPopulationProduct, Integer> combinedMomentsIndex,

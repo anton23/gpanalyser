@@ -35,8 +35,8 @@ public abstract class AbstractProbeRunner
     protected Class<? extends NumericalPostprocessor> postprocessorType;
     protected static final String BEGIN_SIGNAL = "begin";
 
-    protected Constants constants;
-    protected Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
+    protected final Constants constants;
+    private final Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
 
     public AbstractProbeRunner (Constants constants,
            Map<ExpressionVariable, AbstractExpression> unfoldedVariables)
@@ -44,6 +44,7 @@ public abstract class AbstractProbeRunner
         this.constants = constants;
         this.unfoldedVariables = unfoldedVariables;
     }
+
     protected abstract CDF steadyIndividual
         (List<AbstractExpression> statesCountExpressions,
          Map<String, Integer> mapping, GroupedModel model,

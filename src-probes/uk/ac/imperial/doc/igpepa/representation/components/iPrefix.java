@@ -10,7 +10,7 @@ import java.util.List;
 
 public class iPrefix extends Prefix implements iPEPAPrefix
 {
-    ImmediatesMixin immediates = new ImmediatesMixin ();
+    private ImmediatesMixin immediates = new ImmediatesMixin ();
 
     public AbstractPrefix getCooperationImpl (String newAction,
          AbstractPrefix otherAbstractPrefix,

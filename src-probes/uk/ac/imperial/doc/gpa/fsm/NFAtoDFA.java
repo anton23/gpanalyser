@@ -166,7 +166,7 @@ public class NFAtoDFA
         {
             Set<NFAState> closure = new HashSet<NFAState> ();
             getEmptyClosure (state, closure);
-            closures.putAll (state, closure) ;
+            closures.putAll(state, closure) ;
         }
 	}
 
@@ -195,8 +195,8 @@ public class NFAtoDFA
 
     private static class TransitionStatesPair
 	{
-		private ITransition transition;
-		private Collection<NFAState> states;
+		private final ITransition transition;
+		private final Collection<NFAState> states;
 
 		public TransitionStatesPair
             (ITransition transition, Collection<NFAState> states)
@@ -218,8 +218,8 @@ public class NFAtoDFA
 
     private static class Partition
     {
-        Collection<Set<NFAState>> sets;
-        Set<NFAState> startingSet;
+        private final Collection<Set<NFAState>> sets;
+        private final Set<NFAState> startingSet;
 
         public Collection<Set<NFAState>> getSets ()
         {

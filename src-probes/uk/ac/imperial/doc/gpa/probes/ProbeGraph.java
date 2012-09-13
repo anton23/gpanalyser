@@ -14,7 +14,7 @@ import java.awt.*;
 public class ProbeGraph extends JFrame
 {
     private final static String title = "CDF";
-    private XYSeriesCollection times = new XYSeriesCollection ();
+    private final XYSeriesCollection times = new XYSeriesCollection ();
 
     public ProbeGraph ()
     {

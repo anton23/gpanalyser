@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class UPrimeExpression extends AbstractUExpression
 {
-    Set<GPEPAActionCount> actions;
+    private final Set<GPEPAActionCount> actions;
 
     public UPrimeExpression (Set<GPEPAActionCount> actions)
     {

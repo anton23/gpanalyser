@@ -9,7 +9,7 @@ import java.util.List;
 
 public class iPassivePrefix extends PassivePrefix implements iPEPAPrefix
 {
-    ImmediatesMixin immediates = new ImmediatesMixin ();
+    private ImmediatesMixin immediates = new ImmediatesMixin ();
 
     public AbstractPrefix getCooperationImpl (String newAction,
          AbstractPrefix otherAbstractPrefix,

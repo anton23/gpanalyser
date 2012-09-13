@@ -12,7 +12,7 @@ import uk.ac.imperial.doc.jexpressions.statements.*;
 public class CPPStatementPrinter implements IStatementVisitor {
 
 	protected StringBuilder output;
-	protected IExpressionPrinterFactory expressionPrinterFactory;
+	protected final IExpressionPrinterFactory expressionPrinterFactory;
 
 	public CPPStatementPrinter(
             IExpressionPrinterFactory expressionPrinterFactory) {

@@ -2,7 +2,7 @@ package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
 public class ActionsUExpression extends AbstractUExpression
 {
-    UPrimeExpression actions;
+    private final UPrimeExpression actions;
     int times;
 
     public ActionsUExpression (UPrimeExpression actions, int times)

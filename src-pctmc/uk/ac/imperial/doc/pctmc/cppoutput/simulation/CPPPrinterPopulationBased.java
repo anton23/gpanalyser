@@ -16,9 +16,9 @@ import java.util.Map;
 public class CPPPrinterPopulationBased extends CPPPrinterWithConstants implements
         IPopulationVisitor, IPopulationProductVisitor,ICombinedProductExpressionVisitor {
 
-    private Map<State, Integer> stateIndex;
-    private Map<PopulationProduct,Integer> accumulatedProductsIndex;
-    private String f;
+    private final Map<State, Integer> stateIndex;
+    private final Map<PopulationProduct,Integer> accumulatedProductsIndex;
+    private final String f;
 
     public CPPPrinterPopulationBased(Constants constants,
                                      Map<State, Integer> stateIndex, Map<PopulationProduct,

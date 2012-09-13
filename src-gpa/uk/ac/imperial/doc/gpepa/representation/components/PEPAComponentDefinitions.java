@@ -14,7 +14,7 @@ public class PEPAComponentDefinitions {
         return inverseDefinitions;
     }
 
-    protected Map<PEPAComponent, String> inverseDefinitions;
+    private Map<PEPAComponent, String> inverseDefinitions;
 
 	public PEPAComponent getShorthand(PEPAComponent c) {
 		if (inverseDefinitions.containsKey(c)) {
@@ -111,7 +111,8 @@ public class PEPAComponentDefinitions {
             return weight;
         }
 
-        private AbstractExpression rate, weight;
+        private final AbstractExpression rate;
+        private final AbstractExpression weight;
 
         public RateWeightPair(
                 AbstractExpression rate, AbstractExpression weight) {

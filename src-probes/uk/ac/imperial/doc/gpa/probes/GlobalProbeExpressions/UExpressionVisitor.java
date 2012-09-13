@@ -8,10 +8,10 @@ import java.util.Set;
 
 public class UExpressionVisitor
 {
-    private double[][] states;
-    private double stopTime;
-    private double stepSize;
-    private Map<String, Integer> mapping;
+    private final double[][] states;
+    private final double stopTime;
+    private final double stepSize;
+    private final Map<String, Integer> mapping;
 
     public UExpressionVisitor (double[][] states,
         double stopTime, double stepSize, Map<String, Integer> mapping)
