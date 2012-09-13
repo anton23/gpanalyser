@@ -23,7 +23,6 @@ public class PEPAComponentDefinitions {
 		return c;
 	}
 
-    // assumption: action with same name not used both as timed and immediate
     public AbstractExpression getApparentRateExpression
             (final String action, PEPAComponent from) {
         List<AbstractExpression> summands = new LinkedList<AbstractExpression>();
@@ -39,7 +38,6 @@ public class PEPAComponentDefinitions {
         return SumExpression.create(summands);
     }
 
-    // assumption: action with same name not used both as timed and immediate
     public RateWeightPair getApparentRateWeightExpressions
             (final String action, PEPAComponent from) {
 		List<AbstractExpression> summandsRates = new LinkedList<AbstractExpression>();

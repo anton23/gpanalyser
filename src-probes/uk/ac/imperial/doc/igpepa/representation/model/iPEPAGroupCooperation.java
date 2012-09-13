@@ -20,6 +20,12 @@ public class iPEPAGroupCooperation extends GroupCooperation
         super (left, right, actions);
     }
 
+    public iPEPAGroupCooperation
+            (GroupedModel left, GroupedModel right)
+    {
+        super (left, right);
+    }
+
     @Override
     public List<PEPAEvolutionEvent> getEvolutionEvents
         (final PEPAComponentDefinitions definitions,

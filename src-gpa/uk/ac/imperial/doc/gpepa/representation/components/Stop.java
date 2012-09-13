@@ -38,7 +38,11 @@ public class Stop extends PEPAComponent {
 		return getActions();
 	}
 
-	@Override
+    @Override
+    public void getActionsRecursively(PEPAComponentDefinitions definitions,
+                                      Set<String> actions, Set<PEPAComponent> visited) {}
+
+    @Override
 	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
 		return new LinkedList<AbstractPrefix>();
 	}

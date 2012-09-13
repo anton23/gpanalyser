@@ -30,9 +30,34 @@ public class Choice extends PEPAComponent {
     }
 
     @Override
-	public Set<String> getActions(PEPAComponentDefinitions definitions) {
-		return getActions();
+    public Set<String> getActions(PEPAComponentDefinitions definitions) {
+        return getActions();
+    }
+
+    @Override
+    public void getActionsRecursively(PEPAComponentDefinitions definitions,
+                                      Set<String> actions, Set<PEPAComponent> visited) {
+        if (visited.contains(this)) {
+            return;
+        }
+        visited.add(this);
+        for (AbstractPrefix p : choices) {
+            actions.addAll(p.getAllActions());
+            p.getContinuation().getActionsRecursively(definitions, actions, visited);
+        }
 	}
+
+    @Override
+    public void unfoldImplicitCooperations (PEPAComponentDefinitions definitions,
+                                            Set<PEPAComponent> visited) {
+        if (visited.contains(this)) {
+            return;
+        }
+        visited.add(this);
+        for (AbstractPrefix prefix : choices) {
+            prefix.getContinuation().unfoldImplicitCooperations(definitions, visited);
+        }
+    }
 
 	@Override
 	public boolean equals(Object o) {
@@ -73,7 +98,7 @@ public class Choice extends PEPAComponent {
 	public Set<String> getActions() {
 		Set<String> ret = new HashSet<String>();
 		for (AbstractPrefix p : choices) {
-			ret.add(p.getAction());
+			ret.addAll(p.getAllActions());
 		}
 		return ret;
 	}

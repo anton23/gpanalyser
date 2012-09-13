@@ -119,7 +119,7 @@ import PCTMCCompilerPrototype;
 	private GroupedModel mainModel;
 	private Constants mainConstants;
 	private Map<ExpressionVariable,AbstractExpression> mainUnfoldedVariables;
-	private PEPAComponentDefinitions mainDefinitions;
+	private iPEPAComponentDefinitions mainDefinitions;
 	private Map<String, PEPAComponent> components;
 	private List<ITransition> excluded = new LinkedList<ITransition> ();
 	Cloner deepCloner = new Cloner ();
@@ -197,7 +197,7 @@ import PCTMCCompilerPrototype;
 		// NFAUtils.removeAnyTransitions (allActions, startingState);
 		// NFAUtils.extendStatesWithSelfLoops
 		// 	(allActions, startingState);
-		// NFAUtils.removeSurplusSelfLoops (startingState);
+		NFAUtils.removeSurplusSelfLoops (startingState);
 		alphabet.addAll (NFADetectors.detectAlphabet
 				(startingState, true, excluded));
 
@@ -239,7 +239,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   cd = componentDefinitions
   {
     components = $cd.componentDefinitions;
-    mainDefinitions = new PEPAComponentDefinitions (components);
+    mainDefinitions = new iPEPAComponentDefinitions (components);
   }
   m=model
   {
@@ -247,9 +247,9 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
   }
   (ca=countActions {cooperationActions=$countActions.cooperationActions;})?
   {
-  	iPEPAComponentDefinitions nonvanish = new iPEPAComponentDefinitions($cd.componentDefinitions)
-  		.removeVanishingStates($m.model.getInitialComponents());
-    $pctmc  = GPEPAToPCTMC.getPCTMC(nonvanish ,$m.model,cooperationActions, $unfoldedVariables);
+  	mainDefinitions = mainDefinitions.removeVanishingStates($m.model.getInitialComponents());
+	$m.model.unfoldImplicitCooperations(mainDefinitions);
+    $pctmc  = GPEPAToPCTMC.getPCTMC(mainDefinitions ,$m.model,cooperationActions, $unfoldedVariables);
   }
 ;
 
@@ -270,10 +270,14 @@ componentDefinitions returns [Map<String,PEPAComponent> componentDefinitions]
     componentDefinitions.put(seqId,seq);
   })+
 ;
+
 model returns [GroupedModel model]:
-  ^(COOP l=model cooperationActions=coop r=model){
+  ^(COOP cooperationActions=coop  l=model r=model){
     model = new iPEPAGroupCooperation($l.model,$r.model,$cooperationActions.cooperationActions);
   }
+ | ^(COOP TIMES l=model r=model){
+       model = new iPEPAGroupCooperation($l.model,$r.model);
+   }
  | ^(LABELLEDGROUP label=UPPERCASENAME g=group){
     $model = new iPEPALabelledComponentGroup($label.text,$g.group);
    }  
@@ -288,8 +292,7 @@ group returns [Group group]
 }:
 
   (^(MULT s=component n=expression){
-    counts.put($s.c,$n.e);  
-
+    counts.put($s.c,$n.e);
   }  
   )+
 ;
@@ -320,10 +323,13 @@ component returns [PEPAComponent c]:
    ;
 
 coopComponent returns [PEPAComponent c]:
-  ^(COOPCOMP l=component  a=coop r=component{
+  ^(COOPCOMP a=coop l=component DUMMY r=component){
         $c = new iCooperationComponent($l.c,$r.c,$a.cooperationActions);
-    
-    }  )  ;
+    }
+  | ^(COOPCOMP TIMES l=component DUMMY r=component){
+        $c = new iCooperationComponent($l.c,$r.c);
+    }
+;
   
 choice returns [PEPAComponent c]
 @init{
@@ -1169,6 +1175,7 @@ scope
 	Map<String, PEPAComponent> newComp = new HashMap<String, PEPAComponent> ();
 	Map<String, PEPAComponent> altComp = new HashMap<String, PEPAComponent> ();
 	$probe_spec::localAcceptingStates = new HashSet<ComponentId> ();
+    PEPAComponentDefinitions newMainDef;
 }
 	:	^(DEF signalNames=SIGNALS
 				{
@@ -1180,20 +1187,22 @@ scope
 							(new SignalTransition (signal));
 					}
 				}
-			globalProbeName=UPPERCASENAME (local_probes [newComp, altComp]
-			locations)?	probeg [simulate, gprobe, $probe_spec::allActions])
+			globalProbeName=UPPERCASENAME (local_probes [newComp, altComp])?
 			{
-				gprobe.setName ($globalProbeName.text);
 				Map<String, PEPAComponent> newDef
 					= new HashMap<String, PEPAComponent> (newComp);
 				newDef.putAll ($probe_spec::origComponents);
-				PEPAComponentDefinitions definitions
-					= new iPEPAComponentDefinitions (newDef)
+				newMainDef = new iPEPAComponentDefinitions (newDef)
 					.removeVanishingStates ($probe_spec::initialStates);
+			}
+			(locations [newMainDef])?
+			probeg [simulate, gprobe, $probe_spec::allActions])
+			{
+				gprobe.setName ($globalProbeName.text);
 
 				Set<GPEPAState> stateObservers = new HashSet<GPEPAState> ();
 				Set<GroupComponentPair> pairs
-					= $probe_def::model.getGroupComponentPairs (definitions);
+					= $probe_def::model.getGroupComponentPairs (newMainDef);
 				for (GroupComponentPair g : pairs)
 				{
 					stateObservers.add (new GPEPAState (g));
@@ -1206,7 +1215,7 @@ scope
 				{
 					newComps.add (new ComponentId (name));
 				}
-				defMap.put (definitions, newComps);
+				defMap.put (newMainDef, newComps);
 				PEPAComponentDefinitions altDef = null;
 				if ($probe_def::steady)
 				{
@@ -1289,7 +1298,7 @@ scope
 							(mainConstants, mainUnfoldedVariables)
 							.executeProbedModel
 								(gprobe, $probe_def::model, stateObservers,
-								 definitions, altDef, defMap,
+								 newMainDef, altDef, defMap,
 								 $probe_spec::localAcceptingStates,
 								 $probe_def::stop_time, $probe_def::step_size,
 								 $probe_def::parameter, $probe_spec::alphabet,
@@ -1302,7 +1311,7 @@ scope
 						(mainConstants, mainUnfoldedVariables)
 						.executeProbedModel
 							(gprobe, $probe_def::model, stateObservers,
-							 definitions, altDef, defMap,
+							 newMainDef, altDef, defMap,
 							 $probe_spec::localAcceptingStates,
 							 $probe_def::stop_time, $probe_def::step_size,
 							 $probe_def::parameter, $probe_spec::alphabet,
@@ -1330,8 +1339,11 @@ local_probe_ass [Map<String, PEPAComponent> newComp,
 			 	$probe_spec::initialStates.add (new ComponentId ($name.text));
 			 };
 
-locations
-	:	^(LOCATIONS location+) ;
+locations [PEPAComponentDefinitions newDefinitions]
+	:	^(LOCATIONS location+)
+			{
+				$probe_def::model.unfoldImplicitCooperations ($newDefinitions);
+			};
 
 location
 	:	^(SUBSTITUTE m1=model m2=model)

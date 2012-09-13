@@ -87,7 +87,7 @@ Probe ["sample-global-request-10.dat"] (stopTime=650.0, stepSize=0.5, density=10
     where
     {
     	Servers {Complete_server [ns]} =>
-    		Servers {Complete_server <request> LProbe [ns]}
+    		Servers {Complete_server <*> LProbe [ns]}
     }
 }
 

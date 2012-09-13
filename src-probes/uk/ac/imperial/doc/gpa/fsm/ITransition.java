@@ -7,4 +7,6 @@ public interface ITransition
     public ITransition getCopy ();
 
     public ITransition getSimpleTransition ();
+
+    public boolean isEmptyTransition ();
 }

@@ -21,6 +21,7 @@ tokens{
   PAIR;
   INGROUP;
   DOT;
+  DUMMY;
 
   //Local
 
@@ -189,7 +190,7 @@ componentDefinition:
   -> ^(COMPONENT $id $s);
 
 component:   
-    choice cooperationSet choice -> ^(COOPCOMP choice cooperationSet choice)
+    choice cooperationSet choice -> ^(COOPCOMP cooperationSet choice DUMMY choice)
    |choice;
 
 
@@ -217,7 +218,7 @@ primaryComponent:
  | LPAR component RPAR -> component;
  
 model: 
-   labelledGroup cooperationSet labelledGroup -> ^(COOP labelledGroup cooperationSet labelledGroup)
+   labelledGroup cooperationSet labelledGroup -> ^(COOP cooperationSet labelledGroup labelledGroup)
   |  labelledGroup 
 ;
    
@@ -233,7 +234,8 @@ cooperationSet:
        (COMMA {hint.push("cooperation set has to be of the form <a1, a2, ..., >");} LOWERCASENAME {hint.pop();})* 
        {hint.pop();}
       {hint.push("closing bracket '>' missing");}RANGLE {hint.pop();} -> LOWERCASENAME+
-  |LANGLE RANGLE -> LOWERCASENAME[""]; 
+  |LANGLE RANGLE -> LOWERCASENAME[""]
+  |LANGLE TIMES RANGLE -> TIMES;
    
 group:
   groupComponent (PAR {hint.push("group definition has to be of the form G{A[n]|B[m]|...|Z[k]}");}

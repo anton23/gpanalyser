@@ -33,4 +33,9 @@ public class EmptyTransition implements ITransition
     {
         return toString ().hashCode ();
     }
+
+    public boolean isEmptyTransition ()
+    {
+        return true;
+    }
 }

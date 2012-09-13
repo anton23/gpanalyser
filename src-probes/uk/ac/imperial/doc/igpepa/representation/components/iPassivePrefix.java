@@ -73,6 +73,13 @@ public class iPassivePrefix extends PassivePrefix implements iPEPAPrefix
         return weight;
     }
 
+    public List<String> getAllActions()
+    {
+        List<String> actions = super.getAllActions();
+        actions.addAll (getImmediates ());
+        return actions;
+    }
+
     //ImmediatesMixin
 
     public List<ImmediatePrefix> getImmediatesRaw ()

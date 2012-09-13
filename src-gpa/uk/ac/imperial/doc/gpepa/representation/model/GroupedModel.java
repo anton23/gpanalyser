@@ -54,6 +54,7 @@ public abstract class GroupedModel {
 	}
 
 
+    public abstract void unfoldImplicitCooperations (PEPAComponentDefinitions definitions);
 	
 	
 	public AbstractExpression getCountExpression(GroupComponentPair pair) {

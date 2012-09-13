@@ -37,9 +37,29 @@ public class ComponentId extends PEPAComponent {
 		return name.hashCode();
 	}
 
-	@Override
-	public Set<String> getActions(PEPAComponentDefinitions definitions) {
-		return definitions.getComponentDefinition(name).getActions();
+    @Override
+    public void unfoldImplicitCooperations (PEPAComponentDefinitions definitions,
+                                            Set<PEPAComponent> visited) {
+        if (visited.contains(this)) {
+            return;
+        }
+        visited.add(this);
+        definitions.getComponentDefinition(name).unfoldImplicitCooperations(definitions, visited);
+    }
+
+    @Override
+    public Set<String> getActions(PEPAComponentDefinitions definitions) {
+        return definitions.getComponentDefinition(name).getActions();
+    }
+
+    @Override
+	public void getActionsRecursively(PEPAComponentDefinitions definitions,
+                                      Set<String> actions, Set<PEPAComponent> visited) {
+        if (visited.contains(this)) {
+            return;
+        }
+        visited.add(this);
+		definitions.getComponentDefinition(name).getActionsRecursively(definitions, actions, visited);
 	}
 
 	@Override

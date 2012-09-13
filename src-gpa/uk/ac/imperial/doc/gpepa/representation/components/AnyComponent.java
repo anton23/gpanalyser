@@ -15,12 +15,16 @@ public class AnyComponent extends PEPAComponent {
 		return null;
 	}
 
-	@Override
-	public Set<String> getActions(PEPAComponentDefinitions definitions) {
-		return null;
-	}
+    @Override
+    public Set<String> getActions(PEPAComponentDefinitions definitions) {
+        return null;
+    }
 
-	@Override
+    @Override
+    public void getActionsRecursively(PEPAComponentDefinitions definitions,
+                                      Set<String> actions, Set<PEPAComponent> visited) {}
+
+    @Override
 	public Set<PEPAComponent> getDerivativeStates(Set<PEPAComponent> known,
 			PEPAComponentDefinitions definitions) {
 		return null;

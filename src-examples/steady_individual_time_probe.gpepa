@@ -73,12 +73,12 @@ Probe ["steady-worked.dat"]
     where
     {
     	Clients {CB[nc]} =>
-    		Clients {CB <data_tfr, cont_tfr, clt_shutdown> LProbe | CB[nc-1]}
+    		Clients {CB <*> LProbe | CB[nc-1]}
     }
 }
 
 SimProbe ["steady-worked-10-4.dat"]
-	(stopTime=350, stepSize=1, replications=2500) steady 500
+	(stopTime=350, stepSize=1, replications=2000) steady 500
 {
     SIPT = begin : start, end : stop <-
     observes
@@ -88,6 +88,6 @@ SimProbe ["steady-worked-10-4.dat"]
     where
     {
     	Clients {CB[nc]} =>
-    		Clients {CB <data_tfr, cont_tfr, clt_shutdown> LProbe | CB[nc-1]}
+    		Clients {CB <*> LProbe | CB[nc-1]}
     }
 }

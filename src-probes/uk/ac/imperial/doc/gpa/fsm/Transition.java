@@ -46,4 +46,9 @@ public class Transition implements ITransition
     {
         return getCopy ();
     }
+
+    public boolean isEmptyTransition ()
+    {
+        return false;
+    }
 }
