@@ -2,6 +2,9 @@ package uk.ac.imperial.doc.gpepa.representation.components;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class AbstractPrefix
 {
     protected String action;
@@ -9,6 +12,12 @@ public abstract class AbstractPrefix
 
     public String getAction() {
         return action;
+    }
+
+    public List<String> getAllActions() {
+        List<String> actions = new ArrayList<String>();
+        actions.add(action);
+        return actions;
     }
 
     public PEPAComponent getContinuation() {

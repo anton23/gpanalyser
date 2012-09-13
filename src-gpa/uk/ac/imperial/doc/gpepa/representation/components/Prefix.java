@@ -17,7 +17,7 @@ public class Prefix extends AbstractPrefix {
 		if (!(o instanceof Prefix))
 			return false;
 		Prefix asPrefix = (Prefix) o;
-		return action.equals(asPrefix.getAction())
+		return getAllActions().equals(asPrefix.getAllActions())
 				&& rate.equals(asPrefix.getRate())
 				&& continuation.equals(asPrefix.getContinuation());
 	}

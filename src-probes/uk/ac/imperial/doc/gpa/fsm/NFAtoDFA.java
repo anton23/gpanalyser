@@ -25,7 +25,7 @@ public class NFAtoDFA
             // we find the set of states this transition could lead to
             for (ITransition transition : transitions.keySet ())
             {
-                if (!(transition instanceof EmptyTransition))
+                if (!(transition.isEmptyTransition ()))
                 {
                     Collection<NFAState> reachedStates
                         = transitions.get (transition);
@@ -161,44 +161,23 @@ public class NFAtoDFA
     private static void findEmptyClosures
         (NFAState startingState, Multimap<NFAState, NFAState> closures)
 	{
-        Set<NFAState> closure = new HashSet<NFAState> ();
-        getEmptyClosure (startingState, closure);
-		closure.add (startingState);
-        for (NFAState state : closure)
+        Set<NFAState> states = NFADetectors.detectAllStates (startingState);
+        for (NFAState state : states)
         {
-            closures.putAll (state, closure);
+            Set<NFAState> closure = new HashSet<NFAState> ();
+            getEmptyClosure (state, closure);
+            closures.putAll (state, closure) ;
         }
-
-		Multimap<ITransition, NFAState> transitions;
-
-		for (NFAState state : closure)
-		{
-			transitions = state.getTransitions ();
-			for (ITransition transition : transitions.keySet ())
-			{
-				if (!(transition instanceof EmptyTransition))
-				{
-					Collection<NFAState> reachedStates
-                        = transitions.get (transition);
-                    for (NFAState reachedState : reachedStates)
-                    {
-                        if (!closures.containsKey (reachedState))
-                        {
-                            findEmptyClosures (reachedState, closures);
-                        }
-                    }
-				}
-			}
-		}
 	}
 
 	private static void getEmptyClosure
         (NFAState state, Set<NFAState> closure)
 	{
+        closure.add (state);
 		Multimap<ITransition, NFAState> transitions = state.getTransitions ();
 		for (ITransition transition : transitions.keySet ())
 		{
-			if (transition instanceof EmptyTransition)
+			if (transition.isEmptyTransition ())
 			{
                 Collection<NFAState> reachedStates
                     = transitions.get (transition);

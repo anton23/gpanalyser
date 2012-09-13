@@ -35,6 +35,37 @@ public class CooperationComponent extends PEPAComponent {
     protected PEPAComponent left;
 	protected PEPAComponent right;
 	protected Set<String> cooperationSet;
+    private int implicitCooperation = 0;
+
+    public void unfoldImplicitCooperations(PEPAComponentDefinitions definitions,
+                                           Set<PEPAComponent> visited)
+    {
+        if (implicitCooperation == 1)
+        {
+            if (visited.contains(this)) {
+                return;
+            }
+            visited.add(this);
+            left.unfoldImplicitCooperations(definitions, visited);
+            right.unfoldImplicitCooperations(definitions, visited);
+            Set<String> leftActions = new HashSet<String> ();
+            left.getActionsRecursively(definitions, leftActions, new HashSet<PEPAComponent> ());
+            Set<String> rightActions = new HashSet<String> ();
+            right.getActionsRecursively(definitions, rightActions, new HashSet<PEPAComponent> ());
+            cooperationSet = new HashSet<String>();
+            for (String action : rightActions) {
+                if (leftActions.contains(action)) {
+                    cooperationSet.add (action);
+                }
+            }
+            for (String action : leftActions) {
+                if (rightActions.contains(action)) {
+                    cooperationSet.add (action);
+                }
+            }
+            implicitCooperation = 2;
+        }
+    }
 
 	public CooperationComponent(PEPAComponent left, PEPAComponent right,
 			Set<String> cooperationSet) {
@@ -43,6 +74,13 @@ public class CooperationComponent extends PEPAComponent {
 		this.right = right;
 		this.cooperationSet = cooperationSet;
 	}
+
+    public CooperationComponent(PEPAComponent left, PEPAComponent right) {
+        super();
+        this.left = left;
+        this.right = right;
+        implicitCooperation = 1;
+    }
 
 	public Set<String> getCooperationSet() {
 		return cooperationSet;
@@ -77,12 +115,23 @@ public class CooperationComponent extends PEPAComponent {
 	}
 
 	@Override
-	public Set<String> getActions(PEPAComponentDefinitions definitions) {
-		Set<String> ret = new HashSet<String>();
-		ret.addAll(left.getActions(definitions));
-		ret.addAll(right.getActions(definitions));
-		return ret;
-	}
+    public Set<String> getActions(PEPAComponentDefinitions definitions) {
+        Set<String> ret = new HashSet<String>();
+        ret.addAll(left.getActions(definitions));
+        ret.addAll(right.getActions(definitions));
+        return ret;
+    }
+
+    @Override
+    public void getActionsRecursively(PEPAComponentDefinitions definitions,
+                                      Set<String> actions, Set<PEPAComponent> visited) {
+        if (visited.contains(this)) {
+            return;
+        }
+        visited.add(this);
+        left.getActionsRecursively(definitions, actions, visited);
+        right.getActionsRecursively(definitions, actions, visited);
+    }
 
 	@Override
 	public Set<PEPAComponent> getDerivativeStates(Set<PEPAComponent> known,
@@ -103,6 +152,7 @@ public class CooperationComponent extends PEPAComponent {
 
     @Override
 	public List<AbstractPrefix> getPrefixes(PEPAComponentDefinitions definitions) {
+        unfoldImplicitCooperations(definitions, new HashSet<PEPAComponent>());
 		List<AbstractPrefix> leftPrefixes = left.getPrefixes(definitions);
 		List<AbstractPrefix> rightPrefixes = right.getPrefixes(definitions);
 		List<AbstractPrefix> ret = new LinkedList<AbstractPrefix>();

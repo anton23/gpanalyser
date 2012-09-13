@@ -19,8 +19,8 @@ public class ImmediatePrefix extends AbstractPrefix implements iPEPAPrefix
         if (!(o instanceof ImmediatePrefix))
             return false;
         ImmediatePrefix asPrefix = (ImmediatePrefix) o;
-        return action.equals(asPrefix.getAction ())
-                && weight.equals(asPrefix.getWeight ())
+        return getAllActions().equals(asPrefix.getAllActions())
+                && weight.equals (asPrefix.getWeight ())
                 && continuation.equals(asPrefix.getContinuation ());
     }
 
@@ -75,6 +75,13 @@ public class ImmediatePrefix extends AbstractPrefix implements iPEPAPrefix
             continuationString = "(" + continuationString + ")";
         }
         return action + "." + continuationString;
+    }
+
+    public List<String> getAllActions()
+    {
+        List<String> actions = super.getAllActions();
+        actions.addAll (getImmediates ());
+        return actions;
     }
 
     //ImmediatesMixin

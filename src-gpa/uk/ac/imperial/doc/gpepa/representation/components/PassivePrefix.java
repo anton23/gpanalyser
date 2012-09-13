@@ -26,7 +26,7 @@ public class PassivePrefix extends AbstractPrefix {
         if (!(o instanceof PassivePrefix))
             return false;
         PassivePrefix asPrefix = (PassivePrefix) o;
-        return action.equals(asPrefix.getAction())
+        return getAllActions().equals(asPrefix.getAllActions())
                 && continuation.equals(asPrefix.getContinuation());
     }
 

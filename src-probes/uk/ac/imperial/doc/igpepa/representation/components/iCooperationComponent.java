@@ -15,11 +15,16 @@ import java.util.Set;
 
 public class iCooperationComponent extends CooperationComponent
 {
-	public iCooperationComponent (PEPAComponent left, PEPAComponent right,
-			Set<String> cooperationSet)
+    public iCooperationComponent (PEPAComponent left, PEPAComponent right,
+                                  Set<String> cooperationSet)
     {
-		super (left, right, cooperationSet);
-	}
+        super (left, right, cooperationSet);
+    }
+
+    public iCooperationComponent (PEPAComponent left, PEPAComponent right)
+    {
+        super (left, right);
+    }
 
     @Override
 	public List<AbstractPrefix> getPrefixes
@@ -30,7 +35,8 @@ public class iCooperationComponent extends CooperationComponent
             throw new Error ("iCooperationComponent used with"
                 + " incompatible definitions.");
         }
-		List<AbstractPrefix> leftPrefixes = left.getPrefixes (definitions);
+        unfoldImplicitCooperations(definitions, new HashSet<PEPAComponent> ());
+        List<AbstractPrefix> leftPrefixes = left.getPrefixes (definitions);
 		List<AbstractPrefix> rightPrefixes = right.getPrefixes (definitions);
 		List<AbstractPrefix> ret = new LinkedList<AbstractPrefix> ();
 

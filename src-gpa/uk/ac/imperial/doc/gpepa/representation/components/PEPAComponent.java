@@ -34,7 +34,10 @@ public abstract class PEPAComponent {
 	 */
 	public abstract Set<String> getActions();
 
-	public abstract Set<String> getActions(PEPAComponentDefinitions definitions);
+    public abstract Set<String> getActions(PEPAComponentDefinitions definitions);
+
+    public abstract void getActionsRecursively(PEPAComponentDefinitions definitions,
+                                               Set<String> actions, Set<PEPAComponent> visited);
 
 	public abstract List<AbstractPrefix> getPrefixes(
 			PEPAComponentDefinitions definitions);
@@ -45,4 +48,6 @@ public abstract class PEPAComponent {
 	@Override
 	public abstract boolean equals(Object o);
 
+    public void unfoldImplicitCooperations (PEPAComponentDefinitions definitions,
+                                            Set<PEPAComponent> visited) {}
 }

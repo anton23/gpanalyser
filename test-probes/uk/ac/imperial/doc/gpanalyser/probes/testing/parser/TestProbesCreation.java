@@ -114,10 +114,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix("fetch", null,
-                            DoubleExpression.ONE, new ComponentId("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
+                    (new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
@@ -133,10 +130,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe1", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
+                    (new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix("recover", null,
@@ -151,10 +145,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe2", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
+                    (new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
@@ -170,10 +161,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe3", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
+                    (new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
@@ -188,10 +176,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe4", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
+                    (new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
                     new iPassivePrefix ("recover", null,
@@ -221,15 +206,6 @@ public class TestProbesCreation
                     (new iPassivePrefix ("fetch", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ())
@@ -240,15 +216,6 @@ public class TestProbesCreation
                     (new iPassivePrefix ("fetch", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe2"))
         )));
@@ -256,15 +223,6 @@ public class TestProbesCreation
         probeExpected.put ("LProbe2", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
                     (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
@@ -293,9 +251,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("recover", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ())
@@ -310,9 +265,6 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
@@ -331,9 +283,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("recover", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ())
@@ -350,9 +299,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("recover", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe4"))
         )));
@@ -366,9 +312,6 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
@@ -394,12 +337,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ())
@@ -413,12 +350,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ())
@@ -430,12 +361,6 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
@@ -451,12 +376,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe4"))
         )));
@@ -469,12 +388,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ())
@@ -484,7 +397,7 @@ public class TestProbesCreation
     }
 
     @Test
-    public void testiChoiceProbe ()
+    public void testChoiceProbe ()
     {
         Map<String, PEPAComponent> probeGiven = parseProbe ("choice");
         Map<String, PEPAComponent> probeExpected
@@ -497,12 +410,6 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
@@ -517,12 +424,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe2"))
         )));
@@ -535,13 +436,7 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("begin", null,
+                    new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ())
         )));
@@ -564,12 +459,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ())
@@ -582,12 +471,6 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
@@ -602,12 +485,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ())
@@ -620,6 +497,110 @@ public class TestProbesCreation
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe4", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new ImmediatePrefix ("begin",
+                            DoubleExpression.ONE, new ComponentId ("LProbe5"))
+        )));
+
+        probeExpected.put ("LProbe5", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        assertEquals (probeExpected, probeGiven);
+    }
+
+    @Test
+    public void testZeroOneProbe ()
+    {
+        Map<String, PEPAComponent> probeGiven = parseProbe ("zeroone");
+        Map<String, PEPAComponent> probeExpected
+            = new HashMap<String, PEPAComponent> ();
+
+        probeExpected.put ("LProbe", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe1", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ())
+        )));
+
+        probeExpected.put ("LProbe2", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new ImmediatePrefix ("begin",
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"))
+        )));
+
+        probeExpected.put ("LProbe3", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
@@ -646,111 +627,8 @@ public class TestProbesCreation
                      new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new ImmediatePrefix ("begin",
-                            DoubleExpression.ONE, new ComponentId ("LProbe5"))
-        )));
-
-        probeExpected.put ("LProbe5", new iChoice
-                (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe5"),
-                            new ArrayList<ImmediatePrefix> ())
-        )));
-
-        assertEquals (probeExpected, probeGiven);
-    }
-
-    @Test
-    public void testZeroOneProbe ()
-    {
-        Map<String, PEPAComponent> probeGiven = parseProbe ("zeroone");
-        Map<String, PEPAComponent> probeExpected
-            = new HashMap<String, PEPAComponent> ();
-
-        probeExpected.put ("LProbe", new iChoice
-                (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ())
-        )));
-
-        probeExpected.put ("LProbe1", new iChoice
-                (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ())
-        )));
-
-        probeExpected.put ("LProbe2", new iChoice
-                (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new ImmediatePrefix ("begin",
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"))
-        )));
-
-        probeExpected.put ("LProbe3", new iChoice
-                (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ())
         )));
 
@@ -773,32 +651,32 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ())
         )));
 
         probeExpected.put ("LProbe1", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
                     (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"))
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"))
         )));
 
         probeExpected.put ("LProbe2", new iChoice
@@ -820,6 +698,25 @@ public class TestProbesCreation
                              new ArrayList<ImmediatePrefix> ())
         )));
 
+        probeExpected.put ("LProbe3", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                             new ArrayList<ImmediatePrefix> ())
+        )));
+
         assertEquals (probeExpected, probeGiven);
     }
 
@@ -833,19 +730,19 @@ public class TestProbesCreation
         probeExpected.put ("LProbe", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
                     (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ())
         )));
 
@@ -855,16 +752,16 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ())
         )));
 
@@ -882,26 +779,45 @@ public class TestProbesCreation
                      new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new ImmediatePrefix ("begin",
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"))
+                     new iPassivePrefix ("begin", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ())
         )));
 
         probeExpected.put ("LProbe3", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
                     (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new ImmediatePrefix ("begin",
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"))
+        )));
+
+        probeExpected.put ("LProbe4", new iChoice
+                (Lists.<AbstractPrefix>newArrayList
+                    (new iPassivePrefix ("fetch", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("fail", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("recover", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
+                            new ArrayList<ImmediatePrefix> ()),
+                     new iPassivePrefix ("end", null,
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
+                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ())
         )));
 
@@ -1022,17 +938,8 @@ public class TestProbesCreation
         probeExpected.put ("LProbe", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
                     (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                              new ArrayList<ImmediatePrefix> ())
@@ -1043,15 +950,6 @@ public class TestProbesCreation
                     (new iPassivePrefix ("fetch", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                             new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe2"))
         )));
@@ -1061,15 +959,6 @@ public class TestProbesCreation
                     (new iPassivePrefix ("fetch", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                              new ArrayList<ImmediatePrefix> ())
@@ -1093,19 +982,7 @@ public class TestProbesCreation
 
         probeExpected.put ("LProbe1", new iChoice
                 (Lists.<AbstractPrefix>newArrayList
-                    (new iPassivePrefix ("fetch", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("fail", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("begin", null,
+                    (new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ())
         )));
@@ -1308,9 +1185,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("recover", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ())
@@ -1325,9 +1199,6 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe1"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe1"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
@@ -1346,9 +1217,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("recover", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe2"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe2"),
                             new ArrayList<ImmediatePrefix> ())
@@ -1365,9 +1233,6 @@ public class TestProbesCreation
                      new iPassivePrefix ("recover", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe3"),
                             new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe3"),
-                            new ArrayList<ImmediatePrefix> ()),
                      new ImmediatePrefix ("begin",
                             DoubleExpression.ONE, new ComponentId ("LProbe4"))
         )));
@@ -1381,9 +1246,6 @@ public class TestProbesCreation
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("recover", null,
-                            DoubleExpression.ONE, new ComponentId ("LProbe4"),
-                            new ArrayList<ImmediatePrefix> ()),
-                     new iPassivePrefix ("end", null,
                             DoubleExpression.ONE, new ComponentId ("LProbe4"),
                             new ArrayList<ImmediatePrefix> ()),
                      new iPassivePrefix ("begin", null,

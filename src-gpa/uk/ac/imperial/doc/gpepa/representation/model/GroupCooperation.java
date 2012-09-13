@@ -26,6 +26,26 @@ public class GroupCooperation extends GroupedModel {
         return ret;
     }
 
+    @Override
+    public void unfoldImplicitCooperations (PEPAComponentDefinitions definitions) {
+        left.unfoldImplicitCooperations(definitions);
+        right.unfoldImplicitCooperations(definitions);
+        if (implicitCooperation) {
+            Set<String> leftActions = left.getActions(definitions);
+            Set<String> rightActions = right.getActions(definitions);
+            actions = new HashSet<String>();
+            for (String action : rightActions) {
+                if (leftActions.contains(action)) {
+                    actions.add (action);
+                }
+            }
+            for (String action : leftActions) {
+                if (rightActions.contains(action)) {
+                    actions.add (action);
+                }
+            }
+        }
+    }
 
     @Override
     public List<PEPAEvolutionEvent> getEvolutionEvents(
@@ -187,9 +207,18 @@ public class GroupCooperation extends GroupedModel {
         refreshComponentGroups();
     }
 
+    public GroupCooperation(GroupedModel left, GroupedModel right) {
+        super();
+        this.left = left;
+        this.right = right;
+        implicitCooperation = true;
+        refreshComponentGroups();
+    }
+
     protected GroupedModel left;
     protected GroupedModel right;
     protected Set<String> actions;
+    private boolean implicitCooperation = false;
 
     public GroupedModel getLeft() {
         return left;

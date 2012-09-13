@@ -22,12 +22,20 @@ import java.util.*;
  * 
  */
 public class LabelledComponentGroup extends GroupedModel {
-	@Override
+
+    @Override
 	public Set<String> getActions(PEPAComponentDefinitions definitions) {
-		return group.getActions(definitions);
+        Set<GroupComponentPair> pairs = getGroupComponentPairs(definitions);
+        Set<String> actions = new HashSet<String>();
+        for (GroupComponentPair pair : pairs) {
+            actions.addAll(pair.getComponent().getActions());
+        }
+        return actions;
+		//return group.getAllActions(definitions);
 	}
 
-
+    @Override
+    public void unfoldImplicitCooperations (PEPAComponentDefinitions definitions) {}
 
     @Override
     public List<PEPAEvolutionEvent> getEvolutionEvents(

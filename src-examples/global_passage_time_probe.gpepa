@@ -9,8 +9,8 @@ rtmt = 0.2;
 init = 0.07;
 tfr = 0.15;
 
-nc = 50;
-nh = 30;
+nc = 10;
+nh = 6;
 
 ClientHibernate = (clt_on, ron).ClientStandby
 	+ (clt_shutdown, T).ClientHibernate;
@@ -87,7 +87,7 @@ Probe ["global-worked.dat"] (stopTime=400, stepSize=1, density=10)
     where
     {
     	Clients {CB[nc]} =>
-    		Clients {(CB <clt_shutdown> LProbe)[nc]}
+    		Clients {(CB <*> LProbe)[nc]}
     }
 }
 
@@ -101,6 +101,6 @@ SimProbe (stopTime=400, stepSize=1, replications=2000)
     where
     {
     	Clients {CB[nc]} =>
-    		Clients {(CB <clt_shutdown> LProbe)[nc]}
+    		Clients {(CB <*> LProbe)[nc]}
     }
 }

@@ -28,7 +28,7 @@ public class ImmediatesMixin implements iPEPA
         List<String> actions = new LinkedList<String> ();
         for (ImmediatePrefix immediate : immediates)
         {
-            actions.add (immediate.getAction ());
+            actions.add(immediate.getAction());
         }
         return actions;
     }

@@ -85,6 +85,13 @@ public class iPrefix extends Prefix implements iPEPAPrefix
         return rate;
 	}
 
+    public List<String> getAllActions()
+    {
+        List<String> actions = super.getAllActions();
+        actions.addAll (getImmediates ());
+        return actions;
+    }
+
     //ImmediatesMixin
 
     public List<ImmediatePrefix> getImmediatesRaw ()

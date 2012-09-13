@@ -33,4 +33,9 @@ public class AnyTransition implements ITransition
     {
         throw new Error ("AnyTransition cannot create a simple transition.");
     }
+
+    public boolean isEmptyTransition ()
+    {
+        return false;
+    }
 }
