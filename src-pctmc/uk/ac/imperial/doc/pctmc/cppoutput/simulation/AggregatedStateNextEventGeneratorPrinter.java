@@ -14,16 +14,16 @@ import java.util.UUID;
 
 public class AggregatedStateNextEventGeneratorPrinter
 {
-    private Constants variables;
-    private PCTMCSimulation simulation;
-    private PCTMC pctmc;
-    private Collection<EvolutionEvent> observableEvents;
-    public static final String GENERATEDCLASSNAME = "GeneratedEventGenerator";
+    private final Constants variables;
+    private final PCTMCSimulation simulation;
+    private final PCTMC pctmc;
+    private final Collection<EvolutionEvent> observableEvents;
+    private static final String GENERATEDCLASSNAME = "GeneratedEventGenerator";
     public final static String PACKAGE = "uk.ac.imperial.doc.pctmc.cppoutput.simulation";
-    private String nativeClassName;
-    private UUID uuid;
+    private final String nativeClassName;
 
-    private StringBuilder output, classOutput;
+    private final StringBuilder output;
+    private final StringBuilder classOutput;
 
     public AggregatedStateNextEventGeneratorPrinter
             (Constants variables, PCTMCSimulation simulation,
@@ -35,7 +35,7 @@ public class AggregatedStateNextEventGeneratorPrinter
         this.observableEvents = observableEvents;
         output = new StringBuilder();
         classOutput = new StringBuilder();
-        uuid = UUID.randomUUID();
+        UUID uuid = UUID.randomUUID();
         nativeClassName = GENERATEDCLASSNAME + uuid.toString().replace("-","");
         visit();
     }

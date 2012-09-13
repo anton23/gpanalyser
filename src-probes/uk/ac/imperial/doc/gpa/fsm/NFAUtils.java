@@ -268,8 +268,8 @@ public class NFAUtils
 
     public static class Signaller
     {
-        private NFAState startingState;
-        private SignalTransition signal;
+        private final NFAState startingState;
+        private final SignalTransition signal;
 
         public Signaller (NFAState startingState, SignalTransition signal)
         {

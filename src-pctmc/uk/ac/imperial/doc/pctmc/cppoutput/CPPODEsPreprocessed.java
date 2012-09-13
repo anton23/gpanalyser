@@ -5,7 +5,7 @@ import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ISystemOfODEs;
 
 public class CPPODEsPreprocessed extends PCTMCImplementationPreprocessed {
-	private NativeSystemOfODEs odes;
+	private final NativeSystemOfODEs odes;
 
 	public CPPODEsPreprocessed(NativeSystemOfODEs odes) {
 		super();

@@ -18,7 +18,7 @@ import java.util.Map;
 public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	private PCTMCODEAnalysis odeAnalysis;
-    private PCTMCCPPImplementationProvider pcctmc
+    private final PCTMCCPPImplementationProvider pcctmc
             = new PCTMCCPPImplementationProvider();
 
 	private int density;

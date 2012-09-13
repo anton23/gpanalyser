@@ -4,8 +4,8 @@ import uk.ac.imperial.doc.gpa.fsm.NFAPredicate;
 
 public class PredUExpression extends AbstractUExpression
 {
-    private AbstractUExpression R;
-    private NFAPredicate predicate;
+    private final AbstractUExpression R;
+    private final NFAPredicate predicate;
 
     public PredUExpression (AbstractUExpression r, NFAPredicate predicate)
     {

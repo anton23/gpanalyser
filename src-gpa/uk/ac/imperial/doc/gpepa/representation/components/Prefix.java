@@ -27,7 +27,7 @@ public class Prefix extends AbstractPrefix {
 		return toString().hashCode();
 	}
 
-	protected AbstractExpression rate;
+	protected final AbstractExpression rate;
 
 	public AbstractExpression getRate() {
         return rate;

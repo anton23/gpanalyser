@@ -2,8 +2,8 @@ package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
 public class EitherUExpression extends AbstractUExpression
 {
-    private AbstractUExpression R1;
-    private AbstractUExpression R2;
+    private final AbstractUExpression R1;
+    private final AbstractUExpression R2;
 
     public EitherUExpression (AbstractUExpression r1, AbstractUExpression r2)
     {

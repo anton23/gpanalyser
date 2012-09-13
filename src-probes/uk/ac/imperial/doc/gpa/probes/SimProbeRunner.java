@@ -313,7 +313,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         }
     }
 
-    protected void assignNewCounts
+    private void assignNewCounts
             (LinkedHashMap<GroupComponentPair, AbstractExpression> crates,
              Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
              PEPAComponentDefinitions definitions, GroupedModel model,

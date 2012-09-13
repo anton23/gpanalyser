@@ -13,9 +13,8 @@ import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 public class CPPPrinterWithConstants extends CPPExpressionPrinter implements
 		IConstantExpressionVisitor {
 
-	protected Constants constants;
-
-	private static String BASENAME = "r";
+	private final Constants constants;
+	private static final String BASENAME = "r";
 
 	public CPPPrinterWithConstants(Constants constants) {
 		super();

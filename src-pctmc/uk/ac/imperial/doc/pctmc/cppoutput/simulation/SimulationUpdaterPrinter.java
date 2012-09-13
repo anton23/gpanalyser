@@ -13,16 +13,15 @@ import java.util.UUID;
 
 public class SimulationUpdaterPrinter
 {
-        private Constants variables;
-        private Map<CombinedPopulationProduct, Integer> momentIndex;
-        private PCTMCSimulation simulation;
-        private Map<AbstractExpression, Integer> generalExpectationIndex;
-        public static final String GENERATEDCLASSNAME = "GeneratedSimulation";
+        private final Constants variables;
+        private final Map<CombinedPopulationProduct, Integer> momentIndex;
+        private final PCTMCSimulation simulation;
+        private final Map<AbstractExpression, Integer> generalExpectationIndex;
+        private static final String GENERATEDCLASSNAME = "GeneratedSimulation";
         public final static String PACKAGE = "uk.ac.imperial.doc.pctmc.cppoutput.simulation";
-        private String nativeClassName;
-        private UUID uuid;
+        private final String nativeClassName;
 
-        private StringBuilder output, classOutput;
+    private StringBuilder output, classOutput;
 
         public SimulationUpdaterPrinter(Constants variables,
                 Map<CombinedPopulationProduct, Integer> momentIndex,
@@ -35,7 +34,7 @@ public class SimulationUpdaterPrinter
             this.generalExpectationIndex = generalExpectationIndex;
             output = new StringBuilder();
             classOutput = new StringBuilder();
-            uuid = UUID.randomUUID();
+            UUID uuid = UUID.randomUUID();
             nativeClassName = GENERATEDCLASSNAME + uuid.toString().replace("-","");
             visit();
         }

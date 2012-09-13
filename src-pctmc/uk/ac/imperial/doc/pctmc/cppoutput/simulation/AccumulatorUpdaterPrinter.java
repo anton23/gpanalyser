@@ -12,14 +12,15 @@ import java.util.UUID;
 
 public class AccumulatorUpdaterPrinter
 {
-    private Constants variables;
-    private PCTMCSimulation simulation;
-    public static final String GENERATEDCLASSNAME = "GeneratedAccumulator";
-    public final static String PACKAGE = "uk.ac.imperial.doc.pctmc.cppoutput.simulation";
-    private String nativeClassName;
-    private UUID uuid;
+    private final Constants variables;
+    private final PCTMCSimulation simulation;
+    private static final String GENERATEDCLASSNAME = "GeneratedAccumulator";
+    public final static String PACKAGE
+        = "uk.ac.imperial.doc.pctmc.cppoutput.simulation";
+    private final String nativeClassName;
 
-    private StringBuilder output, classOutput;
+    private final StringBuilder output;
+    private final StringBuilder classOutput;
 
     public AccumulatorUpdaterPrinter
             (Constants variables, PCTMCSimulation simulation) {
@@ -28,7 +29,7 @@ public class AccumulatorUpdaterPrinter
         this.simulation = simulation;
         output = new StringBuilder();
         classOutput = new StringBuilder();
-        uuid = UUID.randomUUID();
+        UUID uuid = UUID.randomUUID();
         nativeClassName = GENERATEDCLASSNAME + uuid.toString().replace("-","");
         visit();
     }

@@ -55,9 +55,9 @@ public class NFADetectors
         return nonaccepting;
     }
 
-    public static void detectStates
-        (NFAState startingState, Set<NFAState> detected,
-         Set<NFAState> visited, StateFilter filter)
+    private static void detectStates
+            (NFAState startingState, Set<NFAState> detected,
+             Set<NFAState> visited, StateFilter filter)
 	{
 		if (filter.accept (startingState))
 		{
@@ -87,7 +87,7 @@ public class NFADetectors
             new HashSet<NFAState> ());
     }
 
-    public static NFAState detectSingleAcceptingStateI
+    private static NFAState detectSingleAcceptingStateI
             (NFAState startingState, Set<NFAState> visited)
 	{
 		if (startingState.isAccepting ())
@@ -128,7 +128,7 @@ public class NFADetectors
         return alphabet;
     }
 
-    public static void detectAlphabetI
+    private static void detectAlphabetI
             (NFAState startingState, boolean includeSignals,
              Set<ITransition> alphabet, Set<NFAState> visited)
 	{

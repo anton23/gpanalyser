@@ -34,7 +34,8 @@ import static org.junit.Assert.assertEquals;
 public class TestProbesCreation
 {
     private final static String probeInputsPath = "test-probes/inputs/probes/";
-    private Set<ITransition> allActions, alphabet;
+    private final Set<ITransition> allActions;
+    private final Set<ITransition> alphabet;
 
     public TestProbesCreation ()
     {

@@ -8,7 +8,7 @@ package uk.ac.imperial.doc.jexpressions.expressions;
  */
 public class UMinusExpression extends AbstractExpression {
 
-	protected AbstractExpression e;
+	protected final AbstractExpression e;
 
 	public AbstractExpression getE() {
 		return e;

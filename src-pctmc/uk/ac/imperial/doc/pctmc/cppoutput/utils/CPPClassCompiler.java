@@ -175,7 +175,7 @@ public class CPPClassCompiler {
 	}
 
 	class CharSequenceJavaFileObject extends SimpleJavaFileObject {		
-		private CharSequence content;
+		private final CharSequence content;
 
 		public CharSequenceJavaFileObject(String className, CharSequence content) {
 			super(URI.create("string:///" + className.replace('.', '/')

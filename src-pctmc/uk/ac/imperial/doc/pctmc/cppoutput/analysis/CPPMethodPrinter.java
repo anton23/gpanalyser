@@ -21,9 +21,9 @@ import java.util.UUID;
  */
 public class CPPMethodPrinter {
 
-    private Constants constants;
-    private Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
-    private Map<AbstractExpression, Integer> generalExpectationIndex;
+    private final Constants constants;
+    private final Map<CombinedPopulationProduct, Integer> combinedMomentsIndex;
+    private final Map<AbstractExpression, Integer> generalExpectationIndex;
     public static final String PACKAGE
             = "uk.ac.imperial.doc.jexpressions.cppoutput.statements";
     private StringBuilder jniCode, classOutput;

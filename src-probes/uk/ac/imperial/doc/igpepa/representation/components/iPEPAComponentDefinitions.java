@@ -10,7 +10,7 @@ import java.util.*;
 
 public class iPEPAComponentDefinitions extends PEPAComponentDefinitions
 {
-    private static Cloner deepcloner = new Cloner ();
+    private static final Cloner deepcloner = new Cloner ();
 
     public iPEPAComponentDefinitions (Map<String, PEPAComponent> definitions)
     {
