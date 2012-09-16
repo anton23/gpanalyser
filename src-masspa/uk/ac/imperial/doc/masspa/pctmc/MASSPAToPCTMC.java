@@ -12,8 +12,10 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.masspa.expressions.ExpressionFctAndVarInliner;
 import uk.ac.imperial.doc.masspa.expressions.ExpressionPopProductCreator;
@@ -80,6 +82,7 @@ public class MASSPAToPCTMC
 		}
 		for (EvolutionEvent evo : events)
 		{
+			if (evo.toString().startsWith("Route"))
 			System.out.println(evo);
 		}*/
 		
@@ -256,7 +259,7 @@ public class MASSPAToPCTMC
 
 					// Local event (i.e. non-message induced event)
 					if (!(p instanceof ReceivePrefix))
-					{
+					{		
 						List<State> increasing = new LinkedList<State>();			
 						List<State> decreasing = new LinkedList<State>();
 						decreasing.add(pop);
@@ -297,7 +300,7 @@ public class MASSPAToPCTMC
 					}
 					// External event (i.e. message induced event)
 					if (p instanceof ReceivePrefix)
-					{
+					{					
 						// Find all channels that can induce the transition and
 						// create a new MASSPAEvolutionEvent for each one of them
 						ReceivePrefix rp = (ReceivePrefix) p;
@@ -313,11 +316,12 @@ public class MASSPAToPCTMC
 									{
 										SendPrefix sp = (SendPrefix)p2;
 										if (sp.getMsg().equals(chan.getMsg()))
-										{
+										{											
 											List<State> increasing = new LinkedList<State>();			
 											List<State> decreasing = new LinkedList<State>();
 
 											AbstractExpression msgEmissionRateExpr = ProductExpression.create(sp.getRate(),sp.getNofMsgsSent());
+											msgEmissionRateExpr = inlineFctsAndVars(msgEmissionRateExpr, chan.getSender().getLocation(), _model, null, _variables, _constants);
 											AbstractExpression intensity = (AbstractExpression)chan.getIntensity();
 											
 											// Simplify acc prob * Intensity * msg emission rate expression
@@ -347,12 +351,13 @@ public class MASSPAToPCTMC
 												// Special case when intensity is a population
 												if (intensity instanceof CombinedProductExpression)
 												{
-													/*
+													
 													map.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
 													map2.put(((CombinedProductExpression)intensity).getProduct().getNakedProduct().asMultiset().elementSet().iterator().next(),1);
-													ae = ProductExpression.create(new DoubleExpression(rate),MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))));
-													*/
-													ae = ProductExpression.create(ProductExpression.create(rateExpr,MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))))),intensity);
+													ae = ProductExpression.create(new UMinusExpression(MaxExpression.create(new UMinusExpression(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map)))),new UMinusExpression(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2)))))),rateExpr);
+													
+													//ae = ProductExpression.create(ProductExpression.create(rateExpr,MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))))),intensity);
+													//ae = ProductExpression.create(ProductExpression.create(MinExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map2))))),rateExpr,intensity);
 					
 												}
 												else
@@ -378,8 +383,8 @@ public class MASSPAToPCTMC
 //												}
 //												else
 //												{
-													rateExpr = ProductExpression.create(intensity,rateExpr);
-													ae = ProductExpression.create(rateExpr,CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));
+//													rateExpr = ProductExpression.create(intensity,rateExpr);
+//													ae = ProductExpression.create(rateExpr,CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(map))));
 //												}
 											}
 											events.add(new EvolutionEvent(decreasing, increasing, ae));
