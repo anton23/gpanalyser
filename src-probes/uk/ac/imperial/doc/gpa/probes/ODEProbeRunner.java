@@ -203,11 +203,11 @@ public class ODEProbeRunner extends AbstractProbeRunner
 
         double pointMass = u.getEvaluatedTime ();
         double[] cdf = new double[(int) (stopTime / stepSize)];
-        for (double time = 0; time < stopTime; time += stepSize)
-        {
-            int i = (int) (time / stepSize);
-            cdf[i] = (time >= pointMass) ? 1 : 0;
-        }
+
+        Arrays.fill(cdf, 0, (int) Math.floor(pointMass / stepSize), 0);
+        Arrays.fill(cdf, (int) Math.ceil(pointMass / stepSize),
+                cdf.length, 1);
+
         return new CDF (gprobe.getName (), stepSize, cdf);
     }
 
