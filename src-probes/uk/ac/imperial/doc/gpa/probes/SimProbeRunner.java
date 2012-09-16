@@ -104,6 +104,7 @@ public class SimProbeRunner extends AbstractProbeRunner
         AbstractExpressionEvaluator altEvaluator = postprocessorA
             .getExpressionEvaluator (altStatesCountExpressions, constants);
 
+        PCTMCLogging.setVisible (false);
         // repeating the experiment
         for (int i = 0; i < parameter; ++i)
         {
@@ -134,7 +135,8 @@ public class SimProbeRunner extends AbstractProbeRunner
                     }
                 }
             }
-            System.out.println("ran steady replication " + i);
+
+            outputInfo(i, parameter, "steady replications");
         }
 
         // averaging the obtained measurements
@@ -194,6 +196,8 @@ public class SimProbeRunner extends AbstractProbeRunner
             .getExpressionEvaluator (statesCountExpressionsA, constants);
 
         double[] times = new double[statesCountExpressions.size ()];
+        PCTMCLogging.setVisible (false);
+
         for (int p = 0; p < parameter; ++p)
         {
             // detect when begin signal fired
@@ -247,7 +251,7 @@ public class SimProbeRunner extends AbstractProbeRunner
                 }
             }
 
-            System.out.println ("Ran transient replication " + p);
+            outputInfo(p, parameter, "transient replications");
         }
 
         // averaging the obtained measurements

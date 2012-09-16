@@ -24,6 +24,7 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.util.*;
@@ -268,6 +269,16 @@ public abstract class AbstractProbeRunner
                 result.put (q, DivExpression.create
                         (SumExpression.create(summands), totalBeginRate));
             }
+        }
+    }
+
+    protected void outputInfo (int i, int repetitions, String message)
+    {
+        if (i > 0 && i % (repetitions / 5 > 0 ? repetitions / 5 : 1) == 0)
+        {
+            PCTMCLogging.setVisible (true);
+            PCTMCLogging.info ("Ran " + i + " " + message + ".");
+            PCTMCLogging.setVisible (false);
         }
     }
 

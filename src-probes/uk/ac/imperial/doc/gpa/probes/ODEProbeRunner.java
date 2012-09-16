@@ -22,6 +22,7 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CPPODEAnalysisNumerical
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import java.util.*;
@@ -142,6 +143,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
         evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
 
+        PCTMCLogging.setVisible (false);
         for (double s = 0; s < steadyStateTime; s += stepSize)
         {
             if (s > 0)
@@ -155,10 +157,11 @@ public class ODEProbeRunner extends AbstractProbeRunner
             double[][] obtainedMeasurements = postprocessor.evaluateExpressions
                 (evaluator, constants);
 
+            outputInfo(i, indices, "transient iterations");
+
             cdf[i] = passageTimeCDF (obtainedMeasurements,
                     pairs, accepting, mapping);
             ++i;
-            System.out.println ("Ran transient iteration " + i);
         }
 
         double[] uncCdf = new double[times];
