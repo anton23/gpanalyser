@@ -8,7 +8,9 @@ import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionTransformer;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.jexpressions.variables.IExpressionVariableVisitor;
@@ -44,6 +46,15 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 	private Map<ExpressionVariable, AbstractExpression> m_variables;
 	private Constants m_constants;
 	private Map<ConstantExpression,AbstractExpression> m_boundArgs = new HashMap<ConstantExpression,AbstractExpression>();
+	
+	@Override
+	public void visit(DivExpression e) {
+		e.getNumerator().accept(this);
+		AbstractExpression newNumerator = result;
+		e.getDenominator().accept(this);
+		AbstractExpression newDenominator = result;
+		result = PEPADivExpression.create(newNumerator, newDenominator);
+	}
 	
 	public ExpressionFctAndVarInliner(Location _loc, MASSPAModel _model, Map<FunctionCallExpression, AbstractExpression> _functions, Map<ExpressionVariable, AbstractExpression> _variables, Constants _constants)
 	{

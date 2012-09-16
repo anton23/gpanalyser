@@ -51,7 +51,7 @@ public class ExpressionPopProductCreator extends ExpressionTransformer  implemen
 	{
 		m_pop = _pop;
 	}
-
+	
 	@Override
 	public void visit(IntegerExpression e)
 	{
