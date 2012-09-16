@@ -24,9 +24,9 @@ public class UExpressionVisitor
 
     public void visit (SequenceUExpression expression, double time)
     {
-        AbstractUExpression R2 = expression.getR2();
+        AbstractUExpression R2 = expression.getR2 ();
         R2.accept (this, time);
-        AbstractUExpression R1 = expression.getR1();
+        AbstractUExpression R1 = expression.getR1 ();
         R1.accept (this, R2.getEvaluatedTime ());
         expression.setEvaluatedTime (R1.getEvaluatedTime ());
     }
