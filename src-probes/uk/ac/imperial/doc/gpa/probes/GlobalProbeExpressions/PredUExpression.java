@@ -1,13 +1,11 @@
 package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
-import uk.ac.imperial.doc.gpa.fsm.NFAPredicate;
-
 public class PredUExpression extends AbstractUExpression
 {
     private final AbstractUExpression R;
-    private final NFAPredicate predicate;
+    private final Predicate predicate;
 
-    public PredUExpression (AbstractUExpression r, NFAPredicate predicate)
+    public PredUExpression (AbstractUExpression r, Predicate predicate)
     {
         R = r;
         this.predicate = predicate;
@@ -18,7 +16,7 @@ public class PredUExpression extends AbstractUExpression
         return R;
     }
 
-    public NFAPredicate getPredicate ()
+    public Predicate getPredicate ()
     {
         return predicate;
     }

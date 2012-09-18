@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
-import uk.ac.imperial.doc.gpa.fsm.NFAPredicate;
 import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 
 import java.util.Map;
@@ -91,12 +90,18 @@ public class UExpressionVisitor
         }
     }
 
-    private double evalPred (NFAPredicate predicate, double startingTime)
+    private double evalPred (Predicate predicate, double startingTime)
     {
-        while (!predicate.eval (mapping,
-            states[getTimeIndex (startingTime)]) && startingTime <= stopTime)
+        int index = getTimeIndex (startingTime);
+        while (index < states.length
+               && !predicate.eval (mapping, states[index]))
         {
             startingTime += stepSize;
+            index = getTimeIndex (startingTime);
+        }
+        if (index == states.length)
+        {
+            return -1;
         }
         return startingTime;
     }

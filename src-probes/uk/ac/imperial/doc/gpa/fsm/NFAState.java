@@ -13,7 +13,6 @@ public class NFAState
 {
 	private Multimap<ITransition, NFAState> outgoings = HashMultimap.create ();
 	private boolean accepting = false;
-    private NFAPredicate predicate = null;
 	private String name;
 
 	public NFAState (String name)
@@ -103,16 +102,6 @@ public class NFAState
         return outgoings;
     }
 
-    public NFAPredicate getPredicate ()
-    {
-        return predicate;
-    }
-
-    public void setPredicate (NFAPredicate predicate)
-    {
-        this.predicate = predicate;
-    }
-
     @Override
     public boolean equals (Object o)
     {
@@ -159,9 +148,6 @@ public class NFAState
             }
         }
         result = 31 * result + (accepting ? 1 : 0);
-        result = 31 * result
-            + ((predicate != null && !(predicate instanceof NFADummyPredicate))
-                ? predicate.hashCode () : 0);
         return result * empty;
     }
 }

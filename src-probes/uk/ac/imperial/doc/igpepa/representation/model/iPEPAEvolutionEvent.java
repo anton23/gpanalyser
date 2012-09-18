@@ -7,6 +7,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,11 +31,14 @@ public class iPEPAEvolutionEvent extends PEPAEvolutionEvent
     {
         EvolutionEvent event
             = super.getEvolutionEvent (countActions, unfoldedVariables);
-        for (String action : immediateActions)
+        List<String> immActions = new ArrayList<String> (immediateActions);
+        // assumption - immediate actions do not contain the timed action
+        immActions.remove (action);
+        for (String immAction : immActions)
         {
-            if (countActions.contains (action))
+            if (countActions.contains (immAction))
             {
-                event.getIncreasing ().add (new GPEPAActionCount (action));
+                event.getIncreasing ().add (new GPEPAActionCount (immAction));
             }
         }
         return event;

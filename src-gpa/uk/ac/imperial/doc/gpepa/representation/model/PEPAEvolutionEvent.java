@@ -18,7 +18,7 @@ import java.util.Set;
 
 public class PEPAEvolutionEvent {
 
-    private String action;
+    protected String action;
 	private AbstractExpression rate;
 	private List<GroupComponentPair> increases;
 	private List<GroupComponentPair> decreases;

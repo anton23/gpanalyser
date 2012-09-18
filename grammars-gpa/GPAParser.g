@@ -62,7 +62,8 @@ tokens{
   FALSE                 ;
   COMPARISON            ;
   EXPRESSION			;
-  
+  PRED					;
+
   //Probes
 
   FILE					;
@@ -347,25 +348,40 @@ probeg
 			-> ^(PROBEG $start_sync $stop_sync REPETITION?) ;
 
 rg
-	:	(LBRACE pred RBRACE)? rg_sub (rl_bin_operators rg)?
-			-> ^(RG rg_sub pred? (rg rl_bin_operators)?) ;
+	:	rg_sub
+		| {!($probe_def::mode == 3 && $probe_def::fluid_flow)}? rl_single ;
 
 rg_sub
+	:   (
+			{$probe_def::mode == 3 && $probe_def::fluid_flow}?
+    			rg_single
+    	) ;
+
+rg_single
 	:	rga_all
-		| rl_single ;
+		| rg_bracketed ;
+
+rg_bracketed
+	:	LPAR rg_internal RPAR
+			-> rg_internal ;
+
+rg_internal
+	:	(LBRACE pred RBRACE)? rg_single (rg_op rg_internal)?
+			-> ^(RG pred? rg_single (rg_internal rg_op)?) ;
+
+rg_op
+	:	COMMA -> ^(BINARY_OP COMMA)
+		| PAR -> ^(BINARY_OP PAR)
+		| SEMI -> ^(BINARY_OP SEMI) ;
 
 rga_all
-	:	({$probe_def::mode == 3 && $probe_def::fluid_flow}?=>
-			rga (LBRACK expression RBRACK)?)
-			-> ^(RGA_ALL rga expression?) ;
+	:	LPAR rga (LBRACK expression RBRACK)? RPAR
+			-> ^(RGA_ALL rga expression?)
+		| EMPTY -> ^(EMPTY EMPTY) ;
 
 rga
-	:	a=rga_action (PAR rga_action)*
-		-> ^(RGA $a rga_action*) ;
-
-rga_action
-	:	eventual_specific_action
-		| EMPTY ;
+	:	eventual_specific_action (PAR eventual_specific_action)*
+			-> ^(RGA eventual_specific_action+) ;
 
 // Predicates for global
 
