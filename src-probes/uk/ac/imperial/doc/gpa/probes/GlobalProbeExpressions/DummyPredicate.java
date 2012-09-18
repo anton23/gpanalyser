@@ -1,8 +1,8 @@
-package uk.ac.imperial.doc.gpa.fsm;
+package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
 import java.util.Map;
 
-public class NFADummyPredicate extends NFAPredicate
+public class DummyPredicate extends Predicate
 {
     public boolean eval(
             Map<String, Integer> mapping, double[] data

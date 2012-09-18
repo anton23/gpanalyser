@@ -150,6 +150,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         double[] cdf = passageTimeCDF (overallMeasurements, pairs, accepting,
                 altMapping);
+        PCTMCLogging.setVisible (true);
         return new CDF (name, stepSize, cdf);
     }
 
@@ -265,6 +266,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         double[] cdf = passageTimeCDF (overallMeasurements,
                 pairs, accepting, mappingA);
+        PCTMCLogging.setVisible (true);
         return new CDF (name, stepSize, cdf);
     }
 

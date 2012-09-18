@@ -121,20 +121,10 @@ public class NFAtoDFA
         for (NFAState s : states)
         {
             createAccepting = s.isAccepting () || createAccepting;
-            NFAPredicate pred = s.getPredicate ();
-            if (pred != null && !pred.getPredicateString ().equals (""))
-            {
-                if (!predicate.equals (""))
-                {
-                    predicate += " && ";
-                }
-                predicate += pred.getPredicateString ();
-            }
         }
 
         NFAState newState = new NFAState (name);
         newState.setAccepting (createAccepting);
-        newState.setPredicate (NFAPredicate.create (predicate));
         return newState;
     }
 

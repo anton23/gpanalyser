@@ -2,7 +2,6 @@ package uk.ac.imperial.doc.gpa.probes;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
-import uk.ac.imperial.doc.gpa.fsm.ITransition;
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
 import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
 import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
@@ -79,10 +78,9 @@ public abstract class AbstractProbeRunner
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          Set<ComponentId> accepting, AbstractExpression stopTime,
-         AbstractExpression stepSize, int parameter, Set<ITransition> alphabet,
+         AbstractExpression stepSize, int parameter, Set<String> alphabet,
          int mode, double modePar)
     {
-        Set<String> countActionStrings = convertObjectsToStrings (alphabet);
         List<AbstractExpression> statesCountExpressions
             = new LinkedList<AbstractExpression> ();
         Map<String, Integer> mapping
@@ -97,7 +95,7 @@ public abstract class AbstractProbeRunner
         double stepSizeVal = stepEval.getResult ();
 
         CDF cdf = dispatchEvaluation (gprobe, model, stateObservers,
-                statesCountExpressions, mapping, countActionStrings,
+                statesCountExpressions, mapping, alphabet,
                 mainDef, altDef, definitionsMap, accepting, stopTimeVal,
                 stepSizeVal, parameter, mode, modePar);
 
@@ -174,17 +172,7 @@ public abstract class AbstractProbeRunner
         graph.renderData (cdf, name, stepSize);
     }
 
-    private Set<String> convertObjectsToStrings (Set<?> objects)
-    {
-        Set<String> objectStrings = new HashSet<String> ();
-        for (Object object : objects)
-        {
-            objectStrings.add (object.toString ());
-        }
-        return objectStrings;
-    }
-
-        protected void getProbabilitiesAfterBegin
+    protected void getProbabilitiesAfterBegin
             (GroupedModel model, PEPAComponentDefinitions definitions,
              LinkedHashMap<GroupComponentPair, AbstractExpression> result)
     {
@@ -324,20 +312,6 @@ public abstract class AbstractProbeRunner
         //System.out.println (pctmcs[0]);
         AbstractPCTMCAnalysis analysis
             = getPreparedAnalysis (pctmcs[0], moments, constants);
-
-        /*
-            Set<String> cooperation = new HashSet<String> ();
-            cooperation.add ("cont_tfr");
-            cooperation.add ("data_tfr");
-            cooperation.add ("clt_shutdown");
-            AbstractExpression ge = new PatternPopulationExpression (new GPEPAState (new GroupComponentPair ("Clients", new CooperationComponent (new AnyComponent (), new AnyComponent (), cooperation))));
-            List<AbstractExpression> listGE = new ArrayList<AbstractExpression> ();
-            plotDescriptions.add (new PlotDescription (listGE));
-
-            PatternSetterVisitor.unfoldPatterns (ge, new GPEPAPatternMatcher (pctmc));
-            listGE.add (ge);
-            AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts (analysis, plotDescriptions, new HashMap<ExpressionVariable, AbstractExpression> ());
-        */
 
         NumericalPostprocessor postprocessor
             = getPostprocessor (stopTime, stepSize, parameter);

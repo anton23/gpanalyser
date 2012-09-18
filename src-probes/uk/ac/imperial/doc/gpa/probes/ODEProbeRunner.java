@@ -180,6 +180,7 @@ public class ODEProbeRunner extends AbstractProbeRunner
             uncCdf[t] *= stepSize;
         }
 
+        PCTMCLogging.setVisible (true);
         return new CDF (name, stepSize, uncCdf);
     }
 
@@ -207,9 +208,12 @@ public class ODEProbeRunner extends AbstractProbeRunner
         double pointMass = u.getEvaluatedTime ();
         double[] cdf = new double[(int) (stopTime / stepSize)];
 
-        Arrays.fill(cdf, 0, (int) Math.floor(pointMass / stepSize), 0);
-        Arrays.fill(cdf, (int) Math.ceil(pointMass / stepSize),
-                cdf.length, 1);
+        if (pointMass != -1)
+        {
+            Arrays.fill(cdf, 0, (int) Math.floor(pointMass / stepSize), 0);
+            Arrays.fill(cdf, (int) Math.ceil(pointMass / stepSize),
+                    cdf.length, 1);
+        }
 
         return new CDF (gprobe.getName (), stepSize, cdf);
     }

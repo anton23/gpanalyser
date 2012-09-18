@@ -124,7 +124,7 @@ public class NFADetectors
         Set<ITransition> alphabet = new HashSet<ITransition> ();
         detectAlphabetI (startingState, includeSignals,
             alphabet, new HashSet<NFAState> ());
-        alphabet.removeAll(excluded);
+        alphabet.removeAll (excluded);
         return alphabet;
     }
 
@@ -147,7 +147,8 @@ public class NFADetectors
                 if (!visited.contains (nextState))
                 {
                     visited.add (nextState);
-                    detectAlphabetI (nextState, includeSignals, alphabet, visited);
+                    detectAlphabetI
+                        (nextState, includeSignals, alphabet, visited);
                 }
             }
 		}

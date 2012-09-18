@@ -150,9 +150,8 @@ import PCTMCCompilerPrototype;
 
 	private void generateProbeComponent
 		(String name, NFAState startingState, boolean repeating,
-		Set<ITransition> allActions, Set<ITransition> alphabet,
-		Map<String, PEPAComponent> probeComponents, Set<ComponentId> accepting,
-		GPAParser parser)
+		Set<ITransition> allActions, Map<String, PEPAComponent> probeComponents,
+		Set<ComponentId> accepting, GPAParser parser)
 		throws Exception
 	{
 		Set<NFAState> acceptingStates
@@ -162,25 +161,27 @@ import PCTMCCompilerPrototype;
 		{
 			Set<NFAState> allStates
 				= NFADetectors.detectAllStates (startingState);
-			statesLabel : for (NFAState state : allStates)
+			for (NFAState state : allStates)
 			{
 				Multimap<ITransition, NFAState> transitions
 					= state.getTransitions ();
-				for (ITransition transition : transitions.keySet ())
+				ITransition[] trArr = transitions.keySet ()
+					.toArray (new ITransition[1]);
+				for (int i = 0; i < trArr.length; i++)
 				{
 					Collection<NFAState> reachables
-						= transitions.get (transition);
+						= transitions.get (trArr[i]);
 					for (NFAState reachable : reachables)
 					{
 						if (acceptingStates.contains (reachable))
 						{
-							state.replaceTransition (transition, startingState);
-							continue statesLabel;
+							state.replaceTransition (trArr[i], startingState);
+							break;
 						}
 					}
 				}
 			}
-		}
+    	}
 		else
 		{
 			for (NFAState accState : acceptingStates)
@@ -198,8 +199,6 @@ import PCTMCCompilerPrototype;
 		// NFAUtils.extendStatesWithSelfLoops
 		// 	(allActions, startingState);
 		NFAUtils.removeSurplusSelfLoops (startingState);
-		alphabet.addAll (NFADetectors.detectAlphabet
-				(startingState, true, excluded));
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
 		NFAStateToPEPA.HybridDFAtoPEPA
@@ -394,11 +393,11 @@ extensions
 
 // Local
 
-probel [String name, Set<ITransition> allActions, Set<ITransition> alphabet,
+probel [String name, Set<ITransition> allActions, Set<String> alphabet,
 		boolean steady, GPAParser parser]
-		returns [Map<String, PEPAComponent> probeComponents,
-				 Map<String, PEPAComponent> altProbeComponents,
-				 Set<ComponentId> acceptingComponents]
+	returns [Map<String, PEPAComponent> probeComponents,
+			 Map<String, PEPAComponent> altProbeComponents,
+			 Set<ComponentId> acceptingComponents]
 scope
 {
 	List<NFAUtils.Signaller> signallers;
@@ -408,7 +407,7 @@ scope
 	$acceptingComponents = new HashSet<ComponentId> ();
 	$probel::signallers = new ArrayList<NFAUtils.Signaller> ();
 }
-	:	^(PROBEL (rl_signal [allActions])+ rp=REPETITION?)
+	:	^(PROBEL (rl_signal [$allActions, $alphabet])+ rp=REPETITION?)
 			{
 				NFAState starting_state = NFAUtils.mergeSignallers
 					($probel::signallers);
@@ -418,13 +417,13 @@ scope
 						(starting_state);
 					$altProbeComponents = new HashMap<String, PEPAComponent> ();
 					generateProbeComponent
-						($name, nonrepeating, false, allActions, alphabet,
+						($name, nonrepeating, false, allActions,
 							$altProbeComponents, $acceptingComponents, parser);
 				}
 				$probeComponents = new HashMap<String, PEPAComponent> ();
 				Set<ComponentId> thisAccepting = new HashSet<ComponentId>();
 				generateProbeComponent
-					($name, starting_state, rp != null, allActions, alphabet,
+					($name, starting_state, rp != null, allActions,
 						$probeComponents, thisAccepting, parser);
 				if (!steady)
 				{
@@ -432,12 +431,12 @@ scope
 				}
 			} ;
 
-rl_signal [Set<ITransition> allActions]
+rl_signal [Set<ITransition> allActions, Set<String> alphabet]
 @init
 {
 	NFAState starting_state = new NFAState (t);
 }
-	:	^(RLS rl_single [starting_state, $allActions] sig=signal)
+	:	^(RLS rl_single [starting_state, $allActions, $alphabet] sig=signal)
 			{
 				SignalTransition signal = new SignalTransition ($sig.name);
 				starting_state = NFAtoDFA.convertToDFA (starting_state, t);
@@ -445,14 +444,15 @@ rl_signal [Set<ITransition> allActions]
 						(starting_state, signal));
 			} ;
 
-rl_single [NFAState current_state, Set<ITransition> allActions]
+rl_single [NFAState current_state, Set<ITransition> allActions,
+		Set<String> alphabet]
 	returns [NFAState reached_state]
 @init
 {
 	NFAState starting_state = new NFAState (t);
 }
 	:	^(RL_SINGLE (^(RL_SINGLE_BRACKETED
-			rs=rl_bracketed [starting_state, $allActions]
+			rs=rl_bracketed [starting_state, $allActions, $alphabet]
 			(op=rl_un_operators
 				[starting_state, $rs.reached_state, $allActions])?)))
 			{
@@ -471,7 +471,8 @@ rl_single [NFAState current_state, Set<ITransition> allActions]
 				$current_state.setAccepting (false);
 			}
 		| ^(RL_SINGLE (^(ACTION rs=immediateActions
-						[starting_state, $allActions] (op=rl_un_operators
+						[starting_state, $allActions, $alphabet]
+						(op=rl_un_operators
 							[starting_state, $rs.reached_state,
 							$allActions])?)))
 			{
@@ -490,25 +491,25 @@ rl_single [NFAState current_state, Set<ITransition> allActions]
 				$current_state.setAccepting (false);
 			} ;
 
-rl_bracketed  [NFAState current_state, Set<ITransition> allActions]
+rl_bracketed  [NFAState current_state, Set<ITransition> allActions,
+		Set<String> alphabet]
 	returns [NFAState reached_state]
-	:	^(RL_BRACKETED rl [$current_state, $allActions])
+	:	^(RL_BRACKETED rl [$current_state, $allActions, $alphabet])
 			{
 				$reached_state = $rl.reached_state;
 			} ;
 
-rl [NFAState current_state, Set<ITransition> allActions]
+rl [NFAState current_state, Set<ITransition> allActions, Set<String> alphabet]
 	returns [NFAState reached_state]
 @init
 {
 	NFAState new_starting_state1 = new NFAState (t);
 	NFAState new_starting_state2 = new NFAState (t);
 }
-	:	^(RL rl_single [new_starting_state1, $allActions]
-		(rl2=rl [new_starting_state2, $allActions] op=rl_bin_operators
-				[new_starting_state1, $rl_single.reached_state,
-				new_starting_state2, $rl2.reached_state, $allActions,
-				null, null])?)
+	:	^(RL rl_single [new_starting_state1, $allActions, $alphabet]
+		(rl2=rl [new_starting_state2, $allActions, $alphabet]
+		 op=rl_bin_operators [new_starting_state1, $rl_single.reached_state,
+				new_starting_state2, $rl2.reached_state, $allActions])?)
 			{
 				if (op != null)
 				{
@@ -528,10 +529,8 @@ rl [NFAState current_state, Set<ITransition> allActions]
 
 rl_bin_operators [NFAState starting_state1,
 	NFAState current_state1, NFAState starting_state2,
-	NFAState current_state2, Set<ITransition> allActions,
-	AbstractUExpression U1, AbstractUExpression U2]
-	returns [NFAState starting_state, NFAState reached_state,
-		AbstractUExpression U]
+	NFAState current_state2, Set<ITransition> allActions]
+	returns [NFAState starting_state, NFAState reached_state]
 	:	^(BINARY_OP COMMA)
 			{
 				$starting_state = new NFAState (t);
@@ -541,7 +540,6 @@ rl_bin_operators [NFAState starting_state1,
 					starting_state2);
 				$current_state1.setAccepting (false);
 				$reached_state = $current_state2;
-				$U = new SequenceUExpression ($U1, $U2);
 			}
 		| ^(BINARY_OP PAR)
 			{
@@ -558,7 +556,6 @@ rl_bin_operators [NFAState starting_state1,
 					$reached_state);
 				$current_state2.addTransition (new EmptyTransition (),
 					$reached_state);
-				$U = new EitherUExpression ($U1, $U2);
 			}
 		| ^(BINARY_OP SEMI)
 			{
@@ -574,7 +571,6 @@ rl_bin_operators [NFAState starting_state1,
 				$reached_state = new NFAState (t);
 
 				NFAUtils.unifyAcceptingStates ($starting_state, $reached_state);
-				$U = new BothUExpression ($U1, $U2);
 			}
 		| ^(BINARY_OP DIVIDE)
 			{
@@ -618,7 +614,7 @@ rl_un_operators [NFAState sub_starting_state,
 	:	^(UNARY_OP e1=expression (COMMA e2=expression)?)
 			{
 				ExpressionEvaluatorWithConstants e1eval
-						= new ExpressionEvaluatorWithConstants (mainConstants);
+					= new ExpressionEvaluatorWithConstants (mainConstants);
 				$e1.e.accept (e1eval);
 				int e1int = (int) e1eval.getResult ();
 
@@ -722,13 +718,14 @@ signal returns [String name]
 				$name = $signal_name.text;
 			} ;
 
-immediateActions [NFAState current_state, Set<ITransition> allActions]
+immediateActions [NFAState current_state, Set<ITransition> allActions,
+		Set<String> alphabet]
 	returns [NFAState reached_state]
-	:	eventual_specific_action [$current_state, $allActions]
+	:	eventual_specific_action [$current_state, $allActions, $alphabet]
 			{
 				$reached_state = $eventual_specific_action.reached_state;
 			}
-		| subsequent_specific_action  [$current_state, $allActions]
+		| subsequent_specific_action  [$current_state, $allActions, $alphabet]
 			{
 				$reached_state = $subsequent_specific_action.reached_state;
 			}
@@ -741,7 +738,8 @@ immediateActions [NFAState current_state, Set<ITransition> allActions]
 				$reached_state = $empty_action.reached_state;
 			} ;
 
-eventual_specific_action [NFAState current_state, Set<ITransition> allActions]
+eventual_specific_action [NFAState current_state, Set<ITransition> allActions,
+		Set<String> alphabet]
 	returns [NFAState reached_state, GPEPAActionCount action]
 @init
 {
@@ -762,9 +760,11 @@ eventual_specific_action [NFAState current_state, Set<ITransition> allActions]
 				$reached_state = $t2.reached_state;
 				$reached_state.setAccepting (true);
 				$action = new GPEPAActionCount ($action_name.text);
+				$alphabet.add ($action_name.text);
 			} ;
 
-subsequent_specific_action [NFAState current_state, Set<ITransition> allActions]
+subsequent_specific_action [NFAState current_state, Set<ITransition> allActions,
+		Set<String> alphabet]
 	returns [NFAState reached_state, String action]
 	:	^(SPECIFIC name=LOWERCASENAME)
 			{
@@ -775,13 +775,12 @@ subsequent_specific_action [NFAState current_state, Set<ITransition> allActions]
 					(new Transition ($action), $reached_state);
 				$current_state.setAccepting (false);
 				NFAState failure = NFAUtils.getNewFailureState (allActions);
-				// $current_state.addTransition
-				// 	(new AnyTransition (), failure);
 				for (ITransition transition : $allActions)
 				{
 					$current_state.addTransitionIfNotExisting
 						(transition.getSimpleTransition (), failure);
 				}
+				$alphabet.add ($name.text);
 			} ;
 
 any_action [NFAState current_state, Set<ITransition> allActions]
@@ -813,48 +812,47 @@ empty_action [NFAState current_state]
 
 // Global
 
-probeg [boolean simulate, GlobalProbe gprobe, Set<ITransition> allActions]
+probeg [boolean simulate, GlobalProbe gprobe, Set<ITransition> allActions,
+		Set<String> alphabet]
 @init
 {
 	NFAState starting_state1 = new NFAState (t);
 	NFAState starting_state2 = new NFAState (t);
 }
-	:	^(PROBEG start_actions=rg [starting_state1, $allActions]
-			stop_actions=rg [starting_state2, $allActions] rp=REPETITION?)
+	:	^(PROBEG start_actions=rg [starting_state1, $allActions, $alphabet]
+			stop_actions=rg [starting_state2, $allActions, $alphabet]
+			rp=REPETITION?)
 			{
 				if ($simulate)
 				{
-					NFAState acc_state = new NFAState (t);
-					NFAUtils.unifyAcceptingStates (starting_state1, acc_state);
-					acc_state.replaceTransition
-						(new StartTransition (), starting_state2);
-					acc_state.setAccepting (false);
-					acc_state = new NFAState (t);
-					NFAUtils.unifyAcceptingStates (starting_state2, acc_state);
-					acc_state.setAccepting (false);
-					NFAState final_acc_state = new NFAState (t);
-					final_acc_state.setAccepting (true);
-					acc_state.replaceTransition
-						(new StopTransition (), final_acc_state);
 					starting_state1 = NFAtoDFA.convertToDFA
 						(starting_state1, t);
-					Set<ITransition> alphabet = NFADetectors.detectAlphabet
-						(starting_state1, false,
-							new LinkedList<ITransition> ());
-
+					starting_state2 = NFAtoDFA.convertToDFA
+						(starting_state2, t);
+					Set<NFAState> accepting
+						= NFADetectors.detectAllAcceptingStates
+							(starting_state1);
+					for (NFAState acc_state : accepting)
+					{
+						acc_state.replaceTransition
+							(new StartTransition (), starting_state2);
+						acc_state.setAccepting (false);
+					}
+					NFAState final_acc_state = new NFAState (t);
+					final_acc_state.setAccepting (true);
 					if (rp != null)
 					{
-						Set<NFAState> accepting
-							= NFADetectors.detectAllAcceptingStates
-							(starting_state1);
-						for (NFAState acc : accepting)
-						{
-							acc.addTransition
-								(new EmptyTransition (), starting_state1);
-						}
-						starting_state1 = NFAtoDFA.convertToDFA
-							(starting_state1, $gprobe.getName ());
+						final_acc_state = starting_state1;
 					}
+					accepting = NFADetectors.detectAllAcceptingStates
+							(starting_state2);
+					for (NFAState acc_state : accepting)
+					{
+						acc_state.replaceTransition
+							(new StopTransition (), final_acc_state);
+						acc_state.setAccepting (false);
+					}
+
 					$gprobe.setStartingState (starting_state1);
 				}
 				else
@@ -864,71 +862,63 @@ probeg [boolean simulate, GlobalProbe gprobe, Set<ITransition> allActions]
 				}
 			} ;
 
-rg [NFAState current_state, Set<ITransition> allActions]
+rg [NFAState current_state, Set<ITransition> allActions, Set<String> alphabet]
 	returns [NFAState reached_state, AbstractUExpression U]
-@init
-{
-	NFAState new_starting_state1 = new NFAState (t);
-	NFAState new_starting_state2 = new NFAState (t);
-}
-	:	^(RG rl_single [new_starting_state1, $allActions] pred1=main_pred?
-	        {
-	            if (pred1 != null)
-	            {
-	                new_starting_state1.setPredicate ($pred1.predicate);
-	            }
-	        }
-			(rg2=rg [new_starting_state2, $allActions] op = rl_bin_operators
-				[new_starting_state1, $rl_single.reached_state,
-				new_starting_state2, $rg2.reached_state,
-				$allActions, null, null])?)
+	:   // for fluid flow, we need no state machine
+		rg_single [$allActions, $alphabet]
+			{
+				$U = $rg_single.U;
+			}
+
+		// for simulation, predicates are disabled
+		| rl_single [$current_state, $allActions, $alphabet]
+			{
+				$reached_state = $rl_single.reached_state;
+			} ;
+
+rg_single [Set<ITransition> allActions, Set<String> alphabet]
+	returns [AbstractUExpression U]
+	:	rga_all [$allActions, $alphabet]
+			{
+				$U = $rga_all.U;
+			}
+		| ^(RG predicate=main_pred? op1=rg_single [$allActions, $alphabet]
+		   		(op2=rg_single [$allActions, $alphabet]
+		   		 op=rg_op [$op1.U, $op2.U])?)
 			{
 				if (op != null)
 				{
-					$current_state.addTransition (new EmptyTransition (),
-						$op.starting_state);
-					$reached_state = $op.reached_state;
-				}
-				else
-				{
-					$current_state.addTransition (new EmptyTransition (),
-						new_starting_state1);
-					$reached_state = $rl_single.reached_state;
-				}
-			}
-		// for fluid flow, we need no state machine
-		| ^(RG rg_sub [$allActions] pred1=main_pred?
-			{
-				$U = $rg_sub.U;
-				if (pred1 != null)
-				{
-					new_starting_state1.setPredicate ($pred1.predicate);
-					$U = new PredUExpression ($U, $pred1.predicate);
-				}
-			}
-			(rg2=rg [new_starting_state2, $allActions] op = rl_bin_operators
-				[new_starting_state1, new NFAState (t),
-				new_starting_state2, $rg2.reached_state,
-				$allActions, $U, $rg2.U])?)
-			{
-				if (op != null)
-				{
-					$current_state.addTransition (new EmptyTransition (),
-						$op.starting_state);
-					$reached_state = $op.reached_state;
 					$U = $op.U;
 				}
 				else
 				{
-					$current_state.addTransition (new EmptyTransition (),
-						new_starting_state1);
-					$reached_state = new NFAState (t);
+					$U = $op1.U;
+				}
+				if (predicate != null)
+				{
+					$U = new PredUExpression ($U, $predicate.predicate);
 				}
 			} ;
 
-rg_sub [Set<ITransition> allActions]
-	returns [NFAState reached_state, AbstractUExpression U]
-	:	^(RGA_ALL rga [$allActions] expr=expression?)
+rg_op [AbstractUExpression U1, AbstractUExpression U2]
+	returns [AbstractUExpression U]
+	:
+		^(BINARY_OP COMMA)
+			{
+				$U = new SequenceUExpression ($U1, $U2);
+			}
+		| ^(BINARY_OP PAR)
+			{
+				$U = new EitherUExpression ($U1, $U2);
+			}
+		| ^(BINARY_OP SEMI)
+			{
+				$U = new BothUExpression ($U1, $U2);
+			} ;
+
+rga_all [Set<ITransition> allActions, Set<String> alphabet]
+	returns [AbstractUExpression U]
+	:	^(RGA_ALL rga [$allActions, $alphabet] expr=expression?)
 			{
 				int times = 1;
 				if (expr != null)
@@ -939,27 +929,34 @@ rg_sub [Set<ITransition> allActions]
 					times = (int) eval.getResult ();
 				}
 				$U = new ActionsUExpression ($rga.U, times);
+			}
+		| ^(EMPTY EMPTY)
+			{
+				$U = new ActionsUExpression
+					(new UPrimeExpression
+						(new HashSet<GPEPAActionCount> ()), 1);
 			} ;
 
-rga [Set<ITransition> allActions] returns [UPrimeExpression U]
+rga [Set<ITransition> allActions, Set<String> alphabet]
+	returns [UPrimeExpression U]
 @init
 {
 	Set<GPEPAActionCount> actions = new HashSet<GPEPAActionCount> ();
 }
-	:	^(RGA (a = eventual_specific_action [new NFAState (t), $allActions]
-			{actions.add ($a.action);}) (PAR b = eventual_specific_action
-			[new NFAState (t), $allActions] {actions.add ($b.action);})*)
+	:	^(RGA (a = eventual_specific_action
+			[new NFAState (t), $allActions, $alphabet]
+			{actions.add ($a.action);})+)
 		{
 			actions.remove (null);
 			$U = new UPrimeExpression (actions);
 		} ;
 
 // Predicates for global
-main_pred returns [NFAPredicate predicate]
+main_pred returns [Predicate predicate]
     :   p=pred
         {
             String predicateString = "(" + $p.predicate + ")";
-            $predicate = NFAPredicate.create (predicateString);
+            $predicate = Predicate.create (predicateString);
         } ;
 
 pred returns [String predicate]
@@ -1066,7 +1063,10 @@ concrete_r_expr returns [String predicate]
 	        }
 	    | expr=expression
 	        {
-	            $predicate = "(" + $expr.e.toString () + ")";
+	        	ExpressionEvaluatorWithConstants eval
+					= new ExpressionEvaluatorWithConstants (mainConstants);
+				$expr.e.accept (eval);
+	            $predicate = "(" + eval.getResult () + ")";
 	        } ;
 
 // Probe_spec
@@ -1154,7 +1154,7 @@ probe_spec [boolean simulate, int mode, double modePar]
 	returns [CDF measured_times]
 scope
 {
-    Set<ITransition> alphabet;
+    Set<String> alphabet;
     Set<ITransition> allActions;
     Map<String, PEPAComponent> origComponents;
     Set<ComponentId> localAcceptingStates;
@@ -1163,7 +1163,7 @@ scope
 @init
 {
 	GlobalProbe gprobe = new GlobalProbe ();
-	$probe_spec::alphabet = new HashSet<ITransition> ();
+	$probe_spec::alphabet = new HashSet<String> ();
 	$probe_spec::allActions = new HashSet<ITransition> ();
 	Set<String> actions = mainDefinitions.getActions ();
 	$probe_spec::initialStates = new HashSet<PEPAComponent> ();
@@ -1196,7 +1196,8 @@ scope
 					.removeVanishingStates ($probe_spec::initialStates);
 			}
 			(locations [newMainDef])?
-			probeg [simulate, gprobe, $probe_spec::allActions])
+			probeg [simulate, gprobe, $probe_spec::allActions,
+					$probe_spec::alphabet])
 			{
 				gprobe.setName ($globalProbeName.text);
 
@@ -1234,23 +1235,17 @@ scope
 				{
 					if (mode == 3)
 					{
-						Set<ITransition> observedActions
-							= new HashSet<ITransition> ();
-						Map<String, PEPAComponent> globalComponents
-							= new HashMap<String, PEPAComponent> ();
-						NFAUtils.removeSurplusSelfLoops
-							(gprobe.getStartingState ());
 						Set<ITransition> monitoring
 							= NFADetectors.detectAlphabet
-							(gprobe.getStartingState (), true, excluded);
-						// monitoring.remove (new AnyTransition ());
+								(gprobe.getStartingState (), true, excluded);
+						Map<String, PEPAComponent> globalComponents
+							= new HashMap<String, PEPAComponent> ();
 						Set<ComponentId> accepting
 							= new HashSet<ComponentId> ();
 						generateProbeComponent
 							(gprobe.getName (), gprobe.getStartingState (),
-								false, monitoring, observedActions,
-								globalComponents, accepting,
-								$probe_def::parser);
+								false, monitoring, globalComponents,
+								accepting, $probe_def::parser);
 
 						Multimap<PEPAComponent, AbstractExpression> counts
 							= HashMultimap.create ();
@@ -1258,15 +1253,10 @@ scope
 								DoubleExpression.ONE);
                         Group group = new Group (counts);
                         String label = "GlobalProbe";
-                        Set<String> syncActions = new HashSet<String> ();
-                        for (ITransition trans : observedActions)
-                        {
-                        	syncActions.add (trans.toString ());
-                        }
 						GroupedModel globalModel
 							= new GlobalProbeSimGroupCooperation
 							($probe_def::model, new LabelledComponentGroup
-								(label, group), syncActions);
+								(label, group), $probe_spec::alphabet);
 
 						globalComponents.putAll ($probe_spec::origComponents);
 						globalComponents.putAll (newComp);
@@ -1326,8 +1316,8 @@ local_probes [Map<String, PEPAComponent> newComp,
 local_probe_ass [Map<String, PEPAComponent> newComp,
 	Map<String, PEPAComponent> altComp]
 	:	^(DEF name=UPPERCASENAME probe=probel
-			[$name.text, $probe_spec::allActions,
-			 $probe_spec::alphabet, $probe_def::steady, $probe_def::parser])
+			[$name.text, $probe_spec::allActions, $probe_spec::alphabet,
+			 $probe_def::steady, $probe_def::parser])
 			 {
 			 	$newComp.putAll ($probe.probeComponents);
 			 	if ($probe_def::steady)

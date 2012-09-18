@@ -35,11 +35,9 @@ public class TestProbesCreation
 {
     private final static String probeInputsPath = "test-probes/inputs/probes/";
     private final Set<ITransition> allActions;
-    private final Set<ITransition> alphabet;
 
     public TestProbesCreation ()
     {
-        alphabet = new HashSet<ITransition> ();
         allActions = new HashSet<ITransition> ();
         allActions.add (new Transition ("fetch"));
         allActions.add (new Transition ("fail"));
@@ -87,7 +85,7 @@ public class TestProbesCreation
                 = new CommonTreeNodeStream (probel.getTree ());
             GPACompiler compiler = new GPACompiler (nodes);
             GPACompiler.probel_return probel_return
-                = compiler.probel ("LProbe", allActions, alphabet,
+                = compiler.probel ("LProbe", allActions, new HashSet<String> (),
                     false, getParser (null));
             parsedModel = probel_return.probeComponents;
         }
