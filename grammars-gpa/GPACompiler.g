@@ -130,28 +130,12 @@ import PCTMCCompilerPrototype;
 		excluded.add (new StopTransition ());
 	}
 
-	private Map<String, PEPAComponent>
-		loadProbe (String probeComp, GPAParser parser) throws Exception
-	{
-		GPALexer lex = new GPALexer (new ANTLRStringStream (probeComp));
-		CommonTokenStream tokens = new CommonTokenStream (lex);
-		parser.setTokenStream (tokens);
 
-		GPAParser.componentDefinitions_return probe
-			= parser.componentDefinitions ();
-		CommonTreeNodeStream nodes
-			= new CommonTreeNodeStream ((Tree) probe.tree);
-		TreeNodeStream current = this.getTreeNodeStream ();
-		this.setTreeNodeStream (nodes);
-		Map<String,PEPAComponent> newComponents = this.componentDefinitions ();
-		this.setTreeNodeStream (current);
-		return newComponents;
-	}
 
 	private void generateProbeComponent
 		(String name, NFAState startingState, boolean repeating,
 		Set<ITransition> allActions, Map<String, PEPAComponent> probeComponents,
-		Set<ComponentId> accepting, GPAParser parser)
+		Set<ComponentId> accepting)
 		throws Exception
 	{
 		Set<NFAState> acceptingStates
@@ -201,13 +185,13 @@ import PCTMCCompilerPrototype;
 		NFAUtils.removeSurplusSelfLoops (startingState);
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
-		NFAStateToPEPA.HybridDFAtoPEPA
-			(startingState, name, 0, new PrintStream (stream));
+		Map<String,PEPAComponent> newComponents = NFAStateToPEPA.HybridDFAtoPEPA
+			(startingState, name);
 		for (NFAState state : acceptingStates)
 		{
 			accepting.add (new ComponentId (state.getName ()));
 		}
-		probeComponents.putAll (loadProbe (stream.toString (), parser));
+		probeComponents.putAll (newComponents);
 	}
 }
 
@@ -394,7 +378,7 @@ extensions
 // Local
 
 probel [String name, Set<ITransition> allActions, Set<String> alphabet,
-		boolean steady, GPAParser parser]
+		boolean steady]
 	returns [Map<String, PEPAComponent> probeComponents,
 			 Map<String, PEPAComponent> altProbeComponents,
 			 Set<ComponentId> acceptingComponents]
@@ -418,13 +402,13 @@ scope
 					$altProbeComponents = new HashMap<String, PEPAComponent> ();
 					generateProbeComponent
 						($name, nonrepeating, false, allActions,
-							$altProbeComponents, $acceptingComponents, parser);
+							$altProbeComponents, $acceptingComponents);
 				}
 				$probeComponents = new HashMap<String, PEPAComponent> ();
 				Set<ComponentId> thisAccepting = new HashSet<ComponentId>();
 				generateProbeComponent
 					($name, starting_state, rp != null, allActions,
-						$probeComponents, thisAccepting, parser);
+						$probeComponents, thisAccepting);
 				if (!steady)
 				{
 					$acceptingComponents = thisAccepting;
@@ -1074,7 +1058,6 @@ concrete_r_expr returns [String predicate]
 probe_def returns [CDF measured_times]
 scope
 {
-	GPAParser parser;
 	GroupedModel model;
 	AbstractExpression stop_time;
 	AbstractExpression step_size;
@@ -1083,8 +1066,6 @@ scope
 }
 @init
 {
-	$probe_def::parser = new GPAParser (null);
-	$probe_def::parser.setErrorReporter (new ErrorReporter ());
 	$probe_def::model = deepCloner.deepClone (mainModel);
 }
 	:	^(PROBE_DEF	o=out? odeSettings
@@ -1245,7 +1226,7 @@ scope
 						generateProbeComponent
 							(gprobe.getName (), gprobe.getStartingState (),
 								false, monitoring, globalComponents,
-								accepting, $probe_def::parser);
+								accepting);
 
 						Multimap<PEPAComponent, AbstractExpression> counts
 							= HashMultimap.create ();
@@ -1317,7 +1298,7 @@ local_probe_ass [Map<String, PEPAComponent> newComp,
 	Map<String, PEPAComponent> altComp]
 	:	^(DEF name=UPPERCASENAME probe=probel
 			[$name.text, $probe_spec::allActions, $probe_spec::alphabet,
-			 $probe_def::steady, $probe_def::parser])
+			 $probe_def::steady])
 			 {
 			 	$newComp.putAll ($probe.probeComponents);
 			 	if ($probe_def::steady)
