@@ -443,7 +443,23 @@ scope
 			}
 			-> ^(PROBE_DEF out? odeSettings mode? probe_spec)
 		| SIM_PROBE_DEF out? simulationSettings mode? LBRACE probe_spec RBRACE
-          	-> ^(SIM_PROBE_DEF out? simulationSettings mode? probe_spec) ;
+          	-> ^(SIM_PROBE_DEF out? simulationSettings mode? probe_spec) ;          	
+          	
+  
+/*  
+probe_def  
+scope
+{
+  int mode;
+  boolean fluid_flow;
+}
+  : PROBE_DEF
+    out?
+    analysis
+    mode?
+    LBRACE probe_spec RBRACE  
+    -> ^(PROBE_DEF out? mode? probe_spec analysis)
+*/
 
 mode
 	:	STEADY expression
