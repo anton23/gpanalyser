@@ -132,67 +132,7 @@ import PCTMCCompilerPrototype;
 
 
 
-	private void generateProbeComponent
-		(String name, NFAState startingState, boolean repeating,
-		Set<ITransition> allActions, Map<String, PEPAComponent> probeComponents,
-		Set<ComponentId> accepting)
-		throws Exception
-	{
-		Set<NFAState> acceptingStates
-			= NFADetectors.detectAllAcceptingStates (startingState);
-
-		if (repeating)
-		{
-			Set<NFAState> allStates
-				= NFADetectors.detectAllStates (startingState);
-			for (NFAState state : allStates)
-			{
-				Multimap<ITransition, NFAState> transitions
-					= state.getTransitions ();
-				ITransition[] trArr = transitions.keySet ()
-					.toArray (new ITransition[1]);
-				for (int i = 0; i < trArr.length; i++)
-				{
-					Collection<NFAState> reachables
-						= transitions.get (trArr[i]);
-					for (NFAState reachable : reachables)
-					{
-						if (acceptingStates.contains (reachable))
-						{
-							state.replaceTransition (trArr[i], startingState);
-							break;
-						}
-					}
-				}
-			}
-    	}
-		else
-		{
-			for (NFAState accState : acceptingStates)
-			{
-				for (ITransition transition : allActions)
-				{
-					accState.addTransitionIfNotExisting
-						(transition.getSimpleTransition (), accState);
-				}
-			}
-		}
-
-		// startingState = NFAtoDFA.convertToDFA (startingState, t);
-		// NFAUtils.removeAnyTransitions (allActions, startingState);
-		// NFAUtils.extendStatesWithSelfLoops
-		// 	(allActions, startingState);
-		NFAUtils.removeSurplusSelfLoops (startingState);
-
-		ByteArrayOutputStream stream = new ByteArrayOutputStream ();
-		Map<String,PEPAComponent> newComponents = NFAStateToPEPA.HybridDFAtoPEPA
-			(startingState, name);
-		for (NFAState state : acceptingStates)
-		{
-			accepting.add (new ComponentId (state.getName ()));
-		}
-		probeComponents.putAll (newComponents);
-	}
+	
 }
 
 @rulecatch {
@@ -400,13 +340,13 @@ scope
 					NFAState nonrepeating = deepCloner.deepClone
 						(starting_state);
 					$altProbeComponents = new HashMap<String, PEPAComponent> ();
-					generateProbeComponent
+					$probe_spec::spec.generateProbeComponent
 						($name, nonrepeating, false, allActions,
 							$altProbeComponents, $acceptingComponents);
 				}
 				$probeComponents = new HashMap<String, PEPAComponent> ();
 				Set<ComponentId> thisAccepting = new HashSet<ComponentId>();
-				generateProbeComponent
+				$probe_spec::spec.generateProbeComponent
 					($name, starting_state, rp != null, allActions,
 						$probeComponents, thisAccepting);
 				if (!steady)
@@ -1135,28 +1075,14 @@ probe_spec [boolean simulate, int mode, double modePar]
 	returns [CDF measured_times]
 scope
 {
-    Set<String> alphabet;
-    Set<ITransition> allActions;
-    Map<String, PEPAComponent> origComponents;
-    Set<ComponentId> localAcceptingStates;
-    Set<PEPAComponent> initialStates;
+     ProbeSpec spec;
+     Set<PEPAComponent> initialStates;         
 }
 @init
 {
-	GlobalProbe gprobe = new GlobalProbe ();
-	$probe_spec::alphabet = new HashSet<String> ();
-	$probe_spec::allActions = new HashSet<ITransition> ();
-	Set<String> actions = mainDefinitions.getActions ();
-	$probe_spec::initialStates = new HashSet<PEPAComponent> ();
-	for (String action : actions)
-	{
-		$probe_spec::allActions.add (new Transition (action));
-	}
-	$probe_spec::origComponents = deepCloner.deepClone (components);
-	Map<String, PEPAComponent> newComp = new HashMap<String, PEPAComponent> ();
-	Map<String, PEPAComponent> altComp = new HashMap<String, PEPAComponent> ();
-	$probe_spec::localAcceptingStates = new HashSet<ComponentId> ();
-    PEPAComponentDefinitions newMainDef;
+  $probe_spec::spec = new ProbeSpec(mainDefinitions.getActions(),
+  $probe_def::model, $simulate, $mode, $modePar);
+  $probe_spec::initialStates = new HashSet<PEPAComponent>();
 }
 	:	^(DEF signalNames=SIGNALS
 				{
@@ -1164,130 +1090,28 @@ scope
 					String[] signals = signalsString.split (";");
 					for (String signal : signals)
 					{
-						$probe_spec::allActions.add
-							(new SignalTransition (signal));
+							$probe_spec::spec.addToAllActions(signal);
 					}
 				}
-			globalProbeName=UPPERCASENAME (local_probes [newComp, altComp])?
+			globalProbeName=UPPERCASENAME (local_probes [$probe_spec::spec.newComp, $probe_spec::spec.altComp])?
 			{
-				Map<String, PEPAComponent> newDef
-					= new HashMap<String, PEPAComponent> (newComp);
-				newDef.putAll ($probe_spec::origComponents);
-				newMainDef = new iPEPAComponentDefinitions (newDef)
-					.removeVanishingStates ($probe_spec::initialStates);
+				$probe_spec::spec.processGlobal(components, $probe_spec::initialStates);
 			}
-			(locations [newMainDef])?
-			probeg [simulate, gprobe, $probe_spec::allActions,
-					$probe_spec::alphabet])
+			(locations [$probe_spec::spec.newMainDef])?
+			probeg [simulate, $probe_spec::spec.gprobe, $probe_spec::spec.allActions,
+					$probe_spec::spec.alphabet])
 			{
-				gprobe.setName ($globalProbeName.text);
-
-				Set<GPEPAState> stateObservers = new HashSet<GPEPAState> ();
-				Set<GroupComponentPair> pairs
-					= $probe_def::model.getGroupComponentPairs (newMainDef);
-				for (GroupComponentPair g : pairs)
-				{
-					stateObservers.add (new GPEPAState (g));
-				}
-
-				Map<PEPAComponentDefinitions, Set<ComponentId>> defMap
-					= new HashMap<PEPAComponentDefinitions,Set<ComponentId>> ();
-				Set<ComponentId> newComps = new HashSet<ComponentId> ();
-				for (String name : newComp.keySet ())
-				{
-					newComps.add (new ComponentId (name));
-				}
-				defMap.put (newMainDef, newComps);
-				PEPAComponentDefinitions altDef = null;
-				if ($probe_def::steady)
-				{
-					Set<ComponentId> altComps = new HashSet<ComponentId> ();
-					for (String name : altComp.keySet ())
-					{
-						altComps.add (new ComponentId (name));
-					}
-					// we can reuse altComp now
-					altComp.putAll ($probe_spec::origComponents);
-					altDef = new iPEPAComponentDefinitions (altComp)
-						.removeVanishingStates ($probe_spec::initialStates);
-					defMap.put (altDef, altComps);
-				}
-				if ($simulate)
-				{
-					if (mode == 3)
-					{
-						Set<ITransition> monitoring
-							= NFADetectors.detectAlphabet
-								(gprobe.getStartingState (), true, excluded);
-						Map<String, PEPAComponent> globalComponents
-							= new HashMap<String, PEPAComponent> ();
-						Set<ComponentId> accepting
-							= new HashSet<ComponentId> ();
-						generateProbeComponent
-							(gprobe.getName (), gprobe.getStartingState (),
-								false, monitoring, globalComponents,
-								accepting);
-
-						Multimap<PEPAComponent, AbstractExpression> counts
-							= HashMultimap.create ();
-						counts.put (new ComponentId	(gprobe.getName ()),
-								DoubleExpression.ONE);
-                        Group group = new Group (counts);
-                        String label = "GlobalProbe";
-						GroupedModel globalModel
-							= new GlobalProbeSimGroupCooperation
-							($probe_def::model, new LabelledComponentGroup
-								(label, group), $probe_spec::alphabet);
-
-						globalComponents.putAll ($probe_spec::origComponents);
-						globalComponents.putAll (newComp);
-						$probe_spec::initialStates.add
-							(new ComponentId (gprobe.getName ()));
-						PEPAComponentDefinitions globalDef
-							= new iPEPAComponentDefinitions (globalComponents)
-							.removeVanishingStates ($probe_spec::initialStates);
-
-						stateObservers.clear ();
-						pairs = globalModel.getGroupComponentPairs (globalDef);
-						for (GroupComponentPair g : pairs)
-						{
-							stateObservers.add (new GPEPAState (g));
-						}
-
-						$measured_times = new SimProbeRunner
-							(mainConstants, mainUnfoldedVariables)
-								.executeProbedModel
-								(gprobe, globalModel, stateObservers,
-								 globalDef, null, null, accepting,
-								 $probe_def::stop_time, $probe_def::step_size,
-								 $probe_def::parameter, $probe_spec::alphabet,
-								 $mode, $modePar);
-					}
-					else
-					{
-						$measured_times = new SimProbeRunner
-							(mainConstants, mainUnfoldedVariables)
-							.executeProbedModel
-								(gprobe, $probe_def::model, stateObservers,
-								 newMainDef, altDef, defMap,
-								 $probe_spec::localAcceptingStates,
-								 $probe_def::stop_time, $probe_def::step_size,
-								 $probe_def::parameter, $probe_spec::alphabet,
-								 $mode, $modePar);
-					}
-				}
-				else
-				{
-					$measured_times = new ODEProbeRunner
-						(mainConstants, mainUnfoldedVariables)
-						.executeProbedModel
-							(gprobe, $probe_def::model, stateObservers,
-							 newMainDef, altDef, defMap,
-							 $probe_spec::localAcceptingStates,
-							 $probe_def::stop_time, $probe_def::step_size,
-							 $probe_def::parameter, $probe_spec::alphabet,
-							 $mode, $modePar);
-				}
+			 $probe_spec::spec.afterProbeg($globalProbeName.text,
+			   $probe_def::stop_time,
+			   $probe_def::step_size,
+			   $probe_def::parameter,
+			   $probe_def::steady,
+			   excluded,
+			   mainConstants,
+			   mainUnfoldedVariables,
+			   mainDefinitions);
+			   
+			 $measured_times = $probe_spec::spec.measured_times;
             } ;
 
 local_probes [Map<String, PEPAComponent> newComp,
@@ -1297,7 +1121,7 @@ local_probes [Map<String, PEPAComponent> newComp,
 local_probe_ass [Map<String, PEPAComponent> newComp,
 	Map<String, PEPAComponent> altComp]
 	:	^(DEF name=UPPERCASENAME probe=probel
-			[$name.text, $probe_spec::allActions, $probe_spec::alphabet,
+			[$name.text, $probe_spec::spec.allActions, $probe_spec::spec.alphabet,
 			 $probe_def::steady])
 			 {
 			 	$newComp.putAll ($probe.probeComponents);
@@ -1305,7 +1129,7 @@ local_probe_ass [Map<String, PEPAComponent> newComp,
 			 	{
 			 		$altComp.putAll ($probe.altProbeComponents);
 			 	}
-			 	$probe_spec::localAcceptingStates
+			 	$probe_spec::spec.localAcceptingStates
 			 		= ($probe.acceptingComponents);
 			 	$probe_spec::initialStates.add (new ComponentId ($name.text));
 			 };
