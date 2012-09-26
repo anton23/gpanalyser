@@ -340,13 +340,13 @@ scope
 					NFAState nonrepeating = deepCloner.deepClone
 						(starting_state);
 					$altProbeComponents = new HashMap<String, PEPAComponent> ();
-					$probe_spec::spec.generateProbeComponent
+					ProbeSpec.generateProbeComponent
 						($name, nonrepeating, false, allActions,
 							$altProbeComponents, $acceptingComponents);
 				}
 				$probeComponents = new HashMap<String, PEPAComponent> ();
 				Set<ComponentId> thisAccepting = new HashSet<ComponentId>();
-				$probe_spec::spec.generateProbeComponent
+				ProbeSpec.generateProbeComponent
 					($name, starting_state, rp != null, allActions,
 						$probeComponents, thisAccepting);
 				if (!steady)

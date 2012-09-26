@@ -182,7 +182,7 @@ public class ProbeSpec {
 
 	}
 
-	public void generateProbeComponent(String name, NFAState startingState,
+	public static void generateProbeComponent(String name, NFAState startingState,
 			boolean repeating, Set<ITransition> allActions,
 			Map<String, PEPAComponent> probeComponents,
 			Set<ComponentId> accepting) throws Exception {
