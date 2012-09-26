@@ -6,6 +6,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.cppoutput.PCTMCCPPImplementationProvider;
 import uk.ac.imperial.doc.pctmc.cppoutput.simulation.AccumulatorUpdaterPrinter;
 import uk.ac.imperial.doc.pctmc.cppoutput.simulation.AggregatedStateNextEventGeneratorPrinter;
@@ -27,6 +28,13 @@ import java.util.List;
 
 public class CPPSimulationAnalysisNumericalPostprocessor
         extends NumericalPostprocessor {
+
+	
+	
+	@Override
+	public PCTMCAnalysisPostprocessor regenerate() {
+		throw new AssertionError("Not implemented!");
+	}
 
 	private PCTMCSimulation simulation;
 

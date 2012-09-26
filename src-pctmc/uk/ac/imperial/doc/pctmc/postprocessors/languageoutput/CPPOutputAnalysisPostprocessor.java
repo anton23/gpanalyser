@@ -2,6 +2,7 @@ package uk.ac.imperial.doc.pctmc.postprocessors.languageoutput;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.cppoutput.odeanalysis.CPPODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
@@ -15,7 +16,16 @@ public class CPPOutputAnalysisPostprocessor extends LanguageOutputPostprocessor{
         super(PCTMCOptions.javaFolder);
     }
 
-    public void postprocessAnalysis(Constants constants,
+    
+    
+    @Override
+	public PCTMCAnalysisPostprocessor regenerate() {
+    	throw new AssertionError("Not implemented!");
+	}
+
+
+
+	public void postprocessAnalysis(Constants constants,
                                     AbstractPCTMCAnalysis analysis,
                                     List<PlotDescription> plotDescriptions) {
         if (analysis instanceof PCTMCODEAnalysis){

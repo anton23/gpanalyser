@@ -28,6 +28,8 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -91,8 +93,9 @@ public class ProbeSpec {
 				.removeVanishingStates(initialStates);
 	}
 
-	public void afterProbeg(String globalProbeName, AbstractExpression stop_time,
-			AbstractExpression step_size, int parameter,
+	public void afterProbeg(String globalProbeName, 
+			AbstractPCTMCAnalysis analysis,
+			NumericalPostprocessor postprocessor,			
 			boolean steady, List<ITransition> excluded,
 			Constants mainConstants,
 			Map<ExpressionVariable,AbstractExpression> mainUnfoldedVariables,
@@ -160,20 +163,20 @@ public class ProbeSpec {
 				measured_times = new SimProbeRunner(mainConstants,
 						mainUnfoldedVariables).executeProbedModel(gprobe,
 						globalModel, stateObservers, globalDef, null, null,
-						accepting, stop_time, step_size, parameter, alphabet,
+						accepting, analysis, postprocessor, alphabet,
 						mode, modePar);
 			} else {
 				measured_times = new SimProbeRunner(mainConstants,
 						mainUnfoldedVariables).executeProbedModel(gprobe,
 						model, stateObservers, newMainDef, altDef, defMap,
-						localAcceptingStates, stop_time, step_size, parameter,
+						localAcceptingStates, analysis, postprocessor,
 						alphabet, mode, modePar);
 			}
 		} else {
 			measured_times = new ODEProbeRunner(mainConstants,
 					mainUnfoldedVariables).executeProbedModel(gprobe, model,
 					stateObservers, newMainDef, altDef, defMap,
-					localAcceptingStates, stop_time, step_size, parameter,
+					localAcceptingStates, analysis, postprocessor,
 					alphabet, mode, modePar);
 		}
 

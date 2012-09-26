@@ -6,6 +6,7 @@ import java.util.Map;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
@@ -37,6 +38,13 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		this.density = density;
 	}
 	
+	
+	
+	@Override
+	public PCTMCAnalysisPostprocessor regenerate() {
+		return new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, density);
+	}
+
 	private ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
 			PCTMCODEAnalysis odeAnalysis, JavaODEsPreprocessed preprocessedImplementation) {
 		this(stopTime, stepSize, density);

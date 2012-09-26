@@ -13,6 +13,7 @@ import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWit
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CentralMomentOfLinearCombinationExpression;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.MeanOfLinearCombinationExpression;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
@@ -29,6 +30,12 @@ import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalPostprocessorCI {
+	
+	@Override
+	public PCTMCAnalysisPostprocessor regenerate() {
+		throw new AssertionError("Not implemented!");
+	}
+	
 	private PCTMCSimulation mSimulation;
 
 	private SimulationUpdater mUpdater;

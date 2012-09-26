@@ -15,6 +15,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
+import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CPPSimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
@@ -52,16 +53,24 @@ public class SimProbeRunner extends AbstractProbeRunner
             PEPAComponentDefinitions altDef,
             Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
             Set<ComponentId> accepting,
-            double stopTime, double stepSize, int parameter,
+            AbstractPCTMCAnalysis templateAnalysis, NumericalPostprocessor templatePostprocessor,
             double steadyStateTime, String name)
     {
         double[][] overallMeasurements = null;
+        SimulationAnalysisNumericalPostprocessor simulationPostprocessor = 
+        	(SimulationAnalysisNumericalPostprocessor) templatePostprocessor;
+        int originalReplications = simulationPostprocessor.getReplications();
+        simulationPostprocessor.setReplications(1);
 
-        // creating the steady-state postprocessor and evaluator
-        NumericalPostprocessor postprocessor = runTheProbedSystem
+        double originalStopTime = templatePostprocessor.getStopTime();
+    	templatePostprocessor.setStopTime(steadyStateTime + templatePostprocessor.getStepSize());
+    	
+        
+    	NumericalPostprocessor postprocessor = runTheProbedSystem                
             (model, mainDef, constants, null, stateObservers,
-             statesCountExpressions, mapping, steadyStateTime + stepSize,
-             stepSize, 1, new PCTMC[1]);
+             statesCountExpressions, mapping,
+             templateAnalysis, templatePostprocessor,
+             new PCTMC[1]);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
 
@@ -73,10 +82,13 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         mapping.clear ();
         statesCountExpressions.clear ();
+        simulationPostprocessor.setReplications(originalReplications);
         NumericalPostprocessor postprocessorC = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-             statesCountExpressions, mapping, steadyStateTime + stepSize,
-             stepSize, parameter, new PCTMC[1]);
+             statesCountExpressions, mapping, 
+             templateAnalysis, templatePostprocessor
+             , new PCTMC[1]);
+
         List<AbstractExpression> cratesExpr
             = new LinkedList<AbstractExpression> (crates.values ());
         AbstractExpressionEvaluator cratesEval = postprocessorC
@@ -97,16 +109,19 @@ public class SimProbeRunner extends AbstractProbeRunner
             = new ArrayList<AbstractExpression> ();
         Map<String, Integer> altMapping = new HashMap<String, Integer> ();
         PCTMC[] pctmc = new PCTMC[1];
+        simulationPostprocessor.setReplications(1);
+    	templatePostprocessor.setStopTime(originalStopTime);
         NumericalPostprocessor postprocessorA = runTheProbedSystem
             (model, altDef, constants, null, altStateObservers,
-             altStatesCountExpressions, altMapping, stopTime, stepSize, 1,
+             altStatesCountExpressions, altMapping, 
+             templateAnalysis, templatePostprocessor,             
              pctmc);
         AbstractExpressionEvaluator altEvaluator = postprocessorA
             .getExpressionEvaluator (altStatesCountExpressions, constants);
 
         PCTMCLogging.setVisible (false);
         // repeating the experiment
-        for (int i = 0; i < parameter; ++i)
+        for (int i = 0; i < originalReplications; ++i)
         {
             // running the steady-state repeating model
             postprocessor.calculateDataPoints (constants);
@@ -136,7 +151,7 @@ public class SimProbeRunner extends AbstractProbeRunner
                 }
             }
 
-            outputInfo(i, parameter, "steady replications");
+            outputInfo(i, originalReplications, "steady replications");
         }
 
         // averaging the obtained measurements
@@ -144,14 +159,14 @@ public class SimProbeRunner extends AbstractProbeRunner
         {
             for (int y = 0; y < altStateObservers.size (); ++y)
             {
-                overallMeasurements[x][y] /= parameter;
+                overallMeasurements[x][y] /= originalReplications;
             }
         }
 
         double[] cdf = passageTimeCDF (overallMeasurements, pairs, accepting,
                 altMapping);
         PCTMCLogging.setVisible (true);
-        return new CDF (name, stepSize, cdf);
+        return new CDF (name, templatePostprocessor.getStepSize(), cdf);
     }
 
     @Override
@@ -160,8 +175,9 @@ public class SimProbeRunner extends AbstractProbeRunner
          Map<String, Integer> mapping, GroupedModel model,
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         Set<ComponentId> accepting, double stopTime,
-         double stepSize, int parameter, double steadyStateTime, String name)
+         Set<ComponentId> accepting, 
+         AbstractPCTMCAnalysis templateAnalysis, NumericalPostprocessor templatePostprocessor,         
+         double steadyStateTime, String name)
     {
         double[][] overallMeasurements = null;
         Set<GroupComponentPair> pairs = model.getGroupComponentPairs (mainDef);
@@ -175,10 +191,19 @@ public class SimProbeRunner extends AbstractProbeRunner
             (new GPEPAActionCount (BEGIN_SIGNAL)));
 
         // initial upto begin signal
-        NumericalPostprocessor postprocessor = runTheProbedSystem
+        
+        SimulationAnalysisNumericalPostprocessor simulationPostprocessor = 
+        	(SimulationAnalysisNumericalPostprocessor) templatePostprocessor;
+        int originalReplications = simulationPostprocessor.getReplications();
+        simulationPostprocessor.setReplications(1);
+
+        double originalStopTime = templatePostprocessor.getStopTime();
+    	templatePostprocessor.setStopTime(steadyStateTime);
+        
+    	NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, beginActionCount, stateObservers,
-             statesCountExpressions, mapping, steadyStateTime,
-             stepSize, 1, new PCTMC[1]);
+             statesCountExpressions, mapping, 
+             templateAnalysis, templatePostprocessor, new PCTMC[1]);
         AbstractExpressionEvaluator evaluator = postprocessor
             .getExpressionEvaluator (statesCountExpressions, constants);
         AbstractExpressionEvaluator beginEvaluator = postprocessor
@@ -189,17 +214,20 @@ public class SimProbeRunner extends AbstractProbeRunner
             = new ArrayList<AbstractExpression> ();
         Map<String, Integer> mappingA = new HashMap<String, Integer> ();
         // main after begin signal
+    	templatePostprocessor.setStopTime(originalStopTime);
+
         NumericalPostprocessor postprocessorA = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-             statesCountExpressionsA, mappingA, stopTime, stepSize,
-             1, pctmcs);
+             statesCountExpressionsA, mappingA, 
+             templateAnalysis, templatePostprocessor,
+             pctmcs);
         AbstractExpressionEvaluator evaluatorA = postprocessor
             .getExpressionEvaluator (statesCountExpressionsA, constants);
 
         double[] times = new double[statesCountExpressions.size ()];
         PCTMCLogging.setVisible (false);
 
-        for (int p = 0; p < parameter; ++p)
+        for (int p = 0; p < originalReplications; ++p)
         {
             // detect when begin signal fired
             double time = 0;
@@ -211,7 +239,7 @@ public class SimProbeRunner extends AbstractProbeRunner
             {
                 if (beginSignalled[i][0] == 1)
                 {
-                    time = i * stepSize;
+                    time = i * simulationPostprocessor.getStepSize();
                     Arrays.fill (times, time);
                     break;
                 }
@@ -252,7 +280,7 @@ public class SimProbeRunner extends AbstractProbeRunner
                 }
             }
 
-            outputInfo(p, parameter, "transient replications");
+            outputInfo(p, originalReplications, "transient replications");
         }
 
         // averaging the obtained measurements
@@ -260,14 +288,14 @@ public class SimProbeRunner extends AbstractProbeRunner
         {
             for (int y = 0; y < stateObservers.size (); ++y)
             {
-                overallMeasurements[x][y] /= parameter;
+                overallMeasurements[x][y] /= originalReplications;
             }
         }
 
         double[] cdf = passageTimeCDF (overallMeasurements,
                 pairs, accepting, mappingA);
         PCTMCLogging.setVisible (true);
-        return new CDF (name, stepSize, cdf);
+        return new CDF (name, simulationPostprocessor.getStepSize(), cdf);
     }
 
     protected CDF globalPassages
@@ -277,11 +305,13 @@ public class SimProbeRunner extends AbstractProbeRunner
          Map<String, Integer> mapping, Set<String> countActions,
          Set<ComponentId> accepting,
          PEPAComponentDefinitions mainDef,
-         double stopTime, double stepSize, int parameter)
+         AbstractPCTMCAnalysis templateAnalysis, NumericalPostprocessor templatePostprocessor        
+        )
     {
         NumericalPostprocessor postprocessor = runTheProbedSystem
             (model, mainDef, constants, null, stateObservers,
-             statesCountExpressions, mapping, stopTime, stepSize, parameter,
+             statesCountExpressions, mapping, 
+             templateAnalysis, templatePostprocessor,
              new PCTMC[1]);
 
         double[][] values = postprocessor
@@ -289,7 +319,7 @@ public class SimProbeRunner extends AbstractProbeRunner
 
         double[] cdf = passageTimeCDF (values,
                 model.getGroupComponentPairs (mainDef), accepting, mapping);
-        return new CDF (gprobe.getName (), stepSize, cdf);
+        return new CDF (gprobe.getName (), templatePostprocessor.getStepSize(), cdf);
     }
 
     private void assignNewCounts

@@ -4,12 +4,20 @@ import java.util.List;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.javaoutput.odeanalysis.JavaODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class JavaOutputAnalysisPostprocessor extends LanguageOutputPostprocessor{
+	
+	
+
+	@Override
+	public PCTMCAnalysisPostprocessor regenerate() {
+		throw new AssertionError("Not implemented!");
+	}
 
 	public JavaOutputAnalysisPostprocessor(){
 		super(PCTMCOptions.javaFolder);

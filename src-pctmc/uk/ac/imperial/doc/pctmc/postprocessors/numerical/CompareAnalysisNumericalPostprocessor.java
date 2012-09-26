@@ -6,10 +6,19 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.compare.CompareExpressionEvaluator;
 
 public class CompareAnalysisNumericalPostprocessor extends
 		NumericalPostprocessor {
+
+	
+	
+	
+	@Override
+	public PCTMCAnalysisPostprocessor regenerate() {
+		throw new AssertionError("Not implemented!");
+	}
 
 	protected NumericalPostprocessor postprocessor1; 
 	protected NumericalPostprocessor postprocessor2; 
