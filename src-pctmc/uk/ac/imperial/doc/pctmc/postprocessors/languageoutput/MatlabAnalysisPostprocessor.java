@@ -9,6 +9,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.matlaboutput.MatlabPrinterWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.compare.PCTMCCompareAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -23,6 +24,15 @@ import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
+
+	
+	
+	
+	@Override
+	public PCTMCAnalysisPostprocessor regenerate() {
+		throw new AssertionError("Not implemented!");
+	}
+
 
 	public MatlabAnalysisPostprocessor(){
 		super(PCTMCOptions.matlabFolder);

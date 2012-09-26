@@ -1,7 +1,15 @@
 package uk.ac.imperial.doc.gpa.probes;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
 import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
 import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
@@ -13,8 +21,11 @@ import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
 import uk.ac.imperial.doc.igpepa.representation.components.iPEPAPrefix;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
-import uk.ac.imperial.doc.jexpressions.expressions.*;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -26,7 +37,8 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-import java.util.*;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 public abstract class AbstractProbeRunner
 {
@@ -37,6 +49,8 @@ public abstract class AbstractProbeRunner
 
     protected final Constants constants;
     private final Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
+    
+  
 
     public AbstractProbeRunner (Constants constants,
            Map<ExpressionVariable, AbstractExpression> unfoldedVariables)
@@ -52,7 +66,7 @@ public abstract class AbstractProbeRunner
          PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          Set<ComponentId> accepting,
-         double stopTime, double stepSize, int parameter,
+         AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor,
          double steadyStateTime, String name);
 
     protected abstract CDF transientIndividual
@@ -61,7 +75,7 @@ public abstract class AbstractProbeRunner
          Set<GPEPAState> stateObservers, PEPAComponentDefinitions mainDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
          Set<ComponentId> accepting,
-         double stopTime, double stepSize, int parameter,
+         AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor,
          double steadyStateTime, String name);
 
     protected abstract CDF globalPassages
@@ -70,38 +84,34 @@ public abstract class AbstractProbeRunner
          Map<String, Integer> mapping, Set<String> countActions,
          Set<ComponentId> accepting,
          PEPAComponentDefinitions mainDef,
-         double stopTime, double stepSize, int parameter);
+         AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor);
 
     public CDF executeProbedModel
         (GlobalProbe gprobe, GroupedModel model,
          Set<GPEPAState> stateObservers,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
          Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         Set<ComponentId> accepting, AbstractExpression stopTime,
-         AbstractExpression stepSize, int parameter, Set<String> alphabet,
+         Set<ComponentId> accepting, 
+         AbstractPCTMCAnalysis analysis,
+         NumericalPostprocessor postprocessor,
+         Set<String> alphabet,
          int mode, double modePar)
     {
         List<AbstractExpression> statesCountExpressions
             = new LinkedList<AbstractExpression> ();
         Map<String, Integer> mapping
             = new HashMap<String, Integer> ();
-        ExpressionEvaluatorWithConstants stopEval
-                = new ExpressionEvaluatorWithConstants (constants);
-        stopTime.accept (stopEval);
-        double stopTimeVal = stopEval.getResult ();
-        ExpressionEvaluatorWithConstants stepEval
-                = new ExpressionEvaluatorWithConstants (constants);
-        stepSize.accept (stepEval);
-        double stepSizeVal = stepEval.getResult ();
+  
 
         CDF cdf = dispatchEvaluation (gprobe, model, stateObservers,
                 statesCountExpressions, mapping, alphabet,
-                mainDef, altDef, definitionsMap, accepting, stopTimeVal,
-                stepSizeVal, parameter, mode, modePar);
+                mainDef, altDef, definitionsMap, accepting,
+                analysis, postprocessor,                
+                mode, modePar);
 
         if (PCTMCOptions.gui)
         {
-            plotGraph (gprobe.getName (), cdf, stepSizeVal);
+            plotGraph (gprobe.getName (), cdf, postprocessor.getStepSize());
         }
 
         return cdf;
@@ -112,9 +122,10 @@ public abstract class AbstractProbeRunner
          List<AbstractExpression> statesCountExpressions,
          Map<String, Integer> mapping, Set<String> countActions,
          PEPAComponentDefinitions mainDef, PEPAComponentDefinitions altDef,
-         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,
-         Set<ComponentId> accepting, double stopTime, double stepSize,
-         int parameter, int mode, double modePar)
+         Map<PEPAComponentDefinitions, Set<ComponentId>> definitionsMap,         
+         Set<ComponentId> accepting,
+         AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor,
+         int mode, double modePar)
     {
         switch (mode)
         {
@@ -122,19 +133,19 @@ public abstract class AbstractProbeRunner
                 return steadyIndividual
                     (statesCountExpressions, mapping, model, stateObservers,
                         mainDef, altDef, definitionsMap, accepting,
-                            stopTime, stepSize, parameter,
+                            analysis, postprocessor,
                         modePar, gprobe.getName ());
             case 2:
                 return transientIndividual
                     (statesCountExpressions, mapping, model, stateObservers,
                         mainDef, definitionsMap, accepting,
-                            stopTime, stepSize, parameter,
+                        analysis, postprocessor,
                         modePar, gprobe.getName ());
             case 3:
                 return globalPassages
                     (gprobe, model, stateObservers, statesCountExpressions,
                         mapping, countActions, accepting, mainDef,
-                        stopTime, stepSize, parameter);
+                        analysis, postprocessor);
             default:
                 return null;
         }
@@ -276,7 +287,9 @@ public abstract class AbstractProbeRunner
              Collection<GPEPAState> stateObservers,
              List<AbstractExpression> statesCountExpressions,
              Map<String, Integer> stateCombPopMapping,
-             double stopTime, double stepSize, int parameter, PCTMC[] pctmcs)
+             AbstractPCTMCAnalysis templateAnalysis,
+             NumericalPostprocessor templatePostprocessor,
+             PCTMC[] pctmcs)
     {
         List<CombinedPopulationProduct> moments
             = new ArrayList<CombinedPopulationProduct> ();
@@ -311,10 +324,10 @@ public abstract class AbstractProbeRunner
             (definitions, model, initActions, unfoldedVariables);
         //System.out.println (pctmcs[0]);
         AbstractPCTMCAnalysis analysis
-            = getPreparedAnalysis (pctmcs[0], moments, constants);
+            = getPreparedAnalysis(templateAnalysis, pctmcs[0], moments, constants);
 
         NumericalPostprocessor postprocessor
-            = getPostprocessor (stopTime, stepSize, parameter);
+            = (NumericalPostprocessor) templatePostprocessor.regenerate();
         return runPostProcessor (analysis, postprocessor, constants);
     }
 
@@ -343,43 +356,14 @@ public abstract class AbstractProbeRunner
         stateCombPopMapping.put (mappingString, index);
     }
 
-    private NumericalPostprocessor getPostprocessor
-        (double stopTime, double stepSize, int parameter)
-    {
-        try
-        {
-            return postprocessorType.getDeclaredConstructor
-                (double.class, double.class, int.class).newInstance
-                (stopTime, stepSize, parameter);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace ();
-        }
-        return null;
-    }
-
+  
     protected AbstractPCTMCAnalysis getPreparedAnalysis
-        (PCTMC pctmc, List<CombinedPopulationProduct> moments,
+        (AbstractPCTMCAnalysis template, PCTMC pctmc, List<CombinedPopulationProduct> moments,
          Constants constants)
     {
-        AbstractPCTMCAnalysis analysis = getAnalysis (pctmc);
+        AbstractPCTMCAnalysis analysis = template.regenerate(pctmc);
         analysis.setUsedMoments (moments);
         analysis.prepare (constants);
         return analysis;
-    }
-
-    protected AbstractPCTMCAnalysis getAnalysis (PCTMC pctmc)
-    {
-        try
-        {
-            return analysisType.getDeclaredConstructor
-                (PCTMC.class).newInstance (pctmc);
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace ();
-        }
-        return null;
     }
 }

@@ -16,7 +16,10 @@ import java.util.Map;
 
 public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
-
+	@Override
+	public AbstractPCTMCAnalysis regenerate(PCTMC pctmc) {
+		return new PCTMCSimulation(pctmc);
+	}
 
 	@Override
 	public String toString() {
@@ -25,7 +28,9 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 	
 	public PCTMCSimulation(PCTMC pctmc) {
 		super(pctmc);
-		n = pctmc.getStateIndex().size();
+		if (pctmc != null) {
+			n = pctmc.getStateIndex().size();
+		}
 	}
 
 	private Map<PopulationProduct, Integer> accumulatedMomentIndex;

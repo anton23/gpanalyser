@@ -8,6 +8,7 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
@@ -44,6 +45,16 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	private String overrideCodeClassName;
 
 	protected int replications; 
+
+	public int getReplications() {
+		return replications;
+	}
+	
+
+	public void setReplications(int replications) {
+		this.replications = replications;
+	}
+
 
 	public static final String generatorName = "GeneratedNextEventGenerator";
 	public static final String updaterClassName = "GeneratedProductUpdater";
@@ -95,6 +106,10 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		this.prepared = false;
 	}
 
+	
+	public PCTMCAnalysisPostprocessor regenerate() {
+		return new SimulationAnalysisNumericalPostprocessor(stopTime, stepSize, replications, parameters);		
+	}
 
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,
 			double stepSize, int replications, Map<String, Object> parameters) {

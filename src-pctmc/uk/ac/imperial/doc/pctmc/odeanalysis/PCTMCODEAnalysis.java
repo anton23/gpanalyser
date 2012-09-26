@@ -17,10 +17,12 @@ import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
 public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 {
+	
 	protected MomentClosure m_momentClosure;
 	protected boolean m_autoClosure;
 	private NewODEGenerator m_odeGenerator;
 	private ODEMethod m_odeMethod;
+	private Map<String, Object> constructorParameters;
 	
 	protected static Map<String, Class<? extends MomentClosure>> s_momentClosures;
 	static
@@ -74,9 +76,19 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 		m_autoClosure = true;
 	}
 	
+	@Override
+	public AbstractPCTMCAnalysis regenerate(PCTMC pctmc) {
+		if (this.constructorParameters == null) {
+			return new PCTMCODEAnalysis(pctmc);
+		} else {
+			return new PCTMCODEAnalysis(pctmc, constructorParameters);
+		}
+	}
+	
 	public PCTMCODEAnalysis(PCTMC pctmc, Map<String, Object> parameters)
 	{
 		super(pctmc);
+		this.constructorParameters = parameters;
 		m_autoClosure = true;
 		if (parameters.containsKey("momentClosure"))
 		{

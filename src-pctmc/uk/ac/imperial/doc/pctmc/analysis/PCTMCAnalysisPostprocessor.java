@@ -14,4 +14,6 @@ public interface PCTMCAnalysisPostprocessor {
 	public void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
 			List<PlotDescription> plotDescriptions);
+	
+	public abstract PCTMCAnalysisPostprocessor regenerate();
 }

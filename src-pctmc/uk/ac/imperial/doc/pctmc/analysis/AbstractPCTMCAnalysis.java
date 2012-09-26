@@ -18,6 +18,8 @@ import java.util.*;
 public abstract class AbstractPCTMCAnalysis {
 
 	public abstract String toString();
+	
+	public abstract AbstractPCTMCAnalysis regenerate(PCTMC pctmc);
 
 	protected Collection<CombinedPopulationProduct> usedCombinedProducts;
 	protected Collection<AbstractExpression> usedGeneralExpectations;
@@ -81,7 +83,9 @@ public abstract class AbstractPCTMCAnalysis {
 
 	public AbstractPCTMCAnalysis(PCTMC pctmc) {
 		this.pctmc = pctmc;
-		stateIndex = pctmc.getStateIndex();
+		if (pctmc != null) { 
+			stateIndex = pctmc.getStateIndex();
+		}
 		momentIndex = new HashMap<CombinedPopulationProduct, Integer>();
 		generalExpectationIndex = new HashMap
 				<AbstractExpression, Integer>();

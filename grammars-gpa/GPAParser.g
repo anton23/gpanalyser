@@ -437,13 +437,13 @@ scope
 			{
 				$probe_def::fluid_flow = true;
 			}
-		out? odeSettings mode? LBRACE probe_spec RBRACE
+		out? analysis mode? LBRACE probe_spec RBRACE
 			{
 				$probe_def::fluid_flow = true;
 			}
-			-> ^(PROBE_DEF out? odeSettings mode? probe_spec)
-		| SIM_PROBE_DEF out? simulationSettings mode? LBRACE probe_spec RBRACE
-          	-> ^(SIM_PROBE_DEF out? simulationSettings mode? probe_spec) ;          	
+			-> ^(PROBE_DEF out? analysis mode? probe_spec);
+	/*	| SIM_PROBE_DEF out? simulationSettings mode? LBRACE probe_spec RBRACE
+          	-> ^(SIM_PROBE_DEF out? simulationSettings mode? probe_spec) ;*/          	
           	
   
 /*  

@@ -5,8 +5,14 @@ import java.util.Collection;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 
 public class PCTMCCompareAnalysis extends AbstractPCTMCAnalysis {
+
+	@Override
+	public AbstractPCTMCAnalysis regenerate(PCTMC pctmc) {
+		throw new AssertionError("Not implemented!");
+	}
 
 	private AbstractPCTMCAnalysis analysis1, analysis2;
 

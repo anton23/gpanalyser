@@ -999,22 +999,21 @@ probe_def returns [CDF measured_times]
 scope
 {
 	GroupedModel model;
-	AbstractExpression stop_time;
-	AbstractExpression step_size;
-	int parameter;
+	AbstractPCTMCAnalysis analysis;
+	NumericalPostprocessor postprocessor;
+
 	boolean steady;
 }
 @init
 {
 	$probe_def::model = deepCloner.deepClone (mainModel);
 }
-	:	^(PROBE_DEF	o=out? odeSettings
+	:	^(PROBE_DEF	o=out? a=analysis[null, mainConstants, null]
 				{
-					$probe_def::stop_time = $odeSettings.stopTime;
-					$probe_def::step_size = $odeSettings.stepSize;
-					$probe_def::parameter = $odeSettings.density;
+					$probe_def::analysis = $a.analysis;
+					$probe_def::postprocessor = $a.postprocessor;
 				}
-			md=mode mt=probe_spec [false, $md.chosenMode, $md.par])
+			md=mode mt=probe_spec [$probe_def::analysis instanceof PCTMCSimulation, $md.chosenMode, $md.par])
 			{
 				$measured_times = $mt.measured_times;
 				if (o != null)
@@ -1023,21 +1022,7 @@ scope
 						($measured_times.toString (), $o.name);
 				}
 			}
-		| ^(SIM_PROBE_DEF o=out? simulationSettings
-				{
-					$probe_def::stop_time = $simulationSettings.stopTime;
-					$probe_def::step_size = $simulationSettings.stepSize;
-					$probe_def::parameter = $simulationSettings.replications;
-				}
-			md=mode mt=probe_spec [true, $md.chosenMode, $md.par])
-			{
-				$measured_times = $mt.measured_times;
-				if (o != null)
-				{
-					FileUtils.writeGeneralFile
-						($measured_times.toString (), $o.name);
-				}
-			} ;
+		;
 
 mode returns [int chosenMode, double par]
 	:	^(STEADY limitTime=expression)
@@ -1102,9 +1087,8 @@ scope
 					$probe_spec::spec.alphabet])
 			{
 			 $probe_spec::spec.afterProbeg($globalProbeName.text,
-			   $probe_def::stop_time,
-			   $probe_def::step_size,
-			   $probe_def::parameter,
+			   $probe_def::analysis,
+			   $probe_def::postprocessor,
 			   $probe_def::steady,
 			   excluded,
 			   mainConstants,
