@@ -1,12 +1,26 @@
 package uk.ac.imperial.doc.gpanalyser.probes.testing.parser;
 
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.junit.Test;
+
 import uk.ac.imperial.doc.gpa.fsm.ITransition;
 import uk.ac.imperial.doc.gpa.fsm.Transition;
 import uk.ac.imperial.doc.gpa.syntax.GPACompiler;
@@ -21,15 +35,7 @@ import uk.ac.imperial.doc.igpepa.representation.components.iPassivePrefix;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.Lists;
 
 public class TestProbesCreation
 {
@@ -86,7 +92,7 @@ public class TestProbesCreation
             GPACompiler compiler = new GPACompiler (nodes);
             GPACompiler.probel_return probel_return
                 = compiler.probel ("LProbe", allActions, new HashSet<String> (),
-                    false, getParser (null));
+                    false);
             parsedModel = probel_return.probeComponents;
         }
         catch (RecognitionException e)
