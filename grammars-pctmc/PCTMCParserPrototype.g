@@ -366,10 +366,10 @@ odeAnalysis:
   {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
   odeSettings
   {hint.pop();}
-  LBRACE
+  (LBRACE
     plotDescription*
-  RBRACE
-  -> ^(ODES odeParameters? odeSettings LBRACE plotDescription* RBRACE )
+  RBRACE)?
+  -> ^(ODES odeParameters? odeSettings (LBRACE plotDescription* RBRACE)? )
 ;
 
 odeParameters:
@@ -395,10 +395,10 @@ odeSettings:
 simulation:
   SIMULATION
   simulationSettings
-  LBRACE
+  (LBRACE
     plotDescription*
-  RBRACE
-  -> ^(SIMULATION simulationSettings LBRACE plotDescription* RBRACE )
+  RBRACE)?
+  -> ^(SIMULATION simulationSettings (LBRACE plotDescription* RBRACE)? )
 ;
 
 simulationSettings:

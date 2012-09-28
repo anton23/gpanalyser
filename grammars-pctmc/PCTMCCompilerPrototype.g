@@ -228,25 +228,31 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
              (COMMA p=parameter
                           {parameters.put($p.name, $p.value);})*
           RBRACK)?
-         settings=odeSettings LBRACE
-          (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*
-         ps=plotDescriptions
-    RBRACE   ){
-      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
-      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
-      $settings.stopTime.accept(stopEval);
-      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-      $settings.stepSize.accept(stepEval);
-      if (postprocessorParameters.isEmpty()) {
-        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-            stepEval.getResult(),$settings.density);
-      } else {
-        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-           stepEval.getResult(),$settings.density, postprocessorParameters);
+         settings=odeSettings 
+         {
+		      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
+		      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+		      $settings.stopTime.accept(stopEval);
+		      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+		      $settings.stepSize.accept(stepEval);
+		      if (postprocessorParameters.isEmpty()) {
+		        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+		            stepEval.getResult(),$settings.density);
+		      } else {
+		        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+		           stepEval.getResult(),$settings.density, postprocessorParameters);
+		      }
+		      $analysis.addPostprocessor($postprocessor);
       }
-      $analysis.addPostprocessor($postprocessor);
-      if ($plots!=null) $plots.putAll($analysis,$ps.p);
-   }
+         
+         (LBRACE
+        //  (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*
+         ps=plotDescriptions
+        RBRACE
+        {
+          if ($plots!=null) $plots.putAll($analysis,$ps.p);
+        }
+        )?  )
 
 ;
 
@@ -275,11 +281,8 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
   Map<String, Object> parameters = new HashMap<String, Object>();
 }:
   ^(SIMULATION settings=simulationSettings
-    (COMMA p=parameter {parameters.put($p.name, $p.value);})*
-    LBRACE 
-         ps=plotDescriptions 
-    RBRACE    
-   ){
+    (COMMA p=parameter {parameters.put($p.name, $p.value);})*    
+    {
       $analysis = new PCTMCSimulation($pctmc);
 
       ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
@@ -293,8 +296,14 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
             stopEval.getResult(),stepEval.getResult(),$settings.replications, parameters);
       }
       $analysis.addPostprocessor($postprocessor);
+    }
+    (LBRACE 
+         ps=plotDescriptions 
+    RBRACE
+    {
       if ($plots!=null) $plots.putAll($analysis,$ps.p); 
-   }
+   })?    
+   )
 ;
 
 simulationSettings returns
