@@ -247,19 +247,21 @@ modelDefinition:
 
 
 analysis:
-  odeAnalysis
+ (odeAnalysis
  |simulation
  |accuratesimulation
- |compare
+ |compare)
+ 
+ (LBRACE
+    plotDescription*
+  RBRACE)?
 ;
 
 compare:
   COMPARE LPAR
     analysis COMMA
     analysis
-  RPAR LBRACE
-      plotDescription*
-  RBRACE -> ^(COMPARE analysis analysis plotDescription*)
+  RPAR -> ^(COMPARE analysis analysis)
 ;
 
 experiment
@@ -366,10 +368,7 @@ odeAnalysis:
   {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
   odeSettings
   {hint.pop();}
-  (LBRACE
-    plotDescription*
-  RBRACE)?
-  -> ^(ODES odeParameters? odeSettings (LBRACE plotDescription* RBRACE)? )
+  -> ^(ODES odeParameters? odeSettings)
 ;
 
 odeParameters:
@@ -395,10 +394,7 @@ odeSettings:
 simulation:
   SIMULATION
   simulationSettings
-  (LBRACE
-    plotDescription*
-  RBRACE)?
-  -> ^(SIMULATION simulationSettings (LBRACE plotDescription* RBRACE)? )
+  -> ^(SIMULATION simulationSettings)
 ;
 
 simulationSettings:
@@ -417,10 +413,8 @@ accuratesimulation:
   CI DEF ci = expression COMMA
   MAXRELCIWIDTH DEF maxRelCIWidth = expression COMMA
   BATCHSIZE DEF batchSize = INTEGER
-  RPAR LBRACE
-    plotDescription*
-  RBRACE
-  -> ^(ACCURATESIMULATION $stopTime COMMA $stepSize COMMA $ci COMMA $maxRelCIWidth COMMA $batchSize LBRACE plotDescription* RBRACE );
+  RPAR 
+  -> ^(ACCURATESIMULATION $stopTime COMMA $stepSize COMMA $ci COMMA $maxRelCIWidth COMMA $batchSize);
 
 plotDescription:
  {hint.push("each plot description has to be of the form\n   'e1,...,en (optional ->\"filename\");\n" +

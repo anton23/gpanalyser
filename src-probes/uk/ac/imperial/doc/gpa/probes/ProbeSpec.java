@@ -216,10 +216,7 @@ public class ProbeSpec {
 			}
 		}
 
-		// startingState = NFAtoDFA.convertToDFA (startingState, t);
-		// NFAUtils.removeAnyTransitions (allActions, startingState);
-		// NFAUtils.extendStatesWithSelfLoops
-		// (allActions, startingState);
+
 		NFAUtils.removeSurplusSelfLoops(startingState);
 
 		Map<String, PEPAComponent> newComponents = NFAStateToPEPA
