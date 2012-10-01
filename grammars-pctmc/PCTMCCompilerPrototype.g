@@ -199,24 +199,32 @@ plotAt[Constants constants] returns [AbstractExpression e, double t]:
 analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
 :
-   o=odeAnalysis[pctmc,constants, plots] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
- | s=simulation[pctmc,constants, plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
- | accs=accuratesimulation[pctmc,constants, plots] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+(o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
+ | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | accs=accuratesimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
+)
+ (LBRACE
+        //  (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*
+         ps=plotDescriptions
+ RBRACE
+ {
+    if ($plots!=null) $plots.putAll($analysis,$ps.p);
+ }
+)? 
 ;
 
 compare[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
-^(COMPARE a1=analysis[pctmc, constants, plots] a2=analysis[pctmc, constants, plots] ps=plotDescriptions)
+^(COMPARE a1=analysis[pctmc, constants, plots] a2=analysis[pctmc, constants, plots])
 {
   $analysis = new PCTMCCompareAnalysis($a1.analysis,$a2.analysis);
   $postprocessor = new CompareAnalysisNumericalPostprocessor($a1.postprocessor,$a2.postprocessor);
   $analysis.addPostprocessor($postprocessor);
-  if ($plots!=null) $plots.putAll($analysis,$ps.p);
 }
 ;
 
-odeAnalysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
+odeAnalysis[PCTMC pctmc, Constants constants]
 returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
@@ -245,14 +253,7 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 		      $analysis.addPostprocessor($postprocessor);
       }
          
-         (LBRACE
-        //  (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*
-         ps=plotDescriptions
-        RBRACE
-        {
-          if ($plots!=null) $plots.putAll($analysis,$ps.p);
-        }
-        )?  )
+    )
 
 ;
 
@@ -275,7 +276,7 @@ parameter returns [String name, Object value]:
               |f=FILENAME {$value=$f.text.replace("\"","");})
 ;
 
-simulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
+simulation[PCTMC pctmc, Constants constants]
 returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
@@ -297,12 +298,7 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
       }
       $analysis.addPostprocessor($postprocessor);
     }
-    (LBRACE 
-         ps=plotDescriptions 
-    RBRACE
-    {
-      if ($plots!=null) $plots.putAll($analysis,$ps.p); 
-   })?    
+       
    )
 ;
 
@@ -317,16 +313,13 @@ simulationSettings returns
   }
 ;
 
-accuratesimulation[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots] 
+accuratesimulation[PCTMC pctmc, Constants constants] 
 returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
 }:
   ^(ACCURATESIMULATION stop=expression COMMA step=expression COMMA ci=expression COMMA maxRelCIWidth=expression COMMA batchSize=integer 
-    (COMMA p=parameter {parameters.put($p.name, $p.value);})*
-    LBRACE 
-         ps=plotDescriptions 
-    RBRACE    
+    (COMMA p=parameter {parameters.put($p.name, $p.value);})*    
    ){
       $analysis = new PCTMCSimulation($pctmc);
       
@@ -345,7 +338,6 @@ returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
         $postprocessor = new AccurateSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),ciEval.getResult(),maxRelCIWidthEval.getResult(),$batchSize.value, parameters);
       }
       $analysis.addPostprocessor($postprocessor);
-      if ($plots!=null) $plots.putAll($analysis,$ps.p);
    }
 ;
 
