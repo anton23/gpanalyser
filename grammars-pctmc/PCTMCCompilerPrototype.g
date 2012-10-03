@@ -204,8 +204,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
  | accs=accuratesimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 )
- (LBRACE
-        //  (COMMA f1=parameter {postprocessorParameters.put($f1.name, $f1.value);})*
+ (LBRACE       
          ps=plotDescriptions
  RBRACE
  {
