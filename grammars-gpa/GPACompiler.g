@@ -999,8 +999,6 @@ probe_def returns [CDF measured_times]
 scope
 {
 	GroupedModel model;
-	AbstractPCTMCAnalysis analysis;
-	NumericalPostprocessor postprocessor;
 
 	boolean steady;
 }
@@ -1009,11 +1007,7 @@ scope
 	$probe_def::model = deepCloner.deepClone (mainModel);
 }
 	:	^(PROBE_DEF	o=out? a=analysis[null, mainConstants, null]
-				{
-					$probe_def::analysis = $a.analysis;
-					$probe_def::postprocessor = $a.postprocessor;
-				}
-			md=mode mt=probe_spec [$probe_def::analysis instanceof PCTMCSimulation, $md.chosenMode, $md.par])
+			md=mode mt=probe_spec [$a.analysis, $a.postprocessor, $md.chosenMode, $md.par])
 			{
 				$measured_times = $mt.measured_times;
 				if (o != null)
@@ -1056,7 +1050,7 @@ out returns [String name]
 			$name = $FILENAME.text.replace ("\"", "");
 		} ;
 
-probe_spec [boolean simulate, int mode, double modePar]
+probe_spec [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor, int mode, double modePar]
 	returns [CDF measured_times]
 scope
 {
@@ -1066,7 +1060,7 @@ scope
 @init
 {
   $probe_spec::spec = new ProbeSpec(mainDefinitions.getActions(),
-  $probe_def::model, $simulate, $mode, $modePar);
+  $probe_def::model, $analysis, $postprocessor, $mode, $modePar);
   $probe_spec::initialStates = new HashSet<PEPAComponent>();
 }
 	:	^(DEF signalNames=SIGNALS
@@ -1078,17 +1072,20 @@ scope
 							$probe_spec::spec.addToAllActions(signal);
 					}
 				}
-			globalProbeName=UPPERCASENAME (local_probes [$probe_spec::spec.newComp, $probe_spec::spec.altComp])?
 			{
-				$probe_spec::spec.processGlobal(components, $probe_spec::initialStates);
+			  Map<String, PEPAComponent> newComp = new HashMap<String, PEPAComponent>();
+			  Map<String, PEPAComponent> altComp = new HashMap<String, PEPAComponent>();
+			}
+			globalProbeName=UPPERCASENAME (local_probes [newComp, altComp])?
+			{
+				$probe_spec::spec.processGlobal(components, $probe_spec::initialStates, newComp, altComp);
+				
 			}
 			(locations [$probe_spec::spec.newMainDef])?
-			probeg [simulate, $probe_spec::spec.gprobe, $probe_spec::spec.allActions,
+			probeg [analysis instanceof PCTMCSimulation, $probe_spec::spec.gprobe, $probe_spec::spec.allActions,
 					$probe_spec::spec.alphabet])
 			{
 			 $probe_spec::spec.afterProbeg($globalProbeName.text,
-			   $probe_def::analysis,
-			   $probe_def::postprocessor,
 			   $probe_def::steady,
 			   excluded,
 			   mainConstants,

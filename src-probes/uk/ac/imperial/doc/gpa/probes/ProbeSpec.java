@@ -30,6 +30,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -45,6 +46,10 @@ public class ProbeSpec {
 	public Set<ComponentId> localAcceptingStates;
 
 	private Set<PEPAComponent> initialStates;
+	
+	private AbstractPCTMCAnalysis analysis;
+	private NumericalPostprocessor postprocessor;
+	
 
 	public Map<String, PEPAComponent> newComp;
 	public Map<String, PEPAComponent> altComp;
@@ -53,7 +58,6 @@ public class ProbeSpec {
 
 	GroupedModel model;
 
-	boolean simulate;
 	int mode;
 	double modePar;
 
@@ -61,7 +65,12 @@ public class ProbeSpec {
 
 	public ProbeSpec(Set<String> actions,
 			 GroupedModel model,
-			boolean simulate, int mode, double modePar) {
+			 AbstractPCTMCAnalysis analysis,
+			 NumericalPostprocessor postprocessor,	
+			 int mode, double modePar) {
+		this.analysis = analysis;
+		this.postprocessor = postprocessor;
+	
 		this.alphabet = new HashSet<String> ();
 		this.gprobe = new GlobalProbe();
 		this.allActions = new HashSet<ITransition> ();
@@ -69,12 +78,9 @@ public class ProbeSpec {
 			allActions.add(new Transition(action));
 		}
 		
-		this.newComp = new HashMap<String, PEPAComponent>();
-		this.altComp = new HashMap<String, PEPAComponent>();
 		this.localAcceptingStates = new HashSet<ComponentId>();
 
 		this.model = model;
-		this.simulate = simulate;
 		this.mode = mode;
 		this.modePar = modePar;
 	}
@@ -83,7 +89,11 @@ public class ProbeSpec {
 		allActions.add(new SignalTransition(signal));
 	}
 
-	public void processGlobal(Map<String, PEPAComponent> components, Set<PEPAComponent> initialStates) {
+	public void processGlobal(Map<String, PEPAComponent> components, Set<PEPAComponent> initialStates,
+			Map<String, PEPAComponent> newComp,  Map<String, PEPAComponent> altComp		
+	) {
+		this.newComp = newComp;
+		this.altComp = altComp;
 		this.origComponents = new Cloner().deepClone(components);
 		this.initialStates = initialStates;
 		Map<String, PEPAComponent> newDef = new HashMap<String, PEPAComponent>(
@@ -92,10 +102,11 @@ public class ProbeSpec {
 		newMainDef = new iPEPAComponentDefinitions(newDef)
 				.removeVanishingStates(initialStates);
 	}
+	
+	public void collectNewComp() {
+	}
 
-	public void afterProbeg(String globalProbeName, 
-			AbstractPCTMCAnalysis analysis,
-			NumericalPostprocessor postprocessor,			
+	public void afterProbeg(String globalProbeName, 				
 			boolean steady, List<ITransition> excluded,
 			Constants mainConstants,
 			Map<ExpressionVariable,AbstractExpression> mainUnfoldedVariables,
@@ -128,7 +139,7 @@ public class ProbeSpec {
 					.removeVanishingStates(initialStates);
 			defMap.put(altDef, altComps);
 		}
-		if (simulate) {
+		if (analysis instanceof PCTMCSimulation) {
 			if (mode == 3) {
 				Set<ITransition> monitoring = NFADetectors.detectAlphabet(
 						gprobe.getStartingState(), true, excluded);
