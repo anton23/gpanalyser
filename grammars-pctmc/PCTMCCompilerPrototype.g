@@ -45,6 +45,8 @@ options{
   import com.google.common.collect.HashMultiset;
   import com.google.common.collect.Multiset;
   
+  import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
+  
   
 }
 */
@@ -57,20 +59,22 @@ completeSystem returns[Constants constants,
                Map<ExpressionVariable,AbstractExpression> unfoldedVariables,
                PCTMC pctmc,
                Multimap<AbstractPCTMCAnalysis,PlotDescription> plots,
-               List<PCTMCExperiment> experiments
+               List<PCTMCExperiment> experiments,
+               List<IExtension> extensions
 	]
 :
-  system extensions EOF
+  system es=extensions EOF
 {
   $constants = $system.constants;
   $unfoldedVariables = $system.unfoldedVariables;
   $pctmc = $system.pctmc;
   $plots = $system.plots;
   $experiments = $system.experiments;
+  $extensions = $es.extensions; 
 }
 ;
 
-extensions: ;
+extensions returns[List<IExtension> extensions]: {$extensions = new LinkedList<IExtension>();} ;
 
 system returns[Constants constants, 
                Map<ExpressionVariable,AbstractExpression> unfoldedVariables,

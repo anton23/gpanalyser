@@ -253,6 +253,9 @@ public class PCTMCInterpreter {
 			}
 			iterate.run(constants);
 		}
+		for (IExtension e: fileRepresentation.getExtensions()) {
+			e.execute();
+		}
 	}
 
 	public void processFile(String file) {
