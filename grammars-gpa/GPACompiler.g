@@ -61,6 +61,8 @@ import PCTMCCompilerPrototype;
 	import uk.ac.imperial.doc.gpa.patterns.*; 
 	import uk.ac.imperial.doc.gpa.pctmc.*;
 	import uk.ac.imperial.doc.gpa.syntax.CompilerError;
+	
+	import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
 
 	// Probes
 
@@ -306,12 +308,13 @@ coop returns [Set<String> cooperationActions]
    })+
 ;
 
-extensions
+extensions returns [List<IExtension> extensions]
 @init
 {
 	initExcluded ();
+	$extensions = new LinkedList<IExtension>();
 }
-	:	^(PROBES (probe_def)*) ;
+	:	^(PROBES (d=probe_def {$extensions.add($d.probeExecutable);})*) ;
 
 // Local_And_Global_Probe
 
@@ -995,7 +998,7 @@ concrete_r_expr returns [String predicate]
 
 // Probe_spec
 
-probe_def returns [CDF measured_times]
+probe_def returns [ProbeSpec probeExecutable]
 scope
 {
 	GroupedModel model;
@@ -1009,11 +1012,10 @@ scope
 	:	^(PROBE_DEF	o=out? a=analysis[null, mainConstants, null]
 			md=mode mt=probe_spec [$a.analysis, $a.postprocessor, $md.chosenMode, $md.par])
 			{
-				$measured_times = $mt.measured_times;
+				$probeExecutable = $mt.probeExecutable;
 				if (o != null)
 				{
-					FileUtils.writeGeneralFile
-						($measured_times.toString (), $o.name);
+				  $probeExecutable.setOutput($o.name);
 				}
 			}
 		;
@@ -1051,7 +1053,7 @@ out returns [String name]
 		} ;
 
 probe_spec [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor, int mode, double modePar]
-	returns [CDF measured_times]
+	returns [ProbeSpec probeExecutable]
 scope
 {
      ProbeSpec spec;
@@ -1091,9 +1093,11 @@ scope
 			   mainConstants,
 			   mainUnfoldedVariables,
 			   mainDefinitions);
-			   
-			 $measured_times = $probe_spec::spec.measured_times;
-            } ;
+  
+
+            } 
+     {$probeExecutable = $probe_spec::spec;}       
+            ;
 
 local_probes [Map<String, PEPAComponent> newComp,
 	Map<String, PEPAComponent> altComp]

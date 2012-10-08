@@ -56,6 +56,8 @@ import PCTMCCompilerPrototype;
   import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
   
   import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+ 
+ import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
   
 }
 

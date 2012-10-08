@@ -25,6 +25,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+
+import uk.ac.imperial.doc.pctmc.interpreter.IExtension;  
+  
   
 import uk.ac.imperial.doc.jexpressions.expressions.*;
 import uk.ac.imperial.doc.jexpressions.conditions.*;

@@ -29,14 +29,16 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
+import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.rits.cloning.Cloner;
 
-public class ProbeSpec {
+public class ProbeSpec implements IExtension{
 
 	public GlobalProbe gprobe;
 	public Set<String> alphabet;
@@ -50,7 +52,11 @@ public class ProbeSpec {
 	private AbstractPCTMCAnalysis analysis;
 	private NumericalPostprocessor postprocessor;
 	
-
+	private AbstractProbeRunner runner;
+	
+	private String output;
+	
+	
 	public Map<String, PEPAComponent> newComp;
 	public Map<String, PEPAComponent> altComp;
 
@@ -106,6 +112,11 @@ public class ProbeSpec {
 	public void collectNewComp() {
 	}
 
+	private Map<PEPAComponentDefinitions, Set<ComponentId>> defMap;
+	private Set<GPEPAState> stateObservers;
+	private PEPAComponentDefinitions altDef;
+	
+	
 	public void afterProbeg(String globalProbeName, 				
 			boolean steady, List<ITransition> excluded,
 			Constants mainConstants,
@@ -114,20 +125,20 @@ public class ProbeSpec {
 	) throws Exception {
 		gprobe.setName(globalProbeName);
 
-		Set<GPEPAState> stateObservers = new HashSet<GPEPAState>();
+		stateObservers = new HashSet<GPEPAState>();
 		Set<GroupComponentPair> pairs = model
 				.getGroupComponentPairs(newMainDef);
 		for (GroupComponentPair g : pairs) {
 			stateObservers.add(new GPEPAState(g));
 		}
 
-		Map<PEPAComponentDefinitions, Set<ComponentId>> defMap = new HashMap<PEPAComponentDefinitions, Set<ComponentId>>();
+		defMap = new HashMap<PEPAComponentDefinitions, Set<ComponentId>>();
 		Set<ComponentId> newComps = new HashSet<ComponentId>();
 		for (String name : newComp.keySet()) {
 			newComps.add(new ComponentId(name));
 		}
 		defMap.put(newMainDef, newComps);
-		PEPAComponentDefinitions altDef = null;
+		altDef = null;
 		if (steady) {
 			Set<ComponentId> altComps = new HashSet<ComponentId>();
 			for (String name : altComp.keySet()) {
@@ -170,27 +181,35 @@ public class ProbeSpec {
 				for (GroupComponentPair g : pairs) {
 					stateObservers.add(new GPEPAState(g));
 				}
-
-				measured_times = new SimProbeRunner(mainConstants,
-						mainUnfoldedVariables).executeProbedModel(gprobe,
-						globalModel, stateObservers, globalDef, null, null,
-						accepting, analysis, postprocessor, alphabet,
-						mode, modePar);
+				runner = new SimProbeRunner(mainConstants,
+						mainUnfoldedVariables);
+				
+				model = globalModel;
+				newMainDef = globalDef;
+				altDef = null;
+				defMap = null;
+				localAcceptingStates = accepting;
 			} else {
-				measured_times = new SimProbeRunner(mainConstants,
-						mainUnfoldedVariables).executeProbedModel(gprobe,
-						model, stateObservers, newMainDef, altDef, defMap,
-						localAcceptingStates, analysis, postprocessor,
-						alphabet, mode, modePar);
+				runner = new SimProbeRunner(mainConstants,
+						mainUnfoldedVariables);
 			}
 		} else {
-			measured_times = new ODEProbeRunner(mainConstants,
-					mainUnfoldedVariables).executeProbedModel(gprobe, model,
-					stateObservers, newMainDef, altDef, defMap,
-					localAcceptingStates, analysis, postprocessor,
-					alphabet, mode, modePar);
+			runner = new ODEProbeRunner(mainConstants,
+					mainUnfoldedVariables);
 		}
-
+	}
+	
+	public void execute() {
+		measured_times = runner.executeProbedModel(gprobe,
+		model, stateObservers, newMainDef, altDef, defMap,
+		localAcceptingStates, analysis, postprocessor, alphabet,
+		mode, modePar);
+		
+		if (output != null)
+		{
+			FileUtils.writeGeneralFile
+				(measured_times.toString (), output);
+		}
 	}
 
 	public static void generateProbeComponent(String name, NFAState startingState,
@@ -237,5 +256,15 @@ public class ProbeSpec {
 		}
 		probeComponents.putAll(newComponents);
 	}
+
+	public String getOutput() {
+		return output;
+	}
+
+	public void setOutput(String output) {
+		this.output = output;
+	}
+	
+	
 
 }

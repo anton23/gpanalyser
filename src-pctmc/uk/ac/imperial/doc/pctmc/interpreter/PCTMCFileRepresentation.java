@@ -24,6 +24,11 @@ public class PCTMCFileRepresentation {
 	private Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
 	private Multimap<AbstractPCTMCAnalysis, PlotDescription> plots;
 	private List<PCTMCExperiment> experiments;
+	private List<IExtension> extensions;
+
+	public List<IExtension> getExtensions() {
+		return extensions;
+	}
 
 	@SuppressWarnings("unchecked")
 	public PCTMCFileRepresentation(Object compilerReturn) throws Exception {
@@ -34,6 +39,10 @@ public class PCTMCFileRepresentation {
 				.getClass().getField("plots").get(compilerReturn);
 		experiments = (List<PCTMCExperiment>) compilerReturn.getClass().getField(
 				"experiments").get(compilerReturn);
+
+		extensions = (List<IExtension>) compilerReturn.getClass().getField(
+		"extensions").get(compilerReturn);
+		
 		unfoldedVariables = (Map<ExpressionVariable, AbstractExpression>) compilerReturn
 				.getClass().getField("unfoldedVariables").get(compilerReturn);
 		pctmc = (PCTMC) compilerReturn.getClass().getField("pctmc").get(
