@@ -60,7 +60,9 @@ tokens{
   LOGICAL_AND           ;
   TRUE                  ;
   FALSE                 ;
-  COMPARISON            ;
+  LEQ            ;
+  GEQ;
+  EQ;
   EXPRESSION			;
   PRED					;
 
@@ -400,7 +402,10 @@ b_expr
 			-> ^(comparison $r_expr1 $r_expr2) ;
 
 comparison
-    :   COMPARISON | LANGLE | RANGLE ;
+    :   comparisonOp | LANGLE | RANGLE ;
+    
+comparisonOp:
+  GEQ | LEQ | EQ;
 
 r_expr
 	:	concrete_r_expr (binary_op r_expr)?

@@ -146,7 +146,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 			for (Thread t:threads) {
 				t.join();
 			}
-			PCTMCLogging.setVisible(true);
+			PCTMCLogging.setVisible(true);			
 			} catch(InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -274,7 +274,8 @@ public class PCTMCIterate extends PCTMCExperiment {
 
 		PCTMCLogging.info("Starting " + totalIterations + " iterations:");
 		PCTMCLogging.increaseIndent();
-		PCTMCLogging.setVisible(false);
+		if (PCTMCOptions.nthreads == 1)
+			PCTMCLogging.setVisible(false);
 		iterations = 0;
 		for (int x = 0; x < xRange.getSteps(); x++) {
 			double xValue = xRange.getStep(x);
@@ -301,7 +302,8 @@ public class PCTMCIterate extends PCTMCExperiment {
 		}
 		PCTMCLogging.decreaseIndent();
 		PCTMCLogging.decreaseIndent();
-		PCTMCLogging.setVisible(true);
+		if (PCTMCOptions.nthreads == 1)
+			PCTMCLogging.setVisible(true);
 	}
 	 
 	
@@ -382,7 +384,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 			reEvaluate(constants, reEvaluations);
 			postprocessor.calculateDataPoints(constants);
 			iterations++;
-			if ((iterations) % show == 0) {
+			if ((iterations) % show == 0 && PCTMCOptions.nthreads == 1) {
 				PCTMCLogging.infoForce(iterations + " iterations finished.");
 			}
 			if (minSpecification == null) {

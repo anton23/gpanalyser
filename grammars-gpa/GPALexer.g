@@ -66,8 +66,8 @@ TRUE
 FALSE
 	:	'fF' ;
 
-COMPARISON
-	:	'==' | '>=' | '<=' ;
+LEQ: '<=';
+EQ: '==';
 
 //Local - low priority
 
