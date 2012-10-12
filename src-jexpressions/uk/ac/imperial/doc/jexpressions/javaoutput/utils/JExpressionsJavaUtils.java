@@ -77,6 +77,16 @@ public class JExpressionsJavaUtils {
 		mA2 * safePhi + mB2 * (1.0 - safePhi) - theta * add * safe_phi(mB - mA, theta);		
 	}
 	
+	public static double normalInequality(double muL, double varL, double muR, double varR, double cov) {
+		double stDev = Math.sqrt(varL + varR + 2*cov);
+		if (Double.isNaN(stDev)) {
+			stDev = 0.0;
+		}
+		double mu = -muL + muR;
+		double ret = safe_Phi(0.0-mu, stDev);
+		return ret;
+	}
+	
 	public static double Phi(double x) {
 		try {
 			return normalDist.cumulativeProbability(x);

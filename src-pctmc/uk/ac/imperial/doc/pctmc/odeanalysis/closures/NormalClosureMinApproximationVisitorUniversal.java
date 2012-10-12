@@ -9,12 +9,14 @@ import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
 import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CentralMomentOfLinearCombinationExpression;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CovarianceOfLinearCombinationsExpression;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.IsConstantVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 
@@ -91,6 +93,18 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 		}
 		m_inserted = true;
 	}
+	
+	/*
+	@Override
+	public void visit(IndicatorFunction e) {
+		AbstractExpression left =e.getCondition().getLeft();
+		AbstractExpression right = e.getCondition().getRight();
+		Map<ExpressionVariable, AbstractExpression> var = new HashMap<ExpressionVariable, AbstractExpression>();
+		AbstractExpression varLeft = new CentralMomentOfLinearCombinationExpression(left, 2, var);
+		AbstractExpression varRight = new CentralMomentOfLinearCombinationExpression(right, 2, var);
+		AbstractExpression cov = new CovarianceOfLinearCombinationsExpression(left, right, var);
+		result = considerVariable(FunctionCallExpression.create("normalInequality", Lists.newArrayList(left, varLeft, right, varRight, cov)));
+	}*/
 	
 	@Override
 	public void visit(ProductExpression _e)
