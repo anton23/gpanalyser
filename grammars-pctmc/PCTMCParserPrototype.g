@@ -264,7 +264,19 @@ compare:
   RPAR -> ^(COMPARE analysis analysis)
 ;
 
-experiment
+experiment:
+  iterateExperiment
+ |distributionSimulation
+  ;
+  
+distributionSimulation:
+ DISTRIBUTION_SIMULATION
+ simulation LBRACE
+  plotAtSpecifications
+ RBRACE
+;
+
+iterateExperiment
 // Allows addition of new constants in range specifications
 @init{
   Set<String> tmp = constants;

@@ -60,6 +60,9 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 		} else if (e.getName().equals("normalMinProduct")) {
 			output.append(utilsClassName
 					+ ".normalMinProduct(");
+		} else if (e.getName().equals("normalInequality")) {
+			output.append(utilsClassName
+					+ ".normalInequality(");
 		} else {
 			output.append("Math." + e.getName() + "(");
 		}
