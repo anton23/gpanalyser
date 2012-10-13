@@ -273,7 +273,7 @@ distributionSimulation:
  DISTRIBUTION_SIMULATION
  simulation LBRACE
   plotAtSpecifications
- RBRACE
+ RBRACE -> ^(DISTRIBUTION_SIMULATION simulation plotAtSpecifications)
 ;
 
 iterateExperiment
