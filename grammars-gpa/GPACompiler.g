@@ -77,6 +77,7 @@ import PCTMCCompilerPrototype;
 	import uk.ac.imperial.doc.gpa.probes.*;
 	import uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions.*;
 	import uk.ac.imperial.doc.pctmc.utils.FileUtils;
+	import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionSimulation;
 }
 
 @members {

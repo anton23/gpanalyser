@@ -46,7 +46,7 @@ options{
   import com.google.common.collect.Multiset;
   
   import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
-  
+  import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionSimulation;
   
 }
 */
@@ -96,7 +96,7 @@ system returns[Constants constants,
    
    analysis[$pctmc, $constants, $plots]*
    
-   (e=experiment[$pctmc, $constants, $unfoldedVariables] {$experiments.add($e.iterate);})* 
+   (e=experiment[$pctmc, $constants, $unfoldedVariables] {$experiments.add($e.experiment);})* 
 ;
 
 modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Constants constants] returns [PCTMC pctmc]
@@ -140,8 +140,27 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
       $pctmc = new PCTMC(initMap, events);
 };
 
+experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment experiment]:
+  i=iterateExperiment[pctmc, constants, unfoldedVariables] {$experiment = $i.iterate;}
+ |d=distributionSimulation[pctmc, constants, unfoldedVariables] {$experiment = $d.experiment;} 
+  ;
+ 
+distributionSimulation[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment experiment]
+@init{
+  List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>();
+}:
 
-experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment iterate]
+^(DISTRIBUTION_SIMULATION
+  a=simulation[$pctmc,$constants] 
+   (p=plotAtSpecification[$constants] {plots.add($p.p);})*
+   
+  {$experiment = new DistributionSimulation($a.analysis,
+      $a.postprocessor,
+      plots,
+      $unfoldedVariables);})
+;
+
+iterateExperiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment iterate]
 @init{
   List<RangeSpecification> ranges = new LinkedList<RangeSpecification>();
   List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>();
@@ -280,7 +299,7 @@ parameter returns [String name, Object value]:
 ;
 
 simulation[PCTMC pctmc, Constants constants]
-returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
+returns [PCTMCSimulation analysis, SimulationAnalysisNumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
 }:

@@ -58,7 +58,7 @@ ACCURATESIMULATION: 'AccurateSimulation';
 COMPARE: 'Compare';
 ITERATE: 'Iterate';
 TRANSIENT_ITERATE: 'TransientIterate';
-DISTRIBUTION_SIMULATION: 'DistributionSimulation';
+DISTRIBUTION_SIMULATION: 'Distribution';
 MINIMISE: 'Minimise';
 
 FROMVALUE: 'from'; 
