@@ -90,12 +90,18 @@ public class DistributionSimulation extends PCTMCExperiment {
 	public void run(Constants constants) {		
 		double[][] data = new double[plots.size()][replications];
 		PCTMCLogging.setVisible(false);
+		EmpiricalDistributions[] distributions = new EmpiricalDistributions[plots.size()];
+		for (int i = 0; i < plots.size(); i++) {
+			distributions[i] = new EmpiricalDistributions(1, postprocessor.getNumberOfSteps(), replications, 500);
+		}
 		for (int r = 0; r < replications; r++) {			
 			postprocessor.calculateDataPoints(constants);
 			int i = 0;
 			for (PlotAtDescription plot : plots) {
 				double[] values = postprocessor.evaluateExpressionsAtTimes(plot
 						.getEvaluator(), plot.getAtTimes(), constants);
+				
+				distributions[i].addReplication(postprocessor.evaluateExpressions(plot.getEvaluator(), constants));
 				data[i][r] = values[0];
 				i++;
 			}
@@ -117,6 +123,15 @@ public class DistributionSimulation extends PCTMCExperiment {
 			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(ps, min, stepSize, new String[]{plots.get(p).toString()});	
 			PCTMCChartUtilities.drawChart(dataset, "Value", "Probability", "",
 					"Distribution");
+			
+			String[] timeNames = new String[postprocessor.getNumberOfSteps()];
+			for (int t = 0; t < postprocessor.getNumberOfSteps(); t++) {
+				timeNames[t] = (t * postprocessor.getStepSize()) + "";
+			}
+			distributions[p].calculateDistributions();
+			XYSeriesCollection fullDataset = AnalysisUtils.getDatasetFromArray(distributions[p].getData()[0], distributions[p].getMin(), distributions[p].getDstep(), timeNames);
+			PCTMCChartUtilities.drawChart(fullDataset, "Value", "Probability", "",
+			plots.get(p).toString());
 		}
 
 	}
