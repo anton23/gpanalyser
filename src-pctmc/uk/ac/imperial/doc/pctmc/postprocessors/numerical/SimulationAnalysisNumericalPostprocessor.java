@@ -1,5 +1,17 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -26,12 +38,6 @@ import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
-
-import java.io.*;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class SimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
@@ -225,9 +231,11 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			}
 			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
 					initial, stopTime, stepSize, accUpdater);
+			notifyReplicationObservers(tmp);
 			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
 				updater.update(dataPoints[t], tmp[t]);				
 			}
+			
 		}
 
 		for (int t = 0; t < dataPoints.length; t++) {
@@ -238,6 +246,28 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		PCTMCLogging.decreaseIndent();
 	}
 
+	protected List<ISimulationReplicationObserver> replicationObservers;
+	
+	public void addReplicationObserver(ISimulationReplicationObserver o) {
+		if (replicationObservers == null) {
+			replicationObservers = new LinkedList<ISimulationReplicationObserver>();
+		}
+		replicationObservers.add(o);
+	}
+	
+	protected void notifyReplicationObservers(double[][] tmp) {
+		double[][] data = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
+			                                          					.size()
+			                                          					+ generalExpectationIndex.size()];
+		for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
+			updater.update(data[t], tmp[t]);				
+		}
+		if (replicationObservers == null) return;
+		for (ISimulationReplicationObserver o: replicationObservers) {
+			o.newReplication(data);
+		}
+	}
+	
 
 	public static final String mUpdaterNoAddClassName = "GeneratedProductUpdaterNoAdd";
 
