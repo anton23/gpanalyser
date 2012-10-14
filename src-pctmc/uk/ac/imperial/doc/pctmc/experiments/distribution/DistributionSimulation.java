@@ -17,15 +17,18 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionE
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
+import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ISimulationReplicationObserver;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
-public class DistributionSimulation extends PCTMCExperiment {
+public class DistributionSimulation extends PCTMCExperiment implements ISimulationReplicationObserver {
 
 	private PCTMCSimulation simulation;
 	private SimulationAnalysisNumericalPostprocessor postprocessor;
@@ -76,7 +79,6 @@ public class DistributionSimulation extends PCTMCExperiment {
 
 		simulation.prepare(constants);
 		PCTMCLogging.decreaseIndent();
-		postprocessor.setReplications(1);
 		postprocessor.prepare(simulation, constants);	
 		
 		for (PlotAtDescription p : tmpPlots) {
@@ -85,28 +87,26 @@ public class DistributionSimulation extends PCTMCExperiment {
 			p.setEvaluator(updater);
 		}
 	}
+	
+	EmpiricalDistributions[] distributions;
+	Constants constants;
+	double[][] data;
+	int r;
 
 	@Override
-	public void run(Constants constants) {		
-		double[][] data = new double[plots.size()][replications];
-		PCTMCLogging.setVisible(false);
-		EmpiricalDistributions[] distributions = new EmpiricalDistributions[plots.size()];
+	public void run(Constants constants) {	
+		this.constants = constants;
+		this.r = 0;
+		data = new double[plots.size()][replications];
+
+		distributions = new EmpiricalDistributions[plots.size()];
 		for (int i = 0; i < plots.size(); i++) {
-			distributions[i] = new EmpiricalDistributions(1, postprocessor.getNumberOfSteps(), replications, 500);
+			distributions[i] = new EmpiricalDistributions(1, postprocessor.getNumberOfSteps(), replications, 100);
 		}
-		for (int r = 0; r < replications; r++) {			
-			postprocessor.calculateDataPoints(constants);
-			int i = 0;
-			for (PlotAtDescription plot : plots) {
-				double[] values = postprocessor.evaluateExpressionsAtTimes(plot
-						.getEvaluator(), plot.getAtTimes(), constants);
-				
-				distributions[i].addReplication(postprocessor.evaluateExpressions(plot.getEvaluator(), constants));
-				data[i][r] = values[0];
-				i++;
-			}
-		}
-		PCTMCLogging.setVisible(true);
+		postprocessor.addReplicationObserver(this);
+		postprocessor.calculateDataPoints(constants);
+
+		PCTMCLogging.info("Simulation finished.");
 
 		
 		for (int p = 0; p < plots.size(); p++) {			
@@ -120,7 +120,8 @@ public class DistributionSimulation extends PCTMCExperiment {
 			for (SummaryStatistics s : dist.getBinStats()) {
 				ps[i++][0] = (double) s.getN() / (double) replications;				
 			}
-			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(ps, min, stepSize, new String[]{plots.get(p).toString()});	
+			PlotAtDescription plot = plots.get(p);
+			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(ps, min, stepSize, new String[]{plot.toString()});	
 			PCTMCChartUtilities.drawChart(dataset, "Value", "Probability", "",
 					"Distribution");
 			
@@ -131,9 +132,35 @@ public class DistributionSimulation extends PCTMCExperiment {
 			distributions[p].calculateDistributions();
 			XYSeriesCollection fullDataset = AnalysisUtils.getDatasetFromArray(distributions[p].getData()[0], distributions[p].getMin(), distributions[p].getDstep(), timeNames);
 			PCTMCChartUtilities.drawChart(fullDataset, "Value", "Probability", "",
-			plots.get(p).toString());
+			plot.toString());
+			
+			ChartUtils3D.drawChart(plot.toString(), "Distribution", distributions[p].getData()[0],
+					0.0, postprocessor.getStepSize(),
+					distributions[p].getMin(), distributions[p].getDstep(),
+					"Time", "Value", "Probability");
+			
+			if (!plot.getFilename().isEmpty()) {
+				FileUtils.write3Dfile(plot.getFilename(), distributions[p].getData()[0],
+						0.0, postprocessor.getStepSize(),
+						distributions[p].getMin(), distributions[p].getDstep());
+				FileUtils.write3DGnuplotFile(plot.getFilename(), "Time", "Value", "Probability");
+			}
 		}
-
 	}
+	
+	@Override
+	public void newReplication(double[][] tmp) {
+		int i = 0;
+		for (PlotAtDescription plot : plots) {
+			double[] values = plot.getEvaluator().updateAtTimes(constants.getFlatConstants(), tmp, plot.getAtTimes(), postprocessor.getStepSize()); 
+				
+			double[][] evaluateExpressions = plot.getEvaluator().updateAllTimes(constants.getFlatConstants(), tmp, postprocessor.getStepSize()); 
+			distributions[i].addReplication(evaluateExpressions);
+			data[i][r] = values[0];
+			i++;
+		}
+		r++;
+	}
+
 
 }

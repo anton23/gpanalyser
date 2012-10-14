@@ -165,13 +165,14 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 	public double[][] evaluateExpressions(AbstractExpressionEvaluator evaluator, Constants constants){
 		//evaluator.setRates(constants.getFlatConstants());
 		
-		double[][] selectedData = new double[dataPoints.length][evaluator.getNumberOfExpressions()];
+		/*double[][] selectedData = new double[dataPoints.length][evaluator.getNumberOfExpressions()];
 
 		for (int t = 0; t < selectedData.length; t++) {
 			selectedData[t] = evaluator.update(constants.getFlatConstants(),dataPoints[t], t * stepSize);
 		}
 
-		return selectedData;
+		return selectedData;*/
+		return evaluator.updateAllTimes(constants.getFlatConstants(), dataPoints, stepSize);
 	}
 	
 	public int getTimeIndex(double time){
@@ -182,7 +183,7 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
            double[] times, Constants constants){
 		//			evaluator.setRates(constants.getFlatConstants());
 		
-		double[] selectedData = new double[evaluator.getNumberOfExpressions()];
+	/*	double[] selectedData = new double[evaluator.getNumberOfExpressions()];
         double[] flatConstants = constants.getFlatConstants();
 
 		for (int e = 0; e < evaluator.getNumberOfExpressions(); e++){
@@ -191,7 +192,8 @@ public abstract class NumericalPostprocessor implements PCTMCAnalysisPostprocess
 			selectedData[e] = tmp[e];
 		}
 		
-		return selectedData;
+		return selectedData;*/
+		return evaluator.updateAtTimes(constants.getFlatConstants(), dataPoints, times, stepSize);
 	}
 	
 	public static EvaluatorMethod getEvaluatorMethod(List<AbstractExpression> plotExpressions,

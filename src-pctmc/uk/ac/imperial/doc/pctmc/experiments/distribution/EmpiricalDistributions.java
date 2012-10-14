@@ -41,7 +41,7 @@ public class EmpiricalDistributions {
 		dstep = (max - min) / nbuckets;
 		data = new double[nexpressions][nbuckets][timeSteps];		
 		for (int e = 0; e < nexpressions; e++) {
-			for (int t = 0; t < timeSteps; t++) {
+			for (int t = 1; t < timeSteps; t++) {
 				for (int r = 0; r < replications; r++) {
 					double value = tmpData[r][t][e];					
 					int bucket = dstep > 0.0 ? (int)Math.floor((value - min)/dstep) : 0;
