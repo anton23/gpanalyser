@@ -26,6 +26,7 @@ public class EmpiricalDistributions {
 	public void calculateDistributions() {
 		min = Double.MAX_VALUE;
 		max = Double.MIN_VALUE;
+		boolean allIntegers = true;
 		for (int r = 0; r < tmpData.length; r++) {
 			for (int t = 0; t < tmpData[r].length; t++) {
 				for (int e = 0; e < tmpData[r][t].length; e++) {
@@ -35,10 +36,17 @@ public class EmpiricalDistributions {
 					if (tmpData[r][t][e] > max) {
 						max = tmpData[r][t][e];
 					}
+					if (allIntegers && tmpData[r][t][e] - Math.floor(tmpData[r][t][e]) > 0) {
+						allIntegers = false;
+					}
 				}
 			}
 		}
 		dstep = (max - min) / nbuckets;
+		if (allIntegers) {			
+			dstep = Math.ceil(dstep);
+			max = min + nbuckets * dstep;
+		}
 		data = new double[nexpressions][nbuckets][timeSteps];		
 		for (int e = 0; e < nexpressions; e++) {
 			for (int t = 1; t < timeSteps; t++) {
