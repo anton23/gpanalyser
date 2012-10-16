@@ -59,6 +59,8 @@ import PCTMCCompilerPrototype;
  
  import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionSimulation;
+  import uk.ac.imperial.doc.pctmc.experiments.distribution.GroupOfDistributions;
+  import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtAllTimes;
 }
 
 

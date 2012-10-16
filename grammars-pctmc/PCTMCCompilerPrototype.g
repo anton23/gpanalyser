@@ -47,6 +47,8 @@ options{
   
   import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionSimulation;
+  import uk.ac.imperial.doc.pctmc.experiments.distribution.GroupOfDistributions;
+  import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtAllTimes;
   
 }
 */
@@ -147,17 +149,25 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
  
 distributionSimulation[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment experiment]
 @init{
-  List<PlotAtDescription> plots = new LinkedList<PlotAtDescription>();
+  List<GroupOfDistributions> distributionGroups = new LinkedList<GroupOfDistributions>();
 }:
 
 ^(DISTRIBUTION_SIMULATION
   a=simulation[$pctmc,$constants] 
-   (p=plotAtSpecification[$constants] {plots.add($p.p);})*
+   (p=distributionSpecification {distributionGroups.add($p.group);})*
    
   {$experiment = new DistributionSimulation($a.analysis,
       $a.postprocessor,
-      plots,
+      distributionGroups,
       $unfoldedVariables);})
+;
+
+distributionSpecification returns [GroupOfDistributions group]
+@init {
+  String file = "";
+}:
+    e=expression INTO n=integer BINS (TO s=FILENAME {file=$s.text.replace("\"","");})? SEMI
+    {$group = new DistributionsAtAllTimes($e.e, $n.value, file);}
 ;
 
 iterateExperiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment iterate]

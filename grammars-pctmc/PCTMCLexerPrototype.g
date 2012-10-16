@@ -59,6 +59,8 @@ COMPARE: 'Compare';
 ITERATE: 'Iterate';
 TRANSIENT_ITERATE: 'TransientIterate';
 DISTRIBUTION_SIMULATION: 'Distribution';
+INTO: 'into';
+BINS: 'bins';
 MINIMISE: 'Minimise';
 
 FROMVALUE: 'from'; 
@@ -74,6 +76,7 @@ AND:'and';
 GEQ:'>=';
 RANGLE:'>';
 LANGLE:'<';
+
 
 DERMEAN: 'dE';
 DT: 'dt';

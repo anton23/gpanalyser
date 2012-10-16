@@ -271,9 +271,15 @@ experiment:
   
 distributionSimulation:
  DISTRIBUTION_SIMULATION
- simulation LBRACE
-  plotAtSpecifications
- RBRACE -> ^(DISTRIBUTION_SIMULATION simulation plotAtSpecifications)
+ simulation (LBRACE
+    plotDescription*
+  RBRACE)? LBRACE
+  distributionSpecifications
+ RBRACE -> ^(DISTRIBUTION_SIMULATION simulation distributionSpecifications)
+;
+
+distributionSpecifications:
+   (expression INTO INTEGER BINS (TO FILENAME)? SEMI)+
 ;
 
 iterateExperiment
