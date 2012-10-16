@@ -150,13 +150,16 @@ experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpr
 distributionSimulation[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment experiment]
 @init{
   List<GroupOfDistributions> distributionGroups = new LinkedList<GroupOfDistributions>();
+  List<PlotDescription> plots = new LinkedList<PlotDescription>();
 }:
 
 ^(DISTRIBUTION_SIMULATION
-  a=simulation[$pctmc,$constants] 
+  a=simulation[$pctmc,$constants]
+    (LBRACE pds=plotDescriptions RBRACE {plots = $pds.p;})? COMPUTES 
    (p=distributionSpecification {distributionGroups.add($p.group);})*
    
   {$experiment = new DistributionSimulation($a.analysis,
+      plots,
       $a.postprocessor,
       distributionGroups,
       $unfoldedVariables);})

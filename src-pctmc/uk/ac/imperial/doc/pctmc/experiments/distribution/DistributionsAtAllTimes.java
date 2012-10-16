@@ -1,18 +1,15 @@
 package uk.ac.imperial.doc.pctmc.experiments.distribution;
 
 import java.util.List;
-import java.util.Map;
 
 import org.jfree.data.xy.XYSeriesCollection;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
-import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
-import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
@@ -47,11 +44,7 @@ public class DistributionsAtAllTimes extends GroupOfDistributions {
 	
 	
 	@Override
-	public List<AbstractExpression> getUsedExpressions(
-			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
-		ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(
-				unfoldedVariables);
-		expression.accept(setter);
+	public List<AbstractExpression> getUsedExpressions() {
 		return Lists.newArrayList(expression);		
 	}
 

@@ -59,6 +59,7 @@ COMPARE: 'Compare';
 ITERATE: 'Iterate';
 TRANSIENT_ITERATE: 'TransientIterate';
 DISTRIBUTION_SIMULATION: 'Distribution';
+COMPUTES: 'computes';
 INTO: 'into';
 BINS: 'bins';
 MINIMISE: 'Minimise';

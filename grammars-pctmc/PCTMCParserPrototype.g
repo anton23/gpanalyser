@@ -273,9 +273,9 @@ distributionSimulation:
  DISTRIBUTION_SIMULATION
  simulation (LBRACE
     plotDescription*
-  RBRACE)? LBRACE
+  RBRACE)? COMPUTES LBRACE 
   distributionSpecifications
- RBRACE -> ^(DISTRIBUTION_SIMULATION simulation distributionSpecifications)
+ RBRACE -> ^(DISTRIBUTION_SIMULATION simulation (LBRACE plotDescription* RBRACE)? COMPUTES distributionSpecifications)
 ;
 
 distributionSpecifications:
