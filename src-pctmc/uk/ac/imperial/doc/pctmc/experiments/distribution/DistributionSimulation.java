@@ -17,7 +17,6 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionE
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
-import uk.ac.imperial.doc.pctmc.charts.ChartUtils3D;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
@@ -25,7 +24,6 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ISimulationReplicationObserver;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
-import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class DistributionSimulation extends PCTMCExperiment implements ISimulationReplicationObserver {
@@ -34,18 +32,20 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 	private SimulationAnalysisNumericalPostprocessor postprocessor;
 	private List<PlotAtDescription> plots;
 	private Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
+	private List<GroupOfDistributions> distributionGroups;
 	int replications;
 
 	public DistributionSimulation(PCTMCSimulation simulation,
 			SimulationAnalysisNumericalPostprocessor postprocessor,
-			List<PlotAtDescription> plots,
+			List<GroupOfDistributions> distributionsGroups,
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
 		super();
 		this.simulation = simulation;
 		this.postprocessor = postprocessor;
-		this.plots = plots;
+		this.plots = new LinkedList<PlotAtDescription>(); // REMOVE
 		this.unfoldedVariables = unfoldedVariables;
 		this.replications = postprocessor.getReplications();
+		this.distributionGroups = distributionsGroups;
 	}
 
 	@Override
@@ -63,6 +63,11 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 			plot.unfoldExpressions(unfoldedVariables);
 			usedExpressions.addAll(plot.getPlotExpressions());
 		}
+		
+		for (GroupOfDistributions gd : distributionGroups) {
+			usedExpressions.addAll(gd.getUsedExpressions(unfoldedVariables));
+		}
+		
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
 		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
 		for (AbstractExpression exp : usedExpressions) {
@@ -81,6 +86,10 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 		PCTMCLogging.decreaseIndent();
 		postprocessor.prepare(simulation, constants);	
 		
+		for (GroupOfDistributions gd : distributionGroups) {
+			gd.prepare(constants, postprocessor);
+		}
+		
 		for (PlotAtDescription p : tmpPlots) {
 			AbstractExpressionEvaluator updater = postprocessor
 					.getExpressionEvaluator(p.getPlotExpressions(), constants);
@@ -88,7 +97,7 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 		}
 	}
 	
-	EmpiricalDistributions[] distributions;
+
 	Constants constants;
 	double[][] data;
 	int r;
@@ -99,10 +108,7 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 		this.r = 0;
 		data = new double[plots.size()][replications];
 
-		distributions = new EmpiricalDistributions[plots.size()];
-		for (int i = 0; i < plots.size(); i++) {
-			distributions[i] = new EmpiricalDistributions(1, postprocessor.getNumberOfSteps(), replications, 100);
-		}
+
 		postprocessor.addReplicationObserver(this);
 		postprocessor.calculateDataPoints(constants);
 
@@ -128,23 +134,10 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 			String[] timeNames = new String[postprocessor.getNumberOfSteps()];
 			for (int t = 0; t < postprocessor.getNumberOfSteps(); t++) {
 				timeNames[t] = (t * postprocessor.getStepSize()) + "";
-			}
-			distributions[p].calculateDistributions();
-			XYSeriesCollection fullDataset = AnalysisUtils.getDatasetFromArray(distributions[p].getData()[0], distributions[p].getMin(), distributions[p].getDstep(), timeNames);
-			PCTMCChartUtilities.drawChart(fullDataset, "Value", "Probability", "",
-			plot.toString());
-			
-			ChartUtils3D.drawChart(plot.toString(), "Distribution", distributions[p].getData()[0],
-					0.0, postprocessor.getStepSize(),
-					distributions[p].getMin(), distributions[p].getDstep(),
-					"Time", "Value", "Probability");
-			
-			if (!plot.getFilename().isEmpty()) {
-				FileUtils.write3Dfile(plot.getFilename(), distributions[p].getData()[0],
-						0.0, postprocessor.getStepSize(),
-						distributions[p].getMin(), distributions[p].getDstep());
-				FileUtils.write3DGnuplotFile(plot.getFilename(), "Time", "Value", "Probability");
-			}
+			}			
+		}
+		for (GroupOfDistributions gd : distributionGroups) {
+			gd.simulationFinished();
 		}
 	}
 	
@@ -153,11 +146,12 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 		int i = 0;
 		for (PlotAtDescription plot : plots) {
 			double[] values = plot.getEvaluator().updateAtTimes(constants.getFlatConstants(), tmp, plot.getAtTimes(), postprocessor.getStepSize()); 
-				
-			double[][] evaluateExpressions = plot.getEvaluator().updateAllTimes(constants.getFlatConstants(), tmp, postprocessor.getStepSize()); 
-			distributions[i].addReplication(evaluateExpressions);
 			data[i][r] = values[0];
 			i++;
+		}
+		
+		for (GroupOfDistributions gd : distributionGroups) {
+			gd.newReplication(tmp);
 		}
 		r++;
 	}
