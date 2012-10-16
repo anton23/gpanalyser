@@ -17,10 +17,12 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionE
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.ExpressionVariableSetterPCTMC;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ISimulationReplicationObserver;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
@@ -29,6 +31,7 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 public class DistributionSimulation extends PCTMCExperiment implements ISimulationReplicationObserver {
 
 	private PCTMCSimulation simulation;
+	private List<PlotDescription> simulationPlots;
 	private SimulationAnalysisNumericalPostprocessor postprocessor;
 	private List<PlotAtDescription> plots;
 	private Map<ExpressionVariable, AbstractExpression> unfoldedVariables;
@@ -36,11 +39,13 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 	int replications;
 
 	public DistributionSimulation(PCTMCSimulation simulation,
+			List<PlotDescription> simulationPlots,
 			SimulationAnalysisNumericalPostprocessor postprocessor,
 			List<GroupOfDistributions> distributionsGroups,
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
 		super();
 		this.simulation = simulation;
+		this.simulationPlots = simulationPlots;
 		this.postprocessor = postprocessor;
 		this.plots = new LinkedList<PlotAtDescription>(); // REMOVE
 		this.unfoldedVariables = unfoldedVariables;
@@ -64,13 +69,20 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 			usedExpressions.addAll(plot.getPlotExpressions());
 		}
 		
+		for (PlotDescription p:simulationPlots) {
+			usedExpressions.addAll(p.getExpressions());
+		}
+		
 		for (GroupOfDistributions gd : distributionGroups) {
-			usedExpressions.addAll(gd.getUsedExpressions(unfoldedVariables));
+			usedExpressions.addAll(gd.getUsedExpressions());
 		}
 		
 		Set<CombinedPopulationProduct> usedProducts = new HashSet<CombinedPopulationProduct>();
 		Set<AbstractExpression> usedGeneralExpectations = new HashSet<AbstractExpression>();
 		for (AbstractExpression exp : usedExpressions) {
+			ExpressionVariableSetterPCTMC setter = new ExpressionVariableSetterPCTMC(
+					unfoldedVariables);
+			exp.accept(setter);
 			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
 			exp.accept(visitor);
 			usedProducts.addAll(visitor.getUsedCombinedMoments());
@@ -111,6 +123,9 @@ public class DistributionSimulation extends PCTMCExperiment implements ISimulati
 
 		postprocessor.addReplicationObserver(this);
 		postprocessor.calculateDataPoints(constants);
+		for (PlotDescription pd:simulationPlots) {
+			postprocessor.plotData(simulation.toString(), constants, pd.getExpressions(), pd.getFilename());
+		}
 
 		PCTMCLogging.info("Simulation finished.");
 

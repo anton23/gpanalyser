@@ -23,6 +23,6 @@ public abstract class GroupOfDistributions {
 	public abstract void newReplication(double [][] data);
 	public abstract void simulationFinished();
 	public abstract void prepare(Constants constants, SimulationAnalysisNumericalPostprocessor postprocessor);
-	public abstract List<AbstractExpression> getUsedExpressions(Map<ExpressionVariable, AbstractExpression> unfoldedVariables);
+	public abstract List<AbstractExpression> getUsedExpressions();
 	
 }
