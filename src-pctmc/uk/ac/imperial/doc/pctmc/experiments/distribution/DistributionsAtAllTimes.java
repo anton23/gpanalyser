@@ -72,11 +72,21 @@ public class DistributionsAtAllTimes extends GroupOfDistributions {
 				"Value", "Time", "Probability");
 		
 		if (filename!=null && !filename.isEmpty()) {
-			FileUtils.write3Dfile(filename, distributions.getData()[0],
-					distributions.getMin(), distributions.getDstep(),
-					0.0, stepSize
+			FileUtils.write3Dfile(filename, transpose(distributions.getData()[0]),					
+					0.0, stepSize,
+					distributions.getMin(), distributions.getDstep()
 					);
 			FileUtils.write3DGnuplotFile(filename, "Value", "Time", "Probability");
 		}
+	}
+	
+	private double[][] transpose(double [][] a) {
+		double[][] ret = new double[a[0].length][a.length];
+		for (int i = 0; i < a.length; i++) {
+			for (int j = 0; j < a[0].length; j++) {
+				ret[j][i] = a[i][j];
+			}
+		}
+		return ret;
 	}
 }

@@ -28,7 +28,7 @@ public class EmpiricalDistributions {
 		max = Double.MIN_VALUE;
 		boolean allIntegers = true;
 		for (int r = 0; r < tmpData.length; r++) {
-			for (int t = 1; t < tmpData[r].length-1; t++) { // TODO ingoring initial and last time step
+			for (int t = 0; t < tmpData[r].length-1; t++) { // TODO ingoring initial and last time step
 				for (int e = 0; e < tmpData[r][t].length; e++) {
 					if (tmpData[r][t][e] < min) {
 						min = tmpData[r][t][e];						
@@ -50,7 +50,7 @@ public class EmpiricalDistributions {
 		}
 		data = new double[nexpressions][nbuckets][timeSteps];		
 		for (int e = 0; e < nexpressions; e++) {
-			for (int t = 1; t < timeSteps-1; t++) {
+			for (int t = 0; t < timeSteps-1; t++) {
 				for (int r = 0; r < replications; r++) {
 					double value = tmpData[r][t][e];					
 					int bucket = dstep > 0.0 ? (int)Math.floor((value - min)/dstep) : 0;
