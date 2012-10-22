@@ -36,6 +36,10 @@ public class PlotAtDescription {
 			atTimes[i++] = c.getAtTime();
 		}
 	}
+	
+	public PlotAtDescription(AbstractExpression expression, double time) {
+		this(expression, time, new LinkedList<PlotConstraint>(), "");
+	}
 
 	public void unfoldExpressions(
 			Map<ExpressionVariable, AbstractExpression> unfoldedVariables) {
