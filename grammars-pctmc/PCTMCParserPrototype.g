@@ -274,13 +274,15 @@ distributionSimulation:
  simulation (LBRACE
     plotDescription*
   RBRACE)? COMPUTES LBRACE 
-  distributionSpecifications
- RBRACE -> ^(DISTRIBUTION_SIMULATION simulation (LBRACE plotDescription* RBRACE)? COMPUTES distributionSpecifications)
+  distributionSpecification+
+ RBRACE -> ^(DISTRIBUTION_SIMULATION simulation (LBRACE plotDescription* RBRACE)? COMPUTES distributionSpecification+)
 ;
 
-distributionSpecifications:
-   (expression INTO INTEGER BINS (TO FILENAME)? SEMI)+
+
+distributionSpecification:
+    expression (ATTIME REALNUMBER (COMMA plotAt)*)? INTO INTEGER BINS (TO FILENAME)? SEMI   
 ;
+
 
 iterateExperiment
 // Allows addition of new constants in range specifications

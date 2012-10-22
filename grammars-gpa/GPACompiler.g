@@ -80,6 +80,7 @@ import PCTMCCompilerPrototype;
 	import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionSimulation;
 	import uk.ac.imperial.doc.pctmc.experiments.distribution.GroupOfDistributions;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtAllTimes;
+  import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtTimes;
 }
 
 @members {

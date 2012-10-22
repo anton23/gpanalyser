@@ -49,6 +49,7 @@ options{
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionSimulation;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.GroupOfDistributions;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtAllTimes;
+  import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtTimes;
   
 }
 */
@@ -156,7 +157,7 @@ distributionSimulation[PCTMC pctmc, Constants constants, Map<ExpressionVariable,
 ^(DISTRIBUTION_SIMULATION
   a=simulation[$pctmc,$constants]
     (LBRACE pds=plotDescriptions RBRACE {plots = $pds.p;})? COMPUTES 
-   (p=distributionSpecification {distributionGroups.add($p.group);})*
+   (p=distributionSpecification[$constants] {distributionGroups.add($p.group);})*
    
   {$experiment = new DistributionSimulation($a.analysis,
       plots,
@@ -165,12 +166,22 @@ distributionSimulation[PCTMC pctmc, Constants constants, Map<ExpressionVariable,
       $unfoldedVariables);})
 ;
 
-distributionSpecification returns [GroupOfDistributions group]
+distributionSpecification[Constants constants] returns [GroupOfDistributions group]
 @init {
   String file = "";
+  List<PlotAtDescription> plotAts = new LinkedList<PlotAtDescription>();
 }:
-    e=expression INTO n=integer BINS (TO s=FILENAME {file=$s.text.replace("\"","");})? SEMI
-    {$group = new DistributionsAtAllTimes($e.e, $n.value, file);}
+    (e=expression  
+      (ATTIME a=realnumber {plotAts.add(new PlotAtDescription($e.e,$a.value));} (COMMA p=plotAt[$constants] {plotAts.add(new PlotAtDescription($p.e, $p.t));})*)?
+    )
+          INTO n=integer BINS (TO s=FILENAME {file=$s.text.replace("\"","");})? SEMI
+    {
+      if (plotAts.isEmpty()) {
+        $group = new DistributionsAtAllTimes($e.e, $n.value, file);
+      } else {
+        $group = new DistributionsAtTimes(plotAts, $n.value, file);
+      }
+    }
 ;
 
 iterateExperiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment iterate]
