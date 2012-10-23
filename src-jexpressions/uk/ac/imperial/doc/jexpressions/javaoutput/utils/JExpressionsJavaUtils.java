@@ -1,10 +1,96 @@
 package uk.ac.imperial.doc.jexpressions.javaoutput.utils;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 
 
 public class JExpressionsJavaUtils {
+	
+	static Map<String, String> files;
+	public static Map<String, double[][]> fileValues;
+
+	
+	private static int binarySearch(double[][] values, double v) {
+		int l = 0; int r = values.length - 1;
+		while (l <= r) {
+			int mid = l + (r - l) / 2;
+			if (values[mid][0] < v) {
+				l = mid + 1;
+			} else if (values[mid][0] > v) {
+				r = mid - 1;
+			} else {
+				return mid;
+			}
+				
+		}
+		return r;
+	}
+	
+	public static double evaluate(String fun, double t) {
+		double[][] values = fileValues.get(fun);		
+		int i = binarySearch(values, t);
+		if (i < 0) {
+			throw new AssertionError("Function " + fun + " is not defined for values " + t);
+		}
+		return values[i][1];
+	}
+	
+	private static Comparator<double[]> comparator = new Comparator<double[]> () {
+		
+		@Override
+		public int compare(final double[] a, final double[] b) {
+			return Double.compare(a[0], b[0]);
+		}
+	};
+	
+	private static void loadFile(String fun, String filename) {
+		try {
+			FileReader f = new FileReader(filename);
+			BufferedReader in = new BufferedReader(f);
+			String s = "";
+			List<double[]> valuesList = new LinkedList<double[]>();
+			while(true) {
+				s = in.readLine();
+				if (s == null) break;
+				String[] tmp = s.split(" ");
+				double x = Double.parseDouble(tmp[0]);
+				double y = Double.parseDouble(tmp[1]);
+				valuesList.add(new double[]{x, y});				
+			}
+			double[][] values = new double[valuesList.size()][];
+			int i = 0;
+			for (double[] v : valuesList) {
+				values[i++] = v;
+			}
+			Arrays.sort(values, comparator);
+			fileValues.put(fun, values);
+		} catch (FileNotFoundException e) {
+			throw new AssertionError("File " + filename + " not found!");
+		} catch (IOException e) {
+			throw new AssertionError("Problems reading the file " + filename + "!");
+		}		
+	}
+	
+	public static void loadFiles(Map<String, String> _files) {
+		if (files == null) {
+			files = _files;
+			fileValues = new HashMap<String, double[][]>();
+		}		
+		for (Map.Entry<String, String> e : _files.entrySet()) {
+			loadFile(e.getKey(), e.getValue());
+		}
+	}
 
 	public static double div(double a, double b) {
 		if (b == 0.0) {
