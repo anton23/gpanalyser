@@ -23,10 +23,12 @@ public class EmpiricalDistributions {
 		tmpData[r++] = data;
 	}
 	
+	boolean allIntegers;
+	
 	public void calculateDistributions() {
 		min = Double.MAX_VALUE;
 		max = Double.MIN_VALUE;
-		boolean allIntegers = true;
+		allIntegers = true;
 		for (int r = 0; r < tmpData.length; r++) {
 			for (int t = 0; t < tmpData[r].length; t++) { // TODO ingoring initial and last time step
 				for (int e = 0; e < tmpData[r][t].length; e++) {

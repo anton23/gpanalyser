@@ -66,10 +66,17 @@ public class DistributionsAtAllTimes extends GroupOfDistributions {
 		PCTMCChartUtilities.drawChart(fullDataset, "Value", "Probability", "",
 		expression.toString());
 		
-		ChartUtils3D.drawChart(expression.toString(), "Distribution", distributions.getData()[0],
-				distributions.getMin(), distributions.getDstep(),
-				0.0, stepSize,				
-				"Value", "Time", "Probability");
+		if (distributions.allIntegers) {		
+			ChartUtils3D.draw3dhistogram(expression.toString(), "Distribution", distributions.getData()[0],
+					distributions.getMin(), distributions.getDstep(),
+					0.0, stepSize,				
+					"Value", "Time", "Probability");
+		} else {
+			ChartUtils3D.draw3dhistogramContInY(expression.toString(), "Distribution", distributions.getData()[0],
+					distributions.getMin(), distributions.getDstep(),
+					0.0, stepSize,				
+					"Value", "Time", "Probability");
+		}
 		
 		if (filename!=null && !filename.isEmpty()) {
 			FileUtils.write3Dfile(filename, transpose(distributions.getData()[0]),					

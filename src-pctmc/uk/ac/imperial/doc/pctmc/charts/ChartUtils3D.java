@@ -22,6 +22,156 @@ public class ChartUtils3D {
 
 	public static Rectangle DEFAULT_WINDOW_DIMENSIONS = new Rectangle(0, 0,
 			600, 500);
+	
+	
+	public static void draw3dhistogram(String windowTitle, String command,
+			double[][] data, double minx, double dx, double miny, double dy,
+			String xlabel, String ylabel, String zlabel) {
+		if (!PCTMCChartUtilities.jogl)
+			return;
+		List<Polygon> polygons = new ArrayList<Polygon>();
+		for (int ix = 0; ix < data.length - 1; ix++) {
+			double x = minx + ix * dx;
+			for (int iy = 0; iy < data[0].length - 1; iy++) {
+				double y = miny + iy * dy;				
+				double z00 = data[ix][iy];
+				double z01 = data[ix][iy + 1];
+				double z11 = data[ix + 1][iy + 1];
+				double z10 = data[ix + 1][iy];
+				
+				Polygon polygonTop = new Polygon();				
+				polygonTop.add(new Point(new Coord3d(x, y, z00)));				
+				polygonTop.add(new Point(new Coord3d(x, y + dy, z00)));				
+				polygonTop.add(new Point(new Coord3d(x + dx, y + dy, z00)));				
+				polygonTop.add(new Point(new Coord3d(x + dx, y, z00)));
+				
+				Polygon polygonY = new Polygon(); // parallel with the Y plane				
+				polygonY.add(new Point(new Coord3d(x + dx, y, z00)));				
+				polygonY.add(new Point(new Coord3d(x + dx, y, z10)));				
+				polygonY.add(new Point(new Coord3d(x + dx, y + dy, z10)));				
+				polygonY.add(new Point(new Coord3d(x + dx, y + dy, z00)));
+				
+				Polygon polygonX = new Polygon(); // parallel with the Y plane				
+				polygonX.add(new Point(new Coord3d(x, y + dy, z00)));				
+				polygonX.add(new Point(new Coord3d(x + dx, y + dy, z00)));				
+				polygonX.add(new Point(new Coord3d(x + dx, y + dy, z01)));				
+				polygonX.add(new Point(new Coord3d(x, y + dy, z01)));
+				
+				if (Double.isInfinite(z00))
+					continue;
+				polygons.add(polygonTop);
+				polygons.add(polygonY);
+				polygons.add(polygonX);
+			}
+		}
+
+		Shape surface = new Shape(polygons);
+		float zmin = surface.getBounds().getZmin();
+		float zmax = surface.getBounds().getZmax();
+		surface.setColorMapper(new ColorMapper(new ColorMapRainbow(), zmin,
+				zmax, new org.jzy3d.colors.Color(1, 1, 1, 1f)));
+		surface.setWireframeDisplayed(true);
+		surface.setWireframeColor(org.jzy3d.colors.Color.BLACK);
+
+		Chart chart = new Chart("swing");
+		chart.getAxeLayout().setXAxeLabel(xlabel);
+		chart.getAxeLayout().setYAxeLabel(ylabel);
+		chart.getAxeLayout().setZAxeLabel(zlabel);
+
+		chart.getScene().getGraph().add(surface);
+
+
+
+		chart.getView().getCamera().setStretchToFill(true);
+		chart.getView().setMaximized(true);
+
+		CanvasSwing canvas = (CanvasSwing) chart.getCanvas();
+
+		JPanel panel3d = new JPanel();
+		panel3d.setLayout(new BorderLayout());
+		panel3d.add(new JLabel(command), BorderLayout.SOUTH);
+		panel3d.add(canvas);
+
+		ViewMouseControllerSwing mouse = new ViewMouseControllerSwing();
+		mouse.addTarget(chart.getView());
+		mouse.addMouseSource(canvas);
+
+		PCTMCChartUtilities.addChart(panel3d, command, windowTitle);
+	}
+
+	
+	public static void draw3dhistogramContInY(String windowTitle, String command,
+			double[][] data, double minx, double dx, double miny, double dy,
+			String xlabel, String ylabel, String zlabel) {
+		if (!PCTMCChartUtilities.jogl)
+			return;
+		List<Polygon> polygons = new ArrayList<Polygon>();
+		for (int ix = 0; ix < data.length - 1; ix++) {
+			double x = minx + ix * dx;
+			for (int iy = 0; iy < data[0].length - 1; iy++) {
+				double y = miny + iy * dy;				
+				double z00 = data[ix][iy];
+				double z01 = data[ix][iy + 1];
+				double z11 = data[ix + 1][iy + 1];
+				double z10 = data[ix + 1][iy];
+				
+				Polygon polygonTop = new Polygon();				
+				polygonTop.add(new Point(new Coord3d(x, y, z00)));				
+				polygonTop.add(new Point(new Coord3d(x, y + dy, z00)));				
+				polygonTop.add(new Point(new Coord3d(x + dx, y + dy, z10)));				
+				polygonTop.add(new Point(new Coord3d(x + dx, y, z10)));
+				
+				
+				Polygon polygonX = new Polygon(); // parallel with the Y plane				
+				polygonX.add(new Point(new Coord3d(x, y + dy, z00)));				
+				polygonX.add(new Point(new Coord3d(x + dx, y + dy, z10)));				
+				polygonX.add(new Point(new Coord3d(x + dx, y + dy, z11)));				
+				polygonX.add(new Point(new Coord3d(x, y + dy, z01)));
+				polygons.add(polygonX);
+				
+				if (Double.isInfinite(z00))
+					continue;
+				polygons.add(polygonTop);
+				
+				
+			}
+		}
+
+		Shape surface = new Shape(polygons);
+		float zmin = surface.getBounds().getZmin();
+		float zmax = surface.getBounds().getZmax();
+		surface.setColorMapper(new ColorMapper(new ColorMapRainbow(), zmin,
+				zmax, new org.jzy3d.colors.Color(1, 1, 1, 1f)));
+		surface.setWireframeDisplayed(true);
+		surface.setWireframeColor(org.jzy3d.colors.Color.BLACK);
+
+		Chart chart = new Chart("swing");
+		chart.getAxeLayout().setXAxeLabel(xlabel);
+		chart.getAxeLayout().setYAxeLabel(ylabel);
+		chart.getAxeLayout().setZAxeLabel(zlabel);
+
+		chart.getScene().getGraph().add(surface);
+
+
+
+		chart.getView().getCamera().setStretchToFill(true);
+		chart.getView().setMaximized(true);
+
+		CanvasSwing canvas = (CanvasSwing) chart.getCanvas();
+
+		JPanel panel3d = new JPanel();
+		panel3d.setLayout(new BorderLayout());
+		panel3d.add(new JLabel(command), BorderLayout.SOUTH);
+		panel3d.add(canvas);
+
+		ViewMouseControllerSwing mouse = new ViewMouseControllerSwing();
+		mouse.addTarget(chart.getView());
+		mouse.addMouseSource(canvas);
+
+		PCTMCChartUtilities.addChart(panel3d, command, windowTitle);
+	}
+
+	
 
 	public static void drawChart(String windowTitle, String command,
 			double[][] data, double minx, double dx, double miny, double dy,
