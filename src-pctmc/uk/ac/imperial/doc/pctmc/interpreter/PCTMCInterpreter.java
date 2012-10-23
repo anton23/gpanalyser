@@ -9,6 +9,7 @@ import org.antlr.runtime.tree.TreeNodeStream;
 import org.antlr.runtime.tree.TreeParser;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
@@ -226,6 +227,9 @@ public class PCTMCInterpreter {
 	public void processFileRepresentation(
 			PCTMCFileRepresentation fileRepresentation) {
 		Constants constants = fileRepresentation.getConstants();
+		if (constants.getFiles() != null) {
+			JExpressionsJavaUtils.loadFiles(constants.getFiles());
+		}
 		Multimap<AbstractPCTMCAnalysis, PlotDescription> plots = fileRepresentation
 				.getPlots();
 		List<PCTMCExperiment> experiments = fileRepresentation.getExperiments();

@@ -15,8 +15,9 @@ import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 public class Constants {
 
 	protected Map<String, Integer> constantIndex;
-
 	private Map<String, Double> constants;
+	private Map<String, String> files;
+		
 
 	/**
 	 * Creates a Constants objects with the given underlying value map. Also
@@ -27,6 +28,7 @@ public class Constants {
 	public Constants(Map<String, Double> constants) {
 		super();
 		this.constants = constants;
+		files = new HashMap<String, String>();
 		calculateConstantIndex();
 	}
 
@@ -34,6 +36,11 @@ public class Constants {
 			Map<String, Integer> constantIndex) {
 		this.constantIndex = constantIndex;
 		this.constants = constants;
+		files = new HashMap<String, String>();
+	}
+	
+	public void addFile(String filename, String fun) {
+		files.put(fun, filename);
 	}
 
 	private void calculateConstantIndex() {
@@ -110,6 +117,12 @@ public class Constants {
 			ret[e.getValue()] = constants.get(e.getKey());
 		}
 		return ret;
+	}
+	
+	
+
+	public Map<String, String> getFiles() {
+		return files;
 	}
 
 	/**
