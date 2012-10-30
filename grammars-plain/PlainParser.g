@@ -133,3 +133,24 @@ componentList returns [Multiset<String> components]
 }:
 n1=UPPERCASENAME {$components.add($n1.text);}(COMMA n2=UPPERCASENAME {$components.add($n2.text);})* -> UPPERCASENAME+ 
 ;
+
+analysis:
+ (odeAnalysis
+ |inhomogeneousODEAnalysis
+ |simulation
+ |accuratesimulation
+ |compare)
+
+ (LBRACE
+    plotDescription*
+  RBRACE)?
+;
+
+inhomogeneousODEAnalysis:
+  INHOMOGENEOUSODES
+  odeParameters?
+  {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
+  odeSettings
+  {hint.pop();}
+  -> ^(INHOMOGENEOUSODES odeParameters? odeSettings)
+;

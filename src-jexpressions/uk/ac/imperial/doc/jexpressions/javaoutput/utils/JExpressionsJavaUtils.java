@@ -1,11 +1,62 @@
 package uk.ac.imperial.doc.jexpressions.javaoutput.utils;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 
 
 public class JExpressionsJavaUtils {
-
+	
+	private static Comparator<double[]> comparator = new Comparator<double[]> () {
+		@Override
+		public int compare(final double[] a, final double[] b) {
+			return Double.compare(a[0], b[0]);
+		}
+	};
+	
+	public static<T> Map<T,double[][]> loadTimeSeriesFromFile(Map<T, String> _files) {
+		Map<T,double[][]> fileValues = new HashMap<T, double[][]>();	
+		for (Map.Entry<T, String> e : _files.entrySet()) {
+			String filename = e.getValue();
+			try {
+				FileReader f = new FileReader(filename);
+				BufferedReader in = new BufferedReader(f);
+				String s = "";
+				List<double[]> valuesList = new LinkedList<double[]>();
+				while(true) {
+					s = in.readLine();
+					if (s == null) break;
+					String[] tmp = s.split(" ");
+					double x = Double.parseDouble(tmp[0]);
+					double y = Double.parseDouble(tmp[1]);
+					valuesList.add(new double[]{x, y});				
+				}
+				double[][] values = new double[valuesList.size()][];
+				int i = 0;
+				for (double[] v : valuesList) {
+					values[i++] = v;
+				}
+				Arrays.sort(values, comparator);
+				fileValues.put(e.getKey(), values);
+			} catch (FileNotFoundException ex) {
+				throw new AssertionError("File " + filename + " not found!");
+			} catch (IOException ex) {
+				throw new AssertionError("Problems reading the file " + filename + "!");
+			}
+		}
+		return fileValues;
+	}
+	
 	public static double div(double a, double b) {
 		if (b == 0.0) {
 			return 0.0;

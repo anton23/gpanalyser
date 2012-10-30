@@ -55,7 +55,7 @@ options{
 */
 
 @members{
-  Map<ExpressionVariable,AbstractExpression> vars; 
+  Map<ExpressionVariable,AbstractExpression> vars;
 }
 
 completeSystem returns[Constants constants,
@@ -93,10 +93,12 @@ system returns[Constants constants,
 }
 
 : constantDefinition[constantMap]* {$constants = new Constants(constantMap);}
+   rateFileDefinitions[]*
    varDefinition* {$unfoldedVariables = new ExpressionVariableUnfolderPCTMC(vars).unfoldVariables();
                     vars = $unfoldedVariables; }
    m=modelDefinition[$unfoldedVariables,$constants] {$pctmc = $m.pctmc;}
-   
+   jumpFileDefinitions[]*
+   resetFileDefinitions[]*
    analysis[$pctmc, $constants, $plots]*
    
    (e=experiment[$pctmc, $constants, $unfoldedVariables] {$experiments.add($e.experiment);})* 
@@ -140,7 +142,7 @@ modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Con
         }
       }
 
-      $pctmc = new PCTMC(initMap, events);
+      $pctmc = gParent.genNewPCTMC(initMap, events);
 };
 
 experiment[PCTMC pctmc, Constants constants, Map<ExpressionVariable,AbstractExpression> unfoldedVariables] returns [PCTMCExperiment experiment]:
@@ -248,7 +250,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
 :
 (o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
  | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
- | accs=accuratesimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | accs=accurateSimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 )
  (LBRACE       
@@ -300,7 +302,6 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
       }
          
     )
-
 ;
 
 odeSettings returns
@@ -359,7 +360,7 @@ simulationSettings returns
   }
 ;
 
-accuratesimulation[PCTMC pctmc, Constants constants] 
+accurateSimulation[PCTMC pctmc, Constants constants] 
 returns [PCTMCSimulation analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
@@ -412,6 +413,18 @@ constantDefinition[Map<String,Double> map]:
   ^(CONSTDEF id=constant (value=realnumber {$map.put($id.text,$value.value);}
                          |valueI=integer   {$map.put($id.text,new Double($valueI.value));})
 );
+
+rateFileDefinitions[]:
+   (LOADRATES f=FILENAME INTO fun=LOWERCASENAME {} SEMI)
+;
+
+jumpFileDefinitions[]:
+   (LOADJUMPS f=FILENAME INTO t=state {} SEMI)
+;
+
+resetFileDefinitions[]:
+   (LOADRESETS f=FILENAME INTO t=state {} SEMI)
+;
 
 variable returns [String text]:
   ^(VARIABLE id=LOWERCASENAME) {$text = $id.text;}
