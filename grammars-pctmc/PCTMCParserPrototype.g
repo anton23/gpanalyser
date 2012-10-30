@@ -233,9 +233,11 @@ extensions: ;
 
 system:
   {requireDefinitions = true;}
-  constantDefinition* varDefinition* 
+  constantDefinition* rateFileDefinition* varDefinition* 
   {hint.push("incomplete model definition");} modelDefinition {hint.pop();}
   {hint.push("allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise'");}
+  jumpFileDefinition*
+  resetFileDefinition*
   analysis* experiment*
   {hint.pop();}
 ;
@@ -471,6 +473,15 @@ constantDefinition:
     (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();} 
      {constants.add($c.text);}
      -> ^(CONSTDEF $c $rate);
+     
+rateFileDefinition:
+   LOADRATES FILENAME INTO LOWERCASENAME SEMI;
+
+jumpFileDefinition:
+   LOADJUMPS FILENAME INTO state SEMI; 
+
+resetFileDefinition:
+   LOADRESETS FILENAME INTO state SEMI;
   
 varDefinition:
   variable DEF expression SEMI -> ^(VARDEF variable expression);

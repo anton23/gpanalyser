@@ -43,6 +43,8 @@ import PCTMCCompilerPrototype;
   
   import uk.ac.imperial.doc.gpa.plain.expressions.*; 
   import uk.ac.imperial.doc.gpa.plain.representation.*;
+  import uk.ac.imperial.doc.gpa.plain.representation.timed.*;
+  import uk.ac.imperial.doc.gpa.plain.postprocessors.numerical.*;
    
   import com.google.common.collect.Multimap;
   import com.google.common.collect.LinkedHashMultimap;
@@ -51,13 +53,13 @@ import PCTMCCompilerPrototype;
   import com.google.common.collect.Multiset;
   
   
-    import uk.ac.imperial.doc.gpa.syntax.CompilerError;
+  import uk.ac.imperial.doc.gpa.syntax.CompilerError;
   import uk.ac.imperial.doc.pctmc.syntax.CustomRecognitionException;
   import uk.ac.imperial.doc.pctmc.syntax.ErrorReporter;
   
   import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
  
- import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
+  import uk.ac.imperial.doc.pctmc.interpreter.IExtension;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionSimulation;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.GroupOfDistributions;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtAllTimes;
@@ -67,20 +69,19 @@ import PCTMCCompilerPrototype;
 
 
 @members {
-
-     protected Stack<String> hint = new Stack<String>();
+	// Reporting utility
+    protected Stack<String> hint = new Stack<String>(); 
+    protected ErrorReporter errorReporter;
      
-     protected ErrorReporter errorReporter;
+    public void setErrorReporter(ErrorReporter errorReporter) {
+    	this.errorReporter = errorReporter;
+    }
      
-     public void setErrorReporter(ErrorReporter errorReporter) {
-          this.errorReporter = errorReporter;
-     }
+    public String getErrorHeader(RecognitionException e) {
+    	return "line "+e.line+":"+e.charPositionInLine;
+  	}
      
-     public String getErrorHeader(RecognitionException e) {
-    return "line "+e.line+":"+e.charPositionInLine;
-  }
-     
-       public void displayRecognitionError(String[] tokenNames,
+	public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
         String hdr = getErrorHeader(e);
         String msg = getErrorMessage(e, tokenNames);
@@ -91,33 +92,34 @@ import PCTMCCompilerPrototype;
     }
     
         
-      public String getErrorMessage(RecognitionException e,
+	public String getErrorMessage(RecognitionException e,
                               String[] tokenNames) {
-        String ret;
         if (!hint.isEmpty()) {
-          ret = hint.peek();
-        } else{
-          ret =  super.getErrorMessage(e, tokenNames);
+          return hint.peek();
         }
-        return ret;
-      }
-}
+        return  super.getErrorMessage(e, tokenNames);
+	}
+    
+    // Events for time inhomogenous PCTMCs 
+	protected TimedEvents mTimedEvents = new TimedEvents(); 
 
+  	public PCTMC genNewPCTMC(Map<State,AbstractExpression> initMap, List<EvolutionEvent> events) {
+		return new PlainPCTMC(initMap, events, mTimedEvents);
+  	}
+}
 
 @rulecatch {
-  catch (RecognitionException re) {
-   reportError(re);  
-   recover(input, re);
-  }
-  catch (AssertionError e) {
-   reportError(new CustomRecognitionException(input, e.getMessage()));
-   recover(input, new CustomRecognitionException(input, e.getMessage()));
-  }
+	catch (RecognitionException re) {
+		reportError(re);  
+		recover(input, re);
+	}
+	catch (AssertionError e) {
+		reportError(new CustomRecognitionException(input, e.getMessage()));
+		recover(input, new CustomRecognitionException(input, e.getMessage()));
+	}
 }
 
-
 start:;
-
 
 state returns [State t]
 @init{
@@ -130,4 +132,64 @@ state returns [State t]
 | ^(COUNT c=UPPERCASENAME) {$t = new CountingState($c.text);}
 ;
 
+rateFileDefinitions[]:
+   (LOADRATES f=FILENAME INTO fun=LOWERCASENAME {mTimedEvents.addRateFile($fun.text,$f.text.replace("\"","")); } SEMI)
+;
 
+jumpFileDefinitions[]:
+   (LOADJUMPS f=FILENAME INTO t=state {mTimedEvents.addJumpFile($t.t,$f.text.replace("\"","")); } SEMI)
+;
+
+resetFileDefinitions[]:
+   (LOADRESETS f=FILENAME INTO t=state {mTimedEvents.addResetFile($t.t,$f.text.replace("\"","")); } SEMI)
+;
+
+analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
+returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
+:
+(o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
+ | i=inhomogeneousODEAnalysis[pctmc,constants] {$analysis=$i.analysis; $postprocessor=$i.postprocessor;}
+ | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | accs=accurateSimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
+)
+ (LBRACE       
+         ps=plotDescriptions
+ RBRACE
+ {
+    if ($plots!=null) $plots.putAll($analysis,$ps.p);
+ }
+)? 
+;
+
+inhomogeneousODEAnalysis[PCTMC pctmc, Constants constants]
+returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
+@init{
+  Map<String, Object> parameters = new HashMap<String, Object>();
+  Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
+}:
+  ^(INHOMOGENEOUSODES
+         (LBRACK
+             p1=parameter {parameters.put($p1.name, $p1.value);}
+             (COMMA p=parameter
+                          {parameters.put($p.name, $p.value);})*
+          RBRACK)?
+         settings=odeSettings 
+         {
+		      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
+		      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+		      $settings.stopTime.accept(stopEval);
+		      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+		      $settings.stepSize.accept(stepEval);
+		      if (postprocessorParameters.isEmpty()) {
+		        $postprocessor = new InhomogeneousODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+		            stepEval.getResult(),$settings.density);
+		      } else {
+		        $postprocessor = new InhomogeneousODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+		           stepEval.getResult(),$settings.density, postprocessorParameters);
+		      }
+		      $analysis.addPostprocessor($postprocessor);
+      }
+         
+    )
+;

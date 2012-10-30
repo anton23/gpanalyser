@@ -24,7 +24,7 @@ TIMES	:	'*';
 DIVIDE	:	'/';
 DEF: '='; 
 PATTERN:'%';
-
+TIME: 't';
 
 MIN: 'min';
 MAX: 'max';
@@ -53,7 +53,6 @@ COV: 'Cov';
 
 ODES: 'ODEs';
 SIMULATION: 'Simulation';
-CISIMULATION: 'CISimulation';
 ACCURATESIMULATION: 'AccurateSimulation';
 COMPARE: 'Compare';
 ITERATE: 'Iterate';
@@ -78,6 +77,9 @@ GEQ:'>=';
 RANGLE:'>';
 LANGLE:'<';
 
+LOADRATES: 'loadRates';
+LOADJUMPS: 'loadJumps';
+LOADRESETS: 'loadResets';
 
 DERMEAN: 'dE';
 DT: 'dt';
