@@ -16,13 +16,13 @@ import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
-	private PCTMCODEAnalysis odeAnalysis;
+	protected PCTMCODEAnalysis odeAnalysis;
 
-	private int density;
+	protected int density;
 	
 
-	private String overrideCode;
-	private String overrideCodeClassName;
+	protected String overrideCode;
+	protected String overrideCodeClassName;
 	
 	public int getDensity() {
 		return density;
@@ -45,7 +45,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		return new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, density);
 	}
 
-	private ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
+	protected ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
 			PCTMCODEAnalysis odeAnalysis, JavaODEsPreprocessed preprocessedImplementation) {
 		this(stopTime, stepSize, density);
 		this.odeAnalysis = odeAnalysis;
@@ -113,7 +113,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		
 	}
 
-	private JavaODEsPreprocessed preprocessedImplementation;
+	protected JavaODEsPreprocessed preprocessedImplementation;
 
 	@Override
 	public void calculateDataPoints(Constants constants) {

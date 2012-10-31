@@ -138,6 +138,7 @@ analysis:
  (odeAnalysis
  |inhomogeneousODEAnalysis
  |simulation
+ |inhomogeneousSimulation
  |accuratesimulation
  |compare)
 
@@ -153,4 +154,10 @@ inhomogeneousODEAnalysis:
   odeSettings
   {hint.pop();}
   -> ^(INHOMOGENEOUSODES odeParameters? odeSettings)
+;
+
+inhomogeneousSimulation:
+  INHOMOGENEOUSSIMULATION
+  simulationSettings
+  -> ^(INHOMOGENEOUSSIMULATION simulationSettings)
 ;

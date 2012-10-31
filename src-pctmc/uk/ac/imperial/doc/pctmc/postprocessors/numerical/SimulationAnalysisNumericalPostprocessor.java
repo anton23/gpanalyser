@@ -41,14 +41,15 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class SimulationAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
+
 	//private PCTMCSimulation simulation;
 	
-	private SimulationUpdater updater;
-	private AccumulatorUpdater accUpdater; 
-	private AggregatedStateNextEventGenerator eventGenerator;
+	protected SimulationUpdater updater;
+	protected AccumulatorUpdater accUpdater; 
+	protected AggregatedStateNextEventGenerator eventGenerator;
 	
-	private String overrideCode;
-	private String overrideCodeClassName;
+	protected String overrideCode;
+	protected String overrideCodeClassName;
 
 	protected int replications; 
 
@@ -103,7 +104,6 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		dataPoints = new double[(int) Math.ceil(stopTime / stepSize)]
 		                       [momentIndex.size() + generalExpectationIndex.size()];
 	}
-
 	
 	public SimulationAnalysisNumericalPostprocessor(double stopTime,
 			double stepSize, int replications) {
@@ -141,7 +141,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 	}
 
-    private void setInitialExpressions() {
+    protected void setInitialExpressions() {
         int n = simulation.getPCTMC().getStateIndex().size();
         initialExpressions = new AbstractExpression[n];
         for (int i = 0; i < n; i++) {
@@ -150,7 +150,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
     }
 	
 	protected String productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode ;
-    private PCTMCSimulation simulation;
+    protected PCTMCSimulation simulation;
 	
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
@@ -181,7 +181,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		}
 	}
 	
-	private String eventGeneratorClassName;
+	protected String eventGeneratorClassName;
 	
 	protected void compileUpdatersAndGenerator() {
 		updater = (SimulationUpdater) ClassCompiler.getInstance(
@@ -203,7 +203,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	
 	
 	
-	private void simulate(Constants constants) {
+	protected void simulate(Constants constants) {
 		eventGenerator.setRates(constants.getFlatConstants());
 
         setInitialExpressions();
@@ -256,15 +256,9 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	}
 	
 	protected void notifyReplicationObservers(double[][] tmp) {
-		double[][] data = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
-			                                          					.size()
-			                                          					+ generalExpectationIndex.size()];
-		for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
-			updater.update(data[t], tmp[t]);				
-		}
 		if (replicationObservers == null) return;
 		for (ISimulationReplicationObserver o: replicationObservers) {
-			o.newReplication(data);
+			o.newReplication(tmp);
 		}
 	}
 	
@@ -431,7 +425,4 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		}
 		return code.toString();
 	}
-
-
-
 }

@@ -148,8 +148,9 @@ analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDe
 returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
 :
 (o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
- | i=inhomogeneousODEAnalysis[pctmc,constants] {$analysis=$i.analysis; $postprocessor=$i.postprocessor;}
+ | io=inhomogeneousODEAnalysis[pctmc,constants] {$analysis=$io.analysis; $postprocessor=$io.postprocessor;}
  | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | is=inhomogeneousSimulation[pctmc,constants] {$analysis=$is.analysis; $postprocessor=$is.postprocessor;}
  | accs=accurateSimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 )
@@ -192,4 +193,30 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
       }
          
     )
+;
+
+inhomogeneousSimulation[PCTMC pctmc, Constants constants]
+returns [PCTMCSimulation analysis, InhomogeneousSimulationAnalysisNumericalPostprocessor postprocessor]
+@init{
+  Map<String, Object> parameters = new HashMap<String, Object>();
+}:
+  ^(INHOMOGENEOUSSIMULATION settings=simulationSettings
+    (COMMA p=parameter {parameters.put($p.name, $p.value);})*    
+    {
+      $analysis = new PCTMCSimulation($pctmc);
+
+      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+      $settings.stopTime.accept(stopEval);
+      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+      $settings.stepSize.accept(stepEval);
+      if (parameters.isEmpty()) {
+        $postprocessor = new InhomogeneousSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$settings.replications);
+      } else {
+        $postprocessor = new InhomogeneousSimulationAnalysisNumericalPostprocessor(
+            stopEval.getResult(),stepEval.getResult(),$settings.replications, parameters);
+      }
+      $analysis.addPostprocessor($postprocessor);
+    }
+       
+   )
 ;
