@@ -5,6 +5,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Update a constant or a population according to a
+ * discretely timed event
+ * 
+ * @author Chris Guenther
+ */
 public abstract class DiscreteTimedEventUpdater extends TimedEventUpdater
 {
 	protected Map<Double,Double> mValues;
@@ -19,7 +25,8 @@ public abstract class DiscreteTimedEventUpdater extends TimedEventUpdater
 	public Collection<Double> getAllEventTimes() {
 		return Collections.unmodifiableSet(mValues.keySet());
 	}
-	
+
+	@Override
 	public Double getValue(double time) {
 		return mValues.get(time);
 	}
