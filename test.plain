@@ -5,12 +5,20 @@ loadRates "theRates.dat" into mu;
 {A} -> {B} @ {A}*mu;
 {B} -> {A} @ {B}*0.2;
 
-{A} = 10;
+{A} = 100;
 
 loadJumps "theJumps.dat" into {A};
 loadResets "theResets.dat" into {A};
 
 InhomogeneousODEs[closure=NormalClosure,order=2](stopTime = 100.0, stepSize = 0.1, density = 1000){
+	E[{A}], E[{B}];
+	E[{A}{B}],E[{A}{A}],E[{B}{B}];	
+	E[{A}{B}]-E[{A}]*E[{B}],	
+	E[{A}{A}]-E[{A}]^2,	
+	E[{B}{B}]-E[{B}]^2;	
+}
+
+InhomogeneousSimulation(stopTime = 100.0, stepSize = 0.1, replications = 10000){
 	E[{A}], E[{B}];
 	E[{A}{B}],E[{A}{A}],E[{B}{B}];	
 	E[{A}{B}]-E[{A}]*E[{B}],	

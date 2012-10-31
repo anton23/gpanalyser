@@ -10,3 +10,4 @@ import PCTMCLexerPrototype;
  
 COUNT: '#';
 INHOMOGENEOUSODES: 'InhomogeneousODEs';
+INHOMOGENEOUSSIMULATION: 'InhomogeneousSimulation';

@@ -41,12 +41,58 @@ public class TimedEvents {
 	}
 
 	/**
+	 * @param countIndices
+	 * @return given the {@code countIndices} create and compile a class that modifies the population count vector
+	 * 		   used by the numerical post processor class when a population jump occurs
+	 */
+	public Map<State, ITimedEventPopUpdateFct> getJumpUpdateCountsFcts(Map<State, Integer> countIndices) {
+		Map<State, ITimedEventPopUpdateFct> updaters =
+				new HashMap<State, ITimedEventPopUpdateFct>();
+		int cnt=0;
+		for (State s : mJumpFiles.keySet()) {		
+			// Generate the code
+			String className = "PopUpdaterFctCountJump"+(cnt++);
+			String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
+						  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
+					      "public void update(double[] popVector, double value){\n";
+				   code += "popVector["+countIndices.get(s)+"] += value;\n";
+				   code += "}\n}";
+			ITimedEventPopUpdateFct popUpdFct = (ITimedEventPopUpdateFct)ClassCompiler.getInstance(code, className);
+			updaters.put(s, popUpdFct);
+		}
+		return updaters;
+	}
+	
+	/**
+	 * @param countIndices
+	 * @return given the {@code countIndices} create and compile a class that modifies the population count vector
+	 * 		   used by the numerical post processor class when a population reset occurs
+	 */
+	public Map<State, ITimedEventPopUpdateFct> getResetUpdateCountsFcts(Map<State, Integer> countIndices) {
+			Map<State, ITimedEventPopUpdateFct> updaters =
+					new HashMap<State, ITimedEventPopUpdateFct>();
+			int cnt=0;
+			for (State s : mJumpFiles.keySet()) {		
+				// Generate the code
+				String className = "PopUpdaterFctCountReset"+(cnt++);
+				String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
+							  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
+						      "public void update(double[] popVector, double value){\n";
+					   code += "popVector["+countIndices.get(s)+"] = value;\n";
+					   code += "}\n}";
+				ITimedEventPopUpdateFct popUpdFct = (ITimedEventPopUpdateFct)ClassCompiler.getInstance(code, className);
+				updaters.put(s, popUpdFct);
+			}
+			return updaters;
+	}
+	
+	/**
 	 * TODO: make it work for moments up to any order - not just order 2
 	 * @param momentIndicies
-	 * @return given the {@code momentIndicies} create and compile a class that modifies the population vector used
-	 * 		   by the numerical post processor class when a population jump occurs
+	 * @return given the {@code momentIndicies} create and compile a class that modifies the population
+	 * 		   moment vector used by the numerical post processor class when a population jump occurs
 	 */
-	public Map<State, ITimedEventPopUpdateFct> getJumpUpdateFcts(Map<CombinedPopulationProduct, Integer> momentIndicies) {
+	public Map<State, ITimedEventPopUpdateFct> getJumpUpdateMomentsFcts(Map<CombinedPopulationProduct, Integer> momentIndicies) {
 		Map<State, ITimedEventPopUpdateFct> updaters =
 				new HashMap<State, ITimedEventPopUpdateFct>();
 		int cnt=0;
@@ -58,7 +104,7 @@ public class TimedEvents {
 			int firstOrderIndex = findIndices(s, momentIndicies, firstOrderIndicides, secondOrderIndices, secondOrderOtherMomentIndex);
 			
 			// Generate the code
-			String className = "PopUpdaterFctJump"+(cnt++);
+			String className = "PopUpdaterFctMomentJump"+(cnt++);
 			String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
 						  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
 					      "public void update(double[] popVector, double value){\n";
@@ -88,14 +134,14 @@ public class TimedEvents {
 	/**
 	 * TODO: make it work for moments up to any order - not just order 2
 	 * @param momentIndicies
-	 * @return given the {@code momentIndicies} create and compile a class that modifies the population vector used
-	 * 		   by the numerical post processor class when a population reset occurs
+	 * @return given the {@code momentIndicies} create and compile a class that modifies the population
+	 * 		   moment vector used by the numerical post processor class when a population reset occurs
 	 */
-	public Map<State, ITimedEventPopUpdateFct> getResetUpdateFcts(Map<CombinedPopulationProduct, Integer> momentIndicies) {
+	public Map<State, ITimedEventPopUpdateFct> getResetUpdateMomentsFcts(Map<CombinedPopulationProduct, Integer> momentIndicies) {
 		Map<State, ITimedEventPopUpdateFct> updaters =
 				new HashMap<State, ITimedEventPopUpdateFct>();
 		int cnt=0;
-		for (State s : mJumpFiles.keySet()) {			
+		for (State s : mResetFiles.keySet()) {			
 			// Find important indices
 			Map<State,Integer> firstOrderIndicides = new HashMap<State,Integer>();
 			Set<Integer> secondOrderIndices = new HashSet<Integer>();
@@ -103,7 +149,7 @@ public class TimedEvents {
 			int firstOrderIndex = findIndices(s, momentIndicies, firstOrderIndicides, secondOrderIndices, secondOrderOtherMomentIndex);
 			
 			// Generate the code
-			String className = "PopUpdaterFctReset"+(cnt++);
+			String className = "PopUpdaterFctMomentReset"+(cnt++);
 			String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
 						  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
 					      "public void update(double[] popVector, double value){\n";
