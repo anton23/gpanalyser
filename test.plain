@@ -5,7 +5,7 @@ loadRates "theRates.dat" into mu;
 {A} -> {B} @ {A}*mu;
 {B} -> {A} @ {B}*0.2;
 
-{A} = 100;
+{A} = 10;
 
 loadJumps "theJumps.dat" into {A};
 loadResets "theResets.dat" into {A};
