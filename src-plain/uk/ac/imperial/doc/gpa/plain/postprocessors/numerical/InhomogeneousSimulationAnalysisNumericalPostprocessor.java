@@ -116,16 +116,24 @@ public class InhomogeneousSimulationAnalysisNumericalPostprocessor extends Simul
 				// We do not integrate between events that occur prior to time 0
 				double[][] tmp = null;
 				if (e.getKey() > 0) {
-					// Run the Simulation analysis
+					// Run the Simulation (each time we the simulation
+					// a little bit longer to ensure that the estimate
+					// at the time of the event is accurate
 					tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
-								initial, e.getKey()-lastStopTime, stepSize, accUpdater);
-					int tmpLastInd = tmp.length-1;
+								initial, e.getKey()-lastStopTime+2*stepSize, stepSize, accUpdater);
+					int tmpLastInd = tmp.length-2;
 					for (int i=0; i < initial.length; i++) {
 						initial[i] = tmp[tmpLastInd][i];
 					}
 					index = (int) (lastStopTime/stepSize);
 				}
 				lastStopTime = e.getKey();
+								
+				if(tmp == null) {continue;}
+				for (int t = index; t < index+tmp.length-2; t++) {
+					updater.update(dataPoints[t], tmp[t-index]);
+					updater.update(dataPointsRep[t], tmp[t-index]);	
+				}
 				
 				// Execute rate and population changes for current events
 				for (TimedEventUpdater teu : e.getValue()) {
@@ -134,12 +142,6 @@ public class InhomogeneousSimulationAnalysisNumericalPostprocessor extends Simul
 				eventGenerator.setRates(constanstTmp.getFlatConstants());
 				updater.setRates(constanstTmp.getFlatConstants());
 				accUpdater.setRates(constanstTmp.getFlatConstants());
-				
-				if(tmp == null) {continue;}
-				for (int t = index; t < index+tmp.length; t++) {
-					updater.update(dataPoints[t], tmp[t-index]);
-					updater.update(dataPointsRep[t], tmp[t-index]);	
-				}
 			}
 
 			notifyReplicationObservers(dataPointsRep);
