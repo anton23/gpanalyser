@@ -121,7 +121,7 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends ODEAnalysisN
 				}
 				lastStopTime = e.getKey();
 				
-				// Execute rate and population change updates for current events
+				// Execute rate and population moment changes for current events
 				for (TimedEventUpdater teu : e.getValue()) {
 					teu.update(constanstTmp, initial, lastStopTime);
 				}

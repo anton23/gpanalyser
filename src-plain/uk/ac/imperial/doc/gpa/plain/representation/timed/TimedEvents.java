@@ -40,25 +40,39 @@ public class TimedEvents {
 		mResetFiles.put(s, fileName);
 	}
 
+	public static String sTemplateITimedEventPopUpdateFct = 
+								"import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
+			  					"public class %s implements ITimedEventPopUpdateFct {\n" +
+			  					"public void update(double[] popVector, double value){\n" +
+			  					"%s\n}\n}";
+	
+	/**
+	 * Compile {@code className} with {@code functionBody} and create an instance of the class
+	 * 
+	 * @param className
+	 * @param functionBody
+	 * @return instance of ITimedEventPopUpdateFct with {@code className} and {@code functionBody}
+	 */
+	protected ITimedEventPopUpdateFct compileUpdateFcts(String className, String functionBody)
+	{
+		// Compile and instantiate the class
+		Object[] codeArgs = {className, functionBody};
+		String code = String.format(sTemplateITimedEventPopUpdateFct, codeArgs);
+		return  (ITimedEventPopUpdateFct)ClassCompiler.getInstance(code, className);
+	}
+	
 	/**
 	 * @param countIndices
 	 * @return given the {@code countIndices} create and compile a class that modifies the population count vector
 	 * 		   used by the numerical post processor class when a population jump occurs
 	 */
 	public Map<State, ITimedEventPopUpdateFct> getJumpUpdateCountsFcts(Map<State, Integer> countIndices) {
-		Map<State, ITimedEventPopUpdateFct> updaters =
-				new HashMap<State, ITimedEventPopUpdateFct>();
+		Map<State, ITimedEventPopUpdateFct> updaters =	new HashMap<State, ITimedEventPopUpdateFct>();
 		int cnt=0;
-		for (State s : mJumpFiles.keySet()) {		
-			// Generate the code
+		for (State s : mJumpFiles.keySet()) {
 			String className = "PopUpdaterFctCountJump"+(cnt++);
-			String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
-						  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
-					      "public void update(double[] popVector, double value){\n";
-				   code += "popVector["+countIndices.get(s)+"] += value;\n";
-				   code += "}\n}";
-			ITimedEventPopUpdateFct popUpdFct = (ITimedEventPopUpdateFct)ClassCompiler.getInstance(code, className);
-			updaters.put(s, popUpdFct);
+			String functionBody = "popVector["+countIndices.get(s)+"] += value;";
+			updaters.put(s, compileUpdateFcts(className,functionBody));
 		}
 		return updaters;
 	}
@@ -69,21 +83,14 @@ public class TimedEvents {
 	 * 		   used by the numerical post processor class when a population reset occurs
 	 */
 	public Map<State, ITimedEventPopUpdateFct> getResetUpdateCountsFcts(Map<State, Integer> countIndices) {
-			Map<State, ITimedEventPopUpdateFct> updaters =
-					new HashMap<State, ITimedEventPopUpdateFct>();
-			int cnt=0;
-			for (State s : mJumpFiles.keySet()) {		
-				// Generate the code
-				String className = "PopUpdaterFctCountReset"+(cnt++);
-				String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
-							  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
-						      "public void update(double[] popVector, double value){\n";
-					   code += "popVector["+countIndices.get(s)+"] = value;\n";
-					   code += "}\n}";
-				ITimedEventPopUpdateFct popUpdFct = (ITimedEventPopUpdateFct)ClassCompiler.getInstance(code, className);
-				updaters.put(s, popUpdFct);
-			}
-			return updaters;
+		Map<State, ITimedEventPopUpdateFct> updaters =	new HashMap<State, ITimedEventPopUpdateFct>();
+		int cnt=0;
+		for (State s : mJumpFiles.keySet()) {
+			String className = "PopUpdaterFctCountReset"+(cnt++);
+			String functionBody = "popVector["+countIndices.get(s)+"] = value;";
+			updaters.put(s, compileUpdateFcts(className,functionBody));
+		}
+		return updaters;
 	}
 	
 	/**
@@ -101,31 +108,27 @@ public class TimedEvents {
 			Map<State,Integer> firstOrderIndicides = new HashMap<State,Integer>();
 			Set<Integer> secondOrderIndices = new HashSet<Integer>();
 			Map<Integer,State> secondOrderOtherMomentIndex = new HashMap<Integer,State>();
-			int firstOrderIndex = findIndices(s, momentIndicies, firstOrderIndicides, secondOrderIndices, secondOrderOtherMomentIndex);
+			int firstOrderIndex = findMomentIndices(s, momentIndicies, firstOrderIndicides, secondOrderIndices, secondOrderOtherMomentIndex);
 			
 			// Generate the code
 			String className = "PopUpdaterFctMomentJump"+(cnt++);
-			String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
-						  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
-					      "public void update(double[] popVector, double value){\n";
+			String functionBody = "";
 			
 			for (int i : secondOrderIndices) {
 				int otherMomentIndex = firstOrderIndicides.get(secondOrderOtherMomentIndex.get(i));
 				// Dealing with X^2
 				if (otherMomentIndex == firstOrderIndex) {
-					code += "popVector["+i+"] += Math.pow(popVector["+firstOrderIndex+"]+value,2)"+
-							"-Math.pow(popVector["+firstOrderIndex+"],2);\n";
+					functionBody += "popVector["+i+"] += Math.pow(popVector["+firstOrderIndex+"]+value,2)"+
+									"-Math.pow(popVector["+firstOrderIndex+"],2);\n";
 				}
 				// Dealing with XY
 				else
 				{
-					code += "popVector["+i+"] += popVector["+otherMomentIndex+"]*value;\n";
+					functionBody += "popVector["+i+"] += popVector["+otherMomentIndex+"]*value;\n";
 				}
 			}
-			code += "popVector["+firstOrderIndex+"] += value;\n";
-			code += "}\n}";
-			ITimedEventPopUpdateFct popUpdFct = (ITimedEventPopUpdateFct)ClassCompiler.getInstance(code, className);
-			updaters.put(s, popUpdFct);
+			functionBody += "popVector["+firstOrderIndex+"] += value;\n";
+			updaters.put(s, compileUpdateFcts(className,functionBody));
 		}
 		
 		return updaters;
@@ -146,30 +149,26 @@ public class TimedEvents {
 			Map<State,Integer> firstOrderIndicides = new HashMap<State,Integer>();
 			Set<Integer> secondOrderIndices = new HashSet<Integer>();
 			Map<Integer,State> secondOrderOtherMomentIndex = new HashMap<Integer,State>();
-			int firstOrderIndex = findIndices(s, momentIndicies, firstOrderIndicides, secondOrderIndices, secondOrderOtherMomentIndex);
+			int firstOrderIndex = findMomentIndices(s, momentIndicies, firstOrderIndicides, secondOrderIndices, secondOrderOtherMomentIndex);
 			
 			// Generate the code
 			String className = "PopUpdaterFctMomentReset"+(cnt++);
-			String code = "import uk.ac.imperial.doc.gpa.plain.representation.timed.ITimedEventPopUpdateFct;\n" +
-						  "public class "+className+" implements ITimedEventPopUpdateFct {\n" +
-					      "public void update(double[] popVector, double value){\n";
+			String functionBody = "";
 			
 			for (int i : secondOrderIndices) {
 				int otherMomentIndex = firstOrderIndicides.get(secondOrderOtherMomentIndex.get(i));
 				// Dealing with X^2
 				if (otherMomentIndex == firstOrderIndex) {
-					code += "popVector["+i+"] = value*value;\n";
+					functionBody += "popVector["+i+"] = value*value;\n";
 				}
 				// Dealing with XY
 				else
 				{
-					code += "popVector["+i+"] = value*popVector["+otherMomentIndex+"];\n";
+					functionBody += "popVector["+i+"] = value*popVector["+otherMomentIndex+"];\n";
 				}
 			}
-			code += "popVector["+firstOrderIndex+"] = value;\n";
-			code += "}\n}";
-			ITimedEventPopUpdateFct popUpdFct = (ITimedEventPopUpdateFct)ClassCompiler.getInstance(code, className);
-			updaters.put(s, popUpdFct);
+			functionBody += "popVector["+firstOrderIndex+"] = value;\n";
+			updaters.put(s, compileUpdateFcts(className,functionBody));
 		}
 		
 		return updaters;
@@ -189,7 +188,7 @@ public class TimedEvents {
 	 * @param secondOrderOtherMomentIndex
 	 * @return index of population s in array
 	 */
-	private int findIndices(State s, Map<CombinedPopulationProduct, Integer> momentIndicies,
+	private int findMomentIndices(State s, Map<CombinedPopulationProduct, Integer> momentIndicies,
 							Map<State, Integer> firstOrderIndicides, Set<Integer> secondOrderIndices,
 							Map<Integer, State> secondOrderOtherMomentIndex) {
 		int firstOrderIndex = -1;
