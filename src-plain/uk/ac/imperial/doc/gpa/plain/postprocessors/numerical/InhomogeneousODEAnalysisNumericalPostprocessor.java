@@ -19,6 +19,7 @@ import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
+import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
@@ -44,28 +45,22 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends NumericalPos
 		super(stopTime, stepSize);
 		this.density = density;
 	}
-	
-	
-	
+
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new InhomogeneousODEAnalysisNumericalPostprocessor(stopTime, stepSize, density);
 	}
-
+	
 	private InhomogeneousODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
 			PCTMCODEAnalysis odeAnalysis, JavaODEsPreprocessed preprocessedImplementation) {
 		this(stopTime, stepSize, density);
 		this.odeAnalysis = odeAnalysis;
-		if (!(odeAnalysis.getPCTMC() instanceof PlainPCTMC)) {
-			throw new AssertionError("Expected a PlainPCTMC object but did not receive it");
-		}
 		this.preprocessedImplementation = preprocessedImplementation;
 		this.momentIndex = odeAnalysis.getMomentIndex();
 		this.generalExpectationIndex = odeAnalysis.getGeneralExpectationIndex();
 		this.dataPoints = null;
 	}
-	
-	
+		
 	public InhomogeneousODEAnalysisNumericalPostprocessor(double stopTime, double stepSize,
 			int density, Map<String, Object> parameters) {
 		this(stopTime, stepSize, density);
@@ -105,7 +100,15 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends NumericalPos
 	
 	Map<State,ITimedEventPopUpdateFct> mJumpUpdateFcts;
 	Map<State,ITimedEventPopUpdateFct> mResetUpdateFcts;
-	
+
+	private PlainPCTMC getPlainPCMTC(PCTMCODEAnalysis odeAnalysis) {
+		PCTMC pctmc = odeAnalysis.getPCTMC();
+		if (!(odeAnalysis.getPCTMC() instanceof PlainPCTMC)) {
+			throw new AssertionError("Expected a PlainPCTMC object but did not receive it");
+		}
+		return (PlainPCTMC) pctmc;
+	}
+
 	@Override
 	public void prepare(AbstractPCTMCAnalysis analysis, Constants constants) {
 		super.prepare(analysis, constants);
@@ -124,8 +127,11 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends NumericalPos
 			throw new AssertionError("ODE postprocessor attached to an incompatible analysis " + analysis.toString());
 		}
 		
-		// We need to prepare objects that handle inhomogeneous changes
-		TimedEvents te = ((PlainPCTMC) odeAnalysis.getPCTMC()).getTimedEvents();
+		// We need to prepare objects that handle inhomogeneous changes.
+		// To save time we will create, compile and initialise bespoke
+		// classes that execute modifications to the populationVector as
+		// deterministic events occur
+		TimedEvents te = getPlainPCMTC(odeAnalysis).getTimedEvents();
 		if (mJumpUpdateFcts == null) {mJumpUpdateFcts = te.getJumpUpdateFcts(analysis.getMomentIndex());}
 		if (mResetUpdateFcts == null) {mResetUpdateFcts = te.getResetUpdateFcts(analysis.getMomentIndex());}
 	}
@@ -137,24 +143,42 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends NumericalPos
 		if (odeAnalysis != null) {
 			PCTMCJavaImplementationProvider analysisRunner = new PCTMCJavaImplementationProvider();
 			
-			// Get schedule for event updates
-			TimedEvents te = ((PlainPCTMC) odeAnalysis.getPCTMC()).getTimedEvents();
+			// Get schedule for deterministic events
+			TimedEvents te = getPlainPCMTC(odeAnalysis).getTimedEvents();
 			Map<Double,Collection<TimedEventUpdater>> updates = te.genTimedEventUpdates(mJumpUpdateFcts,mResetUpdateFcts);
 			updates.put(stopTime, new LinkedList<TimedEventUpdater>());
+			
+			// Check that the schedule can be applied to our ODE solver
+			double h = stepSize / density;
+			for (double t : updates.keySet()) {
+				// Does the event time coincide with an integration end point?
+				if (t/h != Math.floor(t/h))
+				{
+					throw new AssertionError("Change at time "+t+" falls between two integration end points.\n" +
+											 "Please change event time, stepSize or density.");
+				}
+			}
 			
 			// Do analysis
 			initial = getInitialValues(constants);
 			dataPoints = new double[(int) Math.ceil(stopTime / stepSize)][initial.length];
 			
+			// The analysis now does the integration between any two deterministic events.
+			// This basically means that we compute the mean-field solution of a time
+			// inhomogeneous PCTMC 
 			int index = 0;
 			double lastStopTime = 0;
 			for (Entry<Double, Collection<TimedEventUpdater>> e : updates.entrySet()){
-				// Run the ODE analysis
-				if (e.getKey() != 0) {
+				// We do not integrate between events that occur prior to time 0
+				if (e.getKey() > 0) {
+					// Run the ODE analysis
 					double[][] dataPointsTemp = analysisRunner.runODEAnalysis(
 												preprocessedImplementation, initial,
 												e.getKey()-lastStopTime, stepSize,	density, constants);
 					// Append new values to array
+					// TODO: At the moment we are copying the entire array. This could be done more efficiently
+					// by passing the array to the evaluator. We did not do this so far to avoid having to change
+					// interfaces.
 					index = (int) (lastStopTime/stepSize);
 					for (int i=0; i < dataPointsTemp.length; ++i) {
 						for (int j=0; j < initial.length; ++j) {
@@ -165,7 +189,7 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends NumericalPos
 				}
 				lastStopTime = e.getKey();
 				
-				// Execute rate and population change updates
+				// Execute rate and population change updates for current events
 				for (TimedEventUpdater teu : e.getValue()) {
 					teu.update(constants, initial, lastStopTime);
 				}

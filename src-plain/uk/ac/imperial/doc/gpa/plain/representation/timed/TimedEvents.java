@@ -20,7 +20,7 @@ import uk.ac.imperial.doc.pctmc.representation.State;
  * PCTMC with time dependent rates, population jumps
  * and resets
  * 
- * @author mcg05
+ * @author Chris Guenther
  */
 public class TimedEvents {
 
@@ -176,13 +176,21 @@ public class TimedEvents {
 	}
 	
 	/**
+	 * @param files
+	 * @return map with time series for each file
+	 */
+	protected <T> Map<T,double[][]> getTimeSeries(Map<T, String> files) {
+		return JExpressionsJavaUtils.loadTimeSeriesFromFile(files);
+	}
+	
+	/**
 	 * @return TimedEventUpdater objects for all time dependent rates
 	 */
-	private Map<String, TimedEventUpdater> getRateUpdaters() {
+	protected Map<String, TimedEventUpdater> getRateUpdaters() {
 		Map<String, TimedEventUpdater> rateUpdaters = 
 				new HashMap<String,TimedEventUpdater>();
 		
-		Map<String,double[][]> allSeries = JExpressionsJavaUtils.loadTimeSeriesFromFile(mRateFiles);
+		Map<String,double[][]> allSeries = getTimeSeries(mRateFiles);
 		for (Entry<String, double[][]> e : allSeries.entrySet()) {
 			String rateName = e.getKey();
 			double[][] rates = e.getValue();
@@ -198,13 +206,13 @@ public class TimedEvents {
 	 * @return TimedEventUpdater objects for all populations in {@code popFiles}
 	 * 		   where the update type, i.e. jump or reset is defined in {@code popUpdateFcts}
 	 */
-	private Map<State, TimedEventUpdater> getPopUpdaters(
+	protected Map<State, TimedEventUpdater> getPopUpdaters(
 			Map<State, String> popFiles,
 			Map<State, ITimedEventPopUpdateFct> popUpdateFcts) {
 		Map<State, TimedEventUpdater> popUpdaters = 
 				new HashMap<State,TimedEventUpdater>();
 
-		Map<State,double[][]> allSeries = JExpressionsJavaUtils.loadTimeSeriesFromFile(popFiles);
+		Map<State,double[][]> allSeries = getTimeSeries(popFiles);
 		for (Entry<State, double[][]> e : allSeries.entrySet()) {
 			State pop = e.getKey();
 			double[][] rates = e.getValue();
