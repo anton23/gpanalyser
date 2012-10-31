@@ -13,6 +13,7 @@ import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
+import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ISimulationReplicationObserver;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -150,5 +151,13 @@ public class InhomogeneousSimulationAnalysisNumericalPostprocessor extends Simul
 			}
 		}
 		PCTMCLogging.decreaseIndent();
+	}
+	
+	@Override
+	protected void notifyReplicationObservers(double[][] tmp) {
+		if (replicationObservers == null) return;
+		for (ISimulationReplicationObserver o: replicationObservers) {
+			o.newReplication(tmp);
+		}
 	}
 }

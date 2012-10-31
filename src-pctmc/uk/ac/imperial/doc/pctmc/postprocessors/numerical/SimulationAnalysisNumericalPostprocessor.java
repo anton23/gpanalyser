@@ -255,12 +255,18 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		replicationObservers.add(o);
 	}
 	
-	protected void notifyReplicationObservers(double[][] tmp) {
-		if (replicationObservers == null) return;
-		for (ISimulationReplicationObserver o: replicationObservers) {
-			o.newReplication(tmp);
-		}
-	}
+    protected void notifyReplicationObservers(double[][] tmp) {
+        double[][] data = new double[(int) Math.ceil(stopTime / stepSize)][momentIndex
+                                                                                                .size()
+                                                                                                + generalExpectationIndex.size()];
+        for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
+                updater.update(data[t], tmp[t]);
+        }
+        if (replicationObservers == null) return;
+        for (ISimulationReplicationObserver o: replicationObservers) {
+                o.newReplication(data);
+        }
+    }
 	
 
 	public static final String mUpdaterNoAddClassName = "GeneratedProductUpdaterNoAdd";
