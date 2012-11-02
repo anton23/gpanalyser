@@ -135,15 +135,15 @@ state returns [State t]
 ;
 
 rateFileDefinitions[]:
-   (LOADRATES f=FILENAME INTO fun=LOWERCASENAME {mTimedEvents.addRateFile($fun.text,$f.text.replace("\"","")); } SEMI)
+   (LOADRATES f=FILENAME INTO fun=LOWERCASENAME {mTimedEvents.addRateEventsFromFile($fun.text,$f.text.replace("\"","")); } SEMI)
 ;
 
 jumpFileDefinitions[]:
-   (LOADJUMPS f=FILENAME INTO t=state {mTimedEvents.addJumpFile($t.t,$f.text.replace("\"","")); } SEMI)
+   (LOADJUMPS f=FILENAME INTO t=state {mTimedEvents.addJumpEventsFromFile($t.t,$f.text.replace("\"","")); } SEMI)
 ;
 
 resetFileDefinitions[]:
-   (LOADRESETS f=FILENAME INTO t=state {mTimedEvents.addResetFile($t.t,$f.text.replace("\"","")); } SEMI)
+   (LOADRESETS f=FILENAME INTO t=state {mTimedEvents.addResetEventsFromFile($t.t,$f.text.replace("\"","")); } SEMI)
 ;
 
 analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
@@ -265,7 +265,7 @@ listOfStrings returns [List<String> l]
 @init {l = new LinkedList<String>();}
 :
   ^(c1=LOWERCASENAME {l.add($c1.text);} (COMMA c2=LOWERCASENAME {l.add($c2.text);})*) 
-| ^(f1=FILENAME {l.add($f1.text);} (COMMA f2=FILENAME {l.add($f2.text);})*)
+| ^(f1=FILENAME {l.add($f1.text.replace("\"",""));} (COMMA f2=FILENAME {l.add($f2.text.replace("\"",""));})*)
 ;
 
 listOfStates returns [List<State> l]

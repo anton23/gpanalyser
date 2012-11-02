@@ -74,7 +74,7 @@ public class PCTMCJavaImplementationProvider implements
 			double stopTime, double stepSize, int density, Constants constants) {
 		SystemOfODEs odes = ((JavaODEsPreprocessed) preprocessed).getOdes();
 		odes.setRates(constants.getFlatConstants());
-		PCTMCLogging.info("Running Runge-Kutta solver.");
+		//PCTMCLogging.info("Running Runge-Kutta solver.");
 		double[][] dataPoints = RungeKutta.rungeKutta(odes, initial, stopTime,
 				stepSize, density);
 		return dataPoints;
