@@ -556,10 +556,12 @@ Forecasting[closure=NormalClosure,order=1](stepSize = 0.1, density = 1000,
 										   				  {StartCluster4},{StartCluster5},{StartCluster6}},
 										   startDeltas = {delta_1,delta_2,delta_3,delta_4,delta_5,delta_6},
 										   tsStep = 1,
-										   arrTS = {"../SpatialysisSVN/data/ts/Arrivals01-05-2012.dat",
-										   			"../SpatialysisSVN/data/ts/Arrivals02-05-2012.dat"},
-										   depTS = {"../SpatialysisSVN/data/ts/Departures01-05-2012.dat",
-										   			"../SpatialysisSVN/data/ts/Departures02-05-2012.dat"})
+										   arrTS = {"../spatialysis/data/ts/Arrivals16-05-2012.dat"
+										   			//,"../spatialysis/data/ts/Arrivals02-05-2012.dat"
+										   			},
+										   depTS = {"../spatialysis/data/ts/Departures16-05-2012.dat"
+										   			//,"../spatialysis/data/ts/Departures02-05-2012.dat"
+										   			})
 										  {
 										  	E[{Arrival}];
 										  }

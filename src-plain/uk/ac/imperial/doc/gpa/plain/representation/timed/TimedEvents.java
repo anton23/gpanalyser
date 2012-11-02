@@ -23,21 +23,50 @@ import uk.ac.imperial.doc.pctmc.representation.State;
  * @author Chris Guenther
  */
 public class TimedEvents {
-
-	Map<String, String> mRateFiles = new HashMap<String,String>();
-	Map<State, String> mJumpFiles = new HashMap<State,String>();
-	Map<State, String> mResetFiles = new HashMap<State,String>();
-
-	public void addRateFile(String rateName, String fileName) {
-		mRateFiles.put(rateName,fileName);
+	
+	public static String sDUMMY_FILENAME = "dummy.dat";
+	Map<String, double[][]> mRateEvents = new HashMap<String, double[][]>();
+	Map<State, double[][]> mJumpEvents = new HashMap<State, double[][]>();
+	Map<State, double[][]> mResetEvents = new HashMap<State, double[][]>();
+	
+	public void addRateEventsFromFile(String rateName, String fileName) {
+		mRateEvents.put(rateName, loadEventsFromFile(fileName));
 	}
 
-	public void addJumpFile(State s, String fileName) {
-		mJumpFiles.put(s, fileName);
+	public void addJumpEventsFromFile(State jumpState, String fileName) {
+		mJumpEvents.put(jumpState, loadEventsFromFile(fileName));
 	}
 	
-	public void addResetFile(State s, String fileName) {
-		mResetFiles.put(s, fileName);
+	public void addResetEventsFromFile(State resetState, String fileName) {
+		mResetEvents.put(resetState, loadEventsFromFile(fileName));
+	}
+
+	/**
+	 * Events will be automatically loaded from files but
+	 * if needed they can also be set manually
+	 * 
+	 * @param rateEvents
+	 * @param jumpEvents
+	 * @param resetEvents
+	 */
+	public void setEvents(Map<String, double[][]> rateEvents,
+						   Map<State, double[][]> jumpEvents,
+						   Map<State, double[][]> resetEvents)
+	{
+		mRateEvents = rateEvents;
+		mJumpEvents = jumpEvents;
+		mResetEvents = resetEvents;
+	}
+	
+	/**
+	 * @param fileName
+	 * @return events found in {@code fileName} unless
+	 * 			{@code fileName} is sDUMMY_FILENAME in which case null
+	 * 			is returned
+	 */
+	protected <T> double[][] loadEventsFromFile(String fileName) {
+		if (fileName.equals(sDUMMY_FILENAME)) {return null;}
+		return JExpressionsJavaUtils.loadTimeSeriesFromFile(fileName);
 	}
 
 	public static String sTemplateITimedEventPopUpdateFct = 
@@ -63,13 +92,14 @@ public class TimedEvents {
 	
 	/**
 	 * @param countIndices
-	 * @return given the {@code countIndices} create and compile a class that modifies the population count vector
-	 * 		   used by the numerical post processor class when a population jump occurs
+	 * @return for each population that is subject to jumps we create and compile a custom class
+	 * 			that modifies the population count vector used by the numerical post processor
+	 * 			class when the jump occurs
 	 */
 	public Map<State, ITimedEventPopUpdateFct> getJumpUpdateCountsFcts(Map<State, Integer> countIndices) {
 		Map<State, ITimedEventPopUpdateFct> updaters =	new HashMap<State, ITimedEventPopUpdateFct>();
 		int cnt=0;
-		for (State s : mJumpFiles.keySet()) {
+		for (State s : mJumpEvents.keySet()) {
 			String className = "PopUpdaterFctCountJump"+(cnt++);
 			String functionBody = "popVector["+countIndices.get(s)+"] += value;";
 			updaters.put(s, compileUpdateFcts(className,functionBody));
@@ -79,13 +109,14 @@ public class TimedEvents {
 	
 	/**
 	 * @param countIndices
-	 * @return given the {@code countIndices} create and compile a class that modifies the population count vector
-	 * 		   used by the numerical post processor class when a population reset occurs
+	 * @return for each population that is subject to resets we create and compile a custom class
+	 * 			that modifies the population count vector used by the numerical post processor
+	 * 			class when the reset occurs
 	 */
 	public Map<State, ITimedEventPopUpdateFct> getResetUpdateCountsFcts(Map<State, Integer> countIndices) {
 		Map<State, ITimedEventPopUpdateFct> updaters =	new HashMap<State, ITimedEventPopUpdateFct>();
 		int cnt=0;
-		for (State s : mJumpFiles.keySet()) {
+		for (State s : mResetEvents.keySet()) {
 			String className = "PopUpdaterFctCountReset"+(cnt++);
 			String functionBody = "popVector["+countIndices.get(s)+"] = value;";
 			updaters.put(s, compileUpdateFcts(className,functionBody));
@@ -96,14 +127,15 @@ public class TimedEvents {
 	/**
 	 * TODO: make it work for moments up to any order - not just order 2
 	 * @param momentIndicies
-	 * @return given the {@code momentIndicies} create and compile a class that modifies the population
-	 * 		   moment vector used by the numerical post processor class when a population jump occurs
+	 * @return for each population that is subject to jumps we create and compile a custom class
+	 * 			that modifies the population moment vector used by the numerical post processor
+	 * 			class when the jump occurs
 	 */
 	public Map<State, ITimedEventPopUpdateFct> getJumpUpdateMomentsFcts(Map<CombinedPopulationProduct, Integer> momentIndicies) {
 		Map<State, ITimedEventPopUpdateFct> updaters =
 				new HashMap<State, ITimedEventPopUpdateFct>();
 		int cnt=0;
-		for (State s : mJumpFiles.keySet()) {			
+		for (State s : mJumpEvents.keySet()) {			
 			// Find important indices
 			Map<State,Integer> firstOrderIndicides = new HashMap<State,Integer>();
 			Set<Integer> secondOrderIndices = new HashSet<Integer>();
@@ -137,14 +169,15 @@ public class TimedEvents {
 	/**
 	 * TODO: make it work for moments up to any order - not just order 2
 	 * @param momentIndicies
-	 * @return given the {@code momentIndicies} create and compile a class that modifies the population
-	 * 		   moment vector used by the numerical post processor class when a population reset occurs
+	 * @return for each population that is subject to resets we create and compile a custom class
+	 * 			that modifies the population moment vector used by the numerical post processor
+	 * 			class when the reset occurs
 	 */
 	public Map<State, ITimedEventPopUpdateFct> getResetUpdateMomentsFcts(Map<CombinedPopulationProduct, Integer> momentIndicies) {
 		Map<State, ITimedEventPopUpdateFct> updaters =
 				new HashMap<State, ITimedEventPopUpdateFct>();
 		int cnt=0;
-		for (State s : mResetFiles.keySet()) {			
+		for (State s : mResetEvents.keySet()) {	
 			// Find important indices
 			Map<State,Integer> firstOrderIndicides = new HashMap<State,Integer>();
 			Set<Integer> secondOrderIndices = new HashSet<Integer>();
@@ -221,22 +254,13 @@ public class TimedEvents {
 	}
 	
 	/**
-	 * @param files
-	 * @return map with time series for each file
-	 */
-	protected <T> Map<T,double[][]> getTimeSeries(Map<T, String> files) {
-		return JExpressionsJavaUtils.loadTimeSeriesFromFile(files);
-	}
-	
-	/**
-	 * @return TimedEventUpdater objects for all time dependent rates
+	 * @return TimedEventUpdater objects for all known time dependent rates
 	 */
 	protected Map<String, TimedEventUpdater> getRateUpdaters() {
 		Map<String, TimedEventUpdater> rateUpdaters = 
 				new HashMap<String,TimedEventUpdater>();
-		
-		Map<String,double[][]> allSeries = getTimeSeries(mRateFiles);
-		for (Entry<String, double[][]> e : allSeries.entrySet()) {
+
+		for (Entry<String, double[][]> e : mRateEvents.entrySet()) {
 			String rateName = e.getKey();
 			double[][] rates = e.getValue();
 			rateUpdaters.put(rateName,new DiscreteRateTimedEventUpdater(rates, rateName));
@@ -246,19 +270,17 @@ public class TimedEvents {
 	}
 
 	/**
-	 * @param popFiles
-	 * @param popUpdateFcts
-	 * @return TimedEventUpdater objects for all populations in {@code popFiles}
-	 * 		   where the update type, i.e. jump or reset is defined in {@code popUpdateFcts}
+	 * @param events
+	 * @param popUpdateFcts must be defined for all these populations in {@code events}
+	 * @return TimedEventUpdater objects for all populations in {@code events}
 	 */
 	protected Map<State, TimedEventUpdater> getPopUpdaters(
-			Map<State, String> popFiles,
+			Map<State, double[][]> events,
 			Map<State, ITimedEventPopUpdateFct> popUpdateFcts) {
 		Map<State, TimedEventUpdater> popUpdaters = 
 				new HashMap<State,TimedEventUpdater>();
 
-		Map<State,double[][]> allSeries = getTimeSeries(popFiles);
-		for (Entry<State, double[][]> e : allSeries.entrySet()) {
+		for (Entry<State, double[][]> e : events.entrySet()) {
 			State pop = e.getKey();
 			double[][] rates = e.getValue();
 			popUpdaters.put(pop,new DiscretePopTimedEventUpdater(rates, popUpdateFcts.get(pop)));
@@ -279,8 +301,8 @@ public class TimedEvents {
 		Map<Double, Collection<TimedEventUpdater>> updates =
 				new TreeMap<Double, Collection<TimedEventUpdater>>();
 		Map<String,TimedEventUpdater> rateUpdaters = getRateUpdaters();
-		Map<State,TimedEventUpdater> jumpUpdaters = getPopUpdaters(mJumpFiles,jumpUpdateFcts);
-		Map<State,TimedEventUpdater> resetUpdaters = getPopUpdaters(mResetFiles,resetUpdateFcts);
+		Map<State,TimedEventUpdater> jumpUpdaters = getPopUpdaters(mJumpEvents,jumpUpdateFcts);
+		Map<State,TimedEventUpdater> resetUpdaters = getPopUpdaters(mResetEvents,resetUpdateFcts);
 		
 		// The rate updates
 		for (TimedEventUpdater teu : rateUpdaters.values()) {
