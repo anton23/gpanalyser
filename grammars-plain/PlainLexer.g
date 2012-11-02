@@ -11,3 +11,14 @@ import PCTMCLexerPrototype;
 COUNT: '#';
 INHOMOGENEOUSODES: 'InhomogeneousODEs';
 INHOMOGENEOUSSIMULATION: 'InhomogeneousSimulation';
+FORECASTING: 'Forecasting';
+
+WARMUP: 'warmup';
+FORECAST: 'forecast';
+INTVLBETWEENFORECASTS: 'intvlBetweenForecasts';
+ARRSTATE: 'arrState';
+STARTSTATES: 'startStates';
+STARTDELTAS: 'startDeltas';
+TSSTEP: 'tsStep';
+ARRTS: 'arrTS';
+DEPTS: 'depTS';

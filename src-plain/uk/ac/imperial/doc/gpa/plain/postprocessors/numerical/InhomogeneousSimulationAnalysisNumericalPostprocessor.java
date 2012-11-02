@@ -52,7 +52,7 @@ public class InhomogeneousSimulationAnalysisNumericalPostprocessor extends Simul
 	Map<State,ITimedEventPopUpdateFct> mJumpUpdateFcts;
 	Map<State,ITimedEventPopUpdateFct> mResetUpdateFcts;
 
-	private PlainPCTMC getPlainPCMTC(AbstractPCTMCAnalysis analysis) {
+	protected PlainPCTMC getPlainPCMTC(AbstractPCTMCAnalysis analysis) {
 		PCTMC pctmc = analysis.getPCTMC();
 		if (!(analysis.getPCTMC() instanceof PlainPCTMC)) {
 			throw new AssertionError("Expected a PlainPCTMC object but did not receive it");

@@ -22,6 +22,8 @@ tokens{
   PRODUCT; 
   COMBINEDPRODUCT; 
   RANGE;
+  FORECASTINGSETTINGS;
+  LOS;
 }
 
 @header{
@@ -137,6 +139,7 @@ n1=UPPERCASENAME {$components.add($n1.text);}(COMMA n2=UPPERCASENAME {$component
 analysis:
  (odeAnalysis
  |inhomogeneousODEAnalysis
+ |forecasting
  |simulation
  |inhomogeneousSimulation
  |accuratesimulation
@@ -156,8 +159,57 @@ inhomogeneousODEAnalysis:
   -> ^(INHOMOGENEOUSODES odeParameters? odeSettings)
 ;
 
+forecasting:
+  FORECASTING
+  odeParameters?
+  {hint.push("Forecasting analysis has to be of the form\n"+
+  			 "Forecasting(stepSize=<number>,\n"+
+  			 "density=<integer>, warmup=<integer>,\n"+
+  			 "forecast=<integer>, intvlBetweenForecasts=<integer>,\n"+
+  			 "arrState=<state>, startStates={<state>,...},\n"+
+  			 "startDeltas={<LOWERCASENAME>,...}, TSStep=<integer>,\n"+
+  			 "arrTS={<StringFilename>,...},depTS={<StringFilename>,...}){}'");}
+  forecastingSettings
+  {hint.pop();}
+  -> ^(FORECASTING odeParameters? forecastingSettings)
+;
+
+forecastingSettings:
+  LPAR
+    STEPSIZE DEF stepSize = expression COMMA
+    DENSITY DEF density = INTEGER COMMA
+    WARMUP DEF warmup = INTEGER COMMA
+    FORECAST DEF forecast = INTEGER COMMA
+    INTVLBETWEENFORECASTS DEF ibf = INTEGER COMMA
+    ARRSTATE DEF arrState = state COMMA
+    STARTSTATES DEF LBRACE startStates = listOfStates RBRACE COMMA
+    STARTDELTAS DEF LBRACE startDeltas = listOfConsts RBRACE COMMA
+    TSSTEP DEF tsStep = INTEGER COMMA
+    ARRTS DEF LBRACE arrTS = listOfFiles RBRACE COMMA
+    DEPTS DEF LBRACE depTS = listOfFiles RBRACE
+  RPAR
+  -> ^(FORECASTINGSETTINGS $stepSize COMMA $density COMMA $warmup COMMA
+  	   $forecast COMMA $ibf COMMA $arrState COMMA $startStates COMMA
+  	   $startDeltas COMMA $tsStep COMMA $arrTS COMMA $depTS)
+;
+
+listOfStates:
+  state (COMMA state)* -> ^(LOS state (COMMA state)*)
+;
+
+listOfConsts:
+  LOWERCASENAME (COMMA LOWERCASENAME)* -> ^(LOWERCASENAME (COMMA LOWERCASENAME)*)
+;
+
+listOfFiles:
+  FILENAME (COMMA FILENAME)* -> ^(FILENAME (COMMA FILENAME)*)
+;
+
+
 inhomogeneousSimulation:
   INHOMOGENEOUSSIMULATION
   simulationSettings
   -> ^(INHOMOGENEOUSSIMULATION simulationSettings)
 ;
+
+
