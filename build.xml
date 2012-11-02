@@ -40,6 +40,7 @@
 	<property name="grammars" value="grammars-gpa"/>
 	<property name="src"  value="src-gpa"/>
 	<property name="package.generated" value="uk/ac/imperial/doc/gpa/syntax"/>
+	<property name="forecasting.src" value="src-forecasting"/>
 	
     <!-- ANTLR and grammars -->
     <property name="antlr" value="antlr-3.4.jar"/>
@@ -227,6 +228,7 @@
         	<src path="${plain.src}"/>
             <src path="${probes.src}"/>
         	<src path="${jexpressions.src}"/>
+        	<src path="${forecasting.src}"/>
             <include name="**/*.java"/> 
          	<exclude name="**/package-info.java"/> 
         </javac>
