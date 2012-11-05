@@ -27,6 +27,11 @@ public class FileUtils {
 		}
 
 	}
+	
+	public static String stripFileName(String filename) {
+		String[] tmp = filename.split("/");
+		return tmp[tmp.length-1];
+	}
 
 	public static void createNeededDirectories(String filename) {
 		String[] pathTmp = filename.split("/");

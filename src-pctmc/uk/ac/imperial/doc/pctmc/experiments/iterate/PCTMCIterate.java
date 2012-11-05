@@ -29,6 +29,7 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 import com.google.common.collect.Lists;
+import com.rits.cloning.Cloner;
 
 public class PCTMCIterate extends PCTMCExperiment {
 	private List<RangeSpecification> ranges;
@@ -71,7 +72,8 @@ public class PCTMCIterate extends PCTMCExperiment {
 				List<RangeSpecification> tmpRanges = new ArrayList<RangeSpecification>();
 				tmpRanges.add(r);
 				tmpRanges.addAll(restOfRanges);
-				ret.add(new PCTMCIterate(tmpRanges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, 1, false));
+				
+				ret.add(new PCTMCIterate(tmpRanges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, new Cloner().deepClone(plots), unfoldedVariables, 1, false));
 			}
 		}
 		return ret;		
@@ -442,9 +444,23 @@ public class PCTMCIterate extends PCTMCExperiment {
 
 	@Override
 	public String toString() {
-		return "Iterate " + ToStringUtils.iterableToSSV(ranges, "\n        ") + "\n" + 
-		   	 	(minRanges.isEmpty()?"":("Minimise " + minSpecification + " " + ToStringUtils.iterableToSSV(minRanges, "\n         ") + "\n"))
-				+ analysis.toString();
+		StringBuilder ret = new StringBuilder();
+
+		ret.append("Iterate ");
+		ret.append(ToStringUtils.iterableToSSV(ranges, "\n        "));
+		ret.append("\n");
+		ret.append((minRanges.isEmpty()?"":("Minimise " + minSpecification + " " + ToStringUtils.iterableToSSV(minRanges, "\n         ") + "\n")));
+		ret.append(analysis.toString());
+		ret.append(analysis.getPostprocessorString());
+		ret.append("{\n");
+		for (PlotAtDescription p : plots) {
+			ret.append("   ");
+			ret.append(p.toString());
+			ret.append(";\n");
+		}
+		ret.append("}");
+		
+		return ret.toString();
 	}
 
 	public String toShortString() {

@@ -26,6 +26,39 @@ public class PCTMCFileRepresentation {
 	private List<PCTMCExperiment> experiments;
 	private List<IExtension> extensions;
 
+	
+	@Override
+	public String toString() {
+		StringBuilder out = new StringBuilder();
+		out.append(constants.toString());
+		for (Map.Entry<ExpressionVariable, AbstractExpression> e:unfoldedVariables.entrySet()) {
+			out.append(e.getKey().toString());
+			out.append(" = ");
+			out.append(e.getValue().toString());
+			out.append(";\n");
+		}		
+		out.append(pctmc.toString());
+		for (AbstractPCTMCAnalysis a : plots.keySet()) {
+			out.append(a.toString());
+			out.append("{\n");
+			for (PlotDescription pd : plots.get(a)) {
+				out.append(pd.toString());
+				out.append(";\n");
+			}
+			out.append("}\n\n");
+		}
+		for (PCTMCExperiment e : experiments) {
+			out.append(e.toString());
+			out.append("\n");
+		}
+		for (IExtension e : extensions) {
+			out.append(e.toString());
+			out.append("\n");
+		}
+		
+		return out.toString();
+	}
+	
 	public List<IExtension> getExtensions() {
 		return extensions;
 	}
