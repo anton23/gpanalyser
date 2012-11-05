@@ -13,6 +13,7 @@ import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
+import uk.ac.imperial.doc.pctmc.condor.CondorGenerator;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -231,6 +232,11 @@ public class PCTMCInterpreter {
 		List<PCTMCExperiment> experiments = fileRepresentation.getExperiments();
 		PCTMC pctmc = fileRepresentation.getPctmc();
 
+		if (PCTMCOptions.condor) {
+			new CondorGenerator(fileRepresentation, file).generate();
+			return;
+		}
+		
 		fileRepresentation.unfoldVariablesAndSetUsedProducts();
 
 		PCTMCLogging.info("Read a PCTMC with " + pctmc.getStateIndex().size()
@@ -258,8 +264,11 @@ public class PCTMCInterpreter {
 		}
 	}
 
+	protected String file = "";
+	
 	public void processFile(String file) {
 		PCTMCLogging.info("Opening file " + file);
+		this.file = file;
 		PCTMCLogging.increaseIndent();
 
 		try {
