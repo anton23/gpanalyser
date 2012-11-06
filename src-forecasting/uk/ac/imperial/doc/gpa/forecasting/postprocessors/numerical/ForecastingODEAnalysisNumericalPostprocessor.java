@@ -108,8 +108,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		PopulationProduct pp = PopulationProduct.getMeanProduct(mArrState);
 		CombinedPopulationProduct cppArrMean = new CombinedPopulationProduct(pp);
 		int cppArrMeanIndex = odeAnalysis.getMomentIndex().get(cppArrMean);
-		//CombinedPopulationProduct cppArrMeanSq = new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp));
-		//int cppArrMeanSqIndex = odeAnalysis.getMomentIndex().get(cppArrMeanSq);
+		CombinedPopulationProduct cppArrMeanSq = new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp));
+		int cppArrMeanSqIndex = odeAnalysis.getMomentIndex().get(cppArrMeanSq);
 		
 		while (tsf.nextTSFile()) {
 			while (true) {
@@ -123,14 +123,14 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 			
 				// Forecast vs Reality
 				double forecastArr = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanIndex]);
-				//double forecastArrSq = MathExtra.twoDecim(dataPoints[(int) (dataPoints.length-(1/stepSize))][cppArrMeanSqIndex]);
-				//double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
+				double forecastArrSq = MathExtra.twoDecim(dataPoints[(int) (dataPoints.length-(1/stepSize))][cppArrMeanSqIndex]);
+				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
 				double[] data = {forecastArr, actualArr};
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {
 					mData.add(data);
 				}
 				
-				System.out.println (forecastArr + /*", stdDev " + forecastStdDev +*/ " actual arrivals: " + actualArr);
+				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
 			}
 		}
 	}
