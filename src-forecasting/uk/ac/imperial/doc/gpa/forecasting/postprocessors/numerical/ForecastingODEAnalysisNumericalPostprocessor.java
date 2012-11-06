@@ -123,7 +123,7 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 			
 				// Forecast vs Reality
 				double forecastArr = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanIndex]);
-				double forecastArrSq = MathExtra.twoDecim(dataPoints[(int) (dataPoints.length-(1/stepSize))][cppArrMeanSqIndex]);
+				double forecastArrSq = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanSqIndex]);
 				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
 				double[] data = {forecastArr, actualArr};
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {

@@ -406,7 +406,7 @@ loadJumps "dummy.dat" into {StartCluster2};
 loadJumps "dummy.dat" into {StartCluster3};
 loadResets "dummy.dat" into {Arrival};
 
-
+/*
 Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 1000,
 										   warmup = 30, forecast = 10,
 										   intvlBetweenForecasts = 1,
@@ -421,18 +421,18 @@ Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 10
 										  {
 										  	E[{Arrival}],E[{Arrival}{Arrival}];
 										  }
-/*
-ForecastingSimu(stepSize = 0.1, replications = 100, warmup = 30, forecast=15,
-										   intvlBetweenForecasts =10,
+*/
+ForecastingSimu(stepSize = 0.1, replications = 200, 
+										   warmup = 30, forecast = 10,
+										   intvlBetweenForecasts = 1,
 										   arrState = {Arrival},
-										   startStates = { {StartCluster1} ,{StartCluster2},{StartCluster3}},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3}},
 										   destMus = {mu_1,mu_2,mu_3},
 										   startDeltas = {delta_1,delta_2,delta_3},
 										   tsStep = 1,
 										   muTS = "../SpatialysisSVN/data/meanMuVals.dat",
-										   arrTS = {"../SpatialysisSVN/data/ts/Arrivals03-05-2012.dat"},
-										   depTS = {"../SpatialysisSVN/data/ts/Departures03-05-2012.dat"})
+										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals07-06-2012.dat"},
+										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures07-06-2012.dat"})
 										  {
 										  	E[{Arrival}],E[{Arrival}{Arrival}];
 										  }
-*/
