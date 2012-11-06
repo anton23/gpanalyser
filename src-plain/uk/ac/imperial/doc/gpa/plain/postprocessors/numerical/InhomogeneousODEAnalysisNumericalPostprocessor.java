@@ -104,9 +104,10 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends ODEAnalysisN
 				// We do not integrate between events that occur prior to time 0
 				if (e.getKey() > 0) {
 					// Run the ODE analysis
+					double duration =  ((double)Math.round((e.getKey()-lastStopTime)*100000))/100000;
 					double[][] dataPointsTemp = analysisRunner.runODEAnalysis(
 												preprocessedImplementation, initial,
-												e.getKey()-lastStopTime, stepSize,	density, constanstTmp);
+												duration, stepSize,	density, constanstTmp);
 					// Append new values to array
 					// TODO: At the moment we are copying the entire array. This could be done more efficiently
 					// by passing the array to the evaluator. We did not do this so far to avoid having to change

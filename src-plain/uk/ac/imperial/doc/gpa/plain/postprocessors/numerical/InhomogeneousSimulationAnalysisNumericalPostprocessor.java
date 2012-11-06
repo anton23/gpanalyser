@@ -119,8 +119,9 @@ public class InhomogeneousSimulationAnalysisNumericalPostprocessor extends Simul
 					// Run the Simulation (each time we the simulation
 					// a little bit longer to ensure that the estimate
 					// at the time of the event is accurate
+					double duration = ((double)Math.round((e.getKey()-lastStopTime)*100000))/100000;
 					tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
-								initial, e.getKey()-lastStopTime+2*stepSize, stepSize, accUpdater);
+								initial, duration+2*stepSize, stepSize, accUpdater);
 					int tmpLastInd = tmp.length-2;
 					for (int i=0; i < initial.length; i++) {
 						initial[i] = tmp[tmpLastInd][i];
