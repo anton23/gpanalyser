@@ -9,7 +9,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import uk.ac.imperial.doc.gpa.forecasting.util.FileExtra;
 import uk.ac.imperial.doc.gpa.forecasting.util.MathExtra;
-import uk.ac.imperial.doc.gpa.plain.postprocessors.numerical.InhomogeneousODEAnalysisNumericalPostprocessor;
+import uk.ac.imperial.doc.gpa.plain.postprocessors.numerical.InhomogeneousSimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
 import uk.ac.imperial.doc.gpa.plain.representation.timed.TimedEvents;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
@@ -23,17 +23,14 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternPopulationExpression;
-import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
-import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
-import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
-public class ForecastingODEAnalysisNumericalPostprocessor extends
-		InhomogeneousODEAnalysisNumericalPostprocessor
+public class ForecastingSimuAnalysisNumericalPostprocessor extends
+		InhomogeneousSimulationAnalysisNumericalPostprocessor
 {	
 	private int mWarmup;
 	private int mForecast;
@@ -47,10 +44,10 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	private List<String> mArrTS;
 	private List<String> mDepTS;
 
-	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
+	public ForecastingSimuAnalysisNumericalPostprocessor(double stepSize, int replications, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
 			   int tsStep, String muTS, List<String> arrTS, List<String> depTS) {
-		super(warmup+forecast+1.5, stepSize, density);
+		super(warmup+forecast+1.5, stepSize, replications);
 		mWarmup = warmup;
 		mForecast = forecast;
 		mIBF = ibf;
@@ -64,10 +61,10 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		mDepTS = depTS;
 	}
 
-	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
+	public ForecastingSimuAnalysisNumericalPostprocessor(double stepSize, int replications, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
 			   int tsStep, String muTS, List<String> arrTS, List<String> depTS, Map<String, Object> parameters) {
-		super(warmup+forecast+1, stepSize, density,parameters);
+		super(warmup+forecast+1, stepSize, replications,parameters);
 		mWarmup = warmup;
 		mForecast = forecast;
 		mIBF = ibf;
@@ -80,24 +77,21 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		mArrTS = arrTS;
 		mDepTS = depTS;
 	}
-	
-	protected ForecastingODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
-			PCTMCODEAnalysis odeAnalysis, JavaODEsPreprocessed preprocessedImplementation) {
-		super(stopTime, stepSize, density, odeAnalysis, preprocessedImplementation);
-	}
-	
+
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
-		return new ForecastingODEAnalysisNumericalPostprocessor(stepSize, density, mWarmup, mForecast,
+		return new ForecastingSimuAnalysisNumericalPostprocessor(stepSize, replications, mWarmup, mForecast,
 				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTS, mArrTS, mDepTS);
 	}
 	
 	@Override
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
-		assert(odeAnalysis!=null);
-		PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider();
-		ForecastingODEAnalysisNumericalPostprocessor ret = new ForecastingODEAnalysisNumericalPostprocessor(stopTime, stepSize, density, odeAnalysis, javaImplementation
-				.getPreprocessedODEImplementation(odeAnalysis.getOdeMethod(), constants, momentIndex));
+		assert(prepared);
+		ForecastingSimuAnalysisNumericalPostprocessor ret = new ForecastingSimuAnalysisNumericalPostprocessor(stepSize, replications, mWarmup, mForecast,
+				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTS, mArrTS, mDepTS);
+		ret.fastPrepare(momentIndex, generalExpectationIndex,
+				productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode,
+				initialExpressions, eventGeneratorClassName);
 		return ret;
 	}
 	
@@ -105,17 +99,19 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	public void calculateDataPoints(Constants constants) {
 		
 		// Do analysis for all time series points
-		PlainPCTMC pctmc = getPlainPCMTC(odeAnalysis);	
+		PlainPCTMC pctmc = getPlainPCMTC(simulation);	
 
+		PopulationProduct pp = PopulationProduct.getMeanProduct(mArrState);
+		CombinedPopulationProduct cppArrMean = new CombinedPopulationProduct(pp);
+		int cppArrMeanIndex = simulation.getMomentIndex().get(cppArrMean);
+		CombinedPopulationProduct cppArrMeanSq = new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp));
+		int cppArrMeanSqIndex = simulation.getMomentIndex().get(cppArrMeanSq);
+		
 		int nofDays = mArrTS.size();
 		if (nofDays != mDepTS.size()) {
 			PCTMCLogging.error("For each observation period we should have an arrival and a departures.");
 			System.exit(0);
 		}
-		
-		// Forecast vs Reality
-		CombinedPopulationProduct cppArrMean = new CombinedPopulationProduct(PopulationProduct.getMeanProduct(mArrState));
-		int cppArrMeanIndex = this.odeAnalysis.getMomentIndex().get(cppArrMean);
 		
 		// MuTS
 		String muTSStr = FileExtra.readFromTextFile(mMuTS);
@@ -196,18 +192,19 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 			
 				// Forecast vs Reality
 				double forecastArr = MathExtra.twoDecim(dataPoints[(int) (dataPoints.length-(1/stepSize))][cppArrMeanIndex]);
+				double forecastArrSq = MathExtra.twoDecim(dataPoints[(int) (dataPoints.length-(1/stepSize))][cppArrMeanSqIndex]);
+				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
 				double actualArr = 0;
 				for (int i=mWarmup; i<mWarmup+mForecast; ++i) {
 					actualArr += Double.parseDouble(arrToday[startObsIndex+i]);
 				}
-				System.out.println("");
 
 				double[] data = {forecastArr, actualArr};
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {
 					mData.add(data);
 				}
 				
-				System.out.println (forecastArr + " "+ actualArr);
+				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
 			}
 		}
 	}
