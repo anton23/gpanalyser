@@ -26,5 +26,7 @@ public class PCTMCOptions {
 	
 	public static boolean condor = false;
 	
+	public static boolean condor_merge = false;
+	
 	public static int condor_parts = 1;
 }

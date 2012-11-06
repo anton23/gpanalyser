@@ -67,6 +67,9 @@ public class GPAPMain {
 				.withRequiredArg().ofType(Integer.class)
 						.describedAs("number of parts");
 				;
+				accepts("condor-merge", "merges results from previously ran condor jobs")
+				.withRequiredArg().ofType(Integer.class)
+						.describedAs("number of parts");
 				
 				accepts("showIterations", "proportion of iterations after which the number of finished iterations is shown")
 						.withRequiredArg().ofType(Integer.class)
@@ -163,6 +166,10 @@ public class GPAPMain {
 			if (options.has("condor")) {
 				PCTMCOptions.condor = true;
 				PCTMCOptions.condor_parts = (Integer) options.valueOf("condor");				
+			}
+			if (options.has("condor-merge")) {
+				PCTMCOptions.condor_merge = true;
+				PCTMCOptions.condor_parts = (Integer) options.valueOf("condor-merge");
 			}
 			 PCTMCLogging .debug("Creating a PCTMC interpreter with\n lexer: "
 			  + interpreter.getLexerClass() + ",\n parser: " + interpreter.getParserClass() + ",\n compiler: " +
