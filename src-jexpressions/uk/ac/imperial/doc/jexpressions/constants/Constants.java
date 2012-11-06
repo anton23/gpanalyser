@@ -126,6 +126,15 @@ public class Constants {
 	 * Returns textual representation of the system.
 	 */
 	public String toString() {
-		return ToStringUtils.mapToDefinitionList(constants, "=", ";\n");
+		StringBuilder out = new StringBuilder();
+		for (Map.Entry<String, Double> e : constants.entrySet()) {
+			out.append(e.getKey());
+			out.append(" = ");
+			String value = String.format("%.10f", e.getValue());		
+			value = value.replaceAll("0+$", "").replaceAll("\\.$", ".0");		
+			out.append(value);
+			out.append(";\n");
+		}
+		return out.toString();
 	}
 }
