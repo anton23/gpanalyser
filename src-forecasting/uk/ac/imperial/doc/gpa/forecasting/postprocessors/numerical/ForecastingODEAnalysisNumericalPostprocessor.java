@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,23 +10,18 @@ import uk.ac.imperial.doc.gpa.forecasting.util.MathExtra;
 import uk.ac.imperial.doc.gpa.plain.postprocessors.numerical.InhomogeneousODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternPopulationExpression;
 import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
-import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
-import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 public class ForecastingODEAnalysisNumericalPostprocessor extends
 		InhomogeneousODEAnalysisNumericalPostprocessor
@@ -43,6 +37,7 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	private String mMuTSFile;
 	private List<String> mArrTSFiles;
 	private List<String> mDepTSFiles;
+	private List<double[]> mData = new LinkedList<double[]>();
 
 	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
@@ -140,56 +135,24 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		}
 	}
 	
-	List<double[]> mData = new LinkedList<double[]>();
-	
 	@Override
 	public void postprocessAnalysis(Constants constants,
 			AbstractPCTMCAnalysis analysis,
-			List<PlotDescription> plotDescriptions){
+			List<PlotDescription> plotDescriptions)
+	{
 		prepare(analysis, constants);
-		calculateDataPoints(constants); 
+		calculateDataPoints(constants);
 		if (mData!=null){
-			results = new HashMap<PlotDescription, double[][]>();
-			List<AbstractExpression> l = new LinkedList<AbstractExpression>();
-			PatternPopulationExpression fcast = new PatternPopulationExpression(mArrState);
-			fcast.setUnfolded(CombinedProductExpression.createMeanExpression(mArrState));
-			PatternPopulationExpression actual = new PatternPopulationExpression(new PlainState("ActualArr"));
-			actual.setUnfolded(CombinedProductExpression.createMeanExpression(new PlainState("ActualArr")));
-			l.add(fcast);
-			l.add(actual);
-			PlotDescription pd = new PlotDescription(l);
-			double[][] data = plotData(analysis.toString(), constants, pd.getExpressions(), pd.getFilename());
-			results.put(pd, data);
-		}
-	}
-
-	@Override
-	public double[][] plotData(String analysisTitle,
-			Constants constants, List<AbstractExpression> expressions,
-			String filename) {
-		String[] names = new String[expressions.size()];
-		for (int i = 0; i < expressions.size(); i++) {
-			names[i] = expressions.get(i).toString();
-		}
-		double[][] data = new double[mData.size()][expressions.size()];
-		for (int i=0; i < data.length; i++) {
-			for (int j=0; j < data[i].length; j++)
-			{
-				data[i][j] = mData.get(i)[j];
+			String[] names =  {"E[ForecastArrival]","Observed Arrivals"};
+			double[][] data = new double[mData.size()][2];
+			for (int i=0; i < data.length; i++) {
+				for (int j=0; j < data[i].length; j++)
+				{
+					data[i][j] = mData.get(i)[j];
+				}
 			}
+			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,stepSize,names);
+			PCTMCChartUtilities.drawChart(dataset, "time", "count", "",	analysis.toString());
 		}
-		XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,
-				stepSize, names);
-		PCTMCChartUtilities.drawChart(dataset, "time", "count", "",
-				analysisTitle+this.toString());
-		if (filename != null && !filename.equals("")) {
-			List<String> labels = new LinkedList<String>();
-			for (AbstractExpression e : expressions) {
-				labels.add(e.toString());
-			}
-			FileUtils.writeGnuplotFile(filename, "", labels, "time", "count");
-			FileUtils.writeCSVfile(filename, dataset);
-		}
-		return data;
 	}
 }
