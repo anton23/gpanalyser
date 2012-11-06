@@ -75,6 +75,10 @@ public class RangeSpecification {
 	public double getStep(int step) {
 		return from + step * dc;
 	}
+	
+	public int getIndex(double value) {
+		return (int)Math.floor((value - from)/dc);
+	}
 
 	public double getDc() {
 		return dc;

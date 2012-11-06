@@ -71,7 +71,7 @@ public class iPrefix extends Prefix implements iPEPAPrefix
         {
             immediatesString += ", " + imm;
         }
-        return "(" + action + immediatesString + ", T, "
+        return "(" + action + immediatesString + ", "
                 + rate + ")." + continuationString;
     }
 

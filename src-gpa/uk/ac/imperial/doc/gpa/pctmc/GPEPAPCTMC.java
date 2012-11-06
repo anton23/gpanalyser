@@ -48,7 +48,7 @@ public class GPEPAPCTMC extends PCTMC{
 		ret+=model.toString();
 		ret+="\n";
 		if (!countActions.isEmpty()) {
-			ret+="Count: "+ToStringUtils.iterableToSSV(countActions, ",");
+			ret+="Count "+ToStringUtils.iterableToSSV(countActions, ",") + ";";
 		}
 		return ret; 
 	}

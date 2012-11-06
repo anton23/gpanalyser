@@ -452,7 +452,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 		ret.append((minRanges.isEmpty()?"":("Minimise " + minSpecification + " " + ToStringUtils.iterableToSSV(minRanges, "\n         ") + "\n")));
 		ret.append(analysis.toString());
 		ret.append(analysis.getPostprocessorString());
-		ret.append("{\n");
+		ret.append("{} plot {\n");
 		for (PlotAtDescription p : plots) {
 			ret.append("   ");
 			ret.append(p.toString());

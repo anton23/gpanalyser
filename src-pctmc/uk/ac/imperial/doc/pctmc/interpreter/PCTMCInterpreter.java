@@ -1,12 +1,24 @@
 package uk.ac.imperial.doc.pctmc.interpreter;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import org.antlr.runtime.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.antlr.runtime.ANTLRFileStream;
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CharStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.Lexer;
+import org.antlr.runtime.Parser;
+import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.TreeNodeStream;
 import org.antlr.runtime.tree.TreeParser;
+
+import uk.ac.imperial.doc.gpa.plain.syntax.PlainParser;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
@@ -14,6 +26,7 @@ import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.condor.CondorGenerator;
+import uk.ac.imperial.doc.pctmc.condor.CondorMerger;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -22,11 +35,8 @@ import uk.ac.imperial.doc.pctmc.syntax.ParsingData;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 
 /**
  * Class with methods for parsing GPEPA files and executing analyses.
@@ -233,7 +243,18 @@ public class PCTMCInterpreter {
 		PCTMC pctmc = fileRepresentation.getPctmc();
 
 		if (PCTMCOptions.condor) {
-			new CondorGenerator(fileRepresentation, file).generate();
+			String options = "";
+			// A not so nice hack
+			if (PlainParser.class.equals(parserClass)) {
+				options = "-plain";
+			}
+
+			new CondorGenerator(fileRepresentation, file, options).generate();
+			return;
+		}
+		
+		if (PCTMCOptions.condor_merge) {
+			new CondorMerger(fileRepresentation, file, "").merge();
 			return;
 		}
 		
