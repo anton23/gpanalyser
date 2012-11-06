@@ -12,6 +12,7 @@ COUNT: '#';
 INHOMOGENEOUSODES: 'InhomogeneousODEs';
 INHOMOGENEOUSSIMULATION: 'InhomogeneousSimulation';
 FORECASTING: 'Forecasting';
+FORECASTINGSIMU: 'ForecastingSimu';
 
 WARMUP: 'warmup';
 FORECAST: 'forecast';
@@ -19,6 +20,8 @@ INTVLBETWEENFORECASTS: 'intvlBetweenForecasts';
 ARRSTATE: 'arrState';
 STARTSTATES: 'startStates';
 STARTDELTAS: 'startDeltas';
+DESTMUS: 'destMus';
 TSSTEP: 'tsStep';
+MUTS: 'muTS';
 ARRTS: 'arrTS';
 DEPTS: 'depTS';

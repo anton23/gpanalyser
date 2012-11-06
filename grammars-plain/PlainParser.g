@@ -23,6 +23,7 @@ tokens{
   COMBINEDPRODUCT; 
   RANGE;
   FORECASTINGSETTINGS;
+  FORECASTINGSIMUSETTINGS;
   LOS;
 }
 
@@ -142,6 +143,7 @@ analysis:
  |forecasting
  |simulation
  |inhomogeneousSimulation
+ |forecastingSimu
  |accuratesimulation
  |compare)
 
@@ -183,14 +185,51 @@ forecastingSettings:
     INTVLBETWEENFORECASTS DEF ibf = INTEGER COMMA
     ARRSTATE DEF arrState = state COMMA
     STARTSTATES DEF LBRACE startStates = listOfStates RBRACE COMMA
+    DESTMUS DEF LBRACE destMus = listOfConsts RBRACE COMMA
     STARTDELTAS DEF LBRACE startDeltas = listOfConsts RBRACE COMMA
     TSSTEP DEF tsStep = INTEGER COMMA
+    MUTS DEF muTS = FILENAME COMMA
     ARRTS DEF LBRACE arrTS = listOfFiles RBRACE COMMA
     DEPTS DEF LBRACE depTS = listOfFiles RBRACE
   RPAR
   -> ^(FORECASTINGSETTINGS $stepSize COMMA $density COMMA $warmup COMMA
-  	   $forecast COMMA $ibf COMMA $arrState COMMA $startStates COMMA
-  	   $startDeltas COMMA $tsStep COMMA $arrTS COMMA $depTS)
+  	   $forecast COMMA $ibf COMMA $arrState COMMA $startStates COMMA $destMus COMMA
+  	   $startDeltas COMMA $tsStep COMMA $muTS COMMA $arrTS COMMA $depTS)
+;
+
+forecastingSimu:
+  FORECASTINGSIMU
+  {hint.push("ForecastingSimu analysis has to be of the form\n"+
+  			 "Forecasting(stepSize=<number>,\n"+
+  			 "replications=<integer>, warmup=<integer>,\n"+
+  			 "forecast=<integer>, intvlBetweenForecasts=<integer>,\n"+
+  			 "arrState=<state>, startStates={<state>,...},\n"+
+  			 "startDeltas={<LOWERCASENAME>,...}, TSStep=<integer>,\n"+
+  			 "arrTS={<StringFilename>,...},depTS={<StringFilename>,...}){}'");}
+  forecastingSimuSettings
+  {hint.pop();}
+  -> ^(FORECASTINGSIMU forecastingSimuSettings)
+;
+
+forecastingSimuSettings:
+  LPAR
+    STEPSIZE DEF stepSize = expression COMMA
+    REPLICATIONS DEF replications = INTEGER COMMA
+    WARMUP DEF warmup = INTEGER COMMA
+    FORECAST DEF forecast = INTEGER COMMA
+    INTVLBETWEENFORECASTS DEF ibf = INTEGER COMMA
+    ARRSTATE DEF arrState = state COMMA
+    STARTSTATES DEF LBRACE startStates = listOfStates RBRACE COMMA
+    DESTMUS DEF LBRACE destMus = listOfConsts RBRACE COMMA
+    STARTDELTAS DEF LBRACE startDeltas = listOfConsts RBRACE COMMA
+    TSSTEP DEF tsStep = INTEGER COMMA
+    MUTS DEF muTS = FILENAME COMMA
+    ARRTS DEF LBRACE arrTS = listOfFiles RBRACE COMMA
+    DEPTS DEF LBRACE depTS = listOfFiles RBRACE
+  RPAR
+  -> ^(FORECASTINGSIMUSETTINGS $stepSize COMMA $replications COMMA $warmup COMMA
+  	   $forecast COMMA $ibf COMMA $arrState COMMA $startStates COMMA $destMus COMMA
+  	   $startDeltas COMMA $tsStep COMMA $muTS COMMA $arrTS COMMA $depTS)
 ;
 
 listOfStates:
