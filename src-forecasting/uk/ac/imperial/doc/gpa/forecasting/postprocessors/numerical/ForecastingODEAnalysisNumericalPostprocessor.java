@@ -143,16 +143,36 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		prepare(analysis, constants);
 		calculateDataPoints(constants);
 		if (mData!=null){
-			String[] names =  {"E[ForecastArrival]","Observed Arrivals"};
-			double[][] data = new double[mData.size()][2];
-			for (int i=0; i < data.length; i++) {
-				for (int j=0; j < data[i].length; j++)
-				{
-					data[i][j] = mData.get(i)[j];
-				}
+			int numDataPts = mData.size();
+			int lag = mForecast * ((int)(1/stepSize));
+			String[] names =  {"E[Forecast t+"+mForecast+" mins]","Empirical"};
+			double[][] data = new double[numDataPts+lag][2];
+			double[][] dataLag = new double[numDataPts+lag][2];
+			
+			for (int i=0; i < numDataPts; ++i) {
+				// Forecast vs real process
+				data[i][0] = mData.get(i)[0];
+				data[i][1] = mData.get(i)[1];
+				
+				// Forecast vs real process shifted
+				dataLag[i][0] = mData.get(i)[0];
+				dataLag[i+lag][1] = mData.get(i)[1];
 			}
+			// Fill in end of prediction graph / beginning of real graph
+			for (int i=0; i < lag; i++) {
+				// Forecast vs real process
+				data[numDataPts+i][0] = data[numDataPts-1][0];
+				data[numDataPts+i][1] = data[numDataPts-1][1];
+				
+				// Forecast vs real process shifted
+				dataLag[numDataPts+i][0] = dataLag[numDataPts-1][0];
+				dataLag[i][1] = 0;
+			}
+
 			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,stepSize,names);
-			PCTMCChartUtilities.drawChart(dataset, "time", "count", "",	analysis.toString());
+			PCTMCChartUtilities.drawChart(dataset, "time", "#arrivals", "Forecast Vs Oracle", analysis.toString());
+			XYSeriesCollection datasetLag = AnalysisUtils.getDatasetFromArray(dataLag,stepSize,names);
+			PCTMCChartUtilities.drawChart(datasetLag, "time", "#arrivals", "Forecast Vs Live", analysis.toString());
 		}
 	}
 }

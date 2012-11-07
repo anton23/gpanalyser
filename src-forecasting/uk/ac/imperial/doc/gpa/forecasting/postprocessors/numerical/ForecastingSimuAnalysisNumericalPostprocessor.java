@@ -139,7 +139,7 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 		if (mData!=null){
 			int numDataPts = mData.size();
 			int lag = mForecast * ((int)(1/stepSize));
-			String[] names =  {"E[Forecast]","Empirical"};
+			String[] names =  {"E[Forecast t+"+mForecast+" mins]","Empirical"};
 			double[][] data = new double[numDataPts+lag][2];
 			double[][] dataLag = new double[numDataPts+lag][2];
 			
@@ -164,9 +164,9 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 			}
 
 			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,stepSize,names);
-			PCTMCChartUtilities.drawChart(dataset, "time", "#arrivals", "Forcast Vs Oracle", analysis.toString());
+			PCTMCChartUtilities.drawChart(dataset, "time", "#arrivals", "Forecast Vs Oracle", analysis.toString());
 			XYSeriesCollection datasetLag = AnalysisUtils.getDatasetFromArray(dataLag,stepSize,names);
-			PCTMCChartUtilities.drawChart(datasetLag, "time", "#arrivals", "Tfl - Operational", analysis.toString());
+			PCTMCChartUtilities.drawChart(datasetLag, "time", "#arrivals", "Forecast Vs Live", analysis.toString());
 		}
 	}
 }
