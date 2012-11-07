@@ -93,16 +93,16 @@ Forecasting[momentClosure=NormalClosure,maxOrder=2](stepSize = 0.1, density = 10
 										  }
 */
 ForecastingSimu(stepSize = 0.1, replications = 500,
-										   warmup = 30, forecast = 5,
+										   warmup = 30, forecast = 10,
 										   intvlBetweenForecasts = 1,
 										   arrState = {Arrival},
 										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3}},
 										   destMus = {mu_1,mu_2,mu_3},
 										   startDeltas = {delta_1,delta_2,delta_3},
 										   tsStep = 1,
-										   muTS = "../spatialysis/data/meanMuVals12-6_old.dat",
-										   arrTS = {"../spatialysis/data/forecast/ts/Arrivals12-06-2012.dat"},
-										   depTS = {"../spatialysis/data/forecast/ts/Departures12-06-2012.dat"})
+										   muTS = "../spatialysis/data/meanMuVals.dat",
+										   arrTS = {"../spatialysis/data/ts/Arrivals30-05-2012.dat"},
+										   depTS = {"../spatialysis/data/ts/Departures30-05-2012.dat"})
 										  {
 										  	E[{Arrival}],E[{Arrival}{Arrival}];
 										  }
