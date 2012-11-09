@@ -3,36 +3,33 @@ gamma = 7;
 mu_1 = 0;
 mu_2 = 0;
 mu_3 = 0;
-mu_4 = 0;
 delta_1 = 0;
 delta_2 = 0;
 delta_3 = 0;
-delta_4 = 0;
 
 loadRates "dummy.dat" into mu_1;
 loadRates "dummy.dat" into mu_2;
 loadRates "dummy.dat" into mu_3;
-loadRates "dummy.dat" into mu_4;
 loadRates "dummy.dat" into delta_1;
 loadRates "dummy.dat" into delta_2;
 loadRates "dummy.dat" into delta_3;
-loadRates "dummy.dat" into delta_4;
 
 // Transitions
 // Cluster1
                  ->  {StartCluster1}  @                                  delta_1;
 {StartCluster1}  ->  {Elsewhere}      @           {StartCluster1}*gamma*(1-mu_1);
 {StartCluster1}  ->  {D_1_0}          @          {StartCluster1}*gamma*mu_1*0.01;
-{D_1_0}          ->  {D_1_1}          @                             {D_1_0}*0.13;
+{D_1_0}          ->  {D_1_1}          @                             {D_1_0}*0.14;
 {StartCluster1}  ->  {D_1_1}          @          {StartCluster1}*gamma*mu_1*0.99;
-{D_1_1}          ->  {D_1_2}          @                             {D_1_1}*1.03;
-{D_1_2}          ->  {D_1_3}          @                             {D_1_2}*1.03;
-{D_1_3}          ->  {D_1_4}          @                             {D_1_3}*1.03;
-{D_1_4}          ->  {D_1_5}          @                             {D_1_4}*1.03;
-{D_1_5}          ->  {D_1_6}          @                             {D_1_5}*1.03;
-{D_1_6}          ->  {D_1_7}          @                             {D_1_6}*1.03;
-{D_1_7}          ->  {D_1_8}          @                             {D_1_7}*1.03;
-{D_1_8}          ->  {Arrival}        @                        {D_1_8}*1.0255427;
+{D_1_1}          ->  {D_1_2}          @                             {D_1_1}*1.02;
+{D_1_2}          ->  {D_1_3}          @                             {D_1_2}*1.02;
+{D_1_3}          ->  {D_1_4}          @                             {D_1_3}*1.02;
+{D_1_4}          ->  {D_1_5}          @                             {D_1_4}*1.02;
+{D_1_5}          ->  {D_1_6}          @                             {D_1_5}*1.02;
+{D_1_6}          ->  {D_1_7}          @                             {D_1_6}*1.02;
+{D_1_7}          ->  {D_1_8}          @                             {D_1_7}*1.02;
+{D_1_8}          ->  {Arrival}        @                        {D_1_8}*1.0237392;
+
 // Cluster2
                  ->  {StartCluster2}  @                                  delta_2;
 {StartCluster2}  ->  {Elsewhere}      @           {StartCluster2}*gamma*(1-mu_2);
@@ -47,75 +44,59 @@ loadRates "dummy.dat" into delta_4;
 {D_2_7}          ->  {D_2_8}          @                             {D_2_7}*0.88;
 {D_2_8}          ->  {D_2_9}          @                             {D_2_8}*0.88;
 {StartCluster2}  ->  {D_2_9}          @          {StartCluster2}*gamma*mu_2*0.01;
-{D_2_9}          ->  {Arrival}        @                        {D_2_9}*0.4746962;
+{D_2_9}          ->  {Arrival}        @                        {D_2_9}*0.4765955;
+
 // Cluster3
                  ->  {StartCluster3}  @                                  delta_3;
 {StartCluster3}  ->  {Elsewhere}      @           {StartCluster3}*gamma*(1-mu_3);
 {StartCluster3}  ->  {D_3_0}          @          {StartCluster3}*gamma*mu_3*0.99;
-{D_3_0}          ->  {D_3_1}          @                             {D_3_0}*0.97;
-{D_3_1}          ->  {D_3_2}          @                             {D_3_1}*0.97;
-{D_3_2}          ->  {D_3_3}          @                             {D_3_2}*0.97;
-{D_3_3}          ->  {D_3_4}          @                             {D_3_3}*0.97;
-{D_3_4}          ->  {D_3_5}          @                             {D_3_4}*0.97;
-{D_3_5}          ->  {D_3_6}          @                             {D_3_5}*0.97;
-{D_3_6}          ->  {D_3_7}          @                             {D_3_6}*0.97;
-{D_3_7}          ->  {D_3_8}          @                             {D_3_7}*0.97;
-{D_3_8}          ->  {D_3_9}          @                             {D_3_8}*0.97;
-{D_3_9}          ->  {D_3_10}         @                             {D_3_9}*0.97;
-{D_3_10}         ->  {D_3_11}         @                            {D_3_10}*0.97;
-{D_3_11}         ->  {D_3_12}         @                            {D_3_11}*0.97;
-{D_3_12}         ->  {D_3_13}         @                            {D_3_12}*0.97;
-{D_3_13}         ->  {D_3_14}         @                            {D_3_13}*0.97;
-{D_3_14}         ->  {D_3_15}         @                            {D_3_14}*0.97;
-{D_3_15}         ->  {D_3_16}         @                            {D_3_15}*0.97;
-{StartCluster3}  ->  {D_3_16}         @          {StartCluster3}*gamma*mu_3*0.01;
-{D_3_16}         ->  {Arrival}        @                       {D_3_16}*0.5837175;
-// Cluster4
-                 ->  {StartCluster4}  @                                  delta_4;
-{StartCluster4}  ->  {Elsewhere}      @           {StartCluster4}*gamma*(1-mu_4);
-{StartCluster4}  ->  {D_4_0}          @          {StartCluster4}*gamma*mu_4*0.93;
-{D_4_0}          ->  {D_4_1}          @                              {D_4_0}*0.7;
-{D_4_1}          ->  {D_4_2}          @                              {D_4_1}*0.7;
-{D_4_2}          ->  {D_4_3}          @                              {D_4_2}*0.7;
-{D_4_3}          ->  {D_4_4}          @                              {D_4_3}*0.7;
-{D_4_4}          ->  {D_4_5}          @                              {D_4_4}*0.7;
-{D_4_5}          ->  {D_4_6}          @                              {D_4_5}*0.7;
-{D_4_6}          ->  {D_4_7}          @                              {D_4_6}*0.7;
-{D_4_7}          ->  {D_4_8}          @                              {D_4_7}*0.7;
-{D_4_8}          ->  {D_4_9}          @                              {D_4_8}*0.7;
-{D_4_9}          ->  {D_4_10}         @                              {D_4_9}*0.7;
-{D_4_10}         ->  {D_4_11}         @                             {D_4_10}*0.7;
-{D_4_11}         ->  {D_4_12}         @                             {D_4_11}*0.7;
-{StartCluster4}  ->  {D_4_12}         @          {StartCluster4}*gamma*mu_4*0.07;
-{D_4_12}         ->  {Arrival}        @                       {D_4_12}*0.4047916;
+{D_3_0}          ->  {D_3_1}          @                             {D_3_0}*0.96;
+{D_3_1}          ->  {D_3_2}          @                             {D_3_1}*0.96;
+{D_3_2}          ->  {D_3_3}          @                             {D_3_2}*0.96;
+{D_3_3}          ->  {D_3_4}          @                             {D_3_3}*0.96;
+{D_3_4}          ->  {D_3_5}          @                             {D_3_4}*0.96;
+{D_3_5}          ->  {D_3_6}          @                             {D_3_5}*0.96;
+{D_3_6}          ->  {D_3_7}          @                             {D_3_6}*0.96;
+{D_3_7}          ->  {D_3_8}          @                             {D_3_7}*0.96;
+{D_3_8}          ->  {D_3_9}          @                             {D_3_8}*0.96;
+{D_3_9}          ->  {D_3_10}         @                             {D_3_9}*0.96;
+{D_3_10}         ->  {D_3_11}         @                            {D_3_10}*0.96;
+{D_3_11}         ->  {D_3_12}         @                            {D_3_11}*0.96;
+{D_3_12}         ->  {D_3_13}         @                            {D_3_12}*0.96;
+{D_3_13}         ->  {D_3_14}         @                            {D_3_13}*0.96;
+{D_3_14}         ->  {D_3_15}         @                            {D_3_14}*0.96;
+{D_3_15}         ->  {D_3_16}         @                            {D_3_15}*0.96;
+{D_3_16}         ->  {D_3_17}         @                            {D_3_16}*0.96;
+{StartCluster3}  ->  {D_3_17}         @          {StartCluster3}*gamma*mu_3*0.01;
+{D_3_17}         ->  {Arrival}        @                       {D_3_17}*0.5342781;
+
 // Initial Pops
 {StartCluster1} = 0;
 {StartCluster2} = 0;
 {StartCluster3} = 0;
-{StartCluster4} = 0;
 
 loadJumps "dummy.dat" into {StartCluster1};
 loadJumps "dummy.dat" into {StartCluster2};
 loadJumps "dummy.dat" into {StartCluster3};
-loadJumps "dummy.dat" into {StartCluster4};
 loadResets "dummy.dat" into {Arrival};
 
-Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 1000,
+Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 100,
 										   warmup = 30, forecast = 15,
 										   intvlBetweenForecasts = 1,
 										   arrState = {Arrival},
-										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4}},
-										   destMus = {mu_1,mu_2,mu_3,mu_4},
-										   startDeltas = {delta_1,delta_2,delta_3,delta_4},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3}},
+										   destMus = {mu_1,mu_2,mu_3},
+										   startDeltas = {delta_1,delta_2,delta_3},
 										   tsStep = 1,
 										   muTS = "../SpatialysisSVN/data/meanMuVals.dat",
-										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals12-06-2012.dat"},
-										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures12-06-2012.dat"})
+										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals21-06-2012.dat"},
+										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures21-06-2012.dat"})
 										  {
 										  	E[{Arrival}],E[{Arrival}{Arrival}];
 										  }
+										  /*
 ForecastingSimu(stepSize = 0.1, replications = 500,
-										   warmup = 30, forecast = 15,
+										   warmup = 30, forecast = 20,
 										   intvlBetweenForecasts = 1,
 										   arrState = {Arrival},
 										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4}},
@@ -123,9 +104,9 @@ ForecastingSimu(stepSize = 0.1, replications = 500,
 										   startDeltas = {delta_1,delta_2,delta_3,delta_4},
 										   tsStep = 1,
 										   muTS = "../SpatialysisSVN/data/meanMuVals.dat",
-										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals12-06-2012.dat"},
-										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures12-06-2012.dat"})
+										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals14-06-2012.dat"},
+										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures14-06-2012.dat"})
 										  {
 										  	E[{Arrival}],E[{Arrival}{Arrival}];
-										  }
+										  }*/
 
