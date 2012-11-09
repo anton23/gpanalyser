@@ -130,10 +130,11 @@ public class InhomogeneousSimulationAnalysisNumericalPostprocessor extends Simul
 				}
 				lastStopTime = e.getKey();
 								
-				if(tmp == null) {continue;}
-				for (int t = index; t < index+tmp.length-2; t++) {
-					updater.update(dataPoints[t], tmp[t-index]);
-					updater.update(dataPointsRep[t], tmp[t-index]);	
+				if(tmp != null) {
+					for (int t = index; t < index+tmp.length-2; t++) {
+						updater.update(dataPoints[t], tmp[t-index]);
+						updater.update(dataPointsRep[t], tmp[t-index]);	
+					}
 				}
 				
 				// Execute rate and population changes for current events

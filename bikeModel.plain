@@ -4,253 +4,110 @@ mu_1 = 0;
 mu_2 = 0;
 mu_3 = 0;
 mu_4 = 0;
-mu_5 = 0;
-mu_6 = 0;
 delta_1 = 0;
 delta_2 = 0;
 delta_3 = 0;
 delta_4 = 0;
-delta_5 = 0;
-delta_6 = 0;
 
 loadRates "dummy.dat" into mu_1;
 loadRates "dummy.dat" into mu_2;
 loadRates "dummy.dat" into mu_3;
 loadRates "dummy.dat" into mu_4;
-loadRates "dummy.dat" into mu_5;
-loadRates "dummy.dat" into mu_6;
 loadRates "dummy.dat" into delta_1;
 loadRates "dummy.dat" into delta_2;
 loadRates "dummy.dat" into delta_3;
 loadRates "dummy.dat" into delta_4;
-loadRates "dummy.dat" into delta_5;
-loadRates "dummy.dat" into delta_6;
 
 // Transitions
 // Cluster1
                  ->  {StartCluster1}  @                                  delta_1;
 {StartCluster1}  ->  {Elsewhere}      @           {StartCluster1}*gamma*(1-mu_1);
-{StartCluster1}  ->  {D_1_0}          @          {StartCluster1}*gamma*mu_1*0.94;
-{D_1_0}          ->  {D_1_1}          @                             {D_1_0}*0.57;
-{StartCluster1}  ->  {D_1_1}          @          {StartCluster1}*gamma*mu_1*0.06;
-{D_1_1}          ->  {D_1_2}          @                             {D_1_1}*1.08;
-{D_1_2}          ->  {D_1_3}          @                             {D_1_2}*1.08;
-{D_1_3}          ->  {D_1_4}          @                             {D_1_3}*1.08;
-{D_1_4}          ->  {D_1_5}          @                             {D_1_4}*1.08;
-{D_1_5}          ->  {D_1_6}          @                             {D_1_5}*1.08;
-{D_1_6}          ->  {D_1_7}          @                             {D_1_6}*1.08;
-{D_1_7}          ->  {D_1_8}          @                             {D_1_7}*1.08;
-{D_1_8}          ->  {D_1_9}          @                             {D_1_8}*1.08;
-{D_1_9}          ->  {D_1_10}         @                             {D_1_9}*1.08;
-{D_1_10}         ->  {D_1_11}         @                            {D_1_10}*1.08;
-{D_1_11}         ->  {D_1_12}         @                            {D_1_11}*1.08;
-{D_1_12}         ->  {D_1_13}         @                            {D_1_12}*1.08;
-{D_1_13}         ->  {D_1_14}         @                            {D_1_13}*1.08;
-{D_1_14}         ->  {Arrival}        @                       {D_1_14}*1.0756457;
+{StartCluster1}  ->  {D_1_0}          @          {StartCluster1}*gamma*mu_1*0.01;
+{D_1_0}          ->  {D_1_1}          @                             {D_1_0}*0.13;
+{StartCluster1}  ->  {D_1_1}          @          {StartCluster1}*gamma*mu_1*0.99;
+{D_1_1}          ->  {D_1_2}          @                             {D_1_1}*1.03;
+{D_1_2}          ->  {D_1_3}          @                             {D_1_2}*1.03;
+{D_1_3}          ->  {D_1_4}          @                             {D_1_3}*1.03;
+{D_1_4}          ->  {D_1_5}          @                             {D_1_4}*1.03;
+{D_1_5}          ->  {D_1_6}          @                             {D_1_5}*1.03;
+{D_1_6}          ->  {D_1_7}          @                             {D_1_6}*1.03;
+{D_1_7}          ->  {D_1_8}          @                             {D_1_7}*1.03;
+{D_1_8}          ->  {Arrival}        @                        {D_1_8}*1.0255427;
 // Cluster2
                  ->  {StartCluster2}  @                                  delta_2;
 {StartCluster2}  ->  {Elsewhere}      @           {StartCluster2}*gamma*(1-mu_2);
-{StartCluster2}  ->  {D_2_0}          @           {StartCluster2}*gamma*mu_2*1.0;
-{D_2_0}          ->  {D_2_1}          @                             {D_2_0}*1.46;
-{D_2_1}          ->  {D_2_2}          @                             {D_2_1}*1.46;
-{D_2_2}          ->  {D_2_3}          @                             {D_2_2}*1.46;
-{D_2_3}          ->  {D_2_4}          @                             {D_2_3}*1.46;
-{D_2_4}          ->  {D_2_5}          @                             {D_2_4}*1.46;
-{D_2_5}          ->  {D_2_6}          @                             {D_2_5}*1.46;
-{D_2_6}          ->  {D_2_7}          @                             {D_2_6}*1.46;
-{D_2_7}          ->  {D_2_8}          @                             {D_2_7}*1.46;
-{D_2_8}          ->  {D_2_9}          @                             {D_2_8}*1.46;
-{D_2_9}          ->  {D_2_10}         @                             {D_2_9}*1.46;
-{D_2_10}         ->  {D_2_11}         @                            {D_2_10}*1.46;
-{D_2_11}         ->  {D_2_12}         @                            {D_2_11}*1.46;
-{D_2_12}         ->  {D_2_13}         @                            {D_2_12}*1.46;
-{D_2_13}         ->  {D_2_14}         @                            {D_2_13}*1.46;
-{D_2_14}         ->  {D_2_15}         @                            {D_2_14}*1.46;
-{D_2_15}         ->  {D_2_16}         @                            {D_2_15}*1.46;
-{D_2_16}         ->  {D_2_17}         @                            {D_2_16}*1.46;
-{D_2_17}         ->  {D_2_18}         @                            {D_2_17}*1.46;
-{D_2_18}         ->  {D_2_19}         @                            {D_2_18}*1.46;
-{D_2_19}         ->  {D_2_20}         @                            {D_2_19}*1.46;
-{D_2_20}         ->  {D_2_21}         @                            {D_2_20}*1.46;
-{D_2_21}         ->  {D_2_22}         @                            {D_2_21}*1.46;
-{D_2_22}         ->  {D_2_23}         @                            {D_2_22}*1.46;
-{D_2_23}         ->  {D_2_24}         @                            {D_2_23}*1.46;
-{D_2_24}         ->  {D_2_25}         @                            {D_2_24}*1.46;
-{D_2_25}         ->  {D_2_26}         @                            {D_2_25}*1.46;
-{D_2_26}         ->  {D_2_27}         @                            {D_2_26}*1.46;
-{StartCluster2}  ->  {D_2_27}         @           {StartCluster2}*gamma*mu_2*0.0;
-{D_2_27}         ->  {Arrival}        @                       {D_2_27}*0.7728716;
+{StartCluster2}  ->  {D_2_0}          @          {StartCluster2}*gamma*mu_2*0.99;
+{D_2_0}          ->  {D_2_1}          @                             {D_2_0}*0.88;
+{D_2_1}          ->  {D_2_2}          @                             {D_2_1}*0.88;
+{D_2_2}          ->  {D_2_3}          @                             {D_2_2}*0.88;
+{D_2_3}          ->  {D_2_4}          @                             {D_2_3}*0.88;
+{D_2_4}          ->  {D_2_5}          @                             {D_2_4}*0.88;
+{D_2_5}          ->  {D_2_6}          @                             {D_2_5}*0.88;
+{D_2_6}          ->  {D_2_7}          @                             {D_2_6}*0.88;
+{D_2_7}          ->  {D_2_8}          @                             {D_2_7}*0.88;
+{D_2_8}          ->  {D_2_9}          @                             {D_2_8}*0.88;
+{StartCluster2}  ->  {D_2_9}          @          {StartCluster2}*gamma*mu_2*0.01;
+{D_2_9}          ->  {Arrival}        @                        {D_2_9}*0.4746962;
 // Cluster3
                  ->  {StartCluster3}  @                                  delta_3;
 {StartCluster3}  ->  {Elsewhere}      @           {StartCluster3}*gamma*(1-mu_3);
-{StartCluster3}  ->  {D_3_0}          @           {StartCluster3}*gamma*mu_3*0.0;
-{D_3_0}          ->  {D_3_1}          @                             {D_3_0}*0.06;
-{StartCluster3}  ->  {D_3_1}          @           {StartCluster3}*gamma*mu_3*1.0;
-{D_3_1}          ->  {D_3_2}          @                             {D_3_1}*1.46;
-{D_3_2}          ->  {D_3_3}          @                             {D_3_2}*1.46;
-{D_3_3}          ->  {D_3_4}          @                             {D_3_3}*1.46;
-{D_3_4}          ->  {D_3_5}          @                             {D_3_4}*1.46;
-{D_3_5}          ->  {D_3_6}          @                             {D_3_5}*1.46;
-{D_3_6}          ->  {D_3_7}          @                             {D_3_6}*1.46;
-{D_3_7}          ->  {D_3_8}          @                             {D_3_7}*1.46;
-{D_3_8}          ->  {D_3_9}          @                             {D_3_8}*1.46;
-{D_3_9}          ->  {D_3_10}         @                             {D_3_9}*1.46;
-{D_3_10}         ->  {Arrival}        @                       {D_3_10}*1.4625041;
+{StartCluster3}  ->  {D_3_0}          @          {StartCluster3}*gamma*mu_3*0.99;
+{D_3_0}          ->  {D_3_1}          @                             {D_3_0}*0.97;
+{D_3_1}          ->  {D_3_2}          @                             {D_3_1}*0.97;
+{D_3_2}          ->  {D_3_3}          @                             {D_3_2}*0.97;
+{D_3_3}          ->  {D_3_4}          @                             {D_3_3}*0.97;
+{D_3_4}          ->  {D_3_5}          @                             {D_3_4}*0.97;
+{D_3_5}          ->  {D_3_6}          @                             {D_3_5}*0.97;
+{D_3_6}          ->  {D_3_7}          @                             {D_3_6}*0.97;
+{D_3_7}          ->  {D_3_8}          @                             {D_3_7}*0.97;
+{D_3_8}          ->  {D_3_9}          @                             {D_3_8}*0.97;
+{D_3_9}          ->  {D_3_10}         @                             {D_3_9}*0.97;
+{D_3_10}         ->  {D_3_11}         @                            {D_3_10}*0.97;
+{D_3_11}         ->  {D_3_12}         @                            {D_3_11}*0.97;
+{D_3_12}         ->  {D_3_13}         @                            {D_3_12}*0.97;
+{D_3_13}         ->  {D_3_14}         @                            {D_3_13}*0.97;
+{D_3_14}         ->  {D_3_15}         @                            {D_3_14}*0.97;
+{D_3_15}         ->  {D_3_16}         @                            {D_3_15}*0.97;
+{StartCluster3}  ->  {D_3_16}         @          {StartCluster3}*gamma*mu_3*0.01;
+{D_3_16}         ->  {Arrival}        @                       {D_3_16}*0.5837175;
 // Cluster4
                  ->  {StartCluster4}  @                                  delta_4;
 {StartCluster4}  ->  {Elsewhere}      @           {StartCluster4}*gamma*(1-mu_4);
-{StartCluster4}  ->  {D_4_0}          @           {StartCluster4}*gamma*mu_4*1.0;
-{D_4_0}          ->  {D_4_1}          @                             {D_4_0}*0.85;
-{D_4_1}          ->  {D_4_2}          @                             {D_4_1}*0.85;
-{D_4_2}          ->  {D_4_3}          @                             {D_4_2}*0.85;
-{D_4_3}          ->  {D_4_4}          @                             {D_4_3}*0.85;
-{D_4_4}          ->  {D_4_5}          @                             {D_4_4}*0.85;
-{D_4_5}          ->  {D_4_6}          @                             {D_4_5}*0.85;
-{D_4_6}          ->  {D_4_7}          @                             {D_4_6}*0.85;
-{D_4_7}          ->  {D_4_8}          @                             {D_4_7}*0.85;
-{StartCluster4}  ->  {D_4_8}          @           {StartCluster4}*gamma*mu_4*0.0;
-{D_4_8}          ->  {Arrival}        @                        {D_4_8}*0.4863544;
-// Cluster5
-                 ->  {StartCluster5}  @                                  delta_5;
-{StartCluster5}  ->  {Elsewhere}      @           {StartCluster5}*gamma*(1-mu_5);
-{StartCluster5}  ->  {D_5_0}          @          {StartCluster5}*gamma*mu_5*0.01;
-{D_5_0}          ->  {D_5_1}          @                             {D_5_0}*0.15;
-{StartCluster5}  ->  {D_5_1}          @          {StartCluster5}*gamma*mu_5*0.99;
-{D_5_1}          ->  {D_5_2}          @                             {D_5_1}*0.95;
-{D_5_2}          ->  {D_5_3}          @                             {D_5_2}*0.95;
-{D_5_3}          ->  {D_5_4}          @                             {D_5_3}*0.95;
-{D_5_4}          ->  {D_5_5}          @                             {D_5_4}*0.95;
-{D_5_5}          ->  {D_5_6}          @                             {D_5_5}*0.95;
-{D_5_6}          ->  {D_5_7}          @                             {D_5_6}*0.95;
-{D_5_7}          ->  {D_5_8}          @                             {D_5_7}*0.95;
-{D_5_8}          ->  {Arrival}        @                        {D_5_8}*0.9483439;
-// Cluster6
-                 ->  {StartCluster6}  @                                  delta_6;
-{StartCluster6}  ->  {Elsewhere}      @           {StartCluster6}*gamma*(1-mu_6);
-{StartCluster6}  ->  {D_6_0}          @           {StartCluster6}*gamma*mu_6*1.0;
-{D_6_0}          ->  {D_6_1}          @                             {D_6_0}*3.99;
-{D_6_1}          ->  {D_6_2}          @                             {D_6_1}*3.99;
-{D_6_2}          ->  {D_6_3}          @                             {D_6_2}*3.99;
-{D_6_3}          ->  {D_6_4}          @                             {D_6_3}*3.99;
-{D_6_4}          ->  {D_6_5}          @                             {D_6_4}*3.99;
-{D_6_5}          ->  {D_6_6}          @                             {D_6_5}*3.99;
-{D_6_6}          ->  {D_6_7}          @                             {D_6_6}*3.99;
-{D_6_7}          ->  {D_6_8}          @                             {D_6_7}*3.99;
-{D_6_8}          ->  {D_6_9}          @                             {D_6_8}*3.99;
-{D_6_9}          ->  {D_6_10}         @                             {D_6_9}*3.99;
-{D_6_10}         ->  {D_6_11}         @                            {D_6_10}*3.99;
-{D_6_11}         ->  {D_6_12}         @                            {D_6_11}*3.99;
-{D_6_12}         ->  {D_6_13}         @                            {D_6_12}*3.99;
-{D_6_13}         ->  {D_6_14}         @                            {D_6_13}*3.99;
-{D_6_14}         ->  {D_6_15}         @                            {D_6_14}*3.99;
-{D_6_15}         ->  {D_6_16}         @                            {D_6_15}*3.99;
-{D_6_16}         ->  {D_6_17}         @                            {D_6_16}*3.99;
-{D_6_17}         ->  {D_6_18}         @                            {D_6_17}*3.99;
-{D_6_18}         ->  {D_6_19}         @                            {D_6_18}*3.99;
-{D_6_19}         ->  {D_6_20}         @                            {D_6_19}*3.99;
-{D_6_20}         ->  {D_6_21}         @                            {D_6_20}*3.99;
-{D_6_21}         ->  {D_6_22}         @                            {D_6_21}*3.99;
-{D_6_22}         ->  {D_6_23}         @                            {D_6_22}*3.99;
-{D_6_23}         ->  {D_6_24}         @                            {D_6_23}*3.99;
-{D_6_24}         ->  {D_6_25}         @                            {D_6_24}*3.99;
-{D_6_25}         ->  {D_6_26}         @                            {D_6_25}*3.99;
-{D_6_26}         ->  {D_6_27}         @                            {D_6_26}*3.99;
-{D_6_27}         ->  {D_6_28}         @                            {D_6_27}*3.99;
-{D_6_28}         ->  {D_6_29}         @                            {D_6_28}*3.99;
-{D_6_29}         ->  {D_6_30}         @                            {D_6_29}*3.99;
-{D_6_30}         ->  {D_6_31}         @                            {D_6_30}*3.99;
-{D_6_31}         ->  {D_6_32}         @                            {D_6_31}*3.99;
-{D_6_32}         ->  {D_6_33}         @                            {D_6_32}*3.99;
-{D_6_33}         ->  {D_6_34}         @                            {D_6_33}*3.99;
-{D_6_34}         ->  {D_6_35}         @                            {D_6_34}*3.99;
-{D_6_35}         ->  {D_6_36}         @                            {D_6_35}*3.99;
-{D_6_36}         ->  {D_6_37}         @                            {D_6_36}*3.99;
-{D_6_37}         ->  {D_6_38}         @                            {D_6_37}*3.99;
-{D_6_38}         ->  {D_6_39}         @                            {D_6_38}*3.99;
-{D_6_39}         ->  {D_6_40}         @                            {D_6_39}*3.99;
-{D_6_40}         ->  {D_6_41}         @                            {D_6_40}*3.99;
-{D_6_41}         ->  {D_6_42}         @                            {D_6_41}*3.99;
-{D_6_42}         ->  {D_6_43}         @                            {D_6_42}*3.99;
-{D_6_43}         ->  {D_6_44}         @                            {D_6_43}*3.99;
-{D_6_44}         ->  {D_6_45}         @                            {D_6_44}*3.99;
-{D_6_45}         ->  {D_6_46}         @                            {D_6_45}*3.99;
-{D_6_46}         ->  {D_6_47}         @                            {D_6_46}*3.99;
-{D_6_47}         ->  {D_6_48}         @                            {D_6_47}*3.99;
-{D_6_48}         ->  {D_6_49}         @                            {D_6_48}*3.99;
-{D_6_49}         ->  {D_6_50}         @                            {D_6_49}*3.99;
-{D_6_50}         ->  {D_6_51}         @                            {D_6_50}*3.99;
-{D_6_51}         ->  {D_6_52}         @                            {D_6_51}*3.99;
-{D_6_52}         ->  {D_6_53}         @                            {D_6_52}*3.99;
-{D_6_53}         ->  {D_6_54}         @                            {D_6_53}*3.99;
-{D_6_54}         ->  {D_6_55}         @                            {D_6_54}*3.99;
-{D_6_55}         ->  {D_6_56}         @                            {D_6_55}*3.99;
-{D_6_56}         ->  {D_6_57}         @                            {D_6_56}*3.99;
-{D_6_57}         ->  {D_6_58}         @                            {D_6_57}*3.99;
-{D_6_58}         ->  {D_6_59}         @                            {D_6_58}*3.99;
-{D_6_59}         ->  {D_6_60}         @                            {D_6_59}*3.99;
-{D_6_60}         ->  {D_6_61}         @                            {D_6_60}*3.99;
-{D_6_61}         ->  {D_6_62}         @                            {D_6_61}*3.99;
-{D_6_62}         ->  {D_6_63}         @                            {D_6_62}*3.99;
-{D_6_63}         ->  {D_6_64}         @                            {D_6_63}*3.99;
-{D_6_64}         ->  {D_6_65}         @                            {D_6_64}*3.99;
-{D_6_65}         ->  {D_6_66}         @                            {D_6_65}*3.99;
-{D_6_66}         ->  {D_6_67}         @                            {D_6_66}*3.99;
-{D_6_67}         ->  {D_6_68}         @                            {D_6_67}*3.99;
-{D_6_68}         ->  {D_6_69}         @                            {D_6_68}*3.99;
-{D_6_69}         ->  {D_6_70}         @                            {D_6_69}*3.99;
-{D_6_70}         ->  {D_6_71}         @                            {D_6_70}*3.99;
-{D_6_71}         ->  {D_6_72}         @                            {D_6_71}*3.99;
-{D_6_72}         ->  {D_6_73}         @                            {D_6_72}*3.99;
-{D_6_73}         ->  {D_6_74}         @                            {D_6_73}*3.99;
-{D_6_74}         ->  {D_6_75}         @                            {D_6_74}*3.99;
-{D_6_75}         ->  {D_6_76}         @                            {D_6_75}*3.99;
-{D_6_76}         ->  {D_6_77}         @                            {D_6_76}*3.99;
-{D_6_77}         ->  {D_6_78}         @                            {D_6_77}*3.99;
-{D_6_78}         ->  {D_6_79}         @                            {D_6_78}*3.99;
-{D_6_79}         ->  {D_6_80}         @                            {D_6_79}*3.99;
-{D_6_80}         ->  {D_6_81}         @                            {D_6_80}*3.99;
-{D_6_81}         ->  {D_6_82}         @                            {D_6_81}*3.99;
-{D_6_82}         ->  {D_6_83}         @                            {D_6_82}*3.99;
-{D_6_83}         ->  {D_6_84}         @                            {D_6_83}*3.99;
-{D_6_84}         ->  {D_6_85}         @                            {D_6_84}*3.99;
-{D_6_85}         ->  {D_6_86}         @                            {D_6_85}*3.99;
-{D_6_86}         ->  {D_6_87}         @                            {D_6_86}*3.99;
-{D_6_87}         ->  {D_6_88}         @                            {D_6_87}*3.99;
-{D_6_88}         ->  {D_6_89}         @                            {D_6_88}*3.99;
-{D_6_89}         ->  {D_6_90}         @                            {D_6_89}*3.99;
-{D_6_90}         ->  {D_6_91}         @                            {D_6_90}*3.99;
-{D_6_91}         ->  {D_6_92}         @                            {D_6_91}*3.99;
-{D_6_92}         ->  {D_6_93}         @                            {D_6_92}*3.99;
-{D_6_93}         ->  {D_6_94}         @                            {D_6_93}*3.99;
-{D_6_94}         ->  {D_6_95}         @                            {D_6_94}*3.99;
-{D_6_95}         ->  {D_6_96}         @                            {D_6_95}*3.99;
-{D_6_96}         ->  {D_6_97}         @                            {D_6_96}*3.99;
-{StartCluster6}  ->  {D_6_97}         @           {StartCluster6}*gamma*mu_6*0.0;
-{D_6_97}         ->  {Arrival}        @                       {D_6_97}*2.0995894;
+{StartCluster4}  ->  {D_4_0}          @          {StartCluster4}*gamma*mu_4*0.93;
+{D_4_0}          ->  {D_4_1}          @                              {D_4_0}*0.7;
+{D_4_1}          ->  {D_4_2}          @                              {D_4_1}*0.7;
+{D_4_2}          ->  {D_4_3}          @                              {D_4_2}*0.7;
+{D_4_3}          ->  {D_4_4}          @                              {D_4_3}*0.7;
+{D_4_4}          ->  {D_4_5}          @                              {D_4_4}*0.7;
+{D_4_5}          ->  {D_4_6}          @                              {D_4_5}*0.7;
+{D_4_6}          ->  {D_4_7}          @                              {D_4_6}*0.7;
+{D_4_7}          ->  {D_4_8}          @                              {D_4_7}*0.7;
+{D_4_8}          ->  {D_4_9}          @                              {D_4_8}*0.7;
+{D_4_9}          ->  {D_4_10}         @                              {D_4_9}*0.7;
+{D_4_10}         ->  {D_4_11}         @                             {D_4_10}*0.7;
+{D_4_11}         ->  {D_4_12}         @                             {D_4_11}*0.7;
+{StartCluster4}  ->  {D_4_12}         @          {StartCluster4}*gamma*mu_4*0.07;
+{D_4_12}         ->  {Arrival}        @                       {D_4_12}*0.4047916;
 // Initial Pops
 {StartCluster1} = 0;
 {StartCluster2} = 0;
 {StartCluster3} = 0;
 {StartCluster4} = 0;
-{StartCluster5} = 0;
-{StartCluster6} = 0;
 
 loadJumps "dummy.dat" into {StartCluster1};
 loadJumps "dummy.dat" into {StartCluster2};
 loadJumps "dummy.dat" into {StartCluster3};
 loadJumps "dummy.dat" into {StartCluster4};
-loadJumps "dummy.dat" into {StartCluster5};
-loadJumps "dummy.dat" into {StartCluster6};
 loadResets "dummy.dat" into {Arrival};
 
 /*
-Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 1000,
-										   warmup = 30, forecast = 10,
-										   intvlBetweenForecasts = 1,
+Forecasting[momentClosure=NormalClosure,maxOrder=2](stepSize = 0.1, density = 1000,
+										   warmup = 30, forecast = 5,
+										   intvlBetweenForecasts = 5,
 										   arrState = {Arrival},
-										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3}},
-										   destMus = {mu_1,mu_2,mu_3},
-										   startDeltas = {delta_1,delta_2,delta_3},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4}},
+										   destMus = {mu_1,mu_2,mu_3,mu_4},
+										   startDeltas = {delta_1,delta_2,delta_3,delta_4},
 										   tsStep = 1,
 										   muTS = "../SpatialysisSVN/data/meanMuVals.dat",
 										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals07-06-2012.dat"},
@@ -260,16 +117,17 @@ Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 10
 										  }
 */
 ForecastingSimu(stepSize = 0.1, replications = 500,
-										   warmup = 30, forecast = 5,
-										   intvlBetweenForecasts = 5,
+										   warmup = 30, forecast = 10,
+										   intvlBetweenForecasts = 1,
 										   arrState = {Arrival},
-										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4},{StartCluster5},{StartCluster6}},
-										   destMus = {mu_1,mu_2,mu_3,mu_4,mu_5,mu_6},
-										   startDeltas = {delta_1,delta_2,delta_3,delta_4,delta_5,delta_6},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4}},
+										   destMus = {mu_1,mu_2,mu_3,mu_4},
+										   startDeltas = {delta_1,delta_2,delta_3,delta_4},
 										   tsStep = 1,
-										   muTS = "../spatialysis/data2/meanMuVals8-6.dat",
-										   arrTS = {"../spatialysis/data2/forecast/ts/Arrivals08-06-2012.dat"},
-										   depTS = {"../spatialysis/data2/forecast/ts/Departures08-06-2012.dat"})
+										   muTS = "../SpatialysisSVN/data/meanMuVals8-6.dat",
+										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals08-06-2012.dat"},
+										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures08-06-2012.dat"})
 										  {
 										  	E[{Arrival}],E[{Arrival}{Arrival}];
 										  }
+
