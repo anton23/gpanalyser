@@ -77,7 +77,7 @@ public class RangeSpecification {
 	}
 	
 	public int getIndex(double value) {
-		return (int)Math.floor((value - from)/dc);
+		return (int)Math.round((value - from)/dc);
 	}
 
 	public double getDc() {
