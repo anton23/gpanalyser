@@ -34,16 +34,27 @@ public class CondorMerger extends CondorBase {
 		for (PlotAtDescription p : iterate.getPlots()) {
 			if (p.getFilename() != null && !p.getFilename().isEmpty()) {
 				double[][] data = new double[dim1][dim2];
-				for (int i = 0; i < PCTMCOptions.condor_parts; i++) {
-					double[][] tmp = read3DFile(p.getFilename()+i);
-					for (int j = 0; j < tmp.length; j++) {
-						int xi = range1.getIndex(tmp[j][0]);
-						int yi = 0;
-						if (range2 != null) {
-							yi = range2.getIndex(tmp[j][1]);
-						}
-						data[xi][yi] = tmp[j][2];
+				for (int i = 0; i < data.length; i++) {
+					for (int j = 0; j < data[i].length; j++) {
+						data[i][j] = Double.POSITIVE_INFINITY;
 					}
+				}
+				for (int i = 0; i < PCTMCOptions.condor_parts; i++) {
+					double[][] tmp;
+					try {
+						tmp = read3DFile(p.getFilename()+i);
+						for (int j = 0; j < tmp.length; j++) {
+							int xi = range1.getIndex(tmp[j][0]);
+							int yi = 0;
+							if (range2 != null) {
+								yi = range2.getIndex(tmp[j][1]);
+							}
+							data[xi][yi] = tmp[j][2];
+						}
+					} catch (FileNotFoundException e) {
+						PCTMCLogging.info("The file " + p.getFilename()+i + " not found.");
+					}
+				
 				}
 				if (range2 != null) {
 					FileUtils.write3Dfile(p.getFilename(), data, range1.getFrom(), range1.getDc(), range2.getFrom(), range2.getDc());
@@ -52,8 +63,7 @@ public class CondorMerger extends CondorBase {
 		}
 	}
 	
-	protected double[][] read3DFile(String file) {
-		try {
+	protected double[][] read3DFile(String file) throws FileNotFoundException {
 			Scanner in = new Scanner(new FileInputStream(file));
 			List<double[]> tmp = new LinkedList<double[]>();
 			while (in.hasNext()) {
@@ -67,11 +77,6 @@ public class CondorMerger extends CondorBase {
 				}
 			}			
 			return tmp.toArray(new double[1][1]);                            			
-		} catch (FileNotFoundException e) {
-			throw new AssertionError("File " + file + " not found!");
-		}
-		
-		
 	}
 	
 	

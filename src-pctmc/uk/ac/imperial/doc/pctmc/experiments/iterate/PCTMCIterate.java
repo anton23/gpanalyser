@@ -66,14 +66,31 @@ public class PCTMCIterate extends PCTMCExperiment {
 			ret.add(new PCTMCIterate(minRanges, reEvaluations, analysis, postprocessor, plots, unfoldedVariables, 1, true));
 			return ret;
 		} else {
+			if (n < ranges.get(0).getSteps()) {
 			List<RangeSpecification> firstRangeParts = ranges.get(0).split(n);
 			List<RangeSpecification> restOfRanges = ranges.subList(1, ranges.size());
-			for (RangeSpecification r:firstRangeParts) {
-				List<RangeSpecification> tmpRanges = new ArrayList<RangeSpecification>();
-				tmpRanges.add(r);
-				tmpRanges.addAll(restOfRanges);
-				
-				ret.add(new PCTMCIterate(tmpRanges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, new Cloner().deepClone(plots), unfoldedVariables, 1, false));
+				for (RangeSpecification r:firstRangeParts) {
+					List<RangeSpecification> tmpRanges = new ArrayList<RangeSpecification>();
+					tmpRanges.add(r);
+					tmpRanges.addAll(restOfRanges);
+					
+					ret.add(new PCTMCIterate(tmpRanges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, new Cloner().deepClone(plots), unfoldedVariables, 1, false));
+				}
+			} else {
+				int n1= ranges.get(0).getSteps();
+				int n2 = n / ranges.get(0).getSteps();
+				List<RangeSpecification> firstRangeParts = ranges.get(0).split(n1);
+				List<RangeSpecification> secondRangeParts = ranges.get(1).split(n2);
+				List<RangeSpecification> restOfRanges = ranges.subList(2, ranges.size());
+				for (RangeSpecification r1:firstRangeParts) {
+					for (RangeSpecification r2:secondRangeParts) {
+					List<RangeSpecification> tmpRanges = new ArrayList<RangeSpecification>();
+					tmpRanges.add(r1);
+					tmpRanges.add(r2);
+					tmpRanges.addAll(restOfRanges);					
+					ret.add(new PCTMCIterate(tmpRanges, minSpecification, minRanges, reEvaluations, analysis, postprocessor, new Cloner().deepClone(plots), unfoldedVariables, 1, false));
+					}
+				}
 			}
 		}
 		return ret;		
@@ -450,6 +467,10 @@ public class PCTMCIterate extends PCTMCExperiment {
 		ret.append(ToStringUtils.iterableToSSV(ranges, "\n        "));
 		ret.append("\n");
 		ret.append((minRanges.isEmpty()?"":("Minimise " + minSpecification + " " + ToStringUtils.iterableToSSV(minRanges, "\n         ") + "\n")));
+		if (!reEvaluations.isEmpty()) {
+			ret.append(" where ");
+			ret.append(ToStringUtils.mapToDefinitionList(reEvaluations, " = ", ";\n"));
+		}
 		ret.append(analysis.toString());
 		ret.append(analysis.getPostprocessorString());
 		ret.append("{} plot {\n");
