@@ -145,7 +145,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		if (mData!=null){
 			int numDataPts = mData.size();
 			int lag = mForecast * ((int)(1/stepSize));
-			String[] names =  {"E[Forecast t+"+mForecast+" mins]","Empirical"};
+			String[] names =  {"E[Forecast([t,t+"+mForecast+"]) ]","Empirical ([t,t+"+mForecast+"])"};
+			String[] namesLag =  {"E[Forecast([t,t+"+mForecast+"]) ]","Empirical ([t-"+mForecast+",t])"};
 			double[][] data = new double[numDataPts+lag][2];
 			double[][] dataLag = new double[numDataPts+lag][2];
 			
@@ -171,8 +172,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 
 			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,stepSize,names);
 			PCTMCChartUtilities.drawChart(dataset, "time", "#arrivals", "Forecast Vs Oracle", analysis.toString());
-			XYSeriesCollection datasetLag = AnalysisUtils.getDatasetFromArray(dataLag,stepSize,names);
-			PCTMCChartUtilities.drawChart(datasetLag, "time", "#arrivals", "Forecast Vs Live", analysis.toString());
+			XYSeriesCollection datasetLag = AnalysisUtils.getDatasetFromArray(dataLag,stepSize,namesLag);
+			PCTMCChartUtilities.drawChart(datasetLag, "time", "#arrivals", "Forecast Vs Latest Measurement", analysis.toString());
 		}
 	}
 }
