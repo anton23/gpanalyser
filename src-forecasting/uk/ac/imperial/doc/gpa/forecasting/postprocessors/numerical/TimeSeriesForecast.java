@@ -1,5 +1,6 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -154,15 +155,26 @@ public class TimeSeriesForecast {
 			// To do that we find the gradient of change from the previous windowSize
 			// minute window to the current one and then extrapolate the rate of the
 			// current forecast window
-			double depRateCurForecast = 0;
-			double depRatePrevWindow = 0;
-			double windowSize = 8;
-			for (int t=1; t <= windowSize; ++t) {
-				depRateCurForecast += (1/windowSize)*jumpEvents[mWarmup-t][1];
-				depRatePrevWindow  += (1/windowSize)*jumpEvents[(int) (mWarmup-windowSize-t)][1];
+			double windowSize = 5;
+			int windowSizeX2 = (int) (2*windowSize);
+			double[] fcastRates = new double[windowSizeX2+mForecast];
+			for (int t=0; t < windowSizeX2; ++t)
+			{
+				fcastRates[t] = jumpEvents[mWarmup-t-1][1];
 			}
-			// Rate = depRateCurForecast + (depRateCurForecast - depRatePrevWindow)
-			double[][] depRateEvents = { { mWarmup, Math.max(2*depRateCurForecast-depRatePrevWindow, 0) }};
+			
+			double[][] depRateEvents = new double[mForecast][2];
+			for (int t=0; t < mForecast; ++t)
+			{
+				double depRateCurForecast = 0;
+				for (int i=0; i < windowSize; ++i) {
+					depRateCurForecast += (1/windowSize)*fcastRates[t+windowSizeX2/2+i];
+				}
+				fcastRates[t+windowSizeX2] = depRateCurForecast;
+				depRateEvents[t][0] = mWarmup+t;
+				depRateEvents[t][1] = fcastRates[t+windowSizeX2];
+			}
+
 			allRateEvents.put(mStartDeltas.get(state), depRateEvents);
 		}
 		
