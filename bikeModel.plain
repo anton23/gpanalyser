@@ -100,33 +100,31 @@ loadJumps "dummy.dat" into {StartCluster3};
 loadJumps "dummy.dat" into {StartCluster4};
 loadResets "dummy.dat" into {Arrival};
 
-/*
-Forecasting[momentClosure=NormalClosure,maxOrder=2](stepSize = 0.1, density = 1000,
-										   warmup = 30, forecast = 5,
-										   intvlBetweenForecasts = 5,
-										   arrState = {Arrival},
-										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4}},
-										   destMus = {mu_1,mu_2,mu_3,mu_4},
-										   startDeltas = {delta_1,delta_2,delta_3,delta_4},
-										   tsStep = 1,
-										   muTS = "../SpatialysisSVN/data/meanMuVals.dat",
-										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals07-06-2012.dat"},
-										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures07-06-2012.dat"})
-										  {
-										  	E[{Arrival}],E[{Arrival}{Arrival}];
-										  }
-*/
-ForecastingSimu(stepSize = 0.1, replications = 500,
-										   warmup = 30, forecast = 10,
+Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 1000,
+										   warmup = 30, forecast = 15,
 										   intvlBetweenForecasts = 1,
 										   arrState = {Arrival},
 										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4}},
 										   destMus = {mu_1,mu_2,mu_3,mu_4},
 										   startDeltas = {delta_1,delta_2,delta_3,delta_4},
 										   tsStep = 1,
-										   muTS = "../SpatialysisSVN/data/meanMuVals8-6.dat",
-										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals08-06-2012.dat"},
-										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures08-06-2012.dat"})
+										   muTS = "../SpatialysisSVN/data/meanMuVals.dat",
+										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals12-06-2012.dat"},
+										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures12-06-2012.dat"})
+										  {
+										  	E[{Arrival}],E[{Arrival}{Arrival}];
+										  }
+ForecastingSimu(stepSize = 0.1, replications = 500,
+										   warmup = 30, forecast = 15,
+										   intvlBetweenForecasts = 1,
+										   arrState = {Arrival},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4}},
+										   destMus = {mu_1,mu_2,mu_3,mu_4},
+										   startDeltas = {delta_1,delta_2,delta_3,delta_4},
+										   tsStep = 1,
+										   muTS = "../SpatialysisSVN/data/meanMuVals.dat",
+										   arrTS = {"../SpatialysisSVN/data/forecast/ts/Arrivals12-06-2012.dat"},
+										   depTS = {"../SpatialysisSVN/data/forecast/ts/Departures12-06-2012.dat"})
 										  {
 										  	E[{Arrival}],E[{Arrival}{Arrival}];
 										  }
