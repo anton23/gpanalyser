@@ -155,26 +155,32 @@ public class TimeSeriesForecast {
 			// To do that we find the gradient of change from the previous windowSize
 			// minute window to the current one and then extrapolate the rate of the
 			// current forecast window
-			double windowSize = 5;
-			int windowSizeX2 = (int) (2*windowSize);
-			double[] fcastRates = new double[windowSizeX2+mForecast];
-			for (int t=0; t < windowSizeX2; ++t)
+			int windowSize = 5;
+			double[] fcastRates = new double[windowSize+mForecast];
+			// Copy the last windowSize measurements into fcastRates
+			for (int t=0; t < windowSize; ++t)
 			{
-				fcastRates[t] = jumpEvents[mWarmup-t-1][1];
+				fcastRates[t] = jumpEvents[mWarmup-windowSize+t][1];
 			}
 			
+			// Iteratively compute the arrival rates for the forecast
+			// window
 			double[][] depRateEvents = new double[mForecast][2];
 			for (int t=0; t < mForecast; ++t)
 			{
 				double depRateCurForecast = 0;
 				for (int i=0; i < windowSize; ++i) {
-					depRateCurForecast += (1/windowSize)*fcastRates[t+windowSizeX2/2+i];
+					depRateCurForecast += (1/((double)windowSize))*fcastRates[t+i];
 				}
-				fcastRates[t+windowSizeX2] = depRateCurForecast;
+				fcastRates[t+windowSize] = depRateCurForecast;
 				depRateEvents[t][0] = mWarmup+t;
-				depRateEvents[t][1] = fcastRates[t+windowSizeX2];
+				depRateEvents[t][1] = depRateCurForecast;
 			}
-
+			//for (double[] d : depRateEvents) {
+			//	System.out.print (Arrays.toString(d));
+			//}
+			//System.out.println();
+			
 			allRateEvents.put(mStartDeltas.get(state), depRateEvents);
 		}
 		
