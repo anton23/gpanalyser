@@ -4,17 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jfree.data.xy.XYSeriesCollection;
-
 import uk.ac.imperial.doc.gpa.forecasting.util.MathExtra;
 import uk.ac.imperial.doc.gpa.plain.postprocessors.numerical.InhomogeneousSimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
@@ -119,13 +115,14 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 				double forecastArr = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanIndex]);
 				double forecastArrSq = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanSqIndex]);
 				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
-				double[] data = {forecastArr, actualArr};
+				double[] data = {forecastArr, forecastStdDev, actualArr};
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {
 					mData.add(data);
 				}
-				
-				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
+				//System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
 			}
+			tsf.plotForecast(mData,stepSize,simulation.toString());
+			mData.clear();
 		}
 	}
 
@@ -136,38 +133,5 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 	{
 		prepare(analysis, constants);
 		calculateDataPoints(constants);
-		if (mData!=null){
-			int numDataPts = mData.size();
-			int lag = mForecast * ((int)(1/stepSize));
-			String[] names =  {"E[Forecast([t,t+"+mForecast+"]) ]","Empirical ([t,t+"+mForecast+"])"};
-			String[] namesLag =  {"E[Forecast([t,t+"+mForecast+"]) ]","Empirical ([t-"+mForecast+",t])"};
-			double[][] data = new double[numDataPts+lag][2];
-			double[][] dataLag = new double[numDataPts+lag][2];
-			
-			for (int i=0; i < numDataPts; ++i) {
-				// Forecast vs real process
-				data[i][0] = mData.get(i)[0];
-				data[i][1] = mData.get(i)[1];
-				
-				// Forecast vs real process shifted
-				dataLag[i][0] = mData.get(i)[0];
-				dataLag[i+lag][1] = mData.get(i)[1];
-			}
-			// Fill in end of prediction graph / beginning of real graph
-			for (int i=0; i < lag; i++) {
-				// Forecast vs real process
-				data[numDataPts+i][0] = data[numDataPts-1][0];
-				data[numDataPts+i][1] = data[numDataPts-1][1];
-				
-				// Forecast vs real process shifted
-				dataLag[numDataPts+i][0] = dataLag[numDataPts-1][0];
-				dataLag[i][1] = 0;
-			}
-
-			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,stepSize,names);
-			PCTMCChartUtilities.drawChart(dataset, "time", "#arrivals", "Forecast Vs Oracle", analysis.toString());
-			XYSeriesCollection datasetLag = AnalysisUtils.getDatasetFromArray(dataLag,stepSize,namesLag);
-			PCTMCChartUtilities.drawChart(datasetLag, "time", "#arrivals", "Forecast Vs Latest Measurement", analysis.toString());
-		}
 	}
 }
