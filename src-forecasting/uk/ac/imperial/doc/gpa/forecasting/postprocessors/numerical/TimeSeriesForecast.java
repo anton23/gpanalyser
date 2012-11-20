@@ -29,6 +29,9 @@ public class TimeSeriesForecast {
 	private List<String> mStartDeltas;
 	private int mTSStep;
 	private double[][] mMuTS;
+	private List<String> mMixedMuTSFiles;
+	private double[][] mMixedMuTS;
+	private double mMixedMuRatio;
 	private List<String> mArrTSFiles;
 	private double[] mArrTS;
 	private List<String> mDepTSFiles;
@@ -39,7 +42,8 @@ public class TimeSeriesForecast {
 	public TimeSeriesForecast(PlainPCTMC pctmc, int warmup, int forecast,
 			int ibf, State arrState, List<State> startStates,
 			List<String> destMus, List<String> startDeltas, int tsStep,
-			String muTSFile, List<String> arrTSFiles, List<String> depTSFiles)
+			String muTSFile, List<String> mixedMuTSFiles, double mixedMuRatio,
+			List<String> arrTSFiles, List<String> depTSFiles)
 	{
 		mPctmc = pctmc;
 		mWarmup = warmup;
@@ -50,6 +54,8 @@ public class TimeSeriesForecast {
 		mDestMus = destMus;
 		mStartDeltas = startDeltas;
 		mTSStep = tsStep;
+		mMixedMuTSFiles = new LinkedList<String>(mixedMuTSFiles);
+		mMixedMuRatio = mixedMuRatio;
 		mArrTSFiles =  new LinkedList<String>(arrTSFiles);
 		mDepTSFiles = new LinkedList<String>(depTSFiles);
 		mTSStartIndex = 0;
@@ -59,17 +65,26 @@ public class TimeSeriesForecast {
 			PCTMCLogging.error("For each observation period we should have an arrival and a departures time series.");
 			System.exit(0);
 		}
+		// Check mixture files
+		if (mMixedMuRatio > 0 && mArrTSFiles.size() != mMixedMuTSFiles.size()) {
+			PCTMCLogging.error("Non-zero mu time series mix ratio but not enough mixedMuTS files");
+			System.exit(0);
+		}
+		if (mMixedMuRatio < 0 || mMixedMuRatio > 1) {
+			PCTMCLogging.error("Mixed mu ratio is only valid in the interval [0,1]");
+			System.exit(0);
+		}
 				
 		// Read Mu parameter time series, which govern the percentage of bikes that
 		// go from a particular cluster to the destination partition at a particular
 		// moment in time
 		String muTSStr = FileExtra.readFromTextFile(muTSFile);
 		mMuTS = new double[mDestMus.size()][];
-		for (int i=0; i<mDestMus.size(); i++) {
-			String[] muTSMuI = muTSStr.split("\n")[i].trim().split(" ");
-			mMuTS[i] = new double[muTSMuI.length];
+		for (int state=0; state<mDestMus.size(); state++) {
+			String[] muTSMuI = muTSStr.split("\n")[state].trim().split(" ");
+			mMuTS[state] = new double[muTSMuI.length];
 			for (int j=0; j < muTSMuI.length; j++) {
-				mMuTS[i][j] = Double.parseDouble(muTSMuI[j]);
+				mMuTS[state][j] = Double.parseDouble(muTSMuI[j]);
 			}
 		}
 	}
@@ -103,6 +118,31 @@ public class TimeSeriesForecast {
 			String[] depStateToday = depNowPerStartState[state].split(" ");
 			for (int i=0; i < numObs; ++i) {
 				mDepTS[state][i] = Double.parseDouble(depStateToday[i]);
+			}
+			
+			// Sanity check
+			if (mArrTS.length != mDepTS[state].length) {
+				PCTMCLogging.error("There must be equally many departure and arrival observations");
+				System.exit(0);
+			}
+		}
+		
+		// Load mus for the day
+		if (mMixedMuRatio > 0) {
+			mMixedMuTS = new double[mDestMus.size()][];
+			String mixedMuTSStr = FileExtra.readFromTextFile(mMixedMuTSFiles.remove(0));
+			for (int state=0; state<mDestMus.size(); state++) {
+				String[] muTSMuI = mixedMuTSStr.split("\n")[state].trim().split(" ");
+				mMixedMuTS[state] = new double[muTSMuI.length];
+				for (int j=0; j < muTSMuI.length; j++) {
+					mMixedMuTS[state][j] = Double.parseDouble(muTSMuI[j]);
+				}
+				
+				// Sanity check
+				if (mArrTS.length != mMixedMuTS[state].length) {
+					PCTMCLogging.error("There must be equally many arrival and mixedMu observations");
+					System.exit(0);
+				}
 			}
 		}
 		
@@ -141,7 +181,13 @@ public class TimeSeriesForecast {
 				jumpEvents[t][0] = relativeTime;
 				jumpEvents[t][1] = mDepTS[state][mTSStartIndex+t];
 				destRateEvents[t][0] = relativeTime;
-				destRateEvents[t][1] = mMuTS[state][mTSStartIndex+t];
+				if (mMixedMuRatio > 0) {
+					destRateEvents[t][1] = (1-mMixedMuRatio)*mMuTS[state][mTSStartIndex+t]+
+											mMixedMuRatio*mMixedMuTS[state][mTSStartIndex+t];
+				}
+				else {
+					destRateEvents[t][1] = mMuTS[state][mTSStartIndex+t];	
+				}
 			}
 			
 			// We assume mu rate changes to be inhomogeneous but deterministic

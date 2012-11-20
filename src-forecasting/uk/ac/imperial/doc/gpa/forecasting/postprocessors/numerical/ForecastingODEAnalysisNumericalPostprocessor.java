@@ -4,17 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jfree.data.xy.XYSeriesCollection;
-
 import uk.ac.imperial.doc.gpa.forecasting.util.MathExtra;
 import uk.ac.imperial.doc.gpa.plain.postprocessors.numerical.InhomogeneousODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
-import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
-import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
@@ -35,13 +31,16 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	private List<String> mStartDeltas;
 	private int mTSStep;
 	private String mMuTSFile;
+	private List<String> mMixedMuTSFiles;
+	private double mMixedMuRatio;
 	private List<String> mArrTSFiles;
 	private List<String> mDepTSFiles;
 	private List<double[]> mData = new LinkedList<double[]>();
 
 	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int tsStep, String muTSFile, List<String> arrTSFiles, List<String> depTSFiles) {
+			   int tsStep, String muTSFile, List<String> mixedMuTSFile, double mixedMuRatio, List<String> arrTSFiles,
+			   List<String> depTSFiles) {
 		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, density);
 		mWarmup = warmup;
 		mForecast = forecast;
@@ -52,13 +51,16 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		mStartDeltas = startDeltas;
 		mTSStep = tsStep;
 		mMuTSFile = muTSFile;
+		mMixedMuTSFiles = mixedMuTSFile;
+		mMixedMuRatio = mixedMuRatio;
 		mArrTSFiles = arrTSFiles;
 		mDepTSFiles = depTSFiles;
 	}
 
 	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int tsStep, String muTSFile, List<String> arrTSFiles, List<String> depTSFiles, Map<String, Object> parameters) {
+			   int tsStep, String muTSFile, List<String> mixedMuTSFile, double mixedMuRatio, List<String> arrTSFiles,
+			   List<String> depTSFiles, Map<String, Object> parameters) {
 		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, density, parameters);
 		mWarmup = warmup;
 		mForecast = forecast;
@@ -69,6 +71,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		mStartDeltas = startDeltas;
 		mTSStep = tsStep;
 		mMuTSFile = muTSFile;
+		mMixedMuTSFiles = mixedMuTSFile;
+		mMixedMuRatio = mixedMuRatio;
 		mArrTSFiles = arrTSFiles;
 		mDepTSFiles = depTSFiles;
 	}
@@ -81,7 +85,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new ForecastingODEAnalysisNumericalPostprocessor(stepSize, density, mWarmup, mForecast,
-				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTSFile, mArrTSFiles, mDepTSFiles);
+				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTSFile, mMixedMuTSFiles,
+				   mMixedMuRatio, mArrTSFiles, mDepTSFiles);
 	}
 	
 	@Override
@@ -102,8 +107,9 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		// Time series preparation
 		TimeSeriesForecast tsf = new TimeSeriesForecast(pctmc,mWarmup,mForecast,mIBF,
 														mArrState,mStartStates,mDestMus,
-														mStartDeltas,mTSStep,mMuTSFile,mArrTSFiles,
-														mDepTSFiles);
+														mStartDeltas,mTSStep,mMuTSFile,
+														mMixedMuTSFiles, mMixedMuRatio,
+														mArrTSFiles, mDepTSFiles);
 
 		PopulationProduct pp = PopulationProduct.getMeanProduct(mArrState);
 		CombinedPopulationProduct cppArrMean = new CombinedPopulationProduct(pp);
@@ -111,7 +117,14 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		CombinedPopulationProduct cppArrMeanSq = new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp));
 		int cppArrMeanSqIndex = odeAnalysis.getMomentIndex().get(cppArrMeanSq);
 		
+		int numObs = 0;
+		double ttlMeanSqError = 0;
+		double maxPercErrorPerc = 0;
+		double maxPercErrorAbs = 0;
+		double maxAbsErrorPerc = 0;
+		double maxAbsErrorAbs = 0;
 		while (tsf.nextTSFile()) {
+			double ttlMeanSqErrorCur = 0;
 			while (true) {
 				// Check if there is enough data for the forecast
 				// period on the current day
@@ -125,13 +138,34 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 				double forecastArr = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanIndex]);
 				double forecastArrSq = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanSqIndex]);
 				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
-				double[] data = {forecastArr, actualArr};
+				double[] data = {forecastArr, forecastStdDev, actualArr};
+
+				// Calculate error
+				numObs++;
+				double absError = Math.abs(forecastArr-actualArr);
+				double percError = absError/actualArr*100;
+				ttlMeanSqErrorCur += Math.pow((absError),2);
+				if (percError > maxPercErrorPerc) {
+					maxPercErrorAbs = absError;
+					maxPercErrorPerc = percError;
+				}
+				if (absError > maxAbsErrorAbs) {
+					maxAbsErrorAbs = absError;
+					maxAbsErrorPerc = percError;
+				}
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {
 					mData.add(data);
 				}
-				
-				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
+				//System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
 			}
+			// Error per time point
+			ttlMeanSqError += ttlMeanSqErrorCur;
+			tsf.plotForecast(mData,stepSize,odeAnalysis.toString());
+			System.out.println("Forecast window size: "+mForecast+"\t Mean Sq Error : "+ttlMeanSqError + " from "+numObs+" obs");
+			System.out.println("Forecast window size: "+mForecast+"\t Max abs Error : "+maxAbsErrorAbs + " = " + maxAbsErrorPerc + "%");
+			System.out.println("Forecast window size: "+mForecast+"\t Max % Error : "+maxPercErrorPerc + " = " + maxPercErrorAbs + " abs");
+			System.out.println("");
+			mData.clear();
 		}
 	}
 	
@@ -142,38 +176,5 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	{
 		prepare(analysis, constants);
 		calculateDataPoints(constants);
-		if (mData!=null){
-			int numDataPts = mData.size();
-			int lag = mForecast * ((int)(1/stepSize));
-			String[] names =  {"E[Forecast([t,t+"+mForecast+"]) ]","Empirical ([t,t+"+mForecast+"])"};
-			String[] namesLag =  {"E[Forecast([t,t+"+mForecast+"]) ]","Empirical ([t-"+mForecast+",t])"};
-			double[][] data = new double[numDataPts+lag][2];
-			double[][] dataLag = new double[numDataPts+lag][2];
-			
-			for (int i=0; i < numDataPts; ++i) {
-				// Forecast vs real process
-				data[i][0] = mData.get(i)[0];
-				data[i][1] = mData.get(i)[1];
-				
-				// Forecast vs real process shifted
-				dataLag[i][0] = mData.get(i)[0];
-				dataLag[i+lag][1] = mData.get(i)[1];
-			}
-			// Fill in end of prediction graph / beginning of real graph
-			for (int i=0; i < lag; i++) {
-				// Forecast vs real process
-				data[numDataPts+i][0] = data[numDataPts-1][0];
-				data[numDataPts+i][1] = data[numDataPts-1][1];
-				
-				// Forecast vs real process shifted
-				dataLag[numDataPts+i][0] = dataLag[numDataPts-1][0];
-				dataLag[i][1] = 0;
-			}
-
-			XYSeriesCollection dataset = AnalysisUtils.getDatasetFromArray(data,stepSize,names);
-			PCTMCChartUtilities.drawChart(dataset, "time", "#arrivals", "Forecast Vs Oracle", analysis.toString());
-			XYSeriesCollection datasetLag = AnalysisUtils.getDatasetFromArray(dataLag,stepSize,namesLag);
-			PCTMCChartUtilities.drawChart(datasetLag, "time", "#arrivals", "Forecast Vs Latest Measurement", analysis.toString());
-		}
 	}
 }
