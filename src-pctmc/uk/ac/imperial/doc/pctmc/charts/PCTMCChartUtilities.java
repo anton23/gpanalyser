@@ -208,7 +208,7 @@ public class PCTMCChartUtilities {
 		ChartPanel chartPanel = new ChartPanel(chart);
 		chartPanel.setMouseZoomable(true, false);
 		chartPanel.setDoubleBuffered(true);
-		tab.addTab("", chartPanel);
+		tab.addTab(chartTitle, chartPanel);
 
 		// RefineryUtilities.positionFrameOnScreen(frame, lastx, lasty);
 		// lastx += 0.05;

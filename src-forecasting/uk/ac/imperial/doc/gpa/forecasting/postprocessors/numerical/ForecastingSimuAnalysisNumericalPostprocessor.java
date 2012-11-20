@@ -28,13 +28,16 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 	private List<String> mStartDeltas;
 	private int mTSStep;
 	private String mMuTSFile;
-	private List<String> mArrTSFile;
-	private List<String> mDepTSFile;
+	private List<String> mMixedMuTSFiles;
+	private double mMixedMuRatio;
+	private List<String> mArrTSFiles;
+	private List<String> mDepTSFiles;
 	List<double[]> mData = new LinkedList<double[]>();
 
 	public ForecastingSimuAnalysisNumericalPostprocessor(double stepSize, int replications, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int tsStep, String muTSFile, List<String> arrTSFiles, List<String> depTSFiles) {
+			   int tsStep, String muTSFile, List<String> mixedMuTSFile, double mixedMuRatio, List<String> arrTSFiles,
+			   List<String> depTSFiles) {
 		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, replications);
 		mWarmup = warmup;
 		mForecast = forecast;
@@ -45,13 +48,16 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 		mStartDeltas = startDeltas;
 		mTSStep = tsStep;
 		mMuTSFile = muTSFile;
-		mArrTSFile = arrTSFiles;
-		mDepTSFile = depTSFiles;
+		mMixedMuTSFiles = mixedMuTSFile;
+		mMixedMuRatio = mixedMuRatio;
+		mArrTSFiles = arrTSFiles;
+		mDepTSFiles = depTSFiles;
 	}
 
 	public ForecastingSimuAnalysisNumericalPostprocessor(double stepSize, int replications, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int tsStep, String muTSFile, List<String> arrTSFiles, List<String> depTSFiles, Map<String, Object> parameters) {
+			   int tsStep, String muTSFile, List<String> mixedMuTSFile, double mixedMuRatio, List<String> arrTSFiles,
+			   List<String> depTSFiles, Map<String, Object> parameters) {
 		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, replications, parameters);
 		mWarmup = warmup;
 		mForecast = forecast;
@@ -62,21 +68,25 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 		mStartDeltas = startDeltas;
 		mTSStep = tsStep;
 		mMuTSFile = muTSFile;
-		mArrTSFile = arrTSFiles;
-		mDepTSFile = depTSFiles;
+		mMixedMuTSFiles = mixedMuTSFile;
+		mMixedMuRatio = mixedMuRatio;
+		mArrTSFiles = arrTSFiles;
+		mDepTSFiles = depTSFiles;
 	}
 
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new ForecastingSimuAnalysisNumericalPostprocessor(stepSize, replications, mWarmup, mForecast,
-				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTSFile, mArrTSFile, mDepTSFile);
+				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTSFile, mMixedMuTSFiles,
+				   mMixedMuRatio, mArrTSFiles, mDepTSFiles);
 	}
 	
 	@Override
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
 		assert(prepared);
-		ForecastingSimuAnalysisNumericalPostprocessor ret = new ForecastingSimuAnalysisNumericalPostprocessor(stepSize, replications, mWarmup, mForecast,
-				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTSFile, mArrTSFile, mDepTSFile);
+		ForecastingSimuAnalysisNumericalPostprocessor ret = new ForecastingSimuAnalysisNumericalPostprocessor(stepSize,
+				replications, mWarmup, mForecast, mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTSFile,
+				mMixedMuTSFiles, mMixedMuRatio, mArrTSFiles, mDepTSFiles);
 		ret.fastPrepare(momentIndex, generalExpectationIndex,
 				productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode,
 				initialExpressions, eventGeneratorClassName);
@@ -92,8 +102,9 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 		// Time series preparation
 		TimeSeriesForecast tsf = new TimeSeriesForecast(pctmc,mWarmup,mForecast,mIBF,
 														mArrState,mStartStates,mDestMus,
-														mStartDeltas,mTSStep,mMuTSFile,mArrTSFile,
-														mDepTSFile);
+														mStartDeltas,mTSStep,mMuTSFile,
+														mMixedMuTSFiles, mMixedMuRatio,
+														mArrTSFiles, mDepTSFiles);
 
 		PopulationProduct pp = PopulationProduct.getMeanProduct(mArrState);
 		CombinedPopulationProduct cppArrMean = new CombinedPopulationProduct(pp);
