@@ -16,9 +16,8 @@ public class Constants {
 
 	protected Map<String, Integer> constantIndex;
 	private Map<String, Double> constants;
-	private Map<String, String> files;
-		
-
+	private Map<String, FileColumn> files;
+	
 	/**
 	 * Creates a Constants objects with the given underlying value map. Also
 	 * creates an index from constant names to integers.
@@ -28,7 +27,7 @@ public class Constants {
 	public Constants(Map<String, Double> constants) {
 		super();
 		this.constants = constants;
-		files = new HashMap<String, String>();
+		files = new HashMap<String, FileColumn>();
 		calculateConstantIndex();
 	}
 
@@ -36,11 +35,15 @@ public class Constants {
 			Map<String, Integer> constantIndex) {
 		this.constantIndex = constantIndex;
 		this.constants = constants;
-		files = new HashMap<String, String>();
+		files = new HashMap<String, FileColumn>();
 	}
 	
 	public void addFile(String filename, String fun) {
-		files.put(fun, filename);
+		files.put(fun, new FileColumn(filename, 1));
+	}
+	
+	public void addFile(String filename, int i, String fun) {
+		files.put(fun, new FileColumn(filename, i));
 	}
 
 	private void calculateConstantIndex() {
@@ -121,7 +124,7 @@ public class Constants {
 	
 	
 
-	public Map<String, String> getFiles() {
+	public Map<String, FileColumn> getFiles() {
 		return files;
 	}
 

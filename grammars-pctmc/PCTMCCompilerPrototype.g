@@ -414,8 +414,13 @@ constantDefinition[Map<String,Double> map]:
                          |valueI=integer   {$map.put($id.text,new Double($valueI.value));})
 );
 
-fileDefinitions[Constants constants]:
-   (LOAD f=FILENAME INTO fun=LOWERCASENAME {$constants.addFile($f.text.replace("\"",""), $fun.text); } SEMI)*
+fileDefinitions[Constants constants]
+@init{
+  int col = 1;
+}:
+   (LOAD f=FILENAME (i = integer {col = $i.value;})? INTO fun=LOWERCASENAME {
+      $constants.addFile($f.text.replace("\"",""), col, $fun.text);
+   } SEMI)*
 ;
 
 variable returns [String text]:

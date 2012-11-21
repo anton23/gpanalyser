@@ -473,7 +473,7 @@ constantDefinition:
      -> ^(CONSTDEF $c $rate);
      
 fileDefinition:
-   LOAD FILENAME INTO LOWERCASENAME SEMI;
+   LOAD FILENAME INTEGER? INTO LOWERCASENAME SEMI;
   
 varDefinition:
   variable DEF expression SEMI -> ^(VARDEF variable expression);
