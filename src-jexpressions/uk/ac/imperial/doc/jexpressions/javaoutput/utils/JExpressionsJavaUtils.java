@@ -14,10 +14,12 @@ import java.util.Map;
 import org.apache.commons.math.MathException;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
 
+import uk.ac.imperial.doc.jexpressions.constants.FileColumn;
+
 
 public class JExpressionsJavaUtils {
 	
-	static Map<String, String> files;
+	static Map<String, FileColumn> files;
 	public static Map<String, double[][]> fileValues;
 
 	
@@ -43,6 +45,10 @@ public class JExpressionsJavaUtils {
 		if (i < 0) {
 			throw new AssertionError("Function " + fun + " is not defined for values " + t);
 		}
+		// Interpolates two successive values
+		if (i < values.length - 1) {
+			return values[i][1] + (values[i+1][1] - values[i][1]) * (t - values[i][0]) / (values[i+1][0] - values[i][0]); 
+		}
 		return values[i][1];
 	}
 	
@@ -54,9 +60,9 @@ public class JExpressionsJavaUtils {
 		}
 	};
 	
-	private static void loadFile(String fun, String filename) {
+	private static void loadFile(String fun, FileColumn fileColumn) {
 		try {
-			FileReader f = new FileReader(filename);
+			FileReader f = new FileReader(fileColumn.getFile());
 			BufferedReader in = new BufferedReader(f);
 			String s = "";
 			List<double[]> valuesList = new LinkedList<double[]>();
@@ -65,7 +71,7 @@ public class JExpressionsJavaUtils {
 				if (s == null) break;
 				String[] tmp = s.split(" ");
 				double x = Double.parseDouble(tmp[0]);
-				double y = Double.parseDouble(tmp[1]);
+				double y = Double.parseDouble(tmp[fileColumn.getColumn()]);
 				valuesList.add(new double[]{x, y});				
 			}
 			double[][] values = new double[valuesList.size()][];
@@ -76,18 +82,18 @@ public class JExpressionsJavaUtils {
 			Arrays.sort(values, comparator);
 			fileValues.put(fun, values);
 		} catch (FileNotFoundException e) {
-			throw new AssertionError("File " + filename + " not found!");
+			throw new AssertionError("File " + fileColumn + " not found!");
 		} catch (IOException e) {
-			throw new AssertionError("Problems reading the file " + filename + "!");
+			throw new AssertionError("Problems reading the file " + fileColumn + "!");
 		}		
 	}
 	
-	public static void loadFiles(Map<String, String> _files) {
+	public static void loadFiles(Map<String, FileColumn> _files) {
 		if (files == null) {
 			files = _files;
 			fileValues = new HashMap<String, double[][]>();
 		}		
-		for (Map.Entry<String, String> e : _files.entrySet()) {
+		for (Map.Entry<String, FileColumn> e : _files.entrySet()) {
 			loadFile(e.getKey(), e.getValue());
 		}
 	}

@@ -6,7 +6,7 @@
     <property file="config.properties"/>
 
     <!-- global properties -->
-    <property name="version" value="0.9.3b-probes"/>
+    <property name="version" value="0.9.3b-time-dependent"/>
 	<property name="java.library.path" value="lib"/>
 	
     <!-- directories -->
