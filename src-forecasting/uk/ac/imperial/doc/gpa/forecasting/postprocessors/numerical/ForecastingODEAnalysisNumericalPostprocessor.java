@@ -116,15 +116,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		int cppArrMeanIndex = odeAnalysis.getMomentIndex().get(cppArrMean);
 		CombinedPopulationProduct cppArrMeanSq = new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp));
 		int cppArrMeanSqIndex = odeAnalysis.getMomentIndex().get(cppArrMeanSq);
-		
-		int numObs = 0;
-		double ttlMeanSqError = 0;
-		double maxPercErrorPerc = 0;
-		double maxPercErrorAbs = 0;
-		double maxAbsErrorPerc = 0;
-		double maxAbsErrorAbs = 0;
+
 		while (tsf.nextTSFile()) {
-			double ttlMeanSqErrorCur = 0;
 			while (true) {
 				// Check if there is enough data for the forecast
 				// period on the current day
@@ -140,31 +133,15 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
 				double[] data = {forecastArr, forecastStdDev, actualArr};
 
-				// Calculate error
-				numObs++;
-				double absError = Math.abs(forecastArr-actualArr);
-				double percError = absError/actualArr*100;
-				ttlMeanSqErrorCur += Math.pow((absError),2);
-				if (percError > maxPercErrorPerc) {
-					maxPercErrorAbs = absError;
-					maxPercErrorPerc = percError;
-				}
-				if (absError > maxAbsErrorAbs) {
-					maxAbsErrorAbs = absError;
-					maxAbsErrorPerc = percError;
-				}
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {
 					mData.add(data);
 				}
-				//System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
+
+				// Compute what the normalised distance between forecast and actual number of arrivals
+				double normActArr = Math.abs(actualArr - forecastArr)/forecastStdDev;
+				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr + "\t Normalised Dist: "+normActArr);
 			}
-			// Error per time point
-			ttlMeanSqError += ttlMeanSqErrorCur;
 			tsf.plotForecast(mData,stepSize,odeAnalysis.toString());
-			System.out.println("Forecast window size: "+mForecast+"\t Mean Sq Error : "+ttlMeanSqError + " from "+numObs+" obs");
-			System.out.println("Forecast window size: "+mForecast+"\t Max abs Error : "+maxAbsErrorAbs + " = " + maxAbsErrorPerc + "%");
-			System.out.println("Forecast window size: "+mForecast+"\t Max % Error : "+maxPercErrorPerc + " = " + maxPercErrorAbs + " abs");
-			System.out.println("");
 			mData.clear();
 		}
 	}
