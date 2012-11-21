@@ -111,7 +111,7 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 		int cppArrMeanIndex = simulation.getMomentIndex().get(cppArrMean);
 		CombinedPopulationProduct cppArrMeanSq = new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp));
 		int cppArrMeanSqIndex = simulation.getMomentIndex().get(cppArrMeanSq);
-		
+
 		while (tsf.nextTSFile()) {
 			while (true) {
 				// Check if there is enough data for the forecast
@@ -121,7 +121,7 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 				
 				// Do the calculation
 				super.calculateDataPoints(constants);
-			
+
 				// Forecast vs Reality
 				double forecastArr = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanIndex]);
 				double forecastArrSq = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanSqIndex]);
@@ -130,7 +130,10 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {
 					mData.add(data);
 				}
-				//System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr);
+
+				// Compute what the normalised distance between forecast and actual number of arrivals
+				double normActArr = Math.abs(actualArr - forecastArr)/forecastStdDev;
+				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr + "\t Normalised Dist: "+normActArr);		
 			}
 			tsf.plotForecast(mData,stepSize,simulation.toString());
 			mData.clear();
