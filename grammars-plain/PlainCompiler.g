@@ -221,13 +221,13 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 		      if (postprocessorParameters.isEmpty()) {
 		        $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(stepEval.getResult(),
 		            $settings.density,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.tsStep, $settings.muTS, $settings.mixedMuTS,
-		            mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS);
+		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
+		            $settings.mixedMuTS, mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS);
 		      } else {
 		        $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(stepEval.getResult(),
 		            $settings.density,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.tsStep, $settings.muTS, $settings.mixedMuTS,
-		            mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS, postprocessorParameters);
+		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
+		            $settings.mixedMuTS, mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS, postprocessorParameters);
 		      }
 		      $analysis.addPostprocessor($postprocessor);
       }
@@ -238,8 +238,8 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 forecastingSettings returns
   [AbstractExpression stepSize, int density, int warmup, int forecast,
    int ibf, State arrState, List<State> startStates, List<String> destMus,
-   List<String> startDeltas, int tsStep, String muTS, List<String> mixedMuTS,
-   AbstractExpression mixedMuRatio, List<String> arrTS, List<String> depTS]:
+   List<String> startDeltas, int maWindowSize, String muTS, String deltaTS,
+   List<String> mixedMuTS,AbstractExpression mixedMuRatio, List<String> arrTS, List<String> depTS]:
 	^(FORECASTINGSETTINGS 
 	stepSizeTmp=expression COMMA
     densityTmp=INTEGER COMMA
@@ -250,8 +250,9 @@ forecastingSettings returns
     startStatesTmp=listOfStates COMMA
     destMusTmp=listOfStrings COMMA
     startDeltasTmp=listOfStrings COMMA
-    tsStepTmp=INTEGER COMMA
+    maWindowSizeTmp=INTEGER COMMA
     muTSTmp=FILENAME COMMA
+    deltaTSTmp=FILENAME COMMA
     mixedMuTSTmp=listOfStrings COMMA
     mixedMuRatioTmp=expression COMMA
     arrTSTmp=listOfStrings COMMA
@@ -266,8 +267,9 @@ forecastingSettings returns
       $startStates = $startStatesTmp.l;
       $destMus = $destMusTmp.l;
       $startDeltas = $startDeltasTmp.l;
-      $tsStep = Integer.parseInt($tsStepTmp.text);
+      $maWindowSize = Integer.parseInt($maWindowSizeTmp.text);
       $muTS = $muTSTmp.text.replace("\"","");
+      $deltaTS = $deltaTSTmp.text.replace("\"","");
       $mixedMuTS= $mixedMuTSTmp.l;
       $mixedMuRatio = $mixedMuRatioTmp.e; 
       $arrTS = $arrTSTmp.l;
@@ -292,13 +294,13 @@ returns [PCTMCSimulation analysis, ForecastingSimuAnalysisNumericalPostprocessor
 		      if (postprocessorParameters.isEmpty()) {
 		        $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(stepEval.getResult(),
 		            $settings.replications,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.tsStep, $settings.muTS, $settings.mixedMuTS,
-		            mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS);
+		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
+		            $settings.mixedMuTS, mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS);
 		      } else {
 		        $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(stepEval.getResult(),
 		            $settings.replications,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.tsStep, $settings.muTS, $settings.mixedMuTS,
-		            mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS, postprocessorParameters);
+		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
+		            $settings.mixedMuTS,mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS, postprocessorParameters);
 		      }
 		      $analysis.addPostprocessor($postprocessor);
       }
@@ -309,8 +311,8 @@ returns [PCTMCSimulation analysis, ForecastingSimuAnalysisNumericalPostprocessor
 forecastingSimuSettings returns
   [AbstractExpression stepSize, int replications, int warmup, int forecast,
    int ibf, State arrState, List<State> startStates, List<String> destMus,
-   List<String> startDeltas, int tsStep, String muTS, List<String> mixedMuTS,
-   AbstractExpression mixedMuRatio, List<String> arrTS, List<String> depTS]:
+   List<String> startDeltas, int maWindowSize, String muTS, String deltaTS,
+   List<String> mixedMuTS, AbstractExpression mixedMuRatio, List<String> arrTS, List<String> depTS]:
 	^(FORECASTINGSIMUSETTINGS 
 	stepSizeTmp=expression COMMA
     replicationsTmp=INTEGER COMMA
@@ -321,8 +323,9 @@ forecastingSimuSettings returns
     startStatesTmp=listOfStates COMMA
     destMusTmp=listOfStrings COMMA
     startDeltasTmp=listOfStrings COMMA
-    tsStepTmp=INTEGER COMMA
+    maWindowSizeTmp=INTEGER COMMA
     muTSTmp=FILENAME COMMA
+    deltaTSTmp=FILENAME COMMA
     mixedMuTSTmp=listOfStrings COMMA
     mixedMuRatioTmp=expression COMMA
     arrTSTmp=listOfStrings COMMA
@@ -337,8 +340,9 @@ forecastingSimuSettings returns
       $startStates = $startStatesTmp.l;
       $destMus = $destMusTmp.l;
       $startDeltas = $startDeltasTmp.l;
-      $tsStep = Integer.parseInt($tsStepTmp.text);
+      $maWindowSize = Integer.parseInt($maWindowSizeTmp.text);
       $muTS = $muTSTmp.text.replace("\"","");
+      $deltaTS = $deltaTSTmp.text.replace("\"","");
       $mixedMuTS= $mixedMuTSTmp.l;
       $mixedMuRatio = $mixedMuRatioTmp.e; 
       $arrTS = $arrTSTmp.l;

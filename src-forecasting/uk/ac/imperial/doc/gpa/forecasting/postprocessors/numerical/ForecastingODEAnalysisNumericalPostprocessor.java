@@ -29,8 +29,9 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	private List<State> mStartStates;
 	private List<String> mDestMus;
 	private List<String> mStartDeltas;
-	private int mTSStep;
+	private int mMAWindowSize;
 	private String mMuTSFile;
+	private String mDeltaTSFile;
 	private List<String> mMixedMuTSFiles;
 	private double mMixedMuRatio;
 	private List<String> mArrTSFiles;
@@ -39,8 +40,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 
 	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int tsStep, String muTSFile, List<String> mixedMuTSFile, double mixedMuRatio, List<String> arrTSFiles,
-			   List<String> depTSFiles) {
+			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio,
+			   List<String> arrTSFiles, List<String> depTSFiles) {
 		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, density);
 		mWarmup = warmup;
 		mForecast = forecast;
@@ -49,8 +50,9 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		mStartStates = startStates;
 		mDestMus = destMus;
 		mStartDeltas = startDeltas;
-		mTSStep = tsStep;
+		mMAWindowSize = maWindowSize;
 		mMuTSFile = muTSFile;
+		mDeltaTSFile = deltaTSFile;
 		mMixedMuTSFiles = mixedMuTSFile;
 		mMixedMuRatio = mixedMuRatio;
 		mArrTSFiles = arrTSFiles;
@@ -59,8 +61,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 
 	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int tsStep, String muTSFile, List<String> mixedMuTSFile, double mixedMuRatio, List<String> arrTSFiles,
-			   List<String> depTSFiles, Map<String, Object> parameters) {
+			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio,
+			   List<String> arrTSFiles, List<String> depTSFiles, Map<String, Object> parameters) {
 		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, density, parameters);
 		mWarmup = warmup;
 		mForecast = forecast;
@@ -69,8 +71,9 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		mStartStates = startStates;
 		mDestMus = destMus;
 		mStartDeltas = startDeltas;
-		mTSStep = tsStep;
+		mMAWindowSize = maWindowSize;
 		mMuTSFile = muTSFile;
+		mDeltaTSFile = deltaTSFile;
 		mMixedMuTSFiles = mixedMuTSFile;
 		mMixedMuRatio = mixedMuRatio;
 		mArrTSFiles = arrTSFiles;
@@ -85,8 +88,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new ForecastingODEAnalysisNumericalPostprocessor(stepSize, density, mWarmup, mForecast,
-				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas, mTSStep, mMuTSFile, mMixedMuTSFiles,
-				   mMixedMuRatio, mArrTSFiles, mDepTSFiles);
+				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas,  mMAWindowSize, mMuTSFile, mDeltaTSFile,
+				   mMixedMuTSFiles, mMixedMuRatio, mArrTSFiles, mDepTSFiles);
 	}
 	
 	@Override
@@ -107,8 +110,8 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		// Time series preparation
 		TimeSeriesForecast tsf = new TimeSeriesForecast(pctmc,mWarmup,mForecast,mIBF,
 														mArrState,mStartStates,mDestMus,
-														mStartDeltas,mTSStep,mMuTSFile,
-														mMixedMuTSFiles, mMixedMuRatio,
+														mStartDeltas, mMAWindowSize, mMuTSFile,
+														mDeltaTSFile, mMixedMuTSFiles, mMixedMuRatio,
 														mArrTSFiles, mDepTSFiles);
 
 		PopulationProduct pp = PopulationProduct.getMeanProduct(mArrState);
