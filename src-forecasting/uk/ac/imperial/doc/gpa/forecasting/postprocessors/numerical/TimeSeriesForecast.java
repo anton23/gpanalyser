@@ -27,8 +27,9 @@ public class TimeSeriesForecast {
 	private List<State> mStartStates;
 	private List<String> mDestMus;
 	private List<String> mStartDeltas;
-	private int mTSStep;
+	private int mMAWindowSize;
 	private double[][] mMuTS;
+	private double[][] mDeltaTS;
 	private List<String> mMixedMuTSFiles;
 	private double[][] mMixedMuTS;
 	private double mMixedMuRatio;
@@ -41,8 +42,9 @@ public class TimeSeriesForecast {
 	
 	public TimeSeriesForecast(PlainPCTMC pctmc, int warmup, int forecast,
 			int ibf, State arrState, List<State> startStates,
-			List<String> destMus, List<String> startDeltas, int tsStep,
-			String muTSFile, List<String> mixedMuTSFiles, double mixedMuRatio,
+			List<String> destMus, List<String> startDeltas,
+			int MAWindowSize, String muTSFile, String deltaTSFile,
+			List<String> mixedMuTSFiles, double mixedMuRatio,
 			List<String> arrTSFiles, List<String> depTSFiles)
 	{
 		mPctmc = pctmc;
@@ -53,7 +55,7 @@ public class TimeSeriesForecast {
 		mStartStates = startStates;
 		mDestMus = destMus;
 		mStartDeltas = startDeltas;
-		mTSStep = tsStep;
+		mMAWindowSize = MAWindowSize;
 		mMixedMuTSFiles = new LinkedList<String>(mixedMuTSFiles);
 		mMixedMuRatio = mixedMuRatio;
 		mArrTSFiles =  new LinkedList<String>(arrTSFiles);
@@ -85,6 +87,19 @@ public class TimeSeriesForecast {
 			mMuTS[state] = new double[muTSMuI.length];
 			for (int j=0; j < muTSMuI.length; j++) {
 				mMuTS[state][j] = Double.parseDouble(muTSMuI[j]);
+			}
+		}
+		
+		// Read values that describe the average relative historical changes
+		// in the arrival rate at a given time. This is used to forecast
+		// future departure rates more accurately.
+		String deltaTSStr = FileExtra.readFromTextFile(deltaTSFile);
+		mDeltaTS = new double[mStartDeltas.size()][];
+		for (int state=0; state<mStartDeltas.size(); state++) {
+			String[] tsDeltaI = deltaTSStr.split("\n")[state].trim().split(" ");
+			mDeltaTS[state] = new double[tsDeltaI.length];
+			for (int j=0; j < tsDeltaI.length; j++) {
+				mDeltaTS[state][j] = Double.parseDouble(tsDeltaI[j]);
 			}
 		}
 	}
@@ -177,10 +192,9 @@ public class TimeSeriesForecast {
 			double[][] jumpEvents = new double[mWarmup][2];
 			double[][] destRateEvents = new double[mWarmup+mForecast][2];
 			for (int t=0; t<mWarmup; ++t) {
-				int relativeTime = t*mTSStep;
-				jumpEvents[t][0] = relativeTime;
+				jumpEvents[t][0] = t;
 				jumpEvents[t][1] = mDepTS[state][mTSStartIndex+t];
-				destRateEvents[t][0] = relativeTime;
+				destRateEvents[t][0] = t;
 				if (mMixedMuRatio > 0) {
 					destRateEvents[t][1] = (1-mMixedMuRatio)*mMuTS[state][mTSStartIndex+t]+
 											mMixedMuRatio*mMixedMuTS[state][mTSStartIndex+t];
@@ -194,8 +208,7 @@ public class TimeSeriesForecast {
 			// Thus we can also anticipate changes in mu during the forecast
 			// period using the average mu observed in the training data
 			for (int t=mWarmup; t<mWarmup+mForecast; ++t) {
-				int relativeTime = t*mTSStep;
-				destRateEvents[t][0] = relativeTime;
+				destRateEvents[t][0] = t;
 				destRateEvents[t][1] = mMuTS[state][mTSStartIndex+t];
 			}
 			
@@ -207,12 +220,11 @@ public class TimeSeriesForecast {
 			// To do that we find the gradient of change from the previous windowSize
 			// minute window to the current one and then extrapolate the rate of the
 			// current forecast window
-			int windowSize = 10;
-			double[] fcastRates = new double[windowSize+mForecast];
+			double[] fcastRates = new double[mMAWindowSize+mForecast];
 			// Copy the last windowSize measurements into fcastRates
-			for (int t=0; t < windowSize; ++t)
+			for (int t=0; t < mMAWindowSize; ++t)
 			{
-				fcastRates[t] = jumpEvents[mWarmup-windowSize+t][1];
+				fcastRates[t] = jumpEvents[mWarmup-mMAWindowSize+t][1];
 			}
 			
 			// Iteratively compute the arrival rates for the forecast
@@ -221,17 +233,20 @@ public class TimeSeriesForecast {
 			for (int t=0; t < mForecast; ++t)
 			{
 				double depRateCurForecast = 0;
-				for (int i=0; i < windowSize; ++i) {
-					depRateCurForecast += (1/((double)windowSize))*fcastRates[t+i];
+				int baseIndex = mTSStartIndex+mWarmup+t;
+				for (int i=0; i < mMAWindowSize; ++i) {
+					double mult = 1.0;
+					// Figure out whether the two observations come from
+					// the same delta window, if not set the relative multiplier
+					if (baseIndex/mMAWindowSize != (baseIndex-mMAWindowSize+i)/mMAWindowSize) {
+						mult = mDeltaTS[state][baseIndex];
+					}
+					depRateCurForecast += mult*(1/((double)mMAWindowSize))*fcastRates[t+i];
 				}
-				fcastRates[t+windowSize] = depRateCurForecast;
+				fcastRates[t+mMAWindowSize] = depRateCurForecast;
 				depRateEvents[t][0] = mWarmup+t;
 				depRateEvents[t][1] = depRateCurForecast;
 			}
-			//for (double[] d : depRateEvents) {
-			//	System.out.print (Arrays.toString(d));
-			//}
-			//System.out.println();
 			
 			allRateEvents.put(mStartDeltas.get(state), depRateEvents);
 		}

@@ -169,8 +169,8 @@ forecasting:
   			 "density=<integer>, warmup=<integer>,\n"+
   			 "forecast=<integer>, intvlBetweenForecasts=<integer>,\n"+
   			 "arrState=<state>, startStates={<state>,...},\n"+
-  			 "startDeltas={<LOWERCASENAME>,...}, TSStep=<integer>,\n"+
-  			 "muTS=<StringFilename>, mixedMuTS={{<StringFilename>,...},<number:MixProportion>},\n"+
+  			 "startDeltas={<LOWERCASENAME>,...}, maWindowSize=<integer>,\n"+
+  			 "muTS=<StringFilename>, deltaTS=<StringFilename>, mixedMuTS={{<StringFilename>,...},<number:MixProportion>},\n"+
   			 "arrTS={<StringFilename>,...},depTS={<StringFilename>,...}){}'");}
   forecastingSettings
   {hint.pop();}
@@ -188,16 +188,17 @@ forecastingSettings:
     STARTSTATES DEF LBRACE startStates = listOfStates RBRACE COMMA
     DESTMUS DEF LBRACE destMus = listOfConsts RBRACE COMMA
     STARTDELTAS DEF LBRACE startDeltas = listOfConsts RBRACE COMMA
-    TSSTEP DEF tsStep = INTEGER COMMA
+    MAWINDOWSIZE DEF maWindowSize = INTEGER COMMA
     MUTS DEF muTS = FILENAME COMMA
+    DELTATS DEF deltaTS = FILENAME COMMA
     MIXEDMUTS DEF LBRACE LBRACE mixedMuTS = listOfFiles RBRACE COMMA mixedMuRatio = expression RBRACE COMMA
     ARRTS DEF LBRACE arrTS = listOfFiles RBRACE COMMA
     DEPTS DEF LBRACE depTS = listOfFiles RBRACE
   RPAR
   -> ^(FORECASTINGSETTINGS $stepSize COMMA $density COMMA $warmup COMMA
   	   $forecast COMMA $ibf COMMA $arrState COMMA $startStates COMMA $destMus COMMA
-  	   $startDeltas COMMA $tsStep COMMA $muTS COMMA $mixedMuTS COMMA $mixedMuRatio COMMA
-  	   $arrTS COMMA $depTS)
+  	   $startDeltas COMMA $maWindowSize COMMA $muTS COMMA $deltaTS COMMA $mixedMuTS
+  	   COMMA $mixedMuRatio COMMA $arrTS COMMA $depTS)
 ;
 
 forecastingSimu:
@@ -207,8 +208,8 @@ forecastingSimu:
   			 "replications=<integer>, warmup=<integer>,\n"+
   			 "forecast=<integer>, intvlBetweenForecasts=<integer>,\n"+
   			 "arrState=<state>, startStates={<state>,...},\n"+
-  			 "startDeltas={<LOWERCASENAME>,...}, TSStep=<integer>,\n"+
-  			 "muTS=<StringFilename>, mixedMuTS={{<StringFilename>,...},<number:MixProportion>},\n"+
+  			 "startDeltas={<LOWERCASENAME>,...}, maWindowSize=<integer>,\n"+
+  			 "muTS=<StringFilename>, deltaTS=<StringFilename>, mixedMuTS={{<StringFilename>,...},<number:MixProportion>},\n"+
   			 "arrTS={<StringFilename>,...},depTS={<StringFilename>,...}){}'");}
   forecastingSimuSettings
   {hint.pop();}
@@ -226,16 +227,17 @@ forecastingSimuSettings:
     STARTSTATES DEF LBRACE startStates = listOfStates RBRACE COMMA
     DESTMUS DEF LBRACE destMus = listOfConsts RBRACE COMMA
     STARTDELTAS DEF LBRACE startDeltas = listOfConsts RBRACE COMMA
-    TSSTEP DEF tsStep = INTEGER COMMA
+    MAWINDOWSIZE DEF maWindowSize = INTEGER COMMA
     MUTS DEF muTS = FILENAME COMMA
+    DELTATS DEF deltaTS = FILENAME COMMA
     MIXEDMUTS DEF LBRACE LBRACE mixedMuTS = listOfFiles RBRACE COMMA mixedMuRatio = expression RBRACE COMMA
     ARRTS DEF LBRACE arrTS = listOfFiles RBRACE COMMA
     DEPTS DEF LBRACE depTS = listOfFiles RBRACE
   RPAR
   -> ^(FORECASTINGSIMUSETTINGS $stepSize COMMA $replications COMMA $warmup COMMA
   	   $forecast COMMA $ibf COMMA $arrState COMMA $startStates COMMA $destMus COMMA
-  	   $startDeltas COMMA $tsStep COMMA $muTS COMMA $mixedMuTS COMMA $mixedMuRatio COMMA
-  	   $arrTS COMMA $depTS)
+  	   $startDeltas COMMA $maWindowSize COMMA $muTS COMMA $deltaTS COMMA $mixedMuTS
+  	   COMMA $mixedMuRatio COMMA $arrTS COMMA $depTS)
 ;
 
 listOfStates:
