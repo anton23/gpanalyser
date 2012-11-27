@@ -241,7 +241,7 @@ public class TimeSeriesForecast {
 					if (baseIndex/mMAWindowSize != (baseIndex-mMAWindowSize+i)/mMAWindowSize) {
 						mult = mDeltaTS[state][baseIndex];
 					}
-					depRateCurForecast += mult*(1/((double)mMAWindowSize))*fcastRates[t+i];
+					depRateCurForecast += (mult/((double)mMAWindowSize))*fcastRates[t+i];
 				}
 				fcastRates[t+mMAWindowSize] = depRateCurForecast;
 				depRateEvents[t][0] = mWarmup+t;
@@ -255,7 +255,7 @@ public class TimeSeriesForecast {
 		double[][] resets = {{mWarmup, 0}};
 		allResetEvents.put(mArrState,resets);
 	
-		// Set events in TimeEvents series point in PCTMC
+		// Set events for TimedEvents in PCTMC
 		TimedEvents te = mPctmc.getTimedEvents();
 		te.setEvents(allRateEvents, allJumpEvents, allResetEvents);
 		
