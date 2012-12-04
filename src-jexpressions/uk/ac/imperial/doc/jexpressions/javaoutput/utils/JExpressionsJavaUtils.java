@@ -46,9 +46,9 @@ public class JExpressionsJavaUtils {
 			throw new AssertionError("Function " + fun + " is not defined for values " + t);
 		}
 		// Interpolates two successive values
-		if (i < values.length - 1) {
+		/*if (i < values.length - 1) {
 			return values[i][1] + (values[i+1][1] - values[i][1]) * (t - values[i][0]) / (values[i+1][0] - values[i][0]); 
-		}
+		}*/
 		return values[i][1];
 	}
 	
