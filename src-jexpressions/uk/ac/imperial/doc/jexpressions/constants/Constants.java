@@ -2,8 +2,8 @@ package uk.ac.imperial.doc.jexpressions.constants;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * This class provides mapping from constants to their (double) values. It also
@@ -142,6 +142,22 @@ public class Constants {
 	 * Returns textual representation of the system.
 	 */
 	public String toString() {
-		return ToStringUtils.mapToDefinitionList(constants, "=", ";\n");
+		StringBuilder out = new StringBuilder();
+		for (Map.Entry<String, Double> e : constants.entrySet()) {
+			out.append(e.getKey());
+			out.append(" = ");
+			String value = String.format("%.10f", e.getValue());		
+			value = value.replaceAll("0+$", "").replaceAll("\\.$", ".0");		
+			out.append(value);
+			out.append(";\n");
+		}
+		if (!files.isEmpty()) {
+			out.append("\n");
+			for (Entry<String, FileColumn> e:files.entrySet()){
+				out.append("load \"" + e.getValue().getFile()+"\" " + e.getValue().getColumn() + " into " + e.getKey()+";\n");
+			}			
+		}
+
+		return out.toString();
 	}
 }
