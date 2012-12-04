@@ -18,6 +18,10 @@ public class FileColumn {
 		return column;
 	}
 	
+	@Override
+	public String toString() {
+		return "\""+file + "\"";
+	}
 	
 	
 }
