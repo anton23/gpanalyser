@@ -84,7 +84,7 @@ public class InhomogeneousODEAnalysisNumericalPostprocessor extends ODEAnalysisN
 			double h = stepSize / density;
 			for (double t : updates.keySet()) {
 				// Does the event time coincide with an integration end point?
-				if (t/h != Math.floor(t/h))
+				if (t/h != Math.floor(t/h) && t != stopTime)
 				{
 					throw new AssertionError("Change at time "+t+" falls between two integration end points.\n" +
 											 "Please change event time, stepSize or density.");

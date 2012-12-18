@@ -1,0 +1,527 @@
+// Constants
+gamma = 5;
+mu_1 = 0;
+mu_2 = 0;
+mu_3 = 0;
+mu_4 = 0;
+mu_5 = 0;
+delta_1 = 0;
+delta_2 = 0;
+delta_3 = 0;
+delta_4 = 0;
+delta_5 = 0;
+
+loadRates "dummy.dat" into mu_1;
+loadRates "dummy.dat" into mu_2;
+loadRates "dummy.dat" into mu_3;
+loadRates "dummy.dat" into mu_4;
+loadRates "dummy.dat" into mu_5;
+loadRates "dummy.dat" into delta_1;
+loadRates "dummy.dat" into delta_2;
+loadRates "dummy.dat" into delta_3;
+loadRates "dummy.dat" into delta_4;
+loadRates "dummy.dat" into delta_5;
+
+// Transitions
+// Cluster1
+                 ->  {StartCluster1}  @                                  delta_1;
+{StartCluster1}  ->  {Elsewhere}      @           {StartCluster1}*gamma*(1-mu_1);
+{StartCluster1}  ->  {D_1_1_9}        @             {StartCluster1}*1*gamma*mu_1;
+{D_1_1_9}        ->  {D_1_1_8}        @                         {D_1_1_9}*0.7719;
+{D_1_1_8}        ->  {D_1_1_7}        @                         {D_1_1_8}*0.7719;
+{D_1_1_7}        ->  {D_1_1_6}        @                         {D_1_1_7}*0.7719;
+{D_1_1_6}        ->  {D_1_1_5}        @                         {D_1_1_6}*0.7719;
+{D_1_1_5}        ->  {D_1_1_4}        @                         {D_1_1_5}*0.7719;
+{D_1_1_4}        ->  {D_1_1_3}        @                         {D_1_1_4}*0.7719;
+{D_1_1_3}        ->  {D_1_1_2}        @                         {D_1_1_3}*0.7719;
+{D_1_1_2}        ->  {D_1_1_1}        @                         {D_1_1_2}*0.7719;
+{D_1_1_1}        ->  {Arrival}        @                         {D_1_1_1}*0.7719;
+
+// Cluster2
+                 ->  {StartCluster2}  @                                  delta_2;
+{StartCluster2}  ->  {Elsewhere}      @           {StartCluster2}*gamma*(1-mu_2);
+{StartCluster2}  ->  {D_2_1_34}       @             {StartCluster2}*1*gamma*mu_2;
+{D_2_1_34}       ->  {D_2_1_33}       @                        {D_2_1_34}*1.3681;
+{D_2_1_33}       ->  {D_2_1_32}       @                        {D_2_1_33}*1.3681;
+{D_2_1_32}       ->  {D_2_1_31}       @                        {D_2_1_32}*1.3681;
+{D_2_1_31}       ->  {D_2_1_30}       @                        {D_2_1_31}*1.3681;
+{D_2_1_30}       ->  {D_2_1_29}       @                        {D_2_1_30}*1.3681;
+{D_2_1_29}       ->  {D_2_1_28}       @                        {D_2_1_29}*1.3681;
+{D_2_1_28}       ->  {D_2_1_27}       @                        {D_2_1_28}*1.3681;
+{D_2_1_27}       ->  {D_2_1_26}       @                        {D_2_1_27}*1.3681;
+{D_2_1_26}       ->  {D_2_1_25}       @                        {D_2_1_26}*1.3681;
+{D_2_1_25}       ->  {D_2_1_24}       @                        {D_2_1_25}*1.3681;
+{D_2_1_24}       ->  {D_2_1_23}       @                        {D_2_1_24}*1.3681;
+{D_2_1_23}       ->  {D_2_1_22}       @                        {D_2_1_23}*1.3681;
+{D_2_1_22}       ->  {D_2_1_21}       @                        {D_2_1_22}*1.3681;
+{D_2_1_21}       ->  {D_2_1_20}       @                        {D_2_1_21}*1.3681;
+{D_2_1_20}       ->  {D_2_1_19}       @                        {D_2_1_20}*1.3681;
+{D_2_1_19}       ->  {D_2_1_18}       @                        {D_2_1_19}*1.3681;
+{D_2_1_18}       ->  {D_2_1_17}       @                        {D_2_1_18}*1.3681;
+{D_2_1_17}       ->  {D_2_1_16}       @                        {D_2_1_17}*1.3681;
+{D_2_1_16}       ->  {D_2_1_15}       @                        {D_2_1_16}*1.3681;
+{D_2_1_15}       ->  {D_2_1_14}       @                        {D_2_1_15}*1.3681;
+{D_2_1_14}       ->  {D_2_1_13}       @                        {D_2_1_14}*1.3681;
+{D_2_1_13}       ->  {D_2_1_12}       @                        {D_2_1_13}*1.3681;
+{D_2_1_12}       ->  {D_2_1_11}       @                        {D_2_1_12}*1.3681;
+{D_2_1_11}       ->  {D_2_1_10}       @                        {D_2_1_11}*1.3681;
+{D_2_1_10}       ->  {D_2_1_9}        @                        {D_2_1_10}*1.3681;
+{D_2_1_9}        ->  {D_2_1_8}        @                         {D_2_1_9}*1.3681;
+{D_2_1_8}        ->  {D_2_1_7}        @                         {D_2_1_8}*1.3681;
+{D_2_1_7}        ->  {D_2_1_6}        @                         {D_2_1_7}*1.3681;
+{D_2_1_6}        ->  {D_2_1_5}        @                         {D_2_1_6}*1.3681;
+{D_2_1_5}        ->  {D_2_1_4}        @                         {D_2_1_5}*1.3681;
+{D_2_1_4}        ->  {D_2_1_3}        @                         {D_2_1_4}*1.3681;
+{D_2_1_3}        ->  {D_2_1_2}        @                         {D_2_1_3}*1.3681;
+{D_2_1_2}        ->  {D_2_1_1}        @                         {D_2_1_2}*1.3681;
+{D_2_1_1}        ->  {Arrival}        @                         {D_2_1_1}*1.3681;
+
+// Cluster3
+                 ->  {StartCluster3}  @                                  delta_3;
+{StartCluster3}  ->  {Elsewhere}      @           {StartCluster3}*gamma*(1-mu_3);
+{StartCluster3}  ->  {D_3_1_20}       @             {StartCluster3}*1*gamma*mu_3;
+{D_3_1_20}       ->  {D_3_1_19}       @                        {D_3_1_20}*1.0263;
+{D_3_1_19}       ->  {D_3_1_18}       @                        {D_3_1_19}*1.0263;
+{D_3_1_18}       ->  {D_3_1_17}       @                        {D_3_1_18}*1.0263;
+{D_3_1_17}       ->  {D_3_1_16}       @                        {D_3_1_17}*1.0263;
+{D_3_1_16}       ->  {D_3_1_15}       @                        {D_3_1_16}*1.0263;
+{D_3_1_15}       ->  {D_3_1_14}       @                        {D_3_1_15}*1.0263;
+{D_3_1_14}       ->  {D_3_1_13}       @                        {D_3_1_14}*1.0263;
+{D_3_1_13}       ->  {D_3_1_12}       @                        {D_3_1_13}*1.0263;
+{D_3_1_12}       ->  {D_3_1_11}       @                        {D_3_1_12}*1.0263;
+{D_3_1_11}       ->  {D_3_1_10}       @                        {D_3_1_11}*1.0263;
+{D_3_1_10}       ->  {D_3_1_9}        @                        {D_3_1_10}*1.0263;
+{D_3_1_9}        ->  {D_3_1_8}        @                         {D_3_1_9}*1.0263;
+{D_3_1_8}        ->  {D_3_1_7}        @                         {D_3_1_8}*1.0263;
+{D_3_1_7}        ->  {D_3_1_6}        @                         {D_3_1_7}*1.0263;
+{D_3_1_6}        ->  {D_3_1_5}        @                         {D_3_1_6}*1.0263;
+{D_3_1_5}        ->  {D_3_1_4}        @                         {D_3_1_5}*1.0263;
+{D_3_1_4}        ->  {D_3_1_3}        @                         {D_3_1_4}*1.0263;
+{D_3_1_3}        ->  {D_3_1_2}        @                         {D_3_1_3}*1.0263;
+{D_3_1_2}        ->  {D_3_1_1}        @                         {D_3_1_2}*1.0263;
+{D_3_1_1}        ->  {Arrival}        @                         {D_3_1_1}*1.0263;
+
+// Cluster4
+                 ->  {StartCluster4}  @                                  delta_4;
+{StartCluster4}  ->  {Elsewhere}      @           {StartCluster4}*gamma*(1-mu_4);
+{StartCluster4}  ->  {D_4_1_14}       @             {StartCluster4}*1*gamma*mu_4;
+{D_4_1_14}       ->  {D_4_1_13}       @                        {D_4_1_14}*0.9515;
+{D_4_1_13}       ->  {D_4_1_12}       @                        {D_4_1_13}*0.9515;
+{D_4_1_12}       ->  {D_4_1_11}       @                        {D_4_1_12}*0.9515;
+{D_4_1_11}       ->  {D_4_1_10}       @                        {D_4_1_11}*0.9515;
+{D_4_1_10}       ->  {D_4_1_9}        @                        {D_4_1_10}*0.9515;
+{D_4_1_9}        ->  {D_4_1_8}        @                         {D_4_1_9}*0.9515;
+{D_4_1_8}        ->  {D_4_1_7}        @                         {D_4_1_8}*0.9515;
+{D_4_1_7}        ->  {D_4_1_6}        @                         {D_4_1_7}*0.9515;
+{D_4_1_6}        ->  {D_4_1_5}        @                         {D_4_1_6}*0.9515;
+{D_4_1_5}        ->  {D_4_1_4}        @                         {D_4_1_5}*0.9515;
+{D_4_1_4}        ->  {D_4_1_3}        @                         {D_4_1_4}*0.9515;
+{D_4_1_3}        ->  {D_4_1_2}        @                         {D_4_1_3}*0.9515;
+{D_4_1_2}        ->  {D_4_1_1}        @                         {D_4_1_2}*0.9515;
+{D_4_1_1}        ->  {Arrival}        @                         {D_4_1_1}*0.9515;
+
+// Cluster5
+                 ->  {StartCluster5}  @                                  delta_5;
+{StartCluster5}  ->  {Elsewhere}      @           {StartCluster5}*gamma*(1-mu_5);
+{StartCluster5}  ->  {D_5_1_27}       @        {StartCluster5}*0.4216*gamma*mu_5;
+{D_5_1_27}       ->  {D_5_1_26}       @                        {D_5_1_27}*5.0317;
+{D_5_1_26}       ->  {D_5_1_25}       @                        {D_5_1_26}*5.0317;
+{D_5_1_25}       ->  {D_5_1_24}       @                        {D_5_1_25}*5.0317;
+{D_5_1_24}       ->  {D_5_1_23}       @                        {D_5_1_24}*5.0317;
+{D_5_1_23}       ->  {D_5_1_22}       @                        {D_5_1_23}*5.0317;
+{D_5_1_22}       ->  {D_5_1_21}       @                        {D_5_1_22}*5.0317;
+{D_5_1_21}       ->  {D_5_1_20}       @                        {D_5_1_21}*5.0317;
+{D_5_1_20}       ->  {D_5_1_19}       @                        {D_5_1_20}*5.0317;
+{D_5_1_19}       ->  {D_5_1_18}       @                        {D_5_1_19}*5.0317;
+{D_5_1_18}       ->  {D_5_1_17}       @                        {D_5_1_18}*5.0317;
+{D_5_1_17}       ->  {D_5_1_16}       @                        {D_5_1_17}*5.0317;
+{D_5_1_16}       ->  {D_5_1_15}       @                        {D_5_1_16}*5.0317;
+{D_5_1_15}       ->  {D_5_1_14}       @                        {D_5_1_15}*5.0317;
+{D_5_1_14}       ->  {D_5_1_13}       @                        {D_5_1_14}*5.0317;
+{D_5_1_13}       ->  {D_5_1_12}       @                        {D_5_1_13}*5.0317;
+{D_5_1_12}       ->  {D_5_1_11}       @                        {D_5_1_12}*5.0317;
+{D_5_1_11}       ->  {D_5_1_10}       @                        {D_5_1_11}*5.0317;
+{D_5_1_10}       ->  {D_5_1_9}        @                        {D_5_1_10}*5.0317;
+{D_5_1_9}        ->  {D_5_1_8}        @                         {D_5_1_9}*5.0317;
+{D_5_1_8}        ->  {D_5_1_7}        @                         {D_5_1_8}*5.0317;
+{D_5_1_7}        ->  {D_5_1_6}        @                         {D_5_1_7}*5.0317;
+{D_5_1_6}        ->  {D_5_1_5}        @                         {D_5_1_6}*5.0317;
+{D_5_1_5}        ->  {D_5_1_4}        @                         {D_5_1_5}*5.0317;
+{D_5_1_4}        ->  {D_5_1_3}        @                         {D_5_1_4}*5.0317;
+{D_5_1_3}        ->  {D_5_1_2}        @                         {D_5_1_3}*5.0317;
+{D_5_1_2}        ->  {D_5_1_1}        @                         {D_5_1_2}*5.0317;
+{D_5_1_1}        ->  {Arrival}        @                         {D_5_1_1}*5.0317;
+
+{StartCluster5}  ->  {D_5_2_25}       @        {StartCluster5}*0.4354*gamma*mu_5;
+{D_5_2_25}       ->  {D_5_2_24}       @                        {D_5_2_25}*3.0023;
+{D_5_2_24}       ->  {D_5_2_23}       @                        {D_5_2_24}*3.0023;
+{D_5_2_23}       ->  {D_5_2_22}       @                        {D_5_2_23}*3.0023;
+{D_5_2_22}       ->  {D_5_2_21}       @                        {D_5_2_22}*3.0023;
+{D_5_2_21}       ->  {D_5_2_20}       @                        {D_5_2_21}*3.0023;
+{D_5_2_20}       ->  {D_5_2_19}       @                        {D_5_2_20}*3.0023;
+{D_5_2_19}       ->  {D_5_2_18}       @                        {D_5_2_19}*3.0023;
+{D_5_2_18}       ->  {D_5_2_17}       @                        {D_5_2_18}*3.0023;
+{D_5_2_17}       ->  {D_5_2_16}       @                        {D_5_2_17}*3.0023;
+{D_5_2_16}       ->  {D_5_2_15}       @                        {D_5_2_16}*3.0023;
+{D_5_2_15}       ->  {D_5_2_14}       @                        {D_5_2_15}*3.0023;
+{D_5_2_14}       ->  {D_5_2_13}       @                        {D_5_2_14}*3.0023;
+{D_5_2_13}       ->  {D_5_2_12}       @                        {D_5_2_13}*3.0023;
+{D_5_2_12}       ->  {D_5_2_11}       @                        {D_5_2_12}*3.0023;
+{D_5_2_11}       ->  {D_5_2_10}       @                        {D_5_2_11}*3.0023;
+{D_5_2_10}       ->  {D_5_2_9}        @                        {D_5_2_10}*3.0023;
+{D_5_2_9}        ->  {D_5_2_8}        @                         {D_5_2_9}*3.0023;
+{D_5_2_8}        ->  {D_5_2_7}        @                         {D_5_2_8}*3.0023;
+{D_5_2_7}        ->  {D_5_2_6}        @                         {D_5_2_7}*3.0023;
+{D_5_2_6}        ->  {D_5_2_5}        @                         {D_5_2_6}*3.0023;
+{D_5_2_5}        ->  {D_5_2_4}        @                         {D_5_2_5}*3.0023;
+{D_5_2_4}        ->  {D_5_2_3}        @                         {D_5_2_4}*3.0023;
+{D_5_2_3}        ->  {D_5_2_2}        @                         {D_5_2_3}*3.0023;
+{D_5_2_2}        ->  {D_5_2_1}        @                         {D_5_2_2}*3.0023;
+{D_5_2_1}        ->  {Arrival}        @                         {D_5_2_1}*3.0023;
+
+{StartCluster5}  ->  {D_5_3_13}       @         {StartCluster5}*0.143*gamma*mu_5;
+{D_5_3_13}       ->  {D_5_3_12}       @                        {D_5_3_13}*0.9442;
+{D_5_3_12}       ->  {D_5_3_11}       @                        {D_5_3_12}*0.9442;
+{D_5_3_11}       ->  {D_5_3_10}       @                        {D_5_3_11}*0.9442;
+{D_5_3_10}       ->  {D_5_3_9}        @                        {D_5_3_10}*0.9442;
+{D_5_3_9}        ->  {D_5_3_8}        @                         {D_5_3_9}*0.9442;
+{D_5_3_8}        ->  {D_5_3_7}        @                         {D_5_3_8}*0.9442;
+{D_5_3_7}        ->  {D_5_3_6}        @                         {D_5_3_7}*0.9442;
+{D_5_3_6}        ->  {D_5_3_5}        @                         {D_5_3_6}*0.9442;
+{D_5_3_5}        ->  {D_5_3_4}        @                         {D_5_3_5}*0.9442;
+{D_5_3_4}        ->  {D_5_3_3}        @                         {D_5_3_4}*0.9442;
+{D_5_3_3}        ->  {D_5_3_2}        @                         {D_5_3_3}*0.9442;
+{D_5_3_2}        ->  {D_5_3_1}        @                         {D_5_3_2}*0.9442;
+{D_5_3_1}        ->  {Arrival}        @                         {D_5_3_1}*0.9442;
+
+// Initial Pops
+{StartCluster1} = 0;
+{StartCluster2} = 0;
+{StartCluster3} = 0;
+{StartCluster4} = 0;
+{StartCluster5} = 0;
+
+loadJumps "dummy.dat" into {StartCluster1};
+loadJumps "dummy.dat" into {StartCluster2};
+loadJumps "dummy.dat" into {StartCluster3};
+loadJumps "dummy.dat" into {StartCluster4};
+loadJumps "dummy.dat" into {StartCluster5};
+loadResets "dummy.dat" into {Arrival};
+
+Forecasting[momentClosure=NormalClosure,maxOrder=1](stepSize = 0.1, density = 10,
+//ForecastingSimu(stepSize = 0.1, replications = 2000,
+										   warmup = 45, forecast = 15,
+										   intvlBetweenForecasts = 5,
+										   arrState = {Arrival},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4},{StartCluster5}},
+										   destMus = {mu_1,mu_2,mu_3,mu_4,mu_5},
+										   startDeltas = {delta_1,delta_2,delta_3,delta_4,delta_5},
+										   maWindowSize = 5,
+										   muTS = "../spatialysis/data/meanMuVals.dat",
+										   deltaTS = "../spatialysis/data/meanDeltaRelVals.dat",
+										   mixedMuTs = {{"../spatialysis/data/meanMuVals6-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals7-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals8-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals11-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals12-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals13-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals14-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals15-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals18-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals19-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals20-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals21-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals22-6-1Min.dat",
+												 "../spatialysis/data/meanMuVals25-6-1Min.dat",
+												 "../spatialysis/data/meanMuVals26-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals27-6-1Min.dat",
+										   		 "../spatialysis/data/meanMuVals28-6-1Min.dat",
+												 "../spatialysis/data/meanMuVals29-6-1Min.dat"}, 0},
+										   arrTS = {"../spatialysis/data/forecast/ts/Arrivals06-06-2012.dat",
+											    "../spatialysis/data/forecast/ts/Arrivals07-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals08-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals11-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals12-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals13-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals14-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals15-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals18-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals19-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals20-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals21-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals22-06-2012.dat",
+											    "../spatialysis/data/forecast/ts/Arrivals25-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals26-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals27-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals28-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Arrivals29-06-2012.dat"
+										  },
+										   depTS = {"../spatialysis/data/forecast/ts/Departures06-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures07-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures08-06-2012.dat",
+											    "../spatialysis/data/forecast/ts/Departures11-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures12-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures13-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures14-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures15-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures18-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures19-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures20-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures21-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures22-06-2012.dat",
+											    "../spatialysis/data/forecast/ts/Departures25-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures26-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures27-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures28-06-2012.dat",
+										   	    "../spatialysis/data/forecast/ts/Departures29-06-2012.dat"
+										  })
+										  {
+										  	E[{Arrival}],E[{Arrival}{Arrival}];
+										  }
+/*
+ForecastingSimu(stepSize = 0.1, replications = 2000,
+										   warmup = 45, forecast = 15,
+										   intvlBetweenForecasts = 5,
+										   arrState = {Arrival},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4},{StartCluster5}},
+										   destMus = {mu_1,mu_2,mu_3,mu_4,mu_5},
+										   startDeltas = {delta_1,delta_2,delta_3,delta_4,delta_},
+										   tsStep = 1,
+										   muTS = "../spatialysis/data/meanMuVals.dat",
+										   mixedMuTs = {{"../spatialysis/data/meanMuVals6-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals7-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals8-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals11-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals12-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals13-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals14-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals15-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals18-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals19-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals20-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals21-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals22-6-1Min.dat"}, 0},
+										   arrTS = {"../spatialysis/data/forecast/ts/Arrivals06-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals07-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals08-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals11-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals12-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals13-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals14-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals15-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals18-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals19-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals20-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals21-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals22-06-2012.dat"},
+										   depTS = {"../spatialysis/data/forecast/ts/Departures06-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures07-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures08-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures11-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures12-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures13-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures14-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures15-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures18-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures19-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures20-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures21-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures22-06-2012.dat"})
+										  {
+										  	E[{Arrival}],E[{Arrival}{Arrival}];
+										  }
+*/
+/*
+																		   mixedMuTs = {{"../spatialysis/data/meanMuVals1-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals2-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals3-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals4-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals8-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals9-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals10-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals11-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals14-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals15-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals16-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals17-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals18-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals21-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals22-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals23-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals24-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals25-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals28-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals29-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals30-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals31-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals1-6-1Min.dat"}, 1},
+											       arrTS = {"../spatialysis/data/training/ts/Arrivals01-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals02-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals03-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals04-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals08-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals09-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals10-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals11-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals14-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals15-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals16-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals17-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals18-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals21-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals22-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals23-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals24-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals25-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals28-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals29-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals30-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals31-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals01-06-2012.dat"},
+										   depTS = {"../spatialysis/data/training/ts/Departures01-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures02-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures03-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures04-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures08-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures09-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures10-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures11-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures14-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures15-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures16-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures17-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures18-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures21-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures22-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures23-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures24-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures25-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures28-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures29-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures30-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures31-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures01-06-2012.dat"}
+/*
+ForecastingSimu(stepSize = 0.1, replications = 2000,
+										   warmup = 35, forecast = 15,
+										   intvlBetweenForecasts = 5,
+										   arrState = {Arrival},
+										   startStates = {{StartCluster1},{StartCluster2},{StartCluster3},{StartCluster4},{StartCluster5}},
+										   destMus = {mu_1,mu_2,mu_3,mu_4,mu_5,mu_6},
+										   startDeltas = {delta_1,delta_2,delta_3,delta_4,delta_},
+										   tsStep = 1,
+										   muTS = "../spatialysis/data/meanMuVals.dat",
+										   mixedMuTs = {{"../spatialysis/data/meanMuVals6-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals7-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals8-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals11-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals12-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals13-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals14-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals15-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals18-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals19-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals20-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals21-6-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals22-6-1Min.dat"}, 0.5},
+										   arrTS = {"../spatialysis/data/forecast/ts/Arrivals06-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals07-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals08-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals11-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals12-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals13-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals14-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals15-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals18-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals19-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals20-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals21-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Arrivals22-06-2012.dat"},
+										   depTS = {"../spatialysis/data/forecast/ts/Departures06-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures07-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures08-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures11-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures12-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures13-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures14-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures15-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures18-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures19-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures20-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures21-06-2012.dat",
+										   		    "../spatialysis/data/forecast/ts/Departures22-06-2012.dat"})
+										  {
+										  	E[{Arrival}],E[{Arrival}{Arrival}];
+										  }
+*/
+/*
+																		   mixedMuTs = {{"../spatialysis/data/meanMuVals1-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals2-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals3-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals4-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals8-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals9-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals10-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals11-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals14-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals15-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals16-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals17-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals18-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals21-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals22-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals23-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals24-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals25-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals28-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals29-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals30-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals31-5-1Min.dat",
+										   				 "../spatialysis/data/meanMuVals1-6-1Min.dat"}, 0.5},
+											       arrTS = {"../spatialysis/data/training/ts/Arrivals01-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals02-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals03-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals04-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals08-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals09-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals10-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals11-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals14-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals15-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals16-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals17-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals18-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals21-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals22-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals23-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals24-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals25-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals28-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals29-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals30-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals31-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Arrivals01-06-2012.dat"},
+										   depTS = {"../spatialysis/data/training/ts/Departures01-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures02-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures03-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures04-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures08-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures09-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures10-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures11-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures14-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures15-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures16-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures17-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures18-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures21-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures22-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures23-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures24-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures25-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures28-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures29-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures30-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures31-05-2012.dat",
+										   			"../spatialysis/data/training/ts/Departures01-06-2012.dat"}
+*/

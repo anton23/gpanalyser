@@ -39,7 +39,7 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
 			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio, List<String> arrTSFiles,
 			   List<String> depTSFiles) {
-		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, replications);
+		super(warmup+forecast+stepSize, stepSize, replications);
 		mWarmup = warmup;
 		mForecast = forecast;
 		mIBF = ibf;
@@ -60,7 +60,7 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
 			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio,
 			   List<String> arrTSFiles, List<String> depTSFiles, Map<String, Object> parameters) {
-		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, replications, parameters);
+		super(warmup+forecast+stepSize, stepSize, replications, parameters);
 		mWarmup = warmup;
 		mForecast = forecast;
 		mIBF = ibf;
