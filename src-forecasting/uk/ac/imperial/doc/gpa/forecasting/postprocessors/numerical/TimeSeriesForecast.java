@@ -18,7 +18,6 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class TimeSeriesForecast {
 
-	public final static double s_ADDON_LENGTH = 0.1;	
 	private PlainPCTMC mPctmc;
 	private int mWarmup;
 	private int mForecast;

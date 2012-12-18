@@ -42,7 +42,7 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
 			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio,
 			   List<String> arrTSFiles, List<String> depTSFiles) {
-		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, density);
+		super(warmup+forecast+stepSize, stepSize, density);
 		mWarmup = warmup;
 		mForecast = forecast;
 		mIBF = ibf;
@@ -63,7 +63,7 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
 			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio,
 			   List<String> arrTSFiles, List<String> depTSFiles, Map<String, Object> parameters) {
-		super(warmup+forecast+TimeSeriesForecast.s_ADDON_LENGTH, stepSize, density, parameters);
+		super(warmup+forecast+stepSize, stepSize, density, parameters);
 		mWarmup = warmup;
 		mForecast = forecast;
 		mIBF = ibf;
@@ -113,7 +113,7 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 														mStartDeltas, mMAWindowSize, mMuTSFile,
 														mDeltaTSFile, mMixedMuTSFiles, mMixedMuRatio,
 														mArrTSFiles, mDepTSFiles);
-
+		
 		PopulationProduct pp = PopulationProduct.getMeanProduct(mArrState);
 		CombinedPopulationProduct cppArrMean = new CombinedPopulationProduct(pp);
 		int cppArrMeanIndex = odeAnalysis.getMomentIndex().get(cppArrMean);
@@ -139,7 +139,7 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 				for (int i=0; i<mIBF*(1/stepSize); ++i) {
 					mData.add(data);
 				}
-
+				
 				// Compute what the normalised distance between forecast and actual number of arrivals
 				double normActArr = Math.abs(actualArr - forecastArr)/forecastStdDev;
 				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr + "\t Normalised Dist: "+normActArr);
