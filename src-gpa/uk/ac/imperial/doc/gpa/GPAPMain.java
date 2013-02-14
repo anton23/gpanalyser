@@ -62,6 +62,15 @@ public class GPAPMain {
 				accepts("nthreads", "number of threads available to analyses")
 				.withRequiredArg().ofType(Integer.class)
 						.describedAs("number of threads");
+				
+				accepts("condor", "splits the iterate commands into smaller parts and generates temporary input files and condor job specification")
+				.withRequiredArg().ofType(Integer.class)
+						.describedAs("number of parts");
+				;
+				accepts("condor-merge", "merges results from previously ran condor jobs")
+				.withRequiredArg().ofType(Integer.class)
+						.describedAs("number of parts");
+				
 				accepts("showIterations", "proportion of iterations after which the number of finished iterations is shown")
 						.withRequiredArg().ofType(Integer.class)
 						.describedAs("1/proportion, e.g. 5 means the number of finished iterations is reported 4 times. 0 value reports after each iteration");
@@ -154,7 +163,14 @@ public class GPAPMain {
 				PCTMCLogging.info("Generating java code, output folder is " + PCTMCOptions.javaFolder);
 				interpreter.addGlobalPostprocessor(new JavaOutputAnalysisPostprocessor());
 			}
-			
+			if (options.has("condor")) {
+				PCTMCOptions.condor = true;
+				PCTMCOptions.condor_parts = (Integer) options.valueOf("condor");				
+			}
+			if (options.has("condor-merge")) {
+				PCTMCOptions.condor_merge = true;
+				PCTMCOptions.condor_parts = (Integer) options.valueOf("condor-merge");
+			}
 			 PCTMCLogging .debug("Creating a PCTMC interpreter with\n lexer: "
 			  + interpreter.getLexerClass() + ",\n parser: " + interpreter.getParserClass() + ",\n compiler: " +
 			  interpreter.getCompilerClass()); 

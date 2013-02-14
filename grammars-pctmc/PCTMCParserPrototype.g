@@ -233,7 +233,7 @@ extensions: ;
 
 system:
   {requireDefinitions = true;}
-  constantDefinition* varDefinition* 
+  constantDefinition* fileDefinition* varDefinition* 
   {hint.push("incomplete model definition");} modelDefinition {hint.pop();}
   {hint.push("allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise'");}
   analysis* experiment*
@@ -471,6 +471,9 @@ constantDefinition:
     (rate=REALNUMBER|rate=INTEGER) SEMI {hint.pop();} 
      {constants.add($c.text);}
      -> ^(CONSTDEF $c $rate);
+     
+fileDefinition:
+   LOAD FILENAME INTEGER? INTO c=LOWERCASENAME SEMI;
   
 varDefinition:
   variable DEF expression SEMI -> ^(VARDEF variable expression);
