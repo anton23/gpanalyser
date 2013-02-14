@@ -93,6 +93,7 @@ system returns[Constants constants,
 }
 
 : constantDefinition[constantMap]* {$constants = new Constants(constantMap);}
+   fileDefinitions[$constants]
    varDefinition* {$unfoldedVariables = new ExpressionVariableUnfolderPCTMC(vars).unfoldVariables();
                     vars = $unfoldedVariables; }
    m=modelDefinition[$unfoldedVariables,$constants] {$pctmc = $m.pctmc;}
@@ -412,6 +413,15 @@ constantDefinition[Map<String,Double> map]:
   ^(CONSTDEF id=constant (value=realnumber {$map.put($id.text,$value.value);}
                          |valueI=integer   {$map.put($id.text,new Double($valueI.value));})
 );
+
+fileDefinitions[Constants constants]
+@init{
+  int col = 1;
+}:
+   (LOAD f=FILENAME (i = integer {col = $i.value;})? INTO fun=LOWERCASENAME {
+      $constants.addFile($f.text.replace("\"",""), col, $fun.text);
+   } SEMI)*
+;
 
 variable returns [String text]:
   ^(VARIABLE id=LOWERCASENAME) {$text = $id.text;}
