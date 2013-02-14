@@ -2,7 +2,7 @@ package uk.ac.imperial.doc.pctmc.cppoutput;
 
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ISystemOfODEs;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 
 public class CPPODEsPreprocessed extends PCTMCImplementationPreprocessed {
 	private final NativeSystemOfODEs odes;
@@ -12,7 +12,7 @@ public class CPPODEsPreprocessed extends PCTMCImplementationPreprocessed {
 		this.odes = odes;
 	}
 
-	public ISystemOfODEs getOdes() {
+	public SystemOfODEs getOdes() {
 		return odes;
 	}
 }
