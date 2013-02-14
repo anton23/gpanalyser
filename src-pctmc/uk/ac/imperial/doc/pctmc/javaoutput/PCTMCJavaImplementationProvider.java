@@ -12,7 +12,7 @@ import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
 import uk.ac.imperial.doc.pctmc.javaoutput.analysis.JavaMethodPrinter;
 import uk.ac.imperial.doc.pctmc.javaoutput.odeanalysis.JavaODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKutta;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrator;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
@@ -75,7 +75,7 @@ public class PCTMCJavaImplementationProvider implements
 		SystemOfODEs odes = ((JavaODEsPreprocessed) preprocessed).getOdes();
 		odes.setRates(constants.getFlatConstants());
 		PCTMCLogging.info("Running Runge-Kutta solver.");
-		double[][] dataPoints = RungeKutta.rungeKutta(odes, initial, stopTime,
+		double[][] dataPoints = ODEIntegrator.rungeKutta(odes, initial, stopTime,
 				stepSize, density);
 		return dataPoints;
 	}

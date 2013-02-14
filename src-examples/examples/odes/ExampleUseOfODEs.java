@@ -15,7 +15,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKutta;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrator;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 
 public class ExampleUseOfODEs {
@@ -23,6 +23,11 @@ public class ExampleUseOfODEs {
 	static class PredatorPreyODEs extends SystemOfODEs{
 		//from http://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equation
 		
+		@Override
+		public int getDimension() {
+			return 2;
+		}
+
 		//y[0] is prey, y[1] is predator count
 		public static Map<String, Integer> getOdeVariableIndex(){
 			Map<String, Integer> odeVariableIndex = new HashMap<String, Integer>();
@@ -40,11 +45,10 @@ public class ExampleUseOfODEs {
 		
 
 		@Override
-		public double[] derivn(double x, double[] y) {
-			double[] ret = new double[2];
+		public void computeDerivatives(double x, double[] y, double [] ret) {			
 			ret[0] = y[0]*(r[0]-r[1]*y[1]);
 			ret[1] = -y[1]*(r[2]-r[3]*y[0]);
-			return ret;
+			
 		}
 	}
 
@@ -103,7 +107,7 @@ public class ExampleUseOfODEs {
 			// We tell the odes what the constants are
 			odes.setRates(constants.getFlatConstants());
 			// And comput the solution
-			double[][] result = RungeKutta.rungeKutta(odes, initial, 20.0, 0.1, 10);
+			double[][] result = ODEIntegrator.rungeKutta(odes, initial, 20.0, 0.1, 10);
 			// Just for fun we plot the solution values of the ode variables
 			XYDataset dataset = AnalysisUtils.getDatasetFromArray(result,null, 0.1, new String[]{"prey", "predator"});
 			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
@@ -127,7 +131,7 @@ public class ExampleUseOfODEs {
 			// We tell the odes what the constants are
 			odes.setRates(new double[]{1.5, 3.0, 1.0, 1.0});
 			// And comput the solution
-			double[][] result = RungeKutta.rungeKutta(odes, initial, 20.0, 0.1, 10);
+			double[][] result = ODEIntegrator.rungeKutta(odes, initial, 20.0, 0.1, 10);
 			// Just for fun we plot the solution values of the ode variables
 			XYDataset dataset = AnalysisUtils.getDatasetFromArray(result,null, 0.1, new String[]{"prey", "predator"});
 			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
