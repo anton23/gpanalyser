@@ -407,8 +407,9 @@ odeSettings:
     STOPTIME DEF stopTime = expression COMMA
     STEPSIZE DEF stepSize = expression COMMA
     DENSITY DEF density = INTEGER
+    (COMMA parameter)*
   RPAR
-  -> ^(ODESETTINGS $stopTime COMMA $stepSize COMMA $density)
+  -> ^(ODESETTINGS $stopTime COMMA $stepSize COMMA $density (COMMA parameter)*)
 ;
  
 simulation:
