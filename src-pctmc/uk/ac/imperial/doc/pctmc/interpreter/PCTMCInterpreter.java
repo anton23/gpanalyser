@@ -294,6 +294,12 @@ public class PCTMCInterpreter {
 	public void processFile(String file) {
 		PCTMCLogging.info("Opening file " + file);
 		this.file = file;
+		String[] pathTmp = file.split("/");
+		String path = "";
+		for (int i = 0; i < pathTmp.length - 1; i++) {
+			path += pathTmp[i] + "/";
+		}
+		PCTMCOptions.filePath = path;
 		PCTMCLogging.increaseIndent();
 
 		try {

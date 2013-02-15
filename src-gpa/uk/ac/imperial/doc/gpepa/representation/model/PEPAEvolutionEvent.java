@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.gpepa.representation.model;
 
-import uk.ac.imperial.doc.gpa.pctmc.RatePopulationToMomentTransformer;
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.gpepa.states.GPEPAState;
