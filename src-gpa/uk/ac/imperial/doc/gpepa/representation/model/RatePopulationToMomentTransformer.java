@@ -1,4 +1,4 @@
-package uk.ac.imperial.doc.gpa.pctmc;
+package uk.ac.imperial.doc.gpepa.representation.model;
 
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionTransformerWithConstants;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;

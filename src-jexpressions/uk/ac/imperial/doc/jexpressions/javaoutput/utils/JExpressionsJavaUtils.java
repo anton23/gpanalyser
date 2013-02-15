@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import uk.ac.imperial.doc.jexpressions.constants.FileColumn;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 
 public class JExpressionsJavaUtils {
@@ -61,7 +62,8 @@ public class JExpressionsJavaUtils {
 	
 	private static void loadFile(String fun, FileColumn fileColumn) {
 		try {
-			FileReader f = new FileReader(fileColumn.getFile());
+			String path = PCTMCOptions.filePath;
+			FileReader f = new FileReader(path + "/" + fileColumn.getFile());
 			BufferedReader in = new BufferedReader(f);
 			String s = "";
 			List<double[]> valuesList = new LinkedList<double[]>();
