@@ -20,6 +20,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	private int density;
 	
+	private Map<String, Object> parameters;
 
 	private String overrideCode;
 	private String overrideCodeClassName;
@@ -76,6 +77,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 				throw new AssertionError("Given value of 'overrideCode' has to be a filename!");
 			}
 		}
+		this.parameters = parameters;
 	}
 
 	@Override

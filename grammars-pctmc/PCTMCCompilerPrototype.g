@@ -274,7 +274,6 @@ odeAnalysis[PCTMC pctmc, Constants constants]
 returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
-  Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
   ^(ODES
          (LBRACK
@@ -282,19 +281,19 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
              (COMMA p=parameter
                           {parameters.put($p.name, $p.value);})*
           RBRACK)?
-         settings=odeSettings 
+         settings=odeSettings         
          {
 		      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
 		      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
 		      $settings.stopTime.accept(stopEval);
 		      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
 		      $settings.stepSize.accept(stepEval);
-		      if (postprocessorParameters.isEmpty()) {
+		      if ($odeSettings.parameters.isEmpty()) {
 		        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
 		            stepEval.getResult(),$settings.density);
 		      } else {
 		        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-		           stepEval.getResult(),$settings.density, postprocessorParameters);
+		           stepEval.getResult(),$settings.density, $odeSettings.parameters);
 		      }
 		      $analysis.addPostprocessor($postprocessor);
       }
@@ -304,14 +303,22 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 ;
 
 odeSettings returns
-  [AbstractExpression stopTime, AbstractExpression stepSize, int density]:
+  [AbstractExpression stopTime, AbstractExpression stepSize, int density, Map<String, Object> parameters]
+@init{
+  $parameters = new HashMap<String, Object>();
+}:
   ^(ODESETTINGS stopExpr=expression COMMA
-  	stepExpr=expression COMMA dens=INTEGER)
+  	stepExpr=expression COMMA dens=INTEGER
   {
       $stopTime = $stopExpr.e;
       $stepSize = $stepExpr.e;
-      $density = Integer.parseInt ($dens.text);
-  }
+      $density = Integer.parseInt ($dens.text);      
+  } 
+      (COMMA 
+        p=parameter
+        {$parameters.put($p.name, $p.value);}          
+      )*
+  )
 ;
 
 parameter returns [String name, Object value]:
