@@ -28,15 +28,15 @@ public class AdaptiveStepsizeIntegrators extends ODEIntegratorsGroup {
 		}
 		double maxStep = stopTime;
 		if (parameters.containsKey(MAX_STEP)) {
-			minStep = (Double) parameters.get(MAX_STEP);
+			maxStep = (Double) parameters.get(MAX_STEP);
 		}
 		double relTol = 1.0e-10;
 		if (parameters.containsKey(REL_TOL)) {
-			minStep = (Double) parameters.get(REL_TOL);
+			relTol = (Double) parameters.get(REL_TOL);
 		}
 		double absTol = 1.0e-10;
 		if (parameters.containsKey(ABS_TOL)) {
-			minStep = (Double) parameters.get(ABS_TOL);
+			absTol = (Double) parameters.get(ABS_TOL);
 		}		
 		return new Object[] {minStep, maxStep, relTol, absTol};
 	}
