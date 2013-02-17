@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.distribution.TDistribution;
-import org.apache.commons.math.distribution.TDistributionImpl;
+import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.exception.OutOfRangeException;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
@@ -223,14 +222,14 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 			}
 			
 			// Compute confidence interval for sample mean and variance
-			TDistribution tDist = new TDistributionImpl(reps-1);
+			TDistribution tDist = new TDistribution(reps-1);
 			double maxRelHalfCIChange = 0;
 			normalisedHalfCIWidth = 1.96;
 			try
 			{
 				normalisedHalfCIWidth = tDist.inverseCumulativeProbability(0.5+mCI/2);
 			}
-			catch (MathException e) {
+			catch (OutOfRangeException e) {
 				e.printStackTrace();
 			}
 			for (int t = 0; t < timeSteps; t++)

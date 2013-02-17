@@ -12,11 +12,10 @@ import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
 import uk.ac.imperial.doc.pctmc.javaoutput.analysis.JavaMethodPrinter;
 import uk.ac.imperial.doc.pctmc.javaoutput.odeanalysis.JavaODEMethodPrinter;
 import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKutta;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrators;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 /**
  * Provides implementation for the abstract methods used by analyses. For now
@@ -71,12 +70,11 @@ public class PCTMCJavaImplementationProvider implements
 
 	public double[][] runODEAnalysis(
 			PCTMCImplementationPreprocessed preprocessed, double[] initial,
-			double stopTime, double stepSize, int density, Constants constants) {
+			double stopTime, double stepSize, Map<String, Object> parameters, Constants constants) {
 		SystemOfODEs odes = ((JavaODEsPreprocessed) preprocessed).getOdes();
 		odes.setRates(constants.getFlatConstants());
-		PCTMCLogging.info("Running Runge-Kutta solver.");
-		double[][] dataPoints = RungeKutta.rungeKutta(odes, initial, stopTime,
-				stepSize, density);
+		double[][] dataPoints = ODEIntegrators.solveODEs(odes, initial, stopTime,
+				stepSize, parameters);
 		return dataPoints;
 	}
 }

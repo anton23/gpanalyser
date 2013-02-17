@@ -29,25 +29,18 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
     private final PCTMCCPPImplementationProvider pcctmc
             = new PCTMCCPPImplementationProvider();
 
-	private int density;
+    Map<String, Object> parameters;
 
-	public int getDensity() {
-		return density;
-	}
-
-	public void setDensity(int density) {
-		this.density = density;
-	}
 
 	public CPPODEAnalysisNumericalPostprocessor(double stopTime, double stepSize,
-            int density) {
+			Map<String, Object> parameters) {
 		super(stopTime, stepSize);
-		this.density = density;
+		this.parameters = parameters;
 	}
 
-	private CPPODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
+	private CPPODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, Map<String, Object> parameters,
             PCTMCODEAnalysis odeAnalysis, PCTMCImplementationPreprocessed preprocessedImplementation) {
-		this(stopTime, stepSize, density);
+		this(stopTime, stepSize, parameters);
 		this.odeAnalysis = odeAnalysis;
 		this.preprocessedImplementation = preprocessedImplementation;
 		this.momentIndex = odeAnalysis.getMomentIndex();
@@ -61,14 +54,14 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 		assert(odeAnalysis!=null);
 		PCTMCCPPImplementationProvider cppImplementation = new PCTMCCPPImplementationProvider();
 		return new CPPODEAnalysisNumericalPostprocessor
-                (stopTime, stepSize, density, odeAnalysis,
+                (stopTime, stepSize, parameters, odeAnalysis,
                         cppImplementation.getPreprocessedODEImplementation(
 						odeAnalysis.getOdeMethod(), constants, momentIndex));
 	}
 
 	@Override
 	public String toString() {
-		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", density = " + density+")"; 
+		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ")"; 
 	}
 
 	@Override
@@ -92,7 +85,7 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 			initial = getInitialValues(constants);			
 			dataPoints = pcctmc.runODEAnalysis(
 					preprocessedImplementation, initial, stopTime, stepSize,
-					density, constants);
+					parameters, constants);
 		}
 	}
 
