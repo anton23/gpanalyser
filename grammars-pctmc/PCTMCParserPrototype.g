@@ -385,7 +385,7 @@ plotAt:
 odeAnalysis:
   ODES 
   odeParameters?
-  {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}'");}
+  {hint.push("ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number> (, parameter=<integer|string|float>)*){}'");}
   odeSettings
   {hint.pop();}
   -> ^(ODES odeParameters? odeSettings)
@@ -405,11 +405,10 @@ parameter:
 odeSettings:
   LPAR
     STOPTIME DEF stopTime = expression COMMA
-    STEPSIZE DEF stepSize = expression COMMA
-    DENSITY DEF density = INTEGER
+    STEPSIZE DEF stepSize = expression 
     (COMMA parameter)*
   RPAR
-  -> ^(ODESETTINGS $stopTime COMMA $stepSize COMMA $density (COMMA parameter)*)
+  -> ^(ODESETTINGS $stopTime COMMA $stepSize (COMMA parameter)*)
 ;
  
 simulation:

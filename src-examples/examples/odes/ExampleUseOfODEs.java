@@ -15,7 +15,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.visitors.ExpressionEvaluator;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrator;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrators;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 
 public class ExampleUseOfODEs {
@@ -107,7 +107,9 @@ public class ExampleUseOfODEs {
 			// We tell the odes what the constants are
 			odes.setRates(constants.getFlatConstants());
 			// And comput the solution
-			double[][] result = ODEIntegrator.rungeKutta(odes, initial, 20.0, 0.1, 10);
+			Map<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put(ODEIntegrators.DENSITY, 10);
+			double[][] result = ODEIntegrators.solveODEs(odes, initial, 20.0, 0.1, parameters);
 			// Just for fun we plot the solution values of the ode variables
 			XYDataset dataset = AnalysisUtils.getDatasetFromArray(result,null, 0.1, new String[]{"prey", "predator"});
 			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
@@ -130,8 +132,11 @@ public class ExampleUseOfODEs {
 			
 			// We tell the odes what the constants are
 			odes.setRates(new double[]{1.5, 3.0, 1.0, 1.0});
+			Map<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put(ODEIntegrators.DENSITY, 10);
+			
 			// And comput the solution
-			double[][] result = ODEIntegrator.rungeKutta(odes, initial, 20.0, 0.1, 10);
+			double[][] result = ODEIntegrators.solveODEs(odes, initial, 20.0, 0.1, parameters);
 			// Just for fun we plot the solution values of the ode variables
 			XYDataset dataset = AnalysisUtils.getDatasetFromArray(result,null, 0.1, new String[]{"prey", "predator"});
 			PCTMCChartUtilities.drawChart(dataset, "time", "count", "Example", "Lotka voltera");
