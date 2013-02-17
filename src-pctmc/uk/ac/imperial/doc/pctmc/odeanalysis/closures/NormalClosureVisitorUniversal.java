@@ -323,7 +323,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 		for (Entry<AbstractExpression, Integer> e : closure.entrySet())
 		{
 			// Break up the moment product
-			ProductExpression pex = (ProductExpression)e.getKey();
+			ProductExpression pex = ProductExpression.forceProduct(e.getKey());
 			List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
 			for (AbstractExpression ae : pex.getTerms())
 			{
@@ -402,7 +402,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 			for (Entry<AbstractExpression, Integer> e : tmpClosure.entrySet())
 			{
 				// Break up the moment product
-				ProductExpression pex = (ProductExpression)e.getKey();
+				ProductExpression pex = ProductExpression.forceProduct(e.getKey());
 				Map<AbstractExpression,Integer> summands = null;
 				List<AbstractExpression> terms = new LinkedList<AbstractExpression>(pex.getTerms());
 				for (AbstractExpression ae : pex.getTerms())
@@ -423,7 +423,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 					// and add the resulting terms to the closure summands
 					for (Entry<AbstractExpression, Integer> e2 : summands.entrySet())
 					{
-						ProductExpression pex2 = (ProductExpression)e2.getKey();
+						ProductExpression pex2 = ProductExpression.forceProduct(e2.getKey());
 						List<AbstractExpression> terms2 = new LinkedList<AbstractExpression>(pex2.getTerms());
 						terms2.addAll(terms);
 						

@@ -184,12 +184,10 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 		PCTMCLogging.debug("Splitting code into methods.");
 		while (line < totalLines - 1) {
 			if (method == 0) {
-				header
-						.append("public void computeDerivatives(double x, double[] y, double[] newy) {\n");
-
+				header.append("public void computeDerivatives(double t, double[] y, double[] newy) {\n");
 			} else {
 				code.append("private void derivn" + method
-						+ "(double[] newy,double x, double[] y) {\n");
+						+ "(double[] newy,double t, double[] y) {\n");
 			}
 			int charactersUsed = 0;
 			while (line < totalLines - 1
@@ -214,7 +212,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 		code.append("\n}\n");
 
 		for (int i = 1; i < method; i++) {
-			header.append("derivn" + i + "(newy,x,y);\n");
+			header.append("derivn" + i + "(newy,t,y);\n");
 		}
 		header.append("}\n");
 		header.append(code);
