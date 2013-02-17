@@ -1,29 +1,76 @@
 package uk.ac.imperial.doc.pctmc.odeanalysis.utils;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.math3.ode.FirstOrderIntegrator;
+import org.apache.commons.math3.ode.MultistepIntegrator;
+import org.apache.commons.math3.ode.nonstiff.AdamsBashforthIntegrator;
+import org.apache.commons.math3.ode.nonstiff.AdamsMoultonIntegrator;
+import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
+import org.apache.commons.math3.ode.nonstiff.DormandPrince54Integrator;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
+import org.apache.commons.math3.ode.nonstiff.GraggBulirschStoerIntegrator;
+import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
+import org.apache.commons.math3.ode.nonstiff.MidpointIntegrator;
+import org.apache.commons.math3.ode.nonstiff.RungeKuttaIntegrator;
 import org.apache.commons.math3.ode.sampling.FixedStepHandler;
 import org.apache.commons.math3.ode.sampling.StepNormalizer;
 
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
+import com.google.common.collect.Sets;
 
+
+@SuppressWarnings({ "unchecked" })
 public class ODEIntegrators {
 	
-	public static String DENSITY = "density";
 	public static String INTEGRATOR = "integrator";
 	public static String GETINTEGRATOR = "getIntegrator";
-	public static String MIN_STEP = "minStep";
-	public static String MAX_STEP = "maxStep";
-	public static String REL_TOL = "relTol";
-	public static String ABS_TOL = "absTol";
+
+	
+	public static String INTEGRATORC = "Integrator";
 	
 	
+	static final Set<Class<? extends RungeKuttaIntegrator>> RUNGEKUTTA = 
+			Sets.<Class<? extends RungeKuttaIntegrator>>
+				newHashSet(ClassicalRungeKuttaIntegrator.class, MidpointIntegrator.class);
+	
+	
+	static final Set<Class<? extends AdaptiveStepsizeIntegrator>> ADAPTIVESTEP =
+			Sets.<Class<? extends AdaptiveStepsizeIntegrator>>
+				newHashSet(DormandPrince853Integrator.class, DormandPrince54Integrator.class, 
+						GraggBulirschStoerIntegrator.class, HighamHall54Integrator.class);
+	
+	static final Set<Class<? extends MultistepIntegrator>> MULTISTEP =
+		Sets.<Class<? extends MultistepIntegrator>>
+				newHashSet(AdamsBashforthIntegrator.class, AdamsMoultonIntegrator.class);
+	
+	
+	static final Map<String, ODEIntegratorsGroup> algorithms = new HashMap<String, ODEIntegratorsGroup>();	
+	
+	static {
+		
+		for (Class<?> c : RUNGEKUTTA) {
+			String name = c.getSimpleName().replace(INTEGRATORC, "");
+			algorithms.put(name, new RungeKuttaIntegrators(c));
+		}
+		
+		for (Class<?> c : ADAPTIVESTEP) {
+			String name = c.getSimpleName().replace(INTEGRATORC, "");
+			algorithms.put(name, new AdaptiveStepsizeIntegrators(c));
+		}
+		
+		for (Class<?> c : MULTISTEP) {
+			String name = c.getSimpleName().replace(INTEGRATORC, "");
+			algorithms.put(name, new MultistepIntegrators(c));
+		}
+	}
+	
+
 	public static double[][] solveODEs(final SystemOfODEs f, double initial[],
 			double stopTime, final double stepSize, Map<String, Object> parameters) {
 		final int n = initial.length;
@@ -32,17 +79,21 @@ public class ODEIntegrators {
 		
 		
 		FirstOrderIntegrator integrator = null;
-		String algorithm = "ClassicalRungeKutta";
+		String algorithm = ClassicalRungeKuttaIntegrator.class.getSimpleName().replace(INTEGRATORC, "");
 		if (parameters.containsKey(INTEGRATOR)) {
 			algorithm = (String) parameters.get(INTEGRATOR);		
 		}
 		
 		try {
-			Method m = ODEIntegrators.class.getDeclaredMethod(GETINTEGRATOR+algorithm, Double.TYPE, Double.TYPE, Map.class);
-			integrator = (FirstOrderIntegrator) m.invoke(null, stopTime, stepSize, parameters);
+			ODEIntegratorsGroup odeIntegratorsGroup = algorithms.get(algorithm);
+			integrator = odeIntegratorsGroup.getInstance(stopTime, stepSize, parameters);
 		} catch (NoSuchMethodException e1) {
+			e1.printStackTrace();
+			throw new AssertionError("Integrator " + algorithm + " unknown!");
+		} catch (NullPointerException e1) {
 			throw new AssertionError("Integrator " + algorithm + " unknown!");
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new AssertionError("Problem with ODE integrator!");
 		}
 		
@@ -65,33 +116,6 @@ public class ODEIntegrators {
 		PCTMCLogging.info("ODE solver finished in " + (System.currentTimeMillis()-t) + "ms");
 		return ret;
 	}
+			
 	
-	
-	@SuppressWarnings("unused")
-	private static FirstOrderIntegrator getIntegratorClassicalRungeKutta(double stopTime, double stepSize, Map<String, Object> parameters) {
-		int density = (Integer) parameters.get(DENSITY);
-		return new ClassicalRungeKuttaIntegrator(stepSize / density);
-	}
-	
-	@SuppressWarnings("unused")
-	private static FirstOrderIntegrator getIntegratorDormandPrince853(double stopTime, double stepSize, Map<String, Object> parameters) {
-		double minStep = 1.0e-8;
-		if (parameters.containsKey(MIN_STEP)) {
-			minStep = (Double) parameters.get(MIN_STEP);
-		}
-		double maxStep = stopTime;
-		if (parameters.containsKey(MAX_STEP)) {
-			minStep = (Double) parameters.get(MAX_STEP);
-		}
-		double relTol = 1.0e-10;
-		if (parameters.containsKey(REL_TOL)) {
-			minStep = (Double) parameters.get(REL_TOL);
-		}
-		double absTol = 1.0e-10;
-		if (parameters.containsKey(ABS_TOL)) {
-			minStep = (Double) parameters.get(ABS_TOL);
-		}		
-		
-		return new DormandPrince853Integrator(minStep, maxStep, absTol, relTol);
-	}
 }

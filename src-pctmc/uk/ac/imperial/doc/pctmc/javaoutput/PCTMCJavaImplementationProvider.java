@@ -16,7 +16,6 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrators;
 import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 /**
  * Provides implementation for the abstract methods used by analyses. For now
