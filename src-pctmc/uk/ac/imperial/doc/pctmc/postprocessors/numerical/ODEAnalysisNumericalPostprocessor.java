@@ -5,6 +5,7 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -18,36 +19,20 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	private PCTMCODEAnalysis odeAnalysis;
 
-	private int density;
-	
+	private Map<String, Object> parameters;
 
 	private String overrideCode;
 	private String overrideCodeClassName;
 	
-	public int getDensity() {
-		return density;
-	}
-
-	public void setDensity(int density) {
-		this.density = density;
-	}
-
-	public ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize,
-			int density) {
-		super(stopTime, stepSize);
-		this.density = density;
-	}
-	
-	
 	
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
-		return new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, density);
+		return new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, parameters);
 	}
 
-	private ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
+	private ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, Map<String, Object> parameters,
 			PCTMCODEAnalysis odeAnalysis, JavaODEsPreprocessed preprocessedImplementation) {
-		this(stopTime, stepSize, density);
+		this(stopTime, stepSize, parameters);
 		this.odeAnalysis = odeAnalysis;
 		this.preprocessedImplementation = preprocessedImplementation;
 		this.momentIndex = odeAnalysis.getMomentIndex();
@@ -57,8 +42,8 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	
 	
 	public ODEAnalysisNumericalPostprocessor(double stopTime, double stepSize,
-			int density, Map<String, Object> parameters) {
-		this(stopTime, stepSize, density);
+			 Map<String, Object> parameters) {
+		super(stopTime, stepSize);
 		if (parameters.containsKey("overrideCode")) {
 			Object value = parameters.get("overrideCode");
 			if (value instanceof String) {
@@ -76,13 +61,14 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 				throw new AssertionError("Given value of 'overrideCode' has to be a filename!");
 			}
 		}
+		this.parameters = parameters;
 	}
 
 	@Override
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
 		assert(odeAnalysis!=null);
 		PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider();
-		ODEAnalysisNumericalPostprocessor ret = new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, density, odeAnalysis, javaImplementation
+		ODEAnalysisNumericalPostprocessor ret = new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, parameters, odeAnalysis, javaImplementation
 				.getPreprocessedODEImplementation(
 						odeAnalysis.getOdeMethod(), constants, momentIndex));
 		return ret;
@@ -90,7 +76,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	@Override
 	public String toString() {
-		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", density = " + density+")"; 
+		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", " + ToStringUtils.mapToDefinitionList(parameters, "=", ", ") + ")"; 
 	}
 
 	@Override
@@ -121,7 +107,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 			initial = getInitialValues(constants);			
 			dataPoints = new PCTMCJavaImplementationProvider().runODEAnalysis(
 					preprocessedImplementation, initial, stopTime, stepSize,
-					density, constants);
+					parameters, constants);
 		}
 	}
 

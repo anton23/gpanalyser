@@ -1,5 +1,8 @@
 package uk.ac.imperial.doc.pctmc.cppoutput;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
@@ -10,13 +13,10 @@ import uk.ac.imperial.doc.pctmc.cppoutput.utils.NativeSystemOfODEs;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationPreprocessed;
 import uk.ac.imperial.doc.pctmc.implementation.PCTMCImplementationProvider;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ISystemOfODEs;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.SystemOfODEs;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Provides implementation for the abstract methods used by analyses. For now
@@ -49,7 +49,7 @@ public class PCTMCCPPImplementationProvider implements PCTMCImplementationProvid
 		return new CPPODEsPreprocessed(odes);
 	}
 
-	public ISystemOfODEs getSystemOfODEsImplementation
+	public SystemOfODEs getSystemOfODEsImplementation
             (ODEMethod method, String className, Constants constants,
              Map<CombinedPopulationProduct, Integer> combinedMomentsIndex) {
 
@@ -68,10 +68,10 @@ public class PCTMCCPPImplementationProvider implements PCTMCImplementationProvid
 
 	public double[][] runODEAnalysis(
 			PCTMCImplementationPreprocessed preprocessed, double[] initial,
-			double stopTime, double stepSize, int density, Constants constants) {
+			double stopTime, double stepSize, Map<String, Object> parameters, Constants constants) {
 		NativeSystemOfODEs odes = (NativeSystemOfODEs) ((CPPODEsPreprocessed) preprocessed).getOdes();
 		PCTMCLogging.info("Running C++ Runge-Kutta solver.");
 		return odes.solve(initial, stopTime, stepSize,
-                density, constants.getFlatConstants());
+                parameters, constants.getFlatConstants());
 	}
 }

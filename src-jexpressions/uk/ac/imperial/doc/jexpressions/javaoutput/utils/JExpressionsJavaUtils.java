@@ -1,7 +1,6 @@
 package uk.ac.imperial.doc.jexpressions.javaoutput.utils;
 
-import org.apache.commons.math.MathException;
-import org.apache.commons.math.distribution.NormalDistributionImpl;
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 
 public class JExpressionsJavaUtils {
@@ -33,7 +32,7 @@ public class JExpressionsJavaUtils {
 		return m / (m + e);
 	}
 	
-	private static NormalDistributionImpl normalDist = new NormalDistributionImpl(0,1,1.0E-12);
+	private static NormalDistribution normalDist = new NormalDistribution(0,1,1.0E-12);
 	
 	public static double phi(double x) {
 		double ret = normalDist.density(x);
@@ -52,15 +51,13 @@ public class JExpressionsJavaUtils {
 	}
 	
 	public static double safe_Phi(double top, double bottom) {
-		try {
+		
 			if (bottom == 0.0) {
 				if (top > 0.0) return 1.0;
 				else return 0.0;
 			} else 
 			return normalDist.cumulativeProbability(top / bottom);
-		} catch (MathException e) {
-			throw new AssertionError("Math exception!");
-		}		
+				
 	}
 	
 	public static double normalMin(double mA, double mB, double thetaSq) {
@@ -87,12 +84,8 @@ public class JExpressionsJavaUtils {
 		return ret;
 	}
 	
-	public static double Phi(double x) {
-		try {
-			return normalDist.cumulativeProbability(x);
-		} catch (MathException e) {
-			throw new AssertionError("Math exception!");
-		}		
+	public static double Phi(double x) {		
+		return normalDist.cumulativeProbability(x);			
 	}
 
 }
