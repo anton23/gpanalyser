@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -23,6 +24,7 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrators;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CompareAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
@@ -42,10 +44,12 @@ public class BaseTestSampleFiles {
 			double stopTime = fileRepresentation.getConstants().getConstantValue("_stopTime");
 			double stepSize = fileRepresentation.getConstants().getConstantValue("_stepSize");
 			int density = (int)Math.floor(fileRepresentation.getConstants().getConstantValue("_density"));
+			Map<String, Object> parameters = new HashMap<String, Object>();
+			parameters.put(ODEIntegrators.DENSITY, density);
 			int replications = (int)Math.floor(fileRepresentation.getConstants().getConstantValue("_replications"));
 			int maxOrder = (int)Math.floor(fileRepresentation.getConstants().getConstantValue("_maxOrder"));
 			
-			NumericalPostprocessor postprocessor = new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, density);
+			NumericalPostprocessor postprocessor = new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, parameters);
 			Assert.assertTrue(postprocessor instanceof ODEAnalysisNumericalPostprocessor);
 			analysis.addPostprocessor(postprocessor);
 			PCTMCSimulation simulation = new PCTMCSimulation(analysis.getPCTMC());

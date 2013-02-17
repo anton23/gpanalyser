@@ -33,7 +33,6 @@ MAX: 'max';
 POWER: '^';
 STOPTIME: 'stopTime'; 
 STEPSIZE: 'stepSize';
-DENSITY: 'density';
 REPLICATIONS:'replications';
 CI:'CI';
 MAXRELCIWIDTH:'maxRelCIWidth';

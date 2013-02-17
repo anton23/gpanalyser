@@ -23,7 +23,7 @@ public interface PCTMCImplementationProvider {
 
 	public abstract double[][] runODEAnalysis(
 			PCTMCImplementationPreprocessed preprocessed, double[] initial,
-			double stopTime, double stepSize, int density, Constants constants);
+			double stopTime, double stepSize, Map<String, Object> parameters, Constants constants);
 
 	public PCTMCImplementationPreprocessed getPreprocessedODEImplementation(
 			ODEMethod method, Constants constants,

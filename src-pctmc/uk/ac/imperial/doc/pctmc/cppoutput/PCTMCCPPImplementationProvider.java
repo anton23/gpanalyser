@@ -68,10 +68,10 @@ public class PCTMCCPPImplementationProvider implements PCTMCImplementationProvid
 
 	public double[][] runODEAnalysis(
 			PCTMCImplementationPreprocessed preprocessed, double[] initial,
-			double stopTime, double stepSize, int density, Constants constants) {
+			double stopTime, double stepSize, Map<String, Object> parameters, Constants constants) {
 		NativeSystemOfODEs odes = (NativeSystemOfODEs) ((CPPODEsPreprocessed) preprocessed).getOdes();
 		PCTMCLogging.info("Running C++ Runge-Kutta solver.");
 		return odes.solve(initial, stopTime, stepSize,
-                density, constants.getFlatConstants());
+                parameters, constants.getFlatConstants());
 	}
 }

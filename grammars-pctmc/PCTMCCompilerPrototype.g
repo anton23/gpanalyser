@@ -288,13 +288,10 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 		      $settings.stopTime.accept(stopEval);
 		      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
 		      $settings.stepSize.accept(stepEval);
-		      if ($odeSettings.parameters.isEmpty()) {
-		        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-		            stepEval.getResult(),$settings.density);
-		      } else {
-		        $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-		           stepEval.getResult(),$settings.density, $odeSettings.parameters);
-		      }
+		      
+		      $postprocessor = new ODEAnalysisNumericalPostprocessor(stopEval.getResult(),
+		           stepEval.getResult(),$odeSettings.parameters);
+		      
 		      $analysis.addPostprocessor($postprocessor);
       }
          
@@ -303,16 +300,14 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
 ;
 
 odeSettings returns
-  [AbstractExpression stopTime, AbstractExpression stepSize, int density, Map<String, Object> parameters]
+  [AbstractExpression stopTime, AbstractExpression stepSize, Map<String, Object> parameters]
 @init{
   $parameters = new HashMap<String, Object>();
 }:
   ^(ODESETTINGS stopExpr=expression COMMA
-  	stepExpr=expression COMMA dens=INTEGER
-  {
+  	stepExpr=expression   {
       $stopTime = $stopExpr.e;
-      $stepSize = $stepExpr.e;
-      $density = Integer.parseInt ($dens.text);      
+      $stepSize = $stepExpr.e;      
   } 
       (COMMA 
         p=parameter
