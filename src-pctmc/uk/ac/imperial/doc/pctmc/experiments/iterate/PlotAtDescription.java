@@ -71,7 +71,7 @@ public class PlotAtDescription {
 				+ time
 				+ constraintString
 				+ ((filename == null || filename.isEmpty()) ? ""
-						: (" ->" + filename));
+						: (" -> \"" + filename + "\""));
 	}
 
 	public List<PlotConstraint> getConstraints() {
@@ -88,6 +88,10 @@ public class PlotAtDescription {
 
 	public String getFilename() {
 		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
 	}
 
 	public double[] getAtTimes() {

@@ -23,4 +23,12 @@ public class PCTMCOptions {
 	public static int maxVariables = 100000;
 	
 	public static int showIterations = 5;
+	
+	public static boolean condor = false;
+	
+	public static boolean condor_merge = false;
+	
+	public static int condor_parts = 1;
+	
+	public static String filePath = "";
 }

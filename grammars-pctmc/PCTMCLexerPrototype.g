@@ -24,7 +24,7 @@ TIMES	:	'*';
 DIVIDE	:	'/';
 DEF: '='; 
 PATTERN:'%';
-
+TIME: 't';
 
 MIN: 'min';
 MAX: 'max';
@@ -76,6 +76,8 @@ AND:'and';
 GEQ:'>=';
 RANGLE:'>';
 LANGLE:'<';
+
+LOAD: 'load';
 
 
 DERMEAN: 'dE';
