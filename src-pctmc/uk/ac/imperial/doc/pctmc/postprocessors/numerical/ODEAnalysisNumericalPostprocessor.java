@@ -5,6 +5,7 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
@@ -22,10 +23,6 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	private String overrideCode;
 	private String overrideCodeClassName;
-	
-
-
-	
 	
 	
 	@Override
@@ -79,7 +76,7 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	@Override
 	public String toString() {
-		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ")"; 
+		return "(stopTime = " + stopTime + ", stepSize = " + stepSize + ", " + ToStringUtils.mapToDefinitionList(parameters, "=", ", ") + ")"; 
 	}
 
 	@Override

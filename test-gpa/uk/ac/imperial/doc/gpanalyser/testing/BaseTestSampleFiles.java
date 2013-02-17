@@ -24,7 +24,7 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
-import uk.ac.imperial.doc.pctmc.odeanalysis.utils.ODEIntegrators;
+import uk.ac.imperial.doc.pctmc.odeanalysis.utils.RungeKuttaIntegrators;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.CompareAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
@@ -45,7 +45,7 @@ public class BaseTestSampleFiles {
 			double stepSize = fileRepresentation.getConstants().getConstantValue("_stepSize");
 			int density = (int)Math.floor(fileRepresentation.getConstants().getConstantValue("_density"));
 			Map<String, Object> parameters = new HashMap<String, Object>();
-			parameters.put(ODEIntegrators.DENSITY, density);
+			parameters.put(RungeKuttaIntegrators.DENSITY, density);
 			int replications = (int)Math.floor(fileRepresentation.getConstants().getConstantValue("_replications"));
 			int maxOrder = (int)Math.floor(fileRepresentation.getConstants().getConstantValue("_maxOrder"));
 			
