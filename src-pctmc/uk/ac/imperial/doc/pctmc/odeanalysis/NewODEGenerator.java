@@ -101,7 +101,7 @@ public class NewODEGenerator {
 		processing.add(moment);
 		AbstractExpression derivative;
 		if (moment.getAccumulatedProducts().isEmpty()) {
-			derivative = getDerivativeOfMoment(moment.getNakedProduct());
+			derivative = getDerivativeOfMoment(moment.getPopulationProduct());
 		} else {
 			derivative = getDerivativeOfAccumulatedMoment(moment);
 		}
@@ -132,7 +132,7 @@ public class NewODEGenerator {
 			}
 			newAccumulatedMoments.remove(accumulatedMoment.getElement(), 1);
 			PopulationProduct newNakedMoment = PopulationProduct.getProduct(
-					combinedProduct.getNakedProduct(), accumulatedMoment
+					combinedProduct.getPopulationProduct(), accumulatedMoment
 							.getElement());
 			CombinedPopulationProduct tmp = new CombinedPopulationProduct(
 					newNakedMoment, newAccumulatedMoments);
@@ -140,9 +140,9 @@ public class NewODEGenerator {
 					CombinedProductExpression.create(tmp));
 			sum.add(diff);
 		}
-		if (combinedProduct.getNakedProduct().getOrder() > 0) {
+		if (combinedProduct.getPopulationProduct().getOrder() > 0) {
 			CombinedPopulationProduct nakedMoment = new CombinedPopulationProduct(
-					combinedProduct.getNakedProduct());
+					combinedProduct.getPopulationProduct());
 			generateODEforCombinedMoment(nakedMoment);
 			AbstractExpression diffNakedMoment = rhs.get(nakedMoment);
 			// Need to insert the accumulated moments into the RHS			

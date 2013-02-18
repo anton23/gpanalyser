@@ -214,7 +214,7 @@ public class ExpressionPopProductCreator extends ExpressionTransformer  implemen
 	@Override
 	public void visit(CombinedProductExpression e)
 	{
-		Map<State,Integer> product = new HashMap<State,Integer>(e.getProduct().getNakedProduct().getRepresentation());
+		Map<State,Integer> product = new HashMap<State,Integer>(e.getProduct().getPopulationProduct().getRepresentation());
 		if (product.containsKey(m_pop))
 		{
 			product.put(m_pop, product.get(m_pop)+1);
