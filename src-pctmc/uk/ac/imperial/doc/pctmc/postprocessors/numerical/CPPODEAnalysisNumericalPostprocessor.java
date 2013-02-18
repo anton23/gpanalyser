@@ -117,7 +117,7 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 			} else {
 				double tmp = 1.0;
 
-				for (Map.Entry<State, Integer> s : e.getKey().getNakedProduct()
+				for (Map.Entry<State, Integer> s : e.getKey().getPopulationProduct()
 						.getRepresentation().entrySet()) {
 					for (int p = 0; p < s.getValue(); p++) {
 						if (!stateIndex.containsKey(s.getKey())) {

@@ -91,7 +91,7 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 	public void visit(CombinedProductExpression e)
 	{
 		Map<State,Integer> localisedProduct = new HashMap<State,Integer>();
-		for (Entry<State, Integer> entry : e.getProduct().getNakedProduct().getRepresentation().entrySet())
+		for (Entry<State, Integer> entry : e.getProduct().getPopulationProduct().getRepresentation().entrySet())
 		{
 			if (entry.getKey() instanceof MASSPAActionCount)
 			{

@@ -15,15 +15,15 @@ import com.google.common.collect.Multiset;
  * 
  */
 public class CombinedPopulationProduct {
-	private PopulationProduct nakedProduct;
+	private PopulationProduct populationProduct;
 	private Multiset<PopulationProduct> accumulatedProducts;
 
-	public CombinedPopulationProduct(PopulationProduct nakedProduct,
+	public CombinedPopulationProduct(PopulationProduct populationProduct,
 			Multiset<PopulationProduct> accumulatedProducts) {
 		super();
-		this.nakedProduct = nakedProduct;
-		if (nakedProduct == null)
-			this.nakedProduct = new PopulationProduct(
+		this.populationProduct = populationProduct;
+		if (populationProduct == null)
+			this.populationProduct = new PopulationProduct(
 					new HashMap<State, Integer>());
 		this.accumulatedProducts = accumulatedProducts;
 		if (accumulatedProducts == null) {
@@ -32,11 +32,11 @@ public class CombinedPopulationProduct {
 		}
 	}
 
-	public CombinedPopulationProduct(PopulationProduct nakedProduct) {
+	public CombinedPopulationProduct(PopulationProduct populationProduct) {
 		super();
-		this.nakedProduct = nakedProduct;
-		if (nakedProduct == null)
-			nakedProduct = new PopulationProduct(new HashMap<State, Integer>());
+		this.populationProduct = populationProduct;
+		if (populationProduct == null)
+			populationProduct = new PopulationProduct(new HashMap<State, Integer>());
 		this.accumulatedProducts = HashMultiset.<PopulationProduct> create();
 	}
 	
@@ -81,7 +81,7 @@ public class CombinedPopulationProduct {
 	public int getOrder() {
 		if (order != -1)
 			return order;
-		order = nakedProduct != null ? nakedProduct.getOrder() : 0;
+		order = populationProduct != null ? populationProduct.getOrder() : 0;
 		for (PopulationProduct product : accumulatedProducts) {
 			order += product.getOrder();
 		}
@@ -102,7 +102,7 @@ public class CombinedPopulationProduct {
 		if (b == null)
 			return a;
 		PopulationProduct newNakedProduct = PopulationProduct.getProduct(a
-				.getNakedProduct(), b.getNakedProduct());
+				.getPopulationProduct(), b.getPopulationProduct());
 		Multiset<PopulationProduct> newAccumulatedProducts = HashMultiset
 				.<PopulationProduct> create();
 		for (Multiset.Entry<PopulationProduct> e : a.getAccumulatedProducts()
@@ -124,7 +124,7 @@ public class CombinedPopulationProduct {
 	 * @return
 	 */
 	public CombinedPopulationProduct getPower(int p) {
-		PopulationProduct newNakedProduct = nakedProduct.toThePower(p);
+		PopulationProduct newNakedProduct = populationProduct.toThePower(p);
 		Multiset<PopulationProduct> newAccumulatedProducts = HashMultiset
 				.<PopulationProduct> create();
 		for (Multiset.Entry<PopulationProduct> e : accumulatedProducts
@@ -137,7 +137,7 @@ public class CombinedPopulationProduct {
 
 	@Override
 	public int hashCode() {
-		return nakedProduct.hashCode() * 31 + accumulatedProducts.hashCode();
+		return populationProduct.hashCode() * 31 + accumulatedProducts.hashCode();
 	}
 
 	@Override
@@ -147,15 +147,15 @@ public class CombinedPopulationProduct {
 		if (!(obj instanceof CombinedPopulationProduct))
 			return false;
 		CombinedPopulationProduct asFCM = (CombinedPopulationProduct) obj;
-		return nakedProduct.equals(asFCM.getNakedProduct())
+		return populationProduct.equals(asFCM.getPopulationProduct())
 				&& accumulatedProducts.equals(asFCM.getAccumulatedProducts());
 	}
 
 	@Override
 	public String toString() {
 		String ret = "";
-		if (nakedProduct != null)
-			ret += nakedProduct.toString()
+		if (populationProduct != null)
+			ret += populationProduct.toString()
 					+ (accumulatedProducts.isEmpty() ? "" : " ");
 		boolean first = true;
 		for (Multiset.Entry<PopulationProduct> e : accumulatedProducts
@@ -173,8 +173,8 @@ public class CombinedPopulationProduct {
 		return ret;
 	}
 
-	public PopulationProduct getNakedProduct() {
-		return nakedProduct;
+	public PopulationProduct getPopulationProduct() {
+		return populationProduct;
 	}
 
 	public Multiset<PopulationProduct> getAccumulatedProducts() {

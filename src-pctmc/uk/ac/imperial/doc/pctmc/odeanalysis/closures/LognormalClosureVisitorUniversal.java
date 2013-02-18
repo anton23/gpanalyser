@@ -139,7 +139,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 		CombinedPopulationProduct product;
 		if (m_insert)
 		{
-			product = new CombinedPopulationProduct(m_moment.getNakedProduct().getV(_e.getState()));
+			product = new CombinedPopulationProduct(m_moment.getPopulationProduct().getV(_e.getState()));
 			m_inserted = true;
 		}
 		else
@@ -232,7 +232,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			else if (m_maxOrder == 1)
 			{		
 				List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-				for (Entry<State, Integer> entry : m_moment.getNakedProduct().getRepresentation().entrySet())
+				for (Entry<State, Integer> entry : m_moment.getPopulationProduct().getRepresentation().entrySet())
 				{
 					for (int i = 0; i < entry.getValue(); i++)
 					{
@@ -246,7 +246,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(entry.getElement())));
 					}
 				}
-				for (Entry<State, Integer> entry : _e.getProduct().getNakedProduct().getRepresentation().entrySet())
+				for (Entry<State, Integer> entry : _e.getProduct().getPopulationProduct().getRepresentation().entrySet())
 				{
 					for (int i = 0; i < entry.getValue(); i++)
 					{
@@ -278,7 +278,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 	{
 		int i=0;
 		PopulationProduct[] pops = new PopulationProduct[_cpp.getOrder()];
-		for (Entry<State, Integer> e : _cpp.getNakedProduct().getRepresentation().entrySet())
+		for (Entry<State, Integer> e : _cpp.getPopulationProduct().getRepresentation().entrySet())
 		{
 			for (int j=0; j<e.getValue(); j++)
 			{
@@ -421,7 +421,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 
 	private double vectorChoose(CombinedPopulationProduct _cppTop, CombinedPopulationProduct _cppBottom)
 	{
-		Map<State, Integer> top = new HashMap<State, Integer>(_cppTop.getNakedProduct().getRepresentation());
+		Map<State, Integer> top = new HashMap<State, Integer>(_cppTop.getPopulationProduct().getRepresentation());
 		for (PopulationProduct ap : _cppTop.getAccumulatedProducts())
 		{
 			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());
@@ -429,7 +429,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			mult = (mult == null) ? 1 : ++mult;
 			top.put(s, mult);
 		}
-		Map<State, Integer> bottom = new HashMap<State, Integer>(_cppBottom.getNakedProduct().getRepresentation());
+		Map<State, Integer> bottom = new HashMap<State, Integer>(_cppBottom.getPopulationProduct().getRepresentation());
 		for (PopulationProduct ap : _cppBottom.getAccumulatedProducts())
 		{
 			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());

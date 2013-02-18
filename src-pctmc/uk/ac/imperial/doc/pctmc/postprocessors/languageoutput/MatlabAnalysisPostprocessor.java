@@ -119,7 +119,7 @@ public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 				boolean first = true; 
 				boolean zero = true; 
 				StringBuilder rhs = new StringBuilder(); 
-				for (Map.Entry<State, Integer> p:e.getKey().getNakedProduct().getRepresentation().entrySet()){
+				for (Map.Entry<State, Integer> p:e.getKey().getPopulationProduct().getRepresentation().entrySet()){
 					AbstractExpression v = pctmc.getInitMap().get(p.getKey());
 					if (!(v.equals(DoubleExpression.ZERO))) zero = false; 
 					MatlabPrinterWithConstants printer = new MatlabPrinterWithConstants(constants); 

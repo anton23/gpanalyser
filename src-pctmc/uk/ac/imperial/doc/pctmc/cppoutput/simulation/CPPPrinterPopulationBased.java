@@ -31,8 +31,8 @@ public class CPPPrinterPopulationBased extends CPPPrinterWithConstants implement
 
 
     public void visit(CombinedProductExpression e) {
-        if (e.getProduct().getNakedProduct().getOrder()>0){
-            PopulationProductExpression tmp = new PopulationProductExpression(e.getProduct().getNakedProduct());
+        if (e.getProduct().getPopulationProduct().getOrder()>0){
+            PopulationProductExpression tmp = new PopulationProductExpression(e.getProduct().getPopulationProduct());
             tmp.accept(this);
             if (!e.getProduct().getAccumulatedProducts().isEmpty()){
                 output.append("*");

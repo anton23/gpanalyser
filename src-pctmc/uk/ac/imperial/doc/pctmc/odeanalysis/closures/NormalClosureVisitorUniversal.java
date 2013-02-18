@@ -149,7 +149,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 		CombinedPopulationProduct product;
 		if (m_insert)
 		{
-			product = new CombinedPopulationProduct(m_moment.getNakedProduct().getV(_e.getState()));
+			product = new CombinedPopulationProduct(m_moment.getPopulationProduct().getV(_e.getState()));
 			m_inserted = true;
 		}
 		else
@@ -242,7 +242,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 			else if (m_maxOrder == 1)
 			{		
 				List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-				for (Entry<State, Integer> entry : m_moment.getNakedProduct().getRepresentation().entrySet())
+				for (Entry<State, Integer> entry : m_moment.getPopulationProduct().getRepresentation().entrySet())
 				{
 					for (int i = 0; i < entry.getValue(); i++)
 					{
@@ -256,7 +256,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(entry.getElement())));
 					}
 				}
-				for (Entry<State, Integer> entry : _e.getProduct().getNakedProduct().getRepresentation().entrySet())
+				for (Entry<State, Integer> entry : _e.getProduct().getPopulationProduct().getRepresentation().entrySet())
 				{
 					for (int i = 0; i < entry.getValue(); i++)
 					{
@@ -302,7 +302,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 	{
 		int i=0;
 		PopulationProduct[] pops = new PopulationProduct[_cpp.getOrder()];
-		for (Entry<State, Integer> e : _cpp.getNakedProduct().getRepresentation().entrySet())
+		for (Entry<State, Integer> e : _cpp.getPopulationProduct().getRepresentation().entrySet())
 		{
 			for (int j=0; j<e.getValue(); j++)
 			{
@@ -331,7 +331,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 				CombinedPopulationProduct cpp = cpex.getProduct();
 				PopulationProduct popTemp = null;
 				Multiset<PopulationProduct> accumulatedProdTerms = HashMultiset.create();
-				for (Entry<State, Integer> e2 : cpp.getNakedProduct().getRepresentation().entrySet())
+				for (Entry<State, Integer> e2 : cpp.getPopulationProduct().getRepresentation().entrySet())
 				{
 					int index = s_genMomentNameId.get(e2.getKey().toString());
 					if (index < accStartIndex)
