@@ -20,7 +20,7 @@ public class CombinedProductExpression extends AbstractExpression {
 	}
 
 	public static AbstractExpression create(CombinedPopulationProduct product) {
-		if (product.getOrder() == 0) {
+		if (product.getOrder() == 0 && product.getAccumulatedProducts().isEmpty()) {
 			return new DoubleExpression(1.0);
 		} else {
 			return new CombinedProductExpression(product);

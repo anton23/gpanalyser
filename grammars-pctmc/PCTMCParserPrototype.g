@@ -589,7 +589,7 @@ moment:
 combinedPowerProduct:
    powerProduct accPower*  ->
     ^(COMBINEDPRODUCT powerProduct accPower*)
- |accPower+  ->
+ | accPower+  ->
     ^(COMBINEDPRODUCT accPower+);  
 
 powerProduct:
