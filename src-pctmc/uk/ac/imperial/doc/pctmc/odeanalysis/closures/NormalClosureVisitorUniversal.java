@@ -30,6 +30,8 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -249,7 +251,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
 					}
 				}
-				for (Multiset.Entry<PopulationProduct> entry : m_moment.getAccumulatedProducts().entrySet())
+				for (Multiset.Entry<AccumulationVariable> entry : m_moment.getAccumulatedProducts().entrySet())
 				{
 					for (int i = 0; i < entry.getCount(); i++)
 					{
@@ -263,7 +265,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
 					}
 				}
-				for (com.google.common.collect.Multiset.Entry<PopulationProduct> entry : _e.getProduct().getAccumulatedProducts().entrySet())
+				for (com.google.common.collect.Multiset.Entry<AccumulationVariable> entry : _e.getProduct().getAccumulatedProducts().entrySet())
 				{
 					for (int i = 0; i < entry.getCount(); i++)
 					{
@@ -301,7 +303,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 	private Map<AbstractExpression, Integer> applyNormalClosure(int _maxorder, CombinedPopulationProduct _cpp)
 	{
 		int i=0;
-		PopulationProduct[] pops = new PopulationProduct[_cpp.getOrder()];
+		PopulationProduct[] pops = new PopulationProduct[_cpp.getPopulationProduct().getOrder()];
 		for (Entry<State, Integer> e : _cpp.getPopulationProduct().getRepresentation().entrySet())
 		{
 			for (int j=0; j<e.getValue(); j++)
@@ -309,10 +311,12 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 				pops[i++] = PopulationProduct.getMeanProduct(e.getKey());
 			}
 		}
-		int accStartIndex=i;
-		for (com.google.common.collect.Multiset.Entry<PopulationProduct> e : _cpp.getAccumulatedProducts().entrySet())
+		int accStartIndex = i;
+		AccumulationVariable[] accVars = new AccumulationVariable[_cpp.getAccumulatedProducts().size()];
+		i = 0;
+		for (com.google.common.collect.Multiset.Entry<AccumulationVariable> e : _cpp.getAccumulatedProducts().entrySet())
 		{
-			pops[i++] = e.getElement();
+			accVars[i++] = e.getElement();
 		}
 		
 		// Get generic closure
@@ -330,7 +334,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 				CombinedProductExpression cpex = (CombinedProductExpression) ae;
 				CombinedPopulationProduct cpp = cpex.getProduct();
 				PopulationProduct popTemp = null;
-				Multiset<PopulationProduct> accumulatedProdTerms = HashMultiset.create();
+				Multiset<AccumulationVariable> accumulatedProdTerms = HashMultiset.create();
 				for (Entry<State, Integer> e2 : cpp.getPopulationProduct().getRepresentation().entrySet())
 				{
 					int index = s_genMomentNameId.get(e2.getKey().toString());
@@ -340,7 +344,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 					}
 					else
 					{
-						accumulatedProdTerms.add(pops[index]);
+						accumulatedProdTerms.add(accVars[index - accStartIndex]);
 					}
 				}
 				terms.add(CombinedProductExpression.create(new CombinedPopulationProduct(popTemp,accumulatedProdTerms)));

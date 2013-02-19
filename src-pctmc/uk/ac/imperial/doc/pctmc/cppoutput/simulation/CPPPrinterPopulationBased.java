@@ -1,12 +1,20 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 
-import com.google.common.collect.Multiset;
+import java.util.Map;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.cppoutput.CPPPrinterWithConstants;
-import uk.ac.imperial.doc.pctmc.expressions.*;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IPopulationProductVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IPopulationVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
+import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 
-import java.util.Map;
+import com.google.common.collect.Multiset;
 
 /**
  * C++ printer of abstract expressions in terms of population counts.
@@ -17,11 +25,11 @@ public class CPPPrinterPopulationBased extends CPPPrinterWithConstants implement
         IPopulationVisitor, IPopulationProductVisitor,ICombinedProductExpressionVisitor {
 
     private final Map<State, Integer> stateIndex;
-    private final Map<PopulationProduct,Integer> accumulatedProductsIndex;
+    private final Map<AccumulationVariable,Integer> accumulatedProductsIndex;
     private final String f;
 
     public CPPPrinterPopulationBased(Constants constants,
-                                     Map<State, Integer> stateIndex, Map<PopulationProduct,
+                                     Map<State, Integer> stateIndex, Map<AccumulationVariable,
             Integer> accumulatedProductsIndex, String f) {
         super(constants);
         this.stateIndex = stateIndex;
@@ -39,7 +47,7 @@ public class CPPPrinterPopulationBased extends CPPPrinterWithConstants implement
             }
         }
         boolean first = true;
-        for (Multiset.Entry<PopulationProduct> entry:e.getProduct().getAccumulatedProducts().entrySet()){
+        for (Multiset.Entry<AccumulationVariable> entry:e.getProduct().getAccumulatedProducts().entrySet()){
             for (int i = 0; i<entry.getCount(); i++){
                 if (first){
                     first=false;

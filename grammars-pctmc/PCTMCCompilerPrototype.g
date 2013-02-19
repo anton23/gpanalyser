@@ -33,7 +33,9 @@ options{
   import pctmc.expressions.*;
   import pctmc.plain.*;
   import pctmc.representation.State;
-  import pctmc.representation.*; 
+  import pctmc.representation.*;
+  import pctmc.representation.accumulations.*; 
+   
   import pctmc.experiments.iterate.*; 
   import pctmc.analysis.plotexpressions.*;
   import pctmc.expressions.patterns.*;
@@ -509,13 +511,13 @@ combinedPowerProduct returns [CombinedPopulationProduct c]
   ps=accPowers {c=new CombinedPopulationProduct(nakedProduct,$ps.a);} )
 ;
 
-accPowers returns [Multiset<PopulationProduct> a]
+accPowers returns [Multiset<AccumulationVariable> a]
 @init{
-  $a = HashMultiset.<PopulationProduct>create();
+  $a = HashMultiset.<AccumulationVariable>create();
 }:
   ( ^(ACC p=product)
-          (n=integer {$a.add($p.p,$n.value-1);})?
-      {$a.add($p.p,1);}
+          (n=integer {$a.add(new AccumulatedProduct($p.p),$n.value-1);})?
+      {$a.add(new AccumulatedProduct($p.p),1);}
   )*
 ;
 

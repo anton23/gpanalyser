@@ -1,14 +1,15 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 
-import uk.ac.imperial.doc.jexpressions.constants.Constants;
-import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
-import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
-
 import java.io.File;
 import java.util.Map;
 import java.util.UUID;
+
+import uk.ac.imperial.doc.jexpressions.constants.Constants;
+import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
+import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
+import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 
 public class AccumulatorUpdaterPrinter
 {
@@ -113,14 +114,16 @@ public class AccumulatorUpdaterPrinter
 
         code.append("double* update (double *counts, double delta, double *r)\n{\n");
         code.append("double *values = new double[" + n + "];\n");
-        for (Map.Entry<PopulationProduct, Integer> entry
+        for (Map.Entry<AccumulationVariable, Integer> entry
                 : simulation.getAccumulatedMomentIndex().entrySet()) {
             code.append("values[" + entry.getValue() + "] = delta * (");
             CPPPrinterPopulationBased printer = new CPPPrinterPopulationBased
                     (variables, simulation.getPCTMC().getStateIndex(),
                             simulation.getAccumulatedMomentIndex(), "counts");
+            // This assumes the accumulation to be an integral of a product
+            
             PopulationProductExpression tmp
-                    = new PopulationProductExpression(entry.getKey());
+                    = new PopulationProductExpression(((AccumulatedProduct) entry.getKey()).getProduct());
             tmp.accept(printer);
             code.append(printer.toString());
             code.append(");\n");

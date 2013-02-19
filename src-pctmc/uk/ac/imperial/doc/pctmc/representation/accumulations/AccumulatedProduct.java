@@ -6,8 +6,14 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 
 public class AccumulatedProduct extends AccumulationVariable {
 	
+	protected PopulationProduct product;	
+	
 	public AccumulatedProduct(PopulationProduct p) {
 		super(CombinedProductExpression.create(new CombinedPopulationProduct(p)));
+		this.product = p;
 	}
 
+	public PopulationProduct getProduct() {
+		return product;
+	}
 }

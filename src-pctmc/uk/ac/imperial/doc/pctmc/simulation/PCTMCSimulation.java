@@ -1,18 +1,18 @@
 package uk.ac.imperial.doc.pctmc.simulation;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 
 public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 
@@ -33,17 +33,17 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 		}
 	}
 
-	private Map<PopulationProduct, Integer> accumulatedMomentIndex;
+	private Map<AccumulationVariable, Integer> accumulatedMomentIndex;
 	
 	
 
-	public Map<PopulationProduct, Integer> getAccumulatedMomentIndex() {
+	public Map<AccumulationVariable, Integer> getAccumulatedMomentIndex() {
 		return accumulatedMomentIndex;
 	}
 
 	private void prepareAccumulatedIndex() {
 		int j = 0;
-		accumulatedMomentIndex = new HashMap<PopulationProduct, Integer>();
+		accumulatedMomentIndex = new HashMap<AccumulationVariable, Integer>();
 		Collection<CombinedPopulationProduct> requiredProducts = new HashSet<CombinedPopulationProduct>(usedCombinedProducts);
 		for (EvolutionEvent event:pctmc.getEvolutionEvents()) {
 			CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
@@ -51,7 +51,7 @@ public class PCTMCSimulation extends AbstractPCTMCAnalysis {
 			requiredProducts.addAll(visitor.getUsedCombinedMoments());
 		}
 		for (CombinedPopulationProduct combinedProduct : requiredProducts) {
-			for (PopulationProduct accumulatedProduct : combinedProduct
+			for (AccumulationVariable accumulatedProduct : combinedProduct
 					.getAccumulatedProducts()) {
 				if (!accumulatedMomentIndex.containsKey(accumulatedProduct)) 
 					accumulatedMomentIndex.put(accumulatedProduct, j++);

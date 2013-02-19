@@ -23,6 +23,8 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.Binomial;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -120,20 +122,21 @@ public class NewODEGenerator {
 			CombinedPopulationProduct combinedProduct) {
 		List<AbstractExpression> sum = new LinkedList<AbstractExpression>();
 
-		for (Multiset.Entry<PopulationProduct> accumulatedMoment : combinedProduct
+		for (Multiset.Entry<AccumulationVariable> accumulatedMoment : combinedProduct
 				.getAccumulatedProducts().entrySet()) {
 			DoubleExpression coefficient = new DoubleExpression(
 					(double) accumulatedMoment.getCount());
-			Multiset<PopulationProduct> newAccumulatedMoments = HashMultiset
-					.<PopulationProduct> create();
-			for (Multiset.Entry<PopulationProduct> e : combinedProduct
+			Multiset<AccumulationVariable> newAccumulatedMoments = HashMultiset
+					.<AccumulationVariable> create();
+			for (Multiset.Entry<AccumulationVariable> e : combinedProduct
 					.getAccumulatedProducts().entrySet()) {
 				newAccumulatedMoments.add(e.getElement(), e.getCount());
 			}
 			newAccumulatedMoments.remove(accumulatedMoment.getElement(), 1);
+			// TODO This is assuming that accumulated variables are just accumulated products
 			PopulationProduct newNakedMoment = PopulationProduct.getProduct(
-					combinedProduct.getPopulationProduct(), accumulatedMoment
-							.getElement());
+					combinedProduct.getPopulationProduct(), ((AccumulatedProduct) accumulatedMoment
+							.getElement()).getProduct());
 			CombinedPopulationProduct tmp = new CombinedPopulationProduct(
 					newNakedMoment, newAccumulatedMoments);
 			AbstractExpression diff = ProductExpression.create(coefficient,
