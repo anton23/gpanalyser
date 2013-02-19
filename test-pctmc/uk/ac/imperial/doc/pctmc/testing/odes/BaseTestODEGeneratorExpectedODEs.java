@@ -28,6 +28,7 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 
 @RunWith(Parameterized.class)
@@ -45,6 +46,7 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 		this.interpreter  = initialiseInterpreter();
 		this.representation = interpreter.parsePCTMCFile(getPath() + file + "/model.gpepa");		
 		this.file = file;
+		PCTMCLogging.info("Testing ODEs for the model " + file);
 	}
 	
 	@Test
@@ -126,6 +128,9 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 	
 	public static ExpandedExpression expandExpression(AbstractExpression e) {
 		ExpandingExpressionTransformerWithMoments t = new ExpandingExpressionTransformerWithMoments(new DoubleConstantCoefficients());
+		if (e == null) {
+			System.out.println("OOPS");
+		}
 		e.accept(t);
 		ExpandedExpression ret = t.getResult();
 		return ret;

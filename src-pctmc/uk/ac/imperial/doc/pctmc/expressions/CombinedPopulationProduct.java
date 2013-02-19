@@ -167,7 +167,7 @@ public class CombinedPopulationProduct {
 					first = false;
 				else
 					ret += " ";
-				ret += "acc(" + e.getElement().toString() + ")";
+				ret += e.getElement().toString();
 				if (e.getCount() > 1)
 					ret += "^" + e.getCount();
 			}
