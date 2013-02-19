@@ -1,12 +1,21 @@
 package uk.ac.imperial.doc.igpepa.representation.components;
 
-import com.rits.cloning.Cloner;
-import uk.ac.imperial.doc.gpepa.representation.components.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
+import uk.ac.imperial.doc.gpepa.representation.components.Choice;
+import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 
-import java.util.*;
+import com.rits.cloning.Cloner;
 
 public class iPEPAComponentDefinitions extends PEPAComponentDefinitions
 {

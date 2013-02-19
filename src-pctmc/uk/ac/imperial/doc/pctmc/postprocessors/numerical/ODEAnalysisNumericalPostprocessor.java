@@ -15,6 +15,8 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
+import com.google.common.collect.Multiset;
+
 public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
 	private PCTMCODEAnalysis odeAnalysis;
@@ -139,14 +141,14 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 			} else {
 				double tmp = 1.0;
 
-				for (Map.Entry<State, Integer> s : e.getKey().getPopulationProduct()
+				for (Multiset.Entry<State> s : e.getKey().getPopulationProduct()
 						.getRepresentation().entrySet()) {
-					for (int p = 0; p < s.getValue(); p++) {
-						if (!stateIndex.containsKey(s.getKey())) {
-							throw new AssertionError("State " + s.getKey()
+					for (int p = 0; p < s.getCount(); p++) {
+						if (!stateIndex.containsKey(s.getElement())) {
+							throw new AssertionError("State " + s.getElement()
 									+ " unknown!");
 						}
-						tmp *= initialCounts[stateIndex.get(s.getKey())];
+						tmp *= initialCounts[stateIndex.get(s.getElement())];
 					}
 				}
 				initial[e.getValue()] = tmp;

@@ -1,11 +1,11 @@
 package uk.ac.imperial.doc.pctmc.javaoutput.analysis;
 
+import java.util.Map;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionPrinterFactory;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-
-import java.util.Map;
 
 /**
  * Factory for printers of expressions based on counts.

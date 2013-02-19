@@ -1,5 +1,13 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.UUID;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
@@ -7,10 +15,6 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
-
-import java.io.*;
-import java.util.Collection;
-import java.util.UUID;
 
 public class AggregatedStateNextEventGeneratorPrinter
 {

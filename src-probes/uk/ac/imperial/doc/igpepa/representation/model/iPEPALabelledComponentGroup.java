@@ -1,5 +1,9 @@
 package uk.ac.imperial.doc.igpepa.representation.model;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
@@ -13,10 +17,6 @@ import uk.ac.imperial.doc.igpepa.representation.components.iPEPAPrefix;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 public class iPEPALabelledComponentGroup extends LabelledComponentGroup
 {

@@ -23,6 +23,8 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
+import com.google.common.collect.Multiset.Entry;
+
 public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 
 	
@@ -119,13 +121,13 @@ public class MatlabAnalysisPostprocessor extends LanguageOutputPostprocessor{
 				boolean first = true; 
 				boolean zero = true; 
 				StringBuilder rhs = new StringBuilder(); 
-				for (Map.Entry<State, Integer> p:e.getKey().getPopulationProduct().getRepresentation().entrySet()){
-					AbstractExpression v = pctmc.getInitMap().get(p.getKey());
+				for (Entry<State> p:e.getKey().getPopulationProduct().getRepresentation().entrySet()){
+					AbstractExpression v = pctmc.getInitMap().get(p.getElement());
 					if (!(v.equals(DoubleExpression.ZERO))) zero = false; 
 					MatlabPrinterWithConstants printer = new MatlabPrinterWithConstants(constants); 
 					v.accept(printer); 
 					if (first) first = false; else rhs.append("*");
-					rhs.append("("+printer.toString()+")^"+p.getValue());
+					rhs.append("("+printer.toString()+")^"+p.getCount());
 				}
 				if (!zero) out.append(rhs.toString()+";");
 				else out.append("0;");

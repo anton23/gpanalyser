@@ -1,11 +1,5 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 
-import uk.ac.imperial.doc.pctmc.utils.FileUtils;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
-
-import javax.tools.*;
-import javax.tools.JavaFileObject.Kind;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +12,20 @@ import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.tools.FileObject;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
+import javax.tools.JavaFileObject.Kind;
+
+import uk.ac.imperial.doc.pctmc.utils.FileUtils;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class CPPClassCompiler {
 

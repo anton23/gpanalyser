@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.jfree.data.xy.XYSeriesCollection;
 
-import com.google.common.collect.Lists;
-
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
@@ -16,6 +14,8 @@ import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PlotAtDescription;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
+
+import com.google.common.collect.Lists;
 
 public class DistributionsAtTimes extends GroupOfDistributions {
 

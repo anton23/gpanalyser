@@ -1,11 +1,11 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.utils;
 
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class ExecProcess
 {

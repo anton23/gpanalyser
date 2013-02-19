@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -328,8 +331,8 @@ public class MASSPAToPCTMC
 											
 											// Combined rate: rate = rate * E[nofSender nofReceiver]
 											AbstractExpression ae=null;
-											Map<State, Integer> map = new HashMap<State, Integer>();
-											Map<State, Integer> map2 = new HashMap<State, Integer>();
+											Multiset<State> map= HashMultiset.create();
+											Multiset<State> map2 = HashMultiset.create();
 											if (chan.getRateType() == MASSPAChannel.RateType.MULTISERVER_SYNC)
 											{
 												// Add any countActions to increasing set
@@ -342,8 +345,8 @@ public class MASSPAToPCTMC
 												increasing.add(new MASSPAAgentPop(sp.getContinuation(),chan.getSender().getLocation()));
 																								
 												// min(E[nofSender], E[nofReceiver])
-												map.put(pop, 1);
-												map2.put(chan.getSender(), 1);
+												map.add(pop, 1);
+												map2.add(chan.getSender(), 1);
 												// Special case when intensity is a population
 												if (intensity instanceof CombinedProductExpression)
 												{
@@ -368,8 +371,8 @@ public class MASSPAToPCTMC
 												increasing.add(contPop);
 												
 												// E[nofSender nofReceiver]
-												map.put(chan.getSender(), 1);
-												map.put(pop, 1);
+												map.add(chan.getSender(), 1);
+												map.add(pop, 1);
 												// Special case when intensity is a population
 												//if (intensity instanceof CombinedProductExpression)
 //												{

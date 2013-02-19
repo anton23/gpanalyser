@@ -15,6 +15,7 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Multiset.Entry;
 
 /**
  * Java printer of abstract expressions in terms of population counts. 
@@ -63,15 +64,15 @@ public class JavaPrinterPopulationBased extends JavaExpressionPrinterWithVariabl
 	public void visit(PopulationProductExpression e) {
 		PopulationProduct moment = e.getProduct();
 		boolean first = true; 
-		for (Map.Entry<State, Integer> entry:moment.getRepresentation().entrySet()){		
-			for (int i = 0; i<entry.getValue(); i++){
+		for (Entry<State> entry:moment.getRepresentation().entrySet()){		
+			for (int i = 0; i<entry.getCount(); i++){
 				if (first){
 					first=false; 
 				} else {
 					output.append("*");
 				}
-				Integer j = stateIndex.get(entry.getKey());
-				if (j==null) throw new AssertionError("Unknown component " + entry.getKey() + "!");
+				Integer j = stateIndex.get(entry.getElement());
+				if (j==null) throw new AssertionError("Unknown component " + entry.getElement() + "!");
 				output.append(f+"[" + j + "]"); 
 			}
 		}

@@ -515,9 +515,9 @@ accPowers returns [Multiset<AccumulationVariable> a]
 @init{
   $a = HashMultiset.<AccumulationVariable>create();
 }:
-  ( ^(ACC p=product)
-          (n=integer {$a.add(new AccumulatedProduct($p.p),$n.value-1);})?
-      {$a.add(new AccumulatedProduct($p.p),1);}
+  ( ^(ACC p=expression)
+          (n=integer {$a.add(new AccumulationVariable($p.e),$n.value-1);})?
+      {$a.add(new AccumulationVariable($p.e),1);}
   )*
 ;
 

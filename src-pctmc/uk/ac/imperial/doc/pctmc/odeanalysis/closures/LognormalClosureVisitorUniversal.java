@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.ejml.alg.dense.decomposition.SingularMatrixException;
 import org.ejml.simple.SimpleMatrix;
@@ -234,11 +233,11 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			else if (m_maxOrder == 1)
 			{		
 				List<AbstractExpression> terms = new LinkedList<AbstractExpression>();
-				for (Entry<State, Integer> entry : m_moment.getPopulationProduct().getRepresentation().entrySet())
+				for (Multiset.Entry<State> entry : m_moment.getPopulationProduct().getRepresentation().entrySet())
 				{
-					for (int i = 0; i < entry.getValue(); i++)
+					for (int i = 0; i < entry.getCount(); i++)
 					{
-						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
+						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getElement())));
 					}
 				}
 				for (Multiset.Entry<AccumulationVariable> entry : m_moment.getAccumulatedProducts().entrySet())
@@ -248,11 +247,11 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(entry.getElement())));
 					}
 				}
-				for (Entry<State, Integer> entry : _e.getProduct().getPopulationProduct().getRepresentation().entrySet())
+				for (Multiset.Entry<State> entry : _e.getProduct().getPopulationProduct().getRepresentation().entrySet())
 				{
-					for (int i = 0; i < entry.getValue(); i++)
+					for (int i = 0; i < entry.getCount(); i++)
 					{
-						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
+						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getElement())));
 					}
 				}
 				for (com.google.common.collect.Multiset.Entry<AccumulationVariable> entry : _e.getProduct().getAccumulatedProducts().entrySet())
@@ -280,11 +279,11 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 	{
 		int i=0;
 		PopulationProduct[] pops = new PopulationProduct[_cpp.getOrder()];
-		for (Entry<State, Integer> e : _cpp.getPopulationProduct().getRepresentation().entrySet())
+		for (Multiset.Entry<State> e : _cpp.getPopulationProduct().getRepresentation().entrySet())
 		{
-			for (int j=0; j<e.getValue(); j++)
+			for (int j=0; j<e.getCount(); j++)
 			{
-				pops[i++] = PopulationProduct.getMeanProduct(e.getKey());
+				pops[i++] = PopulationProduct.getMeanProduct(e.getElement());
 			}
 		}
 		int accStartIndex=i;
@@ -426,36 +425,32 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 
 	private double vectorChoose(CombinedPopulationProduct _cppTop, CombinedPopulationProduct _cppBottom)
 	{
-		Map<State, Integer> top = new HashMap<State, Integer>(_cppTop.getPopulationProduct().getRepresentation());
+		Multiset<State> top = HashMultiset.create(_cppTop.getPopulationProduct().getRepresentation());
 		for (AccumulationVariable ap : _cppTop.getAccumulatedProducts())
 		{
-			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());
-			Integer mult = top.get(s);
-			mult = (mult == null) ? 1 : ++mult;
-			top.put(s, mult);
+			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());			
+			top.add(s);
 		}
-		Map<State, Integer> bottom = new HashMap<State, Integer>(_cppBottom.getPopulationProduct().getRepresentation());
+		Multiset<State> bottom = HashMultiset.create(_cppBottom.getPopulationProduct().getRepresentation());
 		for (AccumulationVariable ap : _cppBottom.getAccumulatedProducts())
 		{
 			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());
-			Integer mult = bottom.get(s);
-			mult = (mult == null) ? 1 : ++mult;
-			bottom.put(s, mult);
+			bottom.add(s);
 		}
 		return vectorChoose(top,bottom);
 	}	
 	
-	private double vectorChoose(Map<State, Integer> _top, Map<State, Integer> _bottom)
+	private double vectorChoose(Multiset<State>  _top, Multiset<State>  _bottom)
 	{
 		double ret=1;
 		Set<State> states = new HashSet<State>();
-		states.addAll(_top.keySet());
-		states.addAll(_bottom.keySet());
+		states.addAll(_top.elementSet());
+		states.addAll(_bottom.elementSet());
 		for (State s : states)
 		{
-			Integer l = _top.get(s);
+			Integer l = _top.count(s);
 			l = (l == null) ? 0 : l;
-			Integer h = _bottom.get(s);
+			Integer h = _bottom.count(s);
 			h = (h == null) ? 0 : h;
 			
 			if (l < h) {return 0;}

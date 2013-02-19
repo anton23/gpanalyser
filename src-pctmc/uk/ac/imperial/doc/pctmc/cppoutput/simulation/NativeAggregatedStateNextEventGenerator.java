@@ -1,12 +1,12 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AggregatedStateNextEventGenerator;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 public abstract class NativeAggregatedStateNextEventGenerator
         extends AggregatedStateNextEventGenerator

@@ -1,31 +1,18 @@
 package uk.ac.imperial.doc.pctmc.expressions;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Multiset.Entry;
 
 public class PopulationProduct {
-	private Map<State, Integer> representation;
-	private int order = -1;
-
-	public PopulationProduct(Map<State, Integer> moment) {
-		super();
-		this.representation = new HashMap<State, Integer>();
-		for (Map.Entry<State, Integer> e : moment.entrySet()) {
-			if (e.getValue() != 0) {
-				this.representation.put(e.getKey(), e.getValue());
-			}
-		}
-	}
+	private Multiset<State> representation;
 
 	public PopulationProduct(Multiset<State> mset) {
-		representation = new HashMap<State, Integer>();
+		representation = HashMultiset.create();
 		for (Multiset.Entry<State> e : mset.entrySet()) {
-			representation.put(e.getElement(), e.getCount());
+			representation.add(e.getElement(), e.getCount());
 		}
 	}
 
@@ -36,64 +23,39 @@ public class PopulationProduct {
 		if (b == null)
 			return a;
 		Multiset<State> tmp = HashMultiset.<State> create();
-		for (Map.Entry<State, Integer> exp : a.getRepresentation().entrySet()) {
-			tmp.add(exp.getKey(), exp.getValue());
-		}
-		for (Map.Entry<State, Integer> exp : b.getRepresentation().entrySet()) {
-			tmp.add(exp.getKey(), exp.getValue());
-		}
-		Map<State, Integer> map = new HashMap<State, Integer>();
-		for (State s : tmp.elementSet()) {
-			map.put(s, tmp.count(s));
-		}
-		return new PopulationProduct(map);
+		tmp.addAll(a.getRepresentation());
+		tmp.addAll(b.getRepresentation());
+		return new PopulationProduct(tmp);
 	}
 
 	public int getPowerOf(State state) {
-		if (representation.containsKey(state)) {
-			return representation.get(state);
-		} else {
-			return 0;
-		}
+		return representation.count(state);
 	}
 
 	public PopulationProduct getV(State state) {
-		Integer kb = representation.get(state);
-		if (kb == null)
-			kb = 0;
-		Map<State, Integer> tmp = new HashMap<State, Integer>(representation);
-		tmp.put(state, kb + 1);
+		Multiset<State> tmp = HashMultiset.create(representation);
+		tmp.add(state);
 		return new PopulationProduct(tmp);
 	}
 
 	public static PopulationProduct getMeanProduct(State s) {
-		Map<State, Integer> product = new HashMap<State, Integer>();
-		product.put(s, 1);
+		Multiset<State> product = HashMultiset.create();
+		product.add(s);
 		return new PopulationProduct(product);
 	}
 
 	public int getOrder() {
-		if (order != -1)
-			return order;
-		order = 0;
-		for (Integer v : representation.values()) {
-			order += v;
-		}
-		return order;
+		return representation.size();
 	}
 
 	public Multiset<State> asMultiset() {
-		Multiset<State> tmp = HashMultiset.<State> create();
-		for (Map.Entry<State, Integer> e : this.getRepresentation().entrySet()) {
-			tmp.add(e.getKey(), e.getValue());
-		}
-		return tmp;
+		return HashMultiset.create(representation);
 	}
 
 	public PopulationProduct toThePower(int p) {
-		Map<State, Integer> newProduct = new HashMap<State, Integer>();
-		for (Map.Entry<State, Integer> e : representation.entrySet()) {
-			newProduct.put(e.getKey(), e.getValue() * p);
+		Multiset<State> newProduct = HashMultiset.create();
+		for (Entry<State> e : representation.entrySet()) {
+			newProduct.add(e.getElement(), e.getCount() * p);
 		}
 		return new PopulationProduct(newProduct);
 	}
@@ -102,15 +64,15 @@ public class PopulationProduct {
 	public String toString() {
 		String ret = "";
 		boolean first = true;
-		for (Map.Entry<State, Integer> e : representation.entrySet()) {
-			if (e.getValue() > 0) {
+		for (Entry<State> e : representation.entrySet()) {
+			if (e.getCount() > 0) {
 				if (first)
 					first = false;
 				else
 					ret += " ";
-				ret += e.getKey();
-				if (e.getValue() > 1)
-					ret += "^" + e.getValue();
+				ret += e.getElement();
+				if (e.getCount() > 1)
+					ret += "^" + e.getElement();
 			}
 		}
 		return ret;
@@ -131,7 +93,7 @@ public class PopulationProduct {
 		return representation.equals(asProduct.getRepresentation());
 	}
 
-	public Map<State, Integer> getRepresentation() {
+	public Multiset<State> getRepresentation() {
 		return representation;
 	}
 }

@@ -1,8 +1,8 @@
 package uk.ac.imperial.doc.pctmc.simulation.utils;
 
-import uk.ac.imperial.doc.pctmc.utils.DiscreteSampler;
-
 import java.util.List;
+
+import uk.ac.imperial.doc.pctmc.utils.DiscreteSampler;
 
 public abstract class AggregatedStateNextEventGenerator {
 	protected double[] r;
