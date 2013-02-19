@@ -35,7 +35,6 @@ public class PCTMCJavaImplementationProvider implements
 		JavaMethodPrinter printer = new JavaMethodPrinter(constants,
 				combinedMomentsIndex, generalExpectationIndex);
 		String code = printer.printEvaluatorMethod(method, className);
-		System.out.println(code);
 		AbstractExpressionEvaluator updater = (AbstractExpressionEvaluator) ClassCompiler
 				.getInstance(code, className);
 		return updater;
