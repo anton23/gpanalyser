@@ -102,7 +102,9 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 					expectedExpanded, actualExpanded);
 			
 		}
-		assertEquals("The system of ODEs has some additional equations " + Sets.difference(generator.getMomentIndex().keySet(), expectedODEs.keySet()), expectedODEs.keySet(), generator.getMomentIndex().keySet());
+		assertEquals("The system of ODEs has some additional equations " 
+				+ Sets.difference(generator.getMomentIndex().keySet(), expectedODEs.keySet()), 
+				expectedODEs.keySet(), generator.getMomentIndex().keySet());
 	}
 	
 	protected CombinedPopulationProduct parseCombinedProduct(String string) throws ParseException{
