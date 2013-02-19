@@ -19,6 +19,8 @@ import org.apache.commons.math3.ode.nonstiff.MidpointIntegrator;
 import org.apache.commons.math3.ode.nonstiff.RungeKuttaIntegrator;
 import org.apache.commons.math3.ode.sampling.FixedStepHandler;
 import org.apache.commons.math3.ode.sampling.StepNormalizer;
+import org.apache.commons.math3.ode.sampling.StepNormalizerBounds;
+import org.apache.commons.math3.ode.sampling.StepNormalizerMode;
 
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
@@ -100,7 +102,7 @@ public class ODEIntegrators {
 		long t = System.currentTimeMillis();
 		
 		PCTMCLogging.info("Running " + algorithm + " ODE solver.");
-		final double ret[][] = new double[(int) Math.ceil(stopTime / stepSize)][];
+		final double ret[][] = new double[(int) Math.ceil(stopTime / stepSize)+1][];
 		
 		FixedStepHandler fixedStepHandler = new FixedStepHandler() {
 			int step;
@@ -111,8 +113,8 @@ public class ODEIntegrators {
 			}
 		};
 		
-		integrator.addStepHandler(new StepNormalizer(stepSize, fixedStepHandler));
-		integrator.integrate(f, 0.0, init, stopTime-stepSize, init);
+		integrator.addStepHandler(new StepNormalizer(stepSize, fixedStepHandler, StepNormalizerMode.MULTIPLES, StepNormalizerBounds.FIRST));
+		integrator.integrate(f, 0.0, init, stopTime, init);
 		PCTMCLogging.info("ODE solver finished in " + (System.currentTimeMillis()-t) + "ms");
 		return ret;
 	}
