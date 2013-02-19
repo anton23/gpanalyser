@@ -23,13 +23,14 @@ import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
-import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.javaoutput.simulation.JavaPrinterPopulationBased;
 import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.simulation.SimulationUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
@@ -274,7 +275,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 
 	public static String getProductUpdaterCode(PCTMCSimulation simulation, Constants variables, boolean noadd) {
 		Map<CombinedPopulationProduct, Integer> momentIndex = simulation.getMomentIndex();
-		Map<PopulationProduct, Integer> accumulatedMomentIndex = simulation.getAccumulatedMomentIndex();
+		Map<AccumulationVariable, Integer> accumulatedMomentIndex = simulation.getAccumulatedMomentIndex();
 		Map<AbstractExpression, Integer> generalExpectationIndex = simulation.getGeneralExpectationIndex();
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + SimulationUpdater.class.getName() + ";\n");
@@ -324,10 +325,11 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		ret.append("      double[] values = new double[" + simulation.getAccumulatedMomentIndex().size() + "];\n");
 		 
 		
-		for (Map.Entry<PopulationProduct, Integer> entry : simulation.getAccumulatedMomentIndex().entrySet()) {
+		for (Map.Entry<AccumulationVariable, Integer> entry : simulation.getAccumulatedMomentIndex().entrySet()) {
 			ret.append("values[" + entry.getValue() + "]=delta*(");			
 			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(constants, simulation.getPCTMC().getStateIndex(),simulation.getAccumulatedMomentIndex(), "counts", true);
-			PopulationProductExpression tmp = new PopulationProductExpression(entry.getKey()); 
+			// TODO this assumes the accumulation is an integral of a product
+			PopulationProductExpression tmp = new PopulationProductExpression(((AccumulatedProduct)entry.getKey()).getProduct()); 
 			tmp.accept(printer); 		
 			ret.append(printer.toString()); 
 			ret.append(");\n");

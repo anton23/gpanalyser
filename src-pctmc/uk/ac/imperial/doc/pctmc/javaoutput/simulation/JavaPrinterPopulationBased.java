@@ -12,6 +12,7 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 
 import com.google.common.collect.Multiset;
 
@@ -24,11 +25,11 @@ public class JavaPrinterPopulationBased extends JavaExpressionPrinterWithVariabl
 		IPopulationVisitor, IPopulationProductVisitor,ICombinedProductExpressionVisitor {
 	
 	private Map<State, Integer> stateIndex;
-	private Map<PopulationProduct,Integer> accumulatedProductsIndex;
+	private Map<AccumulationVariable,Integer> accumulatedProductsIndex;
 	private String f;
 	
 	public JavaPrinterPopulationBased(Constants constants,
-			Map<State, Integer> stateIndex, Map<PopulationProduct,Integer> accumulatedProductsIndex, String f, boolean expandVariables) {
+			Map<State, Integer> stateIndex, Map<AccumulationVariable,Integer> accumulatedProductsIndex, String f, boolean expandVariables) {
 		super(constants, expandVariables);
 		this.stateIndex = stateIndex;
 		this.accumulatedProductsIndex = accumulatedProductsIndex;
@@ -46,7 +47,7 @@ public class JavaPrinterPopulationBased extends JavaExpressionPrinterWithVariabl
 			}
 		}
 		boolean first = true;
-		for (Multiset.Entry<PopulationProduct> entry:e.getProduct().getAccumulatedProducts().entrySet()){
+		for (Multiset.Entry<AccumulationVariable> entry:e.getProduct().getAccumulatedProducts().entrySet()){
  			for (int i = 0; i<entry.getCount(); i++){
 				if (first){
 					first=false; 

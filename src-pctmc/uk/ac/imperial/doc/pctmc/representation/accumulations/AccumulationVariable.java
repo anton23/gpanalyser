@@ -14,4 +14,9 @@ public class AccumulationVariable {
 		return ddt;
 	}
 	
+	// TODO fix
+	public int getOrder() {
+		return 0;
+	}
+	
 }

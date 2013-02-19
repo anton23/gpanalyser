@@ -37,6 +37,8 @@ import PCTMCCompilerPrototype;
   import uk.ac.imperial.doc.pctmc.plain.*;
   import uk.ac.imperial.doc.pctmc.representation.State;
   import uk.ac.imperial.doc.pctmc.representation.*; 
+  import uk.ac.imperial.doc.pctmc.representation.accumulations.*; 
+  
   import uk.ac.imperial.doc.pctmc.experiments.iterate.*; 
   import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.*; 
   import uk.ac.imperial.doc.pctmc.postprocessors.numerical.*;

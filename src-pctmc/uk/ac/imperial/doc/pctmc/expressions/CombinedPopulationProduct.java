@@ -3,6 +3,8 @@ package uk.ac.imperial.doc.pctmc.expressions;
 import java.util.HashMap;
 
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
@@ -16,10 +18,10 @@ import com.google.common.collect.Multiset;
  */
 public class CombinedPopulationProduct {
 	private PopulationProduct populationProduct;
-	private Multiset<PopulationProduct> accumulatedProducts;
+	private Multiset<AccumulationVariable> accumulatedProducts;
 
 	public CombinedPopulationProduct(PopulationProduct populationProduct,
-			Multiset<PopulationProduct> accumulatedProducts) {
+			Multiset<AccumulationVariable> accumulatedProducts) {
 		super();
 		this.populationProduct = populationProduct;
 		if (populationProduct == null)
@@ -28,7 +30,7 @@ public class CombinedPopulationProduct {
 		this.accumulatedProducts = accumulatedProducts;
 		if (accumulatedProducts == null) {
 			this.accumulatedProducts = HashMultiset
-					.<PopulationProduct> create();
+					.<AccumulationVariable> create();
 		}
 	}
 
@@ -37,7 +39,7 @@ public class CombinedPopulationProduct {
 		this.populationProduct = populationProduct;
 		if (populationProduct == null)
 			populationProduct = new PopulationProduct(new HashMap<State, Integer>());
-		this.accumulatedProducts = HashMultiset.<PopulationProduct> create();
+		this.accumulatedProducts = HashMultiset.<AccumulationVariable> create();
 	}
 	
 	public static CombinedPopulationProduct getConstantProduct() {
@@ -63,15 +65,15 @@ public class CombinedPopulationProduct {
 	 */
 	public static CombinedPopulationProduct getMeanAccumulatedPopulation(State s) {
 		PopulationProduct accProduct = PopulationProduct.getMeanProduct(s);
-		Multiset<PopulationProduct> accProducts = HashMultiset
-				.<PopulationProduct> create();
-		accProducts.add(accProduct);
+		Multiset<AccumulationVariable> accProducts = HashMultiset
+				.<AccumulationVariable> create();
+		accProducts.add(new AccumulatedProduct(accProduct));
 		return new CombinedPopulationProduct(null, accProducts);
 	}
 	
-	public static CombinedPopulationProduct getMeanAccumulatedProduct(PopulationProduct p) {
-		Multiset<PopulationProduct> accProducts = HashMultiset
-				.<PopulationProduct> create();
+	public static CombinedPopulationProduct getMeanAccumulatedProduct(AccumulationVariable p) {
+		Multiset<AccumulationVariable> accProducts = HashMultiset
+				.<AccumulationVariable> create();
 		accProducts.add(p);
 		return new CombinedPopulationProduct(null, accProducts);
 	}
@@ -82,7 +84,7 @@ public class CombinedPopulationProduct {
 		if (order != -1)
 			return order;
 		order = populationProduct != null ? populationProduct.getOrder() : 0;
-		for (PopulationProduct product : accumulatedProducts) {
+		for (AccumulationVariable product : accumulatedProducts) {
 			order += product.getOrder();
 		}
 		return order;
@@ -103,13 +105,13 @@ public class CombinedPopulationProduct {
 			return a;
 		PopulationProduct newNakedProduct = PopulationProduct.getProduct(a
 				.getPopulationProduct(), b.getPopulationProduct());
-		Multiset<PopulationProduct> newAccumulatedProducts = HashMultiset
-				.<PopulationProduct> create();
-		for (Multiset.Entry<PopulationProduct> e : a.getAccumulatedProducts()
+		Multiset<AccumulationVariable> newAccumulatedProducts = HashMultiset
+				.<AccumulationVariable> create();
+		for (Multiset.Entry<AccumulationVariable> e : a.getAccumulatedProducts()
 				.entrySet()) {
 			newAccumulatedProducts.add(e.getElement(), e.getCount());
 		}
-		for (Multiset.Entry<PopulationProduct> e : b.getAccumulatedProducts()
+		for (Multiset.Entry<AccumulationVariable> e : b.getAccumulatedProducts()
 				.entrySet()) {
 			newAccumulatedProducts.add(e.getElement(), e.getCount());
 		}
@@ -125,9 +127,9 @@ public class CombinedPopulationProduct {
 	 */
 	public CombinedPopulationProduct getPower(int p) {
 		PopulationProduct newNakedProduct = populationProduct.toThePower(p);
-		Multiset<PopulationProduct> newAccumulatedProducts = HashMultiset
-				.<PopulationProduct> create();
-		for (Multiset.Entry<PopulationProduct> e : accumulatedProducts
+		Multiset<AccumulationVariable> newAccumulatedProducts = HashMultiset
+				.<AccumulationVariable> create();
+		for (Multiset.Entry<AccumulationVariable> e : accumulatedProducts
 				.entrySet()) {
 			newAccumulatedProducts.add(e.getElement(), e.getCount() * p);
 		}
@@ -158,7 +160,7 @@ public class CombinedPopulationProduct {
 			ret += populationProduct.toString()
 					+ (accumulatedProducts.isEmpty() ? "" : " ");
 		boolean first = true;
-		for (Multiset.Entry<PopulationProduct> e : accumulatedProducts
+		for (Multiset.Entry<AccumulationVariable> e : accumulatedProducts
 				.entrySet()) {
 			if (e.getCount() > 0) {
 				if (first)
@@ -177,7 +179,7 @@ public class CombinedPopulationProduct {
 		return populationProduct;
 	}
 
-	public Multiset<PopulationProduct> getAccumulatedProducts() {
+	public Multiset<AccumulationVariable> getAccumulatedProducts() {
 		return accumulatedProducts;
 	}
 

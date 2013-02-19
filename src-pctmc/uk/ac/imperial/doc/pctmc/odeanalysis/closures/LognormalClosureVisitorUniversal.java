@@ -11,9 +11,6 @@ import java.util.Map.Entry;
 import org.ejml.alg.dense.decomposition.SingularMatrixException;
 import org.ejml.simple.SimpleMatrix;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
-
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
@@ -35,6 +32,11 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.plain.PlainState;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 /***
  * 
@@ -239,7 +241,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
 					}
 				}
-				for (Multiset.Entry<PopulationProduct> entry : m_moment.getAccumulatedProducts().entrySet())
+				for (Multiset.Entry<AccumulationVariable> entry : m_moment.getAccumulatedProducts().entrySet())
 				{
 					for (int i = 0; i < entry.getCount(); i++)
 					{
@@ -253,7 +255,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 						terms.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanPopulation(entry.getKey())));
 					}
 				}
-				for (com.google.common.collect.Multiset.Entry<PopulationProduct> entry : _e.getProduct().getAccumulatedProducts().entrySet())
+				for (com.google.common.collect.Multiset.Entry<AccumulationVariable> entry : _e.getProduct().getAccumulatedProducts().entrySet())
 				{
 					for (int i = 0; i < entry.getCount(); i++)
 					{
@@ -286,9 +288,12 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			}
 		}
 		int accStartIndex=i;
-		for (com.google.common.collect.Multiset.Entry<PopulationProduct> e : _cpp.getAccumulatedProducts().entrySet())
+		i = 0;
+		AccumulationVariable[] accVars = new AccumulationVariable[_cpp.getAccumulatedProducts().size()];
+
+		for (com.google.common.collect.Multiset.Entry<AccumulationVariable> e : _cpp.getAccumulatedProducts().entrySet())
 		{
-			pops[i++] = e.getElement();
+			accVars[i++] = e.getElement();
 		}
 
 		// Step 1: Find all moments that might be needed to close the higherOrderMoment.
@@ -305,7 +310,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			}
 			else
 			{
-				lMF.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(pops[j])));
+				lMF.add(CombinedProductExpression.create(CombinedPopulationProduct.getMeanAccumulatedProduct(accVars[j])));
 			}
 		}
 		meanfield = ProductExpression.createOrdered(lMF);
@@ -314,7 +319,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 		while (getNextIndex(indices,m_maxOrder))
 		{
 			PopulationProduct popTemp = null;
-			Multiset<PopulationProduct> accumulatedProdTerms = HashMultiset.create();
+			Multiset<AccumulationVariable> accumulatedProdTerms = HashMultiset.create();
 			for (int k=0; k<pops.length; k++)
 			{
 				if (indices[k] == 0) {continue;}
@@ -331,7 +336,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 				}
 				else
 				{
-					accumulatedProdTerms.add(pops[k]);
+					accumulatedProdTerms.add(new AccumulatedProduct(pops[k]));
 				}
 			}
 			possibleMoments.add(CombinedProductExpression.create(new CombinedPopulationProduct(popTemp,accumulatedProdTerms)));
@@ -422,7 +427,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 	private double vectorChoose(CombinedPopulationProduct _cppTop, CombinedPopulationProduct _cppBottom)
 	{
 		Map<State, Integer> top = new HashMap<State, Integer>(_cppTop.getPopulationProduct().getRepresentation());
-		for (PopulationProduct ap : _cppTop.getAccumulatedProducts())
+		for (AccumulationVariable ap : _cppTop.getAccumulatedProducts())
 		{
 			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());
 			Integer mult = top.get(s);
@@ -430,7 +435,7 @@ public class LognormalClosureVisitorUniversal extends MomentCountTransformerWith
 			top.put(s, mult);
 		}
 		Map<State, Integer> bottom = new HashMap<State, Integer>(_cppBottom.getPopulationProduct().getRepresentation());
-		for (PopulationProduct ap : _cppBottom.getAccumulatedProducts())
+		for (AccumulationVariable ap : _cppBottom.getAccumulatedProducts())
 		{
 			State s = new PlainState(CombinedPopulationProduct.getMeanAccumulatedProduct(ap).toString());
 			Integer mult = bottom.get(s);
