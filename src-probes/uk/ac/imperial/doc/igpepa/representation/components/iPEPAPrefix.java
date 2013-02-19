@@ -1,8 +1,8 @@
 package uk.ac.imperial.doc.igpepa.representation.components;
 
-import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
-
 import java.util.List;
+
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 
 public interface iPEPAPrefix extends iPEPA
 {

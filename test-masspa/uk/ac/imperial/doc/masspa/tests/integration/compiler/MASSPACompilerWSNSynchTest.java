@@ -41,7 +41,9 @@ import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
 
 public class MASSPACompilerWSNSynchTest extends BaseCompilerTest
 {
@@ -107,18 +109,19 @@ public class MASSPACompilerWSNSynchTest extends BaseCompilerTest
 	{
 		Map<ExpressionVariable, AbstractExpression> varMap = representation.getUnfoldedVariables();		
 		Map<ExpressionVariable, AbstractExpression> varMapExpected = new HashMap<ExpressionVariable, AbstractExpression>();
-		Map<State, Integer> rateAtX = new HashMap<State, Integer>();
-		rateAtX.put(getPop("Off","x"),1); rateAtX.put(getPop("On","x"),1);
-		rateAtX.put(pctmc.getModel().getAgentPop("On", VarLocation.getInstance(), 0),1);
+		Multiset<State> rateAtX = HashMultiset.create();
+
+		rateAtX.add(getPop("Off","x"),1); rateAtX.add(getPop("On","x"),1);
+		rateAtX.add(pctmc.getModel().getAgentPop("On", VarLocation.getInstance(), 0),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(x)"), SumExpression.create(ProductExpression.create(new DoubleExpression(2.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAtX)))), new DoubleExpression(10.0)));
-		Map<State, Integer> rateAt0 = new HashMap<State, Integer>();
-		rateAt0.put(getPop("Off","0"),1); rateAt0.put(getPop("On","0"),1);
+		Multiset<State> rateAt0 = HashMultiset.create();
+		rateAt0.add(getPop("Off","0"),1); rateAt0.add(getPop("On","0"),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(0)"), SumExpression.create(ProductExpression.create(new DoubleExpression(2.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt0)))), new DoubleExpression(10.0)));
-		Map<State, Integer> rateAt1 = new HashMap<State, Integer>();
-		rateAt1.put(getPop("#turn_on", "1"),1);
+		Multiset<State> rateAt1 = HashMultiset.create();
+		rateAt1.add(getPop("#turn_on", "1"),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(1)"), new MinusExpression(ProductExpression.create(new DoubleExpression(2.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt1)))), new DoubleExpression(10.0)));
-		Map<State, Integer> rateAt2 = new HashMap<State, Integer>();
-		rateAt2.put(getPop("Off","1"),1); rateAt2.put(getPop("On","2"),1);
+		Multiset<State> rateAt2 = HashMultiset.create();
+		rateAt2.add(getPop("Off","1"),1); rateAt2.add(getPop("On","2"),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(2)"), SumExpression.create(ProductExpression.create(new DoubleExpression(4.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt2)))), new DoubleExpression(20.0)));
 		assertEquals(varMap, varMapExpected);
 	}

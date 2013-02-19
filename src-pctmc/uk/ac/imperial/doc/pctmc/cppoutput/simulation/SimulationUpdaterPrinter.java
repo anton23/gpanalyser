@@ -1,15 +1,15 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.simulation;
 
+import java.io.File;
+import java.util.Map;
+import java.util.UUID;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
-
-import java.io.File;
-import java.util.Map;
-import java.util.UUID;
 
 public class SimulationUpdaterPrinter
 {

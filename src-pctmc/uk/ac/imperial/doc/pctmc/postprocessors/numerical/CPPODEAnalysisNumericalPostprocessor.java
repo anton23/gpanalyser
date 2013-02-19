@@ -1,5 +1,8 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
+import java.util.List;
+import java.util.Map;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -13,8 +16,7 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Multiset.Entry;
 
 public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 
@@ -117,14 +119,14 @@ public class CPPODEAnalysisNumericalPostprocessor extends NumericalPostprocessor
 			} else {
 				double tmp = 1.0;
 
-				for (Map.Entry<State, Integer> s : e.getKey().getPopulationProduct()
+				for (Entry<State> s : e.getKey().getPopulationProduct()
 						.getRepresentation().entrySet()) {
-					for (int p = 0; p < s.getValue(); p++) {
-						if (!stateIndex.containsKey(s.getKey())) {
-							throw new AssertionError("State " + s.getKey()
+					for (int p = 0; p < s.getCount(); p++) {
+						if (!stateIndex.containsKey(s.getElement())) {
+							throw new AssertionError("State " + s.getElement()
 									+ " unknown!");
 						}
-						tmp *= initialCounts[stateIndex.get(s.getKey())];
+						tmp *= initialCounts[stateIndex.get(s.getElement())];
 					}
 				}
 				initial[e.getValue()] = tmp;

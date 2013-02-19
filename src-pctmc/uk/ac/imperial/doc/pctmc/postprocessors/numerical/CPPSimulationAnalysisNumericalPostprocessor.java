@@ -1,5 +1,9 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -21,10 +25,6 @@ import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
-
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 public class CPPSimulationAnalysisNumericalPostprocessor
         extends NumericalPostprocessor {

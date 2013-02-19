@@ -1,11 +1,9 @@
 package uk.ac.imperial.doc.pctmc.experiments.distribution;
 
 import java.util.List;
-import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.SimulationAnalysisNumericalPostprocessor;
 
 public abstract class GroupOfDistributions {

@@ -1,5 +1,15 @@
 package uk.ac.imperial.doc.gpa.probes;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import uk.ac.imperial.doc.gpa.pctmc.GPEPAToPCTMC;
 import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
@@ -24,8 +34,6 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
-
-import java.util.*;
 
 public class SimProbeRunner extends AbstractProbeRunner
 {

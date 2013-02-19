@@ -1,11 +1,11 @@
 package uk.ac.imperial.doc.igpepa.representation.components;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class ImmediatesMixin implements iPEPA
 {

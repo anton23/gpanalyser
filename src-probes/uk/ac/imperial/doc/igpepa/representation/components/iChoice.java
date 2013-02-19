@@ -1,13 +1,13 @@
 package uk.ac.imperial.doc.igpepa.representation.components;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
 import uk.ac.imperial.doc.gpepa.representation.components.Choice;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
 import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponentDefinitions;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class iChoice extends Choice
 {

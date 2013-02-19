@@ -1,9 +1,13 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
-import java.util.*;
 
 public class NFAUtils
 {

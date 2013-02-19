@@ -1,7 +1,5 @@
 package uk.ac.imperial.doc.pctmc.expressions;
 
-import java.util.HashMap;
-
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
@@ -26,7 +24,7 @@ public class CombinedPopulationProduct {
 		this.populationProduct = populationProduct;
 		if (populationProduct == null)
 			this.populationProduct = new PopulationProduct(
-					new HashMap<State, Integer>());
+					HashMultiset.<State>create());
 		this.accumulatedProducts = accumulatedProducts;
 		if (accumulatedProducts == null) {
 			this.accumulatedProducts = HashMultiset
@@ -38,12 +36,12 @@ public class CombinedPopulationProduct {
 		super();
 		this.populationProduct = populationProduct;
 		if (populationProduct == null)
-			populationProduct = new PopulationProduct(new HashMap<State, Integer>());
+			populationProduct = new PopulationProduct(HashMultiset.<State>create());
 		this.accumulatedProducts = HashMultiset.<AccumulationVariable> create();
 	}
 	
 	public static CombinedPopulationProduct getConstantProduct() {
-		return new CombinedPopulationProduct(new PopulationProduct(new HashMap<State, Integer>()));
+		return new CombinedPopulationProduct(new PopulationProduct(HashMultiset.<State>create()));
 	}
 
 	/**

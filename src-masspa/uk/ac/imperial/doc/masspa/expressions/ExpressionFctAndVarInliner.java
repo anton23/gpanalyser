@@ -2,7 +2,6 @@ package uk.ac.imperial.doc.masspa.expressions;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
@@ -29,6 +28,9 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.representation.State;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 /**
  * This class inlines both functions and variables
@@ -90,30 +92,30 @@ public class ExpressionFctAndVarInliner extends ExpressionTransformer  implement
 	@Override
 	public void visit(CombinedProductExpression e)
 	{
-		Map<State,Integer> localisedProduct = new HashMap<State,Integer>();
-		for (Entry<State, Integer> entry : e.getProduct().getPopulationProduct().getRepresentation().entrySet())
+		Multiset<State> localisedProduct = HashMultiset.create();
+		for (Multiset.Entry<State> entry : e.getProduct().getPopulationProduct().getRepresentation().entrySet())
 		{
-			if (entry.getKey() instanceof MASSPAActionCount)
+			if (entry.getElement() instanceof MASSPAActionCount)
 			{
-				MASSPAActionCount count = (MASSPAActionCount)entry.getKey();
+				MASSPAActionCount count = (MASSPAActionCount)entry.getElement();
 				Location l = LocationHelper.getLocalisedLocation(count.getLocation().toString(), m_loc);
-				MASSPAActionCount localCount = m_model.getActionCount(new MASSPAActionCount(((MASSPAActionCount)entry.getKey()).getName(),l));
+				MASSPAActionCount localCount = m_model.getActionCount(new MASSPAActionCount(((MASSPAActionCount)entry.getElement()).getName(),l));
 				if (localCount == null)
 				{
-					throw new AssertionError(String.format(Messages.s_COMPILER_ACTIONCOUNT_INVALID, entry.getKey()));
+					throw new AssertionError(String.format(Messages.s_COMPILER_ACTIONCOUNT_INVALID, entry.getElement()));
 				}
-				localisedProduct.put(localCount,entry.getValue());
+				localisedProduct.add(localCount,entry.getCount());
 			}
-			else if (entry.getKey() instanceof MASSPAAgentPop)
+			else if (entry.getElement() instanceof MASSPAAgentPop)
 			{
-				MASSPAAgentPop pop = (MASSPAAgentPop)entry.getKey();
+				MASSPAAgentPop pop = (MASSPAAgentPop)entry.getElement();
 				Location l = LocationHelper.getLocalisedLocation(pop.getLocation().toString(), m_loc);
 				MASSPAAgentPop localPop = m_model.getAgentPop(new MASSPAAgentPop(new ConstComponent(pop.getComponentName()),l));
 				if (localPop == null)
 				{
-					throw new AssertionError(String.format(Messages.s_COMPILER_AGENTPOP_INVALID, entry.getKey()));
+					throw new AssertionError(String.format(Messages.s_COMPILER_AGENTPOP_INVALID, entry.getElement()));
 				}
-				localisedProduct.put(localPop,entry.getValue());
+				localisedProduct.add(localPop,entry.getCount());
 			}
 		}
 		result = CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(localisedProduct)));

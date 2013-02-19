@@ -1,22 +1,38 @@
 package uk.ac.imperial.doc.pctmc.representation.accumulations;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CollectUsedMomentsVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 
 public class AccumulationVariable {
 	protected AbstractExpression ddt;
-
+	protected int order;
+	
 	public AccumulationVariable(AbstractExpression ddt) {
 		super();
 		this.ddt = ddt;
+		CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
+		ddt.accept(visitor);
+		order = 0;
+		for (CombinedPopulationProduct m : visitor.getUsedCombinedMoments()) {
+			order = Math.max(order, m.getOrder());
+		}	
 	}
 
 	public AbstractExpression getDdt() {
 		return ddt;
 	}
 	
-	// TODO fix
+	
 	public int getOrder() {
-		return 0;
+		return order;
+	}
+	
+	
+
+	@Override
+	public String toString() {
+		return "acc(" + ddt.toString() + ")";
 	}
 
 	@Override

@@ -1,5 +1,9 @@
 package uk.ac.imperial.doc.pctmc.javaoutput.analysis;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.IExpressionPrinterFactory;
@@ -11,10 +15,6 @@ import uk.ac.imperial.doc.jexpressions.statements.IIncrementVisitor;
 import uk.ac.imperial.doc.jexpressions.statements.Increment;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Java statement printer.

@@ -598,8 +598,15 @@ powerProduct:
 power:
   state (POWER INTEGER)? -> state INTEGER?;
   
-acc:
- ACC LPAR powerProduct RPAR -> ^(ACC powerProduct); 
+acc
+@init{
+  boolean oldRequiresExpectation = requiresExpectation;
+  requiresExpectation = false;
+}
+@after{
+  requiresExpectation = oldRequiresExpectation;
+}:
+ ACC LPAR expression RPAR -> ^(ACC expression); 
  
 accPower:
   acc (POWER INTEGER)? -> acc INTEGER?; 

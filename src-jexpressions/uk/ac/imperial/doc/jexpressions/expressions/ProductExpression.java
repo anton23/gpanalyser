@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.Map.Entry;
+
+import com.google.common.collect.Lists;
 
 /**
  * An expression for a product of a number of terms a1*a2*...*an.
@@ -16,6 +18,15 @@ import java.util.TreeMap;
  */
 public class ProductExpression extends AbstractExpression {
 
+	public static ProductExpression forceProduct(AbstractExpression e) {
+		if (e instanceof ProductExpression) {
+			return (ProductExpression) e;
+		} else {
+			return new ProductExpression(Lists.newArrayList(e));
+		}
+	}
+			
+	
 	@Override
 	public void accept(IExpressionVisitor v) {
 		v.visit(this);

@@ -1,11 +1,11 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 // to avoid loops in a graph, the equality is based on identity. Therefore
 // this class MUST NOT be used, whenever two different instances are compared.

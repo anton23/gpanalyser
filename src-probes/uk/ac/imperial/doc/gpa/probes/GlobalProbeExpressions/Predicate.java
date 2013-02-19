@@ -1,11 +1,11 @@
 package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
 
 public abstract class Predicate
 {

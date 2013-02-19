@@ -1,8 +1,5 @@
 package uk.ac.imperial.doc.masspa.expressions;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.constants.IConstantExpressionVisitor;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
@@ -33,6 +30,9 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationExpression;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.PopulationProductExpression;
 import uk.ac.imperial.doc.pctmc.representation.State;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 /**
  * This class inlines both functions and variables
@@ -214,15 +214,8 @@ public class ExpressionPopProductCreator extends ExpressionTransformer  implemen
 	@Override
 	public void visit(CombinedProductExpression e)
 	{
-		Map<State,Integer> product = new HashMap<State,Integer>(e.getProduct().getPopulationProduct().getRepresentation());
-		if (product.containsKey(m_pop))
-		{
-			product.put(m_pop, product.get(m_pop)+1);
-		}
-		else
-		{
-			product.put(m_pop, 1);
-		}
+		Multiset<State> product = HashMultiset.create(e.getProduct().getPopulationProduct().getRepresentation());
+		product.add(m_pop);
 
 		result = CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(product)));
 		m_popPushThrough=true;
@@ -231,15 +224,15 @@ public class ExpressionPopProductCreator extends ExpressionTransformer  implemen
 	@Override
 	public void visit(PopulationExpression e)
 	{
-		Map<State,Integer> product = new HashMap<State,Integer>();
+		Multiset<State> product = HashMultiset.create();
 		if (e.getState().equals(m_pop))
 		{
-			product.put(m_pop, 2);
+			product.add(m_pop, 2);
 		}
 		else
 		{
-			product.put(e.getState(), 1);
-			product.put(m_pop, 1);
+			product.add(e.getState(), 1);
+			product.add(m_pop, 1);
 		}
 
 		result = CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(product)));

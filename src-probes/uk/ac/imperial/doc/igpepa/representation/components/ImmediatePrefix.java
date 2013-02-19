@@ -1,10 +1,14 @@
 package uk.ac.imperial.doc.igpepa.representation.components;
 
-import uk.ac.imperial.doc.gpepa.representation.components.*;
+import java.util.List;
+
+import uk.ac.imperial.doc.gpepa.representation.components.AbstractPrefix;
+import uk.ac.imperial.doc.gpepa.representation.components.Choice;
+import uk.ac.imperial.doc.gpepa.representation.components.ComponentId;
+import uk.ac.imperial.doc.gpepa.representation.components.PEPAComponent;
+import uk.ac.imperial.doc.gpepa.representation.components.Stop;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
-
-import java.util.List;
 
 public class ImmediatePrefix extends AbstractPrefix implements iPEPAPrefix
 {

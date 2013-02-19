@@ -1,5 +1,14 @@
 package uk.ac.imperial.doc.pctmc.charts;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Paint;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -18,12 +27,8 @@ import org.jfree.data.xy.XYZDataset;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.ui.RefineryUtilities;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
 public class PCTMCChartUtilities {
 

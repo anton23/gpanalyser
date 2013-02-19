@@ -1,5 +1,9 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.analysis;
 
+import java.io.File;
+import java.util.Map;
+import java.util.UUID;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.statements.AbstractExpressionEvaluator;
@@ -8,10 +12,6 @@ import uk.ac.imperial.doc.pctmc.cppoutput.statements.CPPStatementPrinter;
 import uk.ac.imperial.doc.pctmc.cppoutput.utils.CPPClassCompiler;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.EvaluatorMethod;
-
-import java.io.File;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * C++ printer for expression evaluator methods.

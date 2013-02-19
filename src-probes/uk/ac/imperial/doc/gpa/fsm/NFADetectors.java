@@ -1,10 +1,10 @@
 package uk.ac.imperial.doc.gpa.fsm;
 
-import com.google.common.collect.Multimap;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.google.common.collect.Multimap;
 
 public class NFADetectors
 {

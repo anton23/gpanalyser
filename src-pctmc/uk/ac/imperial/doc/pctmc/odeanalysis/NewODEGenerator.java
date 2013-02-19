@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -23,7 +22,6 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.representation.State;
-import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulatedProduct;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.Binomial;
@@ -133,14 +131,11 @@ public class NewODEGenerator {
 				newAccumulatedMoments.add(e.getElement(), e.getCount());
 			}
 			newAccumulatedMoments.remove(accumulatedMoment.getElement(), 1);
-			// TODO This is assuming that accumulated variables are just accumulated products
-			PopulationProduct newNakedMoment = PopulationProduct.getProduct(
-					combinedProduct.getPopulationProduct(), ((AccumulatedProduct) accumulatedMoment
-							.getElement()).getProduct());
-			CombinedPopulationProduct tmp = new CombinedPopulationProduct(
-					newNakedMoment, newAccumulatedMoments);
-			AbstractExpression diff = ProductExpression.create(coefficient,
-					CombinedProductExpression.create(tmp));
+			
+			AbstractExpression product = momentClosure.insertProductIntoRate(accumulatedMoment.getElement().getDdt(), combinedProduct.getPopulationProduct());
+			product = momentClosure.insertAccumulations(product, new CombinedPopulationProduct(null, newAccumulatedMoments));
+
+			AbstractExpression diff = ProductExpression.create(coefficient, product);
 			sum.add(diff);
 		}
 		if (combinedProduct.getPopulationProduct().getOrder() > 0) {
@@ -163,16 +158,15 @@ public class NewODEGenerator {
 		// Finds all events that affect the moment value
 		for (EvolutionEvent event : pctmc.getEvolutionEvents()) {
 			Map<State, Integer> changeVector = event.getChangeVector();
-			Map<State, Integer> unchangedPopulations = new HashMap<State, Integer>();
-			Map<State, Integer> changingPopulations = new HashMap<State, Integer>();
-			for (Entry<State, Integer> e : moment.getRepresentation()
-					.entrySet()) {
-				if (!changeVector.containsKey(e.getKey())) {
-					unchangedPopulations.put(e.getKey(),
-							moment.getPowerOf(e.getKey()));
+			Multiset<State> unchangedPopulations = HashMultiset.create();
+			Multiset<State> changingPopulations = HashMultiset.create();
+			for (Multiset.Entry<State> e : moment.getRepresentation().entrySet()) {
+				if (!changeVector.containsKey(e.getElement())) {
+					unchangedPopulations.add(e.getElement(),
+							moment.getPowerOf(e.getElement()));
 				} else {
-					changingPopulations.put(e.getKey(),
-							moment.getPowerOf(e.getKey()));
+					changingPopulations.add(e.getElement(),
+							moment.getPowerOf(e.getElement()));
 				}
 			}
 			// The event contributes to the RHS only if one of the 
@@ -185,18 +179,18 @@ public class NewODEGenerator {
 						new PopulationProduct(unchangedPopulations)));
 				// Goes through each changing population p and expands (X_p+delta_p)^k_p
 				// and multiplies all the terms collected so far
-				for (Entry<State, Integer> e : new PopulationProduct(
+				for (Multiset.Entry<State> e : new PopulationProduct(
 						changingPopulations).getRepresentation().entrySet()) {
 					List<CoefficientMoment> newSummands = new LinkedList<CoefficientMoment>();
 					// Expansion of (X_p + delta_p)^k_p
-					for (int i = 0; i <= e.getValue(); i++) {
+					for (int i = 0; i <= e.getCount(); i++) {
 						DoubleExpression binomialCoefficient = new DoubleExpression(new Double(
 								Binomial.choose(
-										e.getValue(), i)));
+										e.getCount(), i)));
 						DoubleExpression powerOfDelta = new DoubleExpression(
 								Math.pow(changeVector.get(e
-										.getKey()),
-										e.getValue() - i));
+										.getElement()),
+										e.getCount() - i));
 						for (CoefficientMoment c : summands) {
 							AbstractExpression newCoefficient = ProductExpression
 									.create(c.coefficient,
@@ -204,7 +198,7 @@ public class NewODEGenerator {
 											powerOfDelta);
 							Multiset<State> representation = c.moment
 									.asMultiset();
-							representation.add(e.getKey(), i);
+							representation.add(e.getElement(), i);
 							newSummands.add(new CoefficientMoment(
 									newCoefficient, new PopulationProduct(
 											representation)));

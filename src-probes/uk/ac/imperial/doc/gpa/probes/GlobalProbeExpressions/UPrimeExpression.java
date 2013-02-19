@@ -1,8 +1,8 @@
 package uk.ac.imperial.doc.gpa.probes.GlobalProbeExpressions;
 
-import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
-
 import java.util.Set;
+
+import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 
 public class UPrimeExpression extends AbstractUExpression
 {

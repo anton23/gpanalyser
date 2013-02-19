@@ -1,16 +1,16 @@
 package uk.ac.imperial.doc.igpepa.representation.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import uk.ac.imperial.doc.gpepa.representation.group.GroupComponentPair;
 import uk.ac.imperial.doc.gpepa.representation.model.PEPAEvolutionEvent;
 import uk.ac.imperial.doc.gpepa.states.GPEPAActionCount;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.variables.ExpressionVariable;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class iPEPAEvolutionEvent extends PEPAEvolutionEvent
 {

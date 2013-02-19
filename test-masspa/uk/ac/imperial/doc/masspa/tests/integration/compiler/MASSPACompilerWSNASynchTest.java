@@ -40,7 +40,9 @@ import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
 
 public class MASSPACompilerWSNASynchTest extends BaseCompilerTest
 {
@@ -106,18 +108,18 @@ public class MASSPACompilerWSNASynchTest extends BaseCompilerTest
 	{
 		Map<ExpressionVariable, AbstractExpression> varMap = representation.getUnfoldedVariables();		
 		Map<ExpressionVariable, AbstractExpression> varMapExpected = new HashMap<ExpressionVariable, AbstractExpression>();
-		Map<State, Integer> rateAtX = new HashMap<State, Integer>();
-		rateAtX.put(getPop("Off","x"),1); rateAtX.put(getPop("On","x"),1);
-		rateAtX.put(pctmc.getModel().getAgentPop("On", VarLocation.getInstance(), 0),1);
+		Multiset<State> rateAtX = HashMultiset.create();
+		rateAtX.add(getPop("Off","x"),1); rateAtX.add(getPop("On","x"),1);
+		rateAtX.add(pctmc.getModel().getAgentPop("On", VarLocation.getInstance(), 0),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(x)"), SumExpression.create(ProductExpression.create(new DoubleExpression(2.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAtX)))), new DoubleExpression(10.0)));
-		Map<State, Integer> rateAt0 = new HashMap<State, Integer>();
-		rateAt0.put(getPop("Off","0"),1); rateAt0.put(getPop("On","0"),1);
+		Multiset<State> rateAt0 = HashMultiset.create();
+		rateAt0.add(getPop("Off","0"),1); rateAt0.add(getPop("On","0"),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(0)"), SumExpression.create(ProductExpression.create(new DoubleExpression(2.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt0)))), new DoubleExpression(10.0)));
-		Map<State, Integer> rateAt1 = new HashMap<State, Integer>();
-		rateAt1.put(getPop("#turn_on", "1"),1);
+		Multiset<State> rateAt1 = HashMultiset.create();
+		rateAt1.add(getPop("#turn_on", "1"),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(1)"), new MinusExpression(ProductExpression.create(new DoubleExpression(2.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt1)))), new DoubleExpression(10.0)));
-		Map<State, Integer> rateAt2 = new HashMap<State, Integer>();
-		rateAt2.put(getPop("Off","1"),1); rateAt2.put(getPop("On","2"),1);
+		Multiset<State> rateAt2 = HashMultiset.create();
+		rateAt2.add(getPop("Off","1"),1); rateAt2.add(getPop("On","2"),1);
 		varMapExpected.put(new ExpressionVariable("myRate@(2)"), SumExpression.create(ProductExpression.create(new DoubleExpression(4.0),CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt2)))), new DoubleExpression(20.0)));
 		assertEquals(varMap, varMapExpected);
 	}
@@ -196,8 +198,8 @@ public class MASSPACompilerWSNASynchTest extends BaseCompilerTest
 		// Evo's @(0)
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("On","0")), Lists.newArrayList(getPop("Off","0"),getPop("#turn_off","0"),getPop("#turn_off","A")),
 				ProductExpression.create(new PopulationExpression(getPop("On","0")), new DoubleExpression(0.1))));
-		Map<State, Integer> rateAt0 = new HashMap<State, Integer>();
-		rateAt0.put(getPop("Off","0"),1); rateAt0.put(getPop("On","1"),1);
+		Multiset<State> rateAt0 = HashMultiset.create();
+		rateAt0.add(getPop("Off","0"),1); rateAt0.add(getPop("On","1"),1);
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("Off","0")), Lists.newArrayList(getPop("#turn_on","0"),getPop("#turn_on","A"),getPop("On","0")),
 				ProductExpression.create(ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt0))),new DoubleExpression(0.15/300.0)))));
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("Off","0")), Lists.newArrayList(getPop("On","0")),
@@ -207,20 +209,20 @@ public class MASSPACompilerWSNASynchTest extends BaseCompilerTest
 		// Evo's @(2)
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("On","2")), Lists.newArrayList(getPop("Off","2"),getPop("#turn_off","2"),getPop("#turn_off","A")),
 				ProductExpression.create(new PopulationExpression(getPop("On","2")), new DoubleExpression(0.1))));
-		Map<State, Integer> rateAt2 = new HashMap<State, Integer>();
-		rateAt2.put(getPop("Off","2"),1); rateAt2.put(getPop("On","1"),1);
+		Multiset<State> rateAt2 = HashMultiset.create();
+		rateAt2.add(getPop("Off","2"),1); rateAt2.add(getPop("On","1"),1);
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("Off","2")), Lists.newArrayList(getPop("#turn_on","2"),getPop("#turn_on","A"),getPop("On","2")),
 				ProductExpression.create(ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt2))),new DoubleExpression(0.15/450.0)))));
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("Off","2")), Lists.newArrayList(getPop("On","2")),
 				ProductExpression.create(new PopulationExpression(getPop("Off","2")), new DoubleExpression(0.00001))));
 		
 		// Evo's @(1)
-		Map<State, Integer> rateAt11 = new HashMap<State, Integer>();
-		rateAt11.put(getPop("Off","1"),1); rateAt11.put(getPop("On","0"),1);
+		Multiset<State> rateAt11 = HashMultiset.create();
+		rateAt11.add(getPop("Off","1"),1); rateAt11.add(getPop("On","0"),1);
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("Off","1")), Lists.newArrayList(getPop("#turn_on","1"),getPop("#turn_on","A"),getPop("On","1")),
 				ProductExpression.create(ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt11))),new DoubleExpression(0.1/300.0)))));
-		Map<State, Integer> rateAt12 = new HashMap<State, Integer>();
-		rateAt12.put(getPop("Off","1"),1); rateAt12.put(getPop("On","2"),1);
+		Multiset<State> rateAt12 = HashMultiset.create();
+		rateAt12.add(getPop("Off","1"),1); rateAt12.add(getPop("On","2"),1);
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("Off","1")), Lists.newArrayList(getPop("#turn_on","1"),getPop("#turn_on","A"),getPop("On","1")),
 				ProductExpression.create(ProductExpression.create(CombinedProductExpression.create(new CombinedPopulationProduct(new PopulationProduct(rateAt12))),new DoubleExpression(0.1/300.0)))));
 		evolutionEventsExpected.add(new EvolutionEvent(Lists.newArrayList(getPop("Off","1")), Lists.newArrayList(getPop("On","1")),

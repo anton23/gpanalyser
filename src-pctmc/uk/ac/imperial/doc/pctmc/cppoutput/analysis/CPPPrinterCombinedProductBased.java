@@ -1,11 +1,15 @@
 package uk.ac.imperial.doc.pctmc.cppoutput.analysis;
 
+import java.util.Map;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.cppoutput.CPPPrinterWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
-import uk.ac.imperial.doc.pctmc.expressions.*;
-
-import java.util.Map;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.expressions.GeneralExpectationExpression;
+import uk.ac.imperial.doc.pctmc.expressions.ICombinedProductExpressionVisitor;
+import uk.ac.imperial.doc.pctmc.expressions.IGeneralExpectationExpressionVisitor;
 
 /**
  * C++ printer for expressions with combined population products as leaves.
