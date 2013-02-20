@@ -17,11 +17,11 @@ public abstract class ODEIntegratorsGroup {
 
 	public abstract Class<?>[] parameterTypes();
 	
-	public abstract Object[] processParameters(double stopTime, double stepSize, Map<String, Object> parameters);
+	public abstract Object[] processParameters(double startTime, double stopTime, double stepSize, Map<String, Object> parameters);
 	
-	public FirstOrderIntegrator getInstance(double stopTime, double stepSize, Map<String, Object> parameters)
+	public FirstOrderIntegrator getInstance(double startTime, double stopTime, double stepSize, Map<String, Object> parameters)
 		throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 			Constructor<?> constructor = integratorClass.getConstructor(parameterTypes());
-			return (FirstOrderIntegrator) constructor.newInstance(processParameters(stopTime, stepSize, parameters));	
+			return (FirstOrderIntegrator) constructor.newInstance(processParameters(startTime, stopTime, stepSize, parameters));	
 	}
 }

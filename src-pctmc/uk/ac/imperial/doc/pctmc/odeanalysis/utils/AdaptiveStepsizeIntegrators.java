@@ -20,7 +20,7 @@ public class AdaptiveStepsizeIntegrators extends ODEIntegratorsGroup {
 	
 			
 	@Override
-	public Object[] processParameters(double stopTime, double stepSize,
+	public Object[] processParameters(double startTime, double stopTime, double stepSize,
 			Map<String, Object> parameters) {
 		double minStep = 1.0e-8;
 		if (parameters.containsKey(MIN_STEP)) {
