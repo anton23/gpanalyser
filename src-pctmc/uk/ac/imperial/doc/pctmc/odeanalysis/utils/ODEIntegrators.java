@@ -32,6 +32,7 @@ public class ODEIntegrators {
 	
 	public static String INTEGRATOR = "integrator";
 	public static String GETINTEGRATOR = "getIntegrator";
+	public static String BOUNDS = "bounds";
 
 	
 	public static String INTEGRATORC = "Integrator";
@@ -72,12 +73,74 @@ public class ODEIntegrators {
 		}
 	}
 	
-
+	
 	public static double[][] solveODEs(final SystemOfODEs f, double initial[],
 			double stopTime, final double stepSize, Map<String, Object> parameters) {
+		return solveODEs(f, initial, 0.0, stopTime, stepSize, parameters);
+	}
+
+	public static double[][] solveODEs(final SystemOfODEs f, double initial[],
+			double startTime, final double stopTime, final double stepSize, Map<String, Object> parameters) {
 		final int n = initial.length;
 		
 		double[] init = Arrays.copyOf(initial, n);
+		
+		FirstOrderIntegrator integrator = getIntegrator(startTime, stopTime, stepSize, parameters);
+		
+		long t = System.currentTimeMillis();
+		
+		
+		StepNormalizerBounds bounds = StepNormalizerBounds.FIRST;
+		
+		if (parameters.containsKey(BOUNDS)) {
+			String option = (String)parameters.get(BOUNDS);
+			try {				
+				bounds = StepNormalizerBounds.valueOf(option);
+			} catch (Exception e) {
+				throw new AssertionError("Not a valid bounds option: " + option);
+			}
+		}
+		StepNormalizerMode mode = StepNormalizerMode.MULTIPLES;
+		
+		
+		double firstAfter = (Math.floor(startTime / stepSize) + 1) * stepSize;
+		double lastBefore = Math.floor(stopTime / stepSize) * stepSize;
+		
+		int length;
+		if (firstAfter <= lastBefore) {
+			length = (int) Math.round((lastBefore - firstAfter) / stepSize) + 1;
+		}
+		else {
+			length = 0;
+		}
+		
+		if (bounds.firstIncluded()) length++;
+
+		if (bounds.lastIncluded() && lastBefore != stopTime) length++;
+		
+		
+		final double ret[][] = new double[length][];
+		
+		FixedStepHandler fixedStepHandler = new FixedStepHandler() {
+			int step;
+		    public void init(double t0, double[] y0, double t) {step = 0;}
+			public void handleStep(double t, double[] y, double[] yDot,
+					boolean isLast) {
+				if (t <= stopTime + 1e-10) { // For some reason this is not always true... TODO
+					ret[step++] = Arrays.copyOf(y, n);
+				}
+			}
+		};
+		
+		
+		integrator.addStepHandler(new StepNormalizer(stepSize, fixedStepHandler, mode, bounds));
+		integrator.integrate(f, startTime, init, stopTime, init);
+		PCTMCLogging.info("ODE solver finished in " + (System.currentTimeMillis()-t) + "ms");
+		return ret;
+	}
+	
+	public static FirstOrderIntegrator getIntegrator(double startTime, final double stopTime, 
+			final double stepSize, Map<String, Object> parameters) {
 		
 		
 		FirstOrderIntegrator integrator = null;
@@ -88,7 +151,7 @@ public class ODEIntegrators {
 		
 		try {
 			ODEIntegratorsGroup odeIntegratorsGroup = algorithms.get(algorithm);
-			integrator = odeIntegratorsGroup.getInstance(stopTime, stepSize, parameters);
+			integrator = odeIntegratorsGroup.getInstance(startTime, stopTime, stepSize, parameters);
 		} catch (NoSuchMethodException e1) {
 			e1.printStackTrace();
 			throw new AssertionError("Integrator " + algorithm + " unknown!");
@@ -98,26 +161,14 @@ public class ODEIntegrators {
 			e.printStackTrace();
 			throw new AssertionError("Problem with ODE integrator!");
 		}
-		
-		long t = System.currentTimeMillis();
-		
 		PCTMCLogging.info("Running " + algorithm + " ODE solver.");
-		final double ret[][] = new double[(int) Math.ceil(stopTime / stepSize)+1][];
-		
-		FixedStepHandler fixedStepHandler = new FixedStepHandler() {
-			int step;
-		    public void init(double t0, double[] y0, double t) {step = 0;}
-			public void handleStep(double t, double[] y, double[] yDot,
-					boolean isLast) {
-				ret[step++] = Arrays.copyOf(y, n);
-			}
-		};
-		
-		integrator.addStepHandler(new StepNormalizer(stepSize, fixedStepHandler, StepNormalizerMode.MULTIPLES, StepNormalizerBounds.FIRST));
-		integrator.integrate(f, 0.0, init, stopTime, init);
-		PCTMCLogging.info("ODE solver finished in " + (System.currentTimeMillis()-t) + "ms");
-		return ret;
+
+		return integrator;
 	}
+	
+	
+	
+	
 			
 	
 }

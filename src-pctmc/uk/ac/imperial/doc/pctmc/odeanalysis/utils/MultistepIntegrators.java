@@ -11,9 +11,9 @@ public class MultistepIntegrators extends AdaptiveStepsizeIntegrators {
 	}
 	
 	@Override
-	public  Object[] processParameters(double stopTime, double stepSize,
+	public  Object[] processParameters(double startTime, double stopTime, double stepSize,
 			Map<String, Object> parameters) {
-		Object[] processParameters = super.processParameters(stopTime, stepSize, parameters);
+		Object[] processParameters = super.processParameters(startTime, stopTime, stepSize, parameters);
 		Integer nSteps = 4;
 		if (parameters.containsKey(NSTEP)) {
 			nSteps = (Integer) parameters.get(NSTEP);
