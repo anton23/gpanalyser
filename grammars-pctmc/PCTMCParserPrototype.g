@@ -413,8 +413,8 @@ odeSettings:
  
 simulation:
   SIMULATION
-  simulationSettings
-  -> ^(SIMULATION simulationSettings)
+  simulationSettings  
+  -> ^(SIMULATION simulationSettings )
 ;
 
 simulationSettings:
@@ -422,8 +422,9 @@ simulationSettings:
     STOPTIME DEF stopTime = expression COMMA
     STEPSIZE DEF stepSize = expression COMMA
     REPLICATIONS DEF replications = INTEGER
+    (COMMA parameter)*
   RPAR
-  -> ^(SIMULATIONSETTINGS $stopTime COMMA $stepSize COMMA $replications)
+  -> ^(SIMULATIONSETTINGS $stopTime COMMA $stepSize COMMA $replications (COMMA parameter)*)
 ;
 
 accuratesimulation:

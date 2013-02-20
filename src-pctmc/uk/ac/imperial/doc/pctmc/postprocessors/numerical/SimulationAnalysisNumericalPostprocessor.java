@@ -34,6 +34,7 @@ import uk.ac.imperial.doc.pctmc.simulation.SimulationUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AggregatedStateNextEventGenerator;
 import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulator;
+import uk.ac.imperial.doc.pctmc.simulation.utils.GillespieSimulatorWithODEs;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
@@ -224,11 +225,21 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		                                          					.size()
 		                                          					+ generalExpectationIndex.size()];
 		double[][] tmp;
+		GillespieSimulator simulator = new GillespieSimulator();
+		if (parameters != null && parameters.containsKey("simulator")) {
+			if (parameters.get("simulator").equals("ODE")) {
+				simulator = new GillespieSimulatorWithODEs();
+				PCTMCLogging.info("Using a simulator with ODE solver for accumulations.");
+			}
+		}
+		
+		
 		for (int r = 0; r < replications; r++) {
 			if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {
 				PCTMCLogging.info(r + " replications finished.");
 			}
-			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
+
+			tmp = simulator.simulateAccumulated(eventGenerator,
 					initial, stopTime, stepSize, accUpdater);
 			notifyReplicationObservers(tmp);
 			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {

@@ -196,7 +196,7 @@ public class AccurateSimulationAnalysisNumericalPostprocessor extends NumericalP
 				{
 					PCTMCLogging.info(reps + " replications finished.");
 				}
-				tmp = GillespieSimulator.simulateAccumulated(mEventGenerator,initial, stopTime, stepSize, mAccUpdater);
+				tmp = new GillespieSimulator().simulateAccumulated(mEventGenerator,initial, stopTime, stepSize, mAccUpdater);
 				for (int t = 0; t < timeSteps; t++)
 				{
 					mUpdater.update(dataPoints[t], tmp[t]);

@@ -13,6 +13,7 @@ import org.apache.commons.math3.ode.nonstiff.AdaptiveStepsizeIntegrator;
 import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince54Integrator;
 import org.apache.commons.math3.ode.nonstiff.DormandPrince853Integrator;
+import org.apache.commons.math3.ode.nonstiff.EulerIntegrator;
 import org.apache.commons.math3.ode.nonstiff.GraggBulirschStoerIntegrator;
 import org.apache.commons.math3.ode.nonstiff.HighamHall54Integrator;
 import org.apache.commons.math3.ode.nonstiff.MidpointIntegrator;
@@ -40,7 +41,7 @@ public class ODEIntegrators {
 	
 	static final Set<Class<? extends RungeKuttaIntegrator>> RUNGEKUTTA = 
 			Sets.<Class<? extends RungeKuttaIntegrator>>
-				newHashSet(ClassicalRungeKuttaIntegrator.class, MidpointIntegrator.class);
+				newHashSet(ClassicalRungeKuttaIntegrator.class, MidpointIntegrator.class, EulerIntegrator.class);
 	
 	
 	static final Set<Class<? extends AdaptiveStepsizeIntegrator>> ADAPTIVESTEP =
@@ -51,7 +52,6 @@ public class ODEIntegrators {
 	static final Set<Class<? extends MultistepIntegrator>> MULTISTEP =
 		Sets.<Class<? extends MultistepIntegrator>>
 				newHashSet(AdamsBashforthIntegrator.class, AdamsMoultonIntegrator.class);
-	
 	
 	static final Map<String, ODEIntegratorsGroup> algorithms = new HashMap<String, ODEIntegratorsGroup>();	
 	
