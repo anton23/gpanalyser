@@ -157,7 +157,7 @@ public class CPPSimulationAnalysisNumericalPostprocessor
 			if (r > 0 && r % (replications / 5 > 0 ? replications/ 5 : 1) == 0) {
 				PCTMCLogging.info(r + " replications finished.");
 			}
-			tmp = GillespieSimulator.simulateAccumulated(eventGenerator,
+			tmp = new GillespieSimulator().simulateAccumulated(eventGenerator,
                     initial, stopTime, stepSize, accUpdater);
 			for (int t = 0; t < (int) Math.ceil(stopTime / stepSize); t++) {
 				updater.update(dataPoints[t], tmp[t]);				
