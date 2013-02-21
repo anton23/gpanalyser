@@ -126,7 +126,7 @@ public class ODEIntegrators {
 		    public void init(double t0, double[] y0, double t) {step = 0;}
 			public void handleStep(double t, double[] y, double[] yDot,
 					boolean isLast) {
-				if (t <= stopTime + 1e-10) { // For some reason this is not always true... TODO
+				if (t <= stopTime + 1e-10 && step < ret.length) { // For some reason this is not always true... TODO
 					ret[step++] = Arrays.copyOf(y, n);
 				}
 			}
