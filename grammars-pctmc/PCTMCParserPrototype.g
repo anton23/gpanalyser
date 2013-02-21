@@ -8,6 +8,7 @@ options {
 }
 
 tokens{
+  ACCVINIT;
   COMPONENT; 
   CONSTANT;
   VARIABLE;
@@ -235,9 +236,23 @@ system:
   {requireDefinitions = true;}
   constantDefinition* varDefinition* 
   {hint.push("incomplete model definition");} modelDefinition {hint.pop();}
+  accDefinitions?
   {hint.push("allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise'");}
   analysis* experiment*
   {hint.pop();}
+;
+
+accDefinitions:
+  accDefinition+
+  accInitDefinition+
+;
+
+accDefinition:
+  (DER ACCV UPPERCASENAME DEF expression SEMI) -> ^(ACCV UPPERCASENAME DEF expression) 
+;
+
+accInitDefinition:
+  (ACCV UPPERCASENAME DEF expression SEMI) -> ^(ACCVINIT UPPERCASENAME DEF expression)
 ;
 
 modelDefinition:
@@ -607,7 +622,8 @@ acc
 @after{
   requiresExpectation = oldRequiresExpectation;
 }:
- ACC LPAR expression RPAR -> ^(ACC expression); 
+ ACC LPAR expression RPAR -> ^(ACC expression)
+|ACCV UPPERCASENAME -> ^(ACCV UPPERCASENAME);
  
 accPower:
   acc (POWER INTEGER)? -> acc INTEGER?; 

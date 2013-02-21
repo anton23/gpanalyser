@@ -1,10 +1,12 @@
 package uk.ac.imperial.doc.pctmc.postprocessors.numerical;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
@@ -12,7 +14,11 @@ import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.javaoutput.JavaODEsPreprocessed;
 import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
+import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.representation.PCTMCWithAccumulations;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 
 import com.google.common.collect.Multiset;
@@ -122,7 +128,8 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 	public double[] getInitialValues(Constants constants) {
 		initial = new double[momentIndex.size()];
 
-		Map<State, Integer> stateIndex = odeAnalysis.getPCTMC()
+		PCTMC pctmc = odeAnalysis.getPCTMC();
+		Map<State, Integer> stateIndex = pctmc
 				.getStateIndex();
 		int size = stateIndex.size();
 		double[] initialCounts = new double[size];
@@ -130,15 +137,24 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		for (int i = 0; i < size; i++) {
 			ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(
 					constants);
-			odeAnalysis.getPCTMC().getInitCounts()[i].accept(evaluator);
+			pctmc.getInitCounts()[i].accept(evaluator);
 			initialCounts[i] = evaluator.getResult();
 		}
-
+		
+		Map<NamedAccumulation, Double> initialAcc = new HashMap<NamedAccumulation, Double>();
+		if (pctmc instanceof PCTMCWithAccumulations) {
+			Map<NamedAccumulation, AbstractExpression> accInit = ((PCTMCWithAccumulations)pctmc).getAccInit();
+			for (Map.Entry<NamedAccumulation, AbstractExpression> e : accInit.entrySet()) {
+				ExpressionEvaluatorWithConstants evaluator = new ExpressionEvaluatorWithConstants(
+						constants);
+				e.getValue().accept(evaluator);
+				initialAcc.put(e.getKey(), evaluator.getResult());
+			}
+		}
+		
 		for (Map.Entry<CombinedPopulationProduct, Integer> e : momentIndex
 				.entrySet()) {
-			if (!e.getKey().getAccumulatedProducts().isEmpty()) {
-				initial[e.getValue()] = 0;
-			} else {
+			
 				double tmp = 1.0;
 
 				for (Multiset.Entry<State> s : e.getKey().getPopulationProduct()
@@ -151,9 +167,18 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 						tmp *= initialCounts[stateIndex.get(s.getElement())];
 					}
 				}
+				for (Multiset.Entry<AccumulationVariable> a : e.getKey().getAccumulatedProducts().entrySet()) {
+					if (a.getElement() instanceof NamedAccumulation) {
+						Double init = initialAcc.get((NamedAccumulation)a.getElement());
+						for (int p = 0; p < a.getCount(); p++) {
+							tmp *= init;
+						}						
+					} else {
+						tmp = 0;
+					}
+				}
 				initial[e.getValue()] = tmp;
-			}
-		}
+		}		
 		return initial;
 	}
 }

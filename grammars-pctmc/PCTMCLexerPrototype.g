@@ -39,6 +39,7 @@ MAXRELCIWIDTH:'maxRelCIWidth';
 BATCHSIZE:'batchSize';
 
 ACC: 'acc';
+ACCV: '~';
 
 TO: '->';
 
@@ -79,6 +80,7 @@ LANGLE:'<';
 
 
 DERMEAN: 'dE';
+DER: 'd';
 DT: 'dt';
 
 UPPERCASENAME : ('A'..'Z')('A'..'Z'|'a'..'z'|'0'..'9'|'_')*('\'')*;

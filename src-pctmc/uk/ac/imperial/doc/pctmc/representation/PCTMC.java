@@ -14,9 +14,7 @@ public class PCTMC {
 	private State[] inverseStateIndex; 
 	private AbstractExpression[] initCounts; 
 	private Map<State,AbstractExpression> initMap; 
-	private Collection<EvolutionEvent> evolutionEvents; 
-	
-	
+	protected Collection<EvolutionEvent> evolutionEvents; 
 	
 	public Map<State, AbstractExpression> getInitMap() {
 		return initMap;

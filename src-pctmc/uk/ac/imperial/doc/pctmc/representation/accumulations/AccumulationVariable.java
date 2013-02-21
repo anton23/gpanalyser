@@ -11,6 +11,14 @@ public class AccumulationVariable {
 	public AccumulationVariable(AbstractExpression ddt) {
 		super();
 		this.ddt = ddt;
+		calculateOrder();
+	}
+
+	public AbstractExpression getDdt() {
+		return ddt;
+	}
+	
+	protected void calculateOrder() {
 		CollectUsedMomentsVisitor visitor = new CollectUsedMomentsVisitor();
 		ddt.accept(visitor);
 		order = 0;
@@ -18,11 +26,6 @@ public class AccumulationVariable {
 			order = Math.max(order, m.getOrder());
 		}	
 	}
-
-	public AbstractExpression getDdt() {
-		return ddt;
-	}
-	
 	
 	public int getOrder() {
 		return order;

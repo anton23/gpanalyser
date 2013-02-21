@@ -97,11 +97,27 @@ system returns[Constants constants,
 : constantDefinition[constantMap]* {$constants = new Constants(constantMap);}
    varDefinition* {$unfoldedVariables = new ExpressionVariableUnfolderPCTMC(vars).unfoldVariables();
                     vars = $unfoldedVariables; }
+                        
+                    
    m=modelDefinition[$unfoldedVariables,$constants] {$pctmc = $m.pctmc;}
+   
+   (accDef=accDefinitions {$pctmc = new PCTMCWithAccumulations($pctmc, $accDef.accODEs, $accDef.accInit);})?
    
    analysis[$pctmc, $constants, $plots]*
    
    (e=experiment[$pctmc, $constants, $unfoldedVariables] {$experiments.add($e.experiment);})* 
+;
+
+accDefinitions returns [Map<NamedAccumulation, AbstractExpression> accODEs,
+      Map<NamedAccumulation, AbstractExpression> accInit]
+@init{
+  $accODEs = new HashMap<NamedAccumulation, AbstractExpression>();
+  $accInit = new HashMap<NamedAccumulation, AbstractExpression>();
+}
+:
+  (^(ACCV n=UPPERCASENAME DEF ddt=expression {$accODEs.put(new NamedAccumulation($n.text), $ddt.e);}))+
+  
+   (^(ACCVINIT n1=UPPERCASENAME DEF x=expression  {$accInit.put(new NamedAccumulation($n1.text), $x.e);}))+
 ;
 
 modelDefinition[Map<ExpressionVariable,AbstractExpression> unfoldedVariables,Constants constants] returns [PCTMC pctmc]
@@ -520,11 +536,16 @@ accPowers returns [Multiset<AccumulationVariable> a]
 @init{
   $a = HashMultiset.<AccumulationVariable>create();
 }:
-  ( ^(ACC p=expression)
-          (n=integer {$a.add(new AccumulationVariable($p.e),$n.value-1);})?
-      {$a.add(new AccumulationVariable($p.e),1);}
-  )*
+   (v=acc  (n=integer {$a.add($v.a, $n.value-1);})?
+   {$a.add($v.a, 1);}
+   )*
 ;
+
+acc returns [AccumulationVariable a]:
+   ^(ACC p=expression {$a = new AccumulationVariable($p.e);})
+ | ^(ACCV n=UPPERCASENAME {$a = new NamedAccumulation($n.text);}) 
+ ;
+
 
 product returns [PopulationProduct p]
 @init{
