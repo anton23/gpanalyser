@@ -15,6 +15,9 @@ import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternSetterVisitor;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.representation.PCTMCWithAccumulations;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulation;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulationUnfolder;
 
 import com.google.common.collect.Multimap;
 
@@ -76,6 +79,21 @@ public class PCTMCFileRepresentation {
 	public void unfoldVariablesAndSetUsedProducts() {
 		for (AbstractPCTMCAnalysis analysis : plots.keySet()) {
 			AbstractPCTMCAnalysis.unfoldVariablesAndSetUsedProducts(analysis, plots.get(analysis), unfoldedVariables);
+		}
+		unfoldAccumulations();
+	}
+	
+	public void unfoldAccumulations() {
+		if (pctmc instanceof PCTMCWithAccumulations) {
+			Map<NamedAccumulation, AbstractExpression> accODEs = ((PCTMCWithAccumulations) pctmc).getAccODEs();
+			NamedAccumulationUnfolder unfolder = new NamedAccumulationUnfolder(accODEs);
+			for (AbstractPCTMCAnalysis analysis : plots.keySet()) {
+				for (PlotDescription p : plots.get(analysis)) {
+					for (AbstractExpression e : p.getExpressions()) {
+						e.accept(unfolder);
+					}
+				}
+			}
 		}
 	}
 	

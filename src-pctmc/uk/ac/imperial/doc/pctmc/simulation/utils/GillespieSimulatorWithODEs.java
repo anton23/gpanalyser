@@ -10,7 +10,7 @@ public class GillespieSimulatorWithODEs extends GillespieSimulator {
 	@Override
 	public double[][] simulateAccumulated(AggregatedStateNextEventGenerator g,
 			double initial[], double stopTime, double stepSize, final AccumulatorUpdater accumulator) {
-		final int n = initial.length;
+		final int n = initial.length - accumulator.n;
 		
 		SystemOfODEs f = new SystemOfODEs() {
 			
@@ -51,7 +51,7 @@ public class GillespieSimulatorWithODEs extends GillespieSimulator {
 
 		double[] counts = new double[n];
 
-		for (int i = 0; i < np; i++) {
+		for (int i = 0; i < initial.length; i++) {
 			counts[i] = initial[i];
 			ret[0][i] = initial[i];
 		}

@@ -15,6 +15,7 @@ import java.util.Set;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.constants.visitors.ExpressionEvaluatorWithConstants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.JavaExpressionPrinterWithVariables;
 import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
@@ -27,8 +28,10 @@ import uk.ac.imperial.doc.pctmc.javaoutput.simulation.JavaPrinterPopulationBased
 import uk.ac.imperial.doc.pctmc.javaoutput.utils.ClassCompiler;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.representation.PCTMCWithAccumulations;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulation;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.simulation.SimulationUpdater;
 import uk.ac.imperial.doc.pctmc.simulation.utils.AccumulatorUpdater;
@@ -142,10 +145,23 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	}
 
     private void setInitialExpressions() {
-        int n = simulation.getPCTMC().getStateIndex().size();
-        initialExpressions = new AbstractExpression[n];
+        PCTMC pctmc = simulation.getPCTMC();
+		int n = pctmc.getStateIndex().size();
+		Map<NamedAccumulation, AbstractExpression> accInit = null;
+		if (pctmc instanceof PCTMCWithAccumulations) {
+			accInit = ((PCTMCWithAccumulations) pctmc).getAccInit(); 
+		}
+        Map<AccumulationVariable, Integer> accumulationIndex = simulation.getAccumulatedMomentIndex();
+        initialExpressions = new AbstractExpression[n + accumulationIndex.size()];
         for (int i = 0; i < n; i++) {
-            initialExpressions[i] = simulation.getPCTMC().getInitCounts()[i];
+            initialExpressions[i] = pctmc.getInitCounts()[i];
+        }
+        for (Map.Entry<AccumulationVariable, Integer> e : accumulationIndex.entrySet()) {
+        	if (e.getKey() instanceof NamedAccumulation) {
+        		initialExpressions[n + e.getValue()] = accInit.get(e.getKey());
+        	} else {
+        		initialExpressions[n + e.getValue()] = DoubleExpression.ZERO;
+        	}
         }
     }
 	

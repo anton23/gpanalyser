@@ -6,7 +6,7 @@ public class GillespieSimulator {
 	
 	public double[][] simulateAccumulated(AggregatedStateNextEventGenerator g,
 			double initial[], double stopTime, double stepSize, final AccumulatorUpdater accumulator) {
-		int n = initial.length;
+		int n = initial.length - accumulator.n;
 		double[][] ret = new double[(int) Math.ceil(stopTime / stepSize)][n+accumulator.n];
 
 		double currentTime = 0;
