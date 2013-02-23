@@ -436,7 +436,7 @@ simulationSettings:
   LPAR
     STOPTIME DEF stopTime = expression COMMA
     STEPSIZE DEF stepSize = expression COMMA
-    REPLICATIONS DEF replications = INTEGER
+    REPLICATIONS DEF replications = expression
     (COMMA parameter)*
   RPAR
   -> ^(SIMULATIONSETTINGS $stopTime COMMA $stepSize COMMA $replications (COMMA parameter)*)

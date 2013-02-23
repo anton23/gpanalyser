@@ -72,7 +72,7 @@ public class PopulationProduct {
 					ret += " ";
 				ret += e.getElement();
 				if (e.getCount() > 1)
-					ret += "^" + e.getElement();
+					ret += "^" + e.getCount();
 			}
 		}
 		return ret;

@@ -1,0 +1,25 @@
+r_arrive = 8.0;
+r_service = 1.0;
+r_on = 1.0;
+r_off = 0.2;
+thresh = 30;
+t_s = 1.0;
+t_a = 10.0;
+
+c = 10;
+a = 2;
+
+scale = 1000;
+
+-> {C} @ r_arrive * scale;
+{C} + {S} -> {S} @ min({C}, {S}) * r_service;
+
+{A} -> {A1} @ min(thresh * scale - ~T, 0) * {A} * (-r_on / scale);
+{A1} -> {A} @ {A1} * r_off;
+
+{S} = c * scale;
+{A} = a * scale; 
+
+ddt ~T = min({C}, {S}) * t_s - {A1} * t_a;
+  ~T = 25 * scale;
+  

@@ -1,7 +1,9 @@
 package uk.ac.imperial.doc.pctmc.testing.odes;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -12,8 +14,6 @@ import org.antlr.runtime.ANTLRFileStream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import com.google.common.collect.Sets;
 
 import uk.ac.imperial.doc.jexpressions.expanded.DoubleConstantCoefficients;
 import uk.ac.imperial.doc.jexpressions.expanded.ExpandedExpression;
@@ -29,6 +29,8 @@ import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
+
+import com.google.common.collect.Sets;
 
 
 @RunWith(Parameterized.class)
@@ -73,6 +75,10 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 
 	@SuppressWarnings("unchecked")
 	protected void checkExpectedODEs(String file) throws ParseException, IOException, IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
+		File f = new File(file);
+		if (!f.exists()) {
+			return;
+		}
 		Object compilerReturn = interpreter.parseGenericRule(new ANTLRFileStream(file), "odeTest", false);
 		List<AbstractExpression> expressions = 
 			(List<AbstractExpression>) compilerReturn.getClass().getField("moments").get(compilerReturn);
@@ -98,9 +104,11 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 		generator.getODEMethodWithCombinedMoments(moments);		
 		for (Map.Entry<CombinedPopulationProduct, AbstractExpression> e:expectedODEs.entrySet()) {
 			ExpandedExpression expectedExpanded = expandExpression(e.getValue());
-			ExpandedExpression actualExpanded = expandExpression((generator.getRHS(e.getKey())));
+			AbstractExpression rhs = generator.getRHS(e.getKey());
+			assertNotNull("Missing ODE for moment " + e.getKey(), rhs);
+			ExpandedExpression actualExpanded = expandExpression(rhs);
 			assertEquals("ODE for moment " + e.getKey() + ", difference:\n"
-					+ expandExpression(new MinusExpression(e.getValue(), generator.getRHS(e.getKey()))).toAbstractExpression()+"\n",
+					+ expandExpression(new MinusExpression(e.getValue(), rhs)).toAbstractExpression()+"\n",
 					expectedExpanded, actualExpanded);
 			
 		}
@@ -127,10 +135,7 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 	}
 	
 	public static ExpandedExpression expandExpression(AbstractExpression e) {
-		ExpandingExpressionTransformerWithMoments t = new ExpandingExpressionTransformerWithMoments(new DoubleConstantCoefficients());
-		if (e == null) {
-			System.out.println("OOPS");
-		}
+		ExpandingExpressionTransformerWithMoments t = new ExpandingExpressionTransformerWithMoments(new DoubleConstantCoefficients());		
 		e.accept(t);
 		ExpandedExpression ret = t.getResult();
 		return ret;

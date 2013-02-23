@@ -21,8 +21,11 @@ import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.representation.EvolutionEvent;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.representation.PCTMCWithAccumulations;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulation;
+import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulationUnfolder;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.Binomial;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -42,6 +45,13 @@ public class NewODEGenerator {
 	protected Map<CombinedPopulationProduct, Integer> momentIndex;
 	
 	public ODEMethod getODEMethodWithCombinedMoments(Collection<CombinedPopulationProduct> combinedMoments) {
+		if (pctmc instanceof PCTMCWithAccumulations) {
+			Map<NamedAccumulation, AbstractExpression> accODEs = ((PCTMCWithAccumulations) pctmc).getAccODEs();
+			NamedAccumulationUnfolder unfolder = new NamedAccumulationUnfolder(accODEs);
+			for (CombinedPopulationProduct p : combinedMoments) {
+				CombinedProductExpression.create(p).accept(unfolder);
+			}
+		}
 		generateODESystem(combinedMoments);
 		AbstractStatement[] ret = new AbstractStatement[rhs.keySet().size()];
 		int i = 0;
@@ -74,7 +84,7 @@ public class NewODEGenerator {
 	public NewODEGenerator(PCTMC pctmc, MomentClosure momentClosure) {
 		super();
 		this.pctmc = pctmc;
-		this.momentClosure = momentClosure;
+		this.momentClosure = momentClosure;		
 	}
 
 	private class CoefficientMoment {
