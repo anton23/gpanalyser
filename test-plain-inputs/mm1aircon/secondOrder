@@ -1,0 +1,51 @@
+E[~T^2];
+
+dE[{C}]/dt = r_arrive * scale - min(E[{C}], E[{S}]) * r_service;
+dE[{S}]/dt = 0.0;
+dE[{A}]/dt = -min(thresh * scale - E[~T], 0) * E[{A}] * (-r_on / scale) + E[{A1}] * r_off;
+dE[{A1}]/dt = min(thresh * scale - E[~T], 0) * E[{A}] * (-r_on / scale) - E[{A1}] * r_off;
+dE[~T]/dt = min(E[{C}], E[{S}]) * t_s - E[{A1}] * t_a;
+
+dE[{S} {A1}]/dt = (-1.0)*(r_on/scale)* E[{A} {S}] * min((-1.0)*E[~T] + scale * thresh, 0.0) + (-1.0)*r_off*E[{S} {A1}];
+dE[{A1} ~T]/dt =  t_s* min(E[{C} {A1}],E[{S} {A1}]) - t_a * E[{A1}^2] 
+                 - r_on/scale * E[{A} ~T] * min(-E[ ~T] + scale *thresh, 0.0) - r_off* E[{A1} ~T]; 
+dE[{A}^2]/dt = -r_on/scale * E[{A}] * min(-E[ ~T] + scale * thresh, 0.0) + r_off * E[{A1}] 
+              + 2.0*r_off*E[{A} {A1}] + 2.0 * r_on/scale * min(-E[~T] + scale * thresh, 0.0) * E[{A}^2];
+dE[{A} {A1}]/dt = r_off * E[{A1}^2] + r_on/scale * E[{A}] * min(-E[~T] + scale * thresh, 0.0) 
+ 			+ r_on/scale * min(-E[~T] + scale * thresh, 0.0) * E[{A} {A1}] - r_off * E[{A1}] 
+ 			-r_off *E[{A} {A1}]-r_on/scale * min(-E[~T] + scale * thresh, 0.0) * E[{A}^2];
+
+dE[{A} ~T]/dt = 
+         r_on/scale * E[{A} ~T] * min(-E[ ~T] + scale * thresh, 0.0) 
+        + t_s * min(E[{A} {C}], E[{A} {S}]) + r_off * E[{A1} ~T] - t_a * E[{A} {A1}];
+dE[{C} {A1}]/dt = 
+	  - r_on/ scale * E[{C} {A}] * min(- E[ ~T] + scale * thresh, 0.0) 
+	  - r_off *E[{C} {A1}] - r_service * min(E[{C} {A1}], E[{S} {A1}])
+	   + scale * r_arrive * E[{A1}];
+	   
+dE[{C} {A}]/dt = 
+	 r_on/scale * E[{C} {A}] * min(-E[ ~T] + scale * thresh, 0.0)
+    + r_off * E[{C} {A1}] - r_service * min(E[{A} {C}],E[{A} {S}])
+    + scale * r_arrive * E[{A}];
+dE[~T^2]/dt = 2.0*t_s*min(E[{C} ~T], E[{S} ~T]) -2.0* t_a * E[{A1} ~T];
+dE[{S}^2]/dt = 0.0;	
+dE[{A1}^2]/dt = -2.0* r_off * E[{A1}^2] - r_on/scale * E[{A}] * min(-E[ ~T] + scale * thresh, 0.0)
+    -2.0* r_on/scale * min(-E[ ~T] + scale * thresh, 0.0) *E[{A} {A1}] + r_off * E[{A1}];
+dE[{C} ~T]/dt = 
+	 scale * r_arrive * E[ ~T] - t_a * E[{C} {A1}] 
+	 + t_s * min(E[{C}^2],E[{C} {S}]) 
+	 -1.0 * r_service * min(E[{C} ~T],E[{S} ~T]);
+dE[{A} {S}]/dt = 
+   r_on/scale * E[{A} {S}] * min(-E[ ~T] + scale * thresh, 0.0)
+    + r_off * E[{S} {A1}];
+dE[{S} ~T]/dt =
+ t_s * min(E[{C} {S}], E[{S}^2])
+ - t_a * E[{S} {A1}];
+dE[{C} {S}]/dt =
+ - r_service * min(E[{C} {S}],E[{S}^2])
+  + scale * r_arrive * E[{S}];
+dE[{C}^2]/dt = r_service * min(E[{C}], E[{S}]) 
+ -2.0* r_service * min(E[{C}^2],E[{C} {S}])
+ + 2.0*scale * r_arrive * E[{C}] +  scale * r_arrive;
+
+ 

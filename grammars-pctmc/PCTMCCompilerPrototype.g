@@ -356,11 +356,13 @@ returns [PCTMCSimulation analysis, SimulationAnalysisNumericalPostprocessor post
       $settings.stopTime.accept(stopEval);
       ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
       $settings.stepSize.accept(stepEval);
+      ExpressionEvaluatorWithConstants replEval = new ExpressionEvaluatorWithConstants($constants);
+      $settings.replications.accept(replEval);
       if ($settings.parameters.isEmpty()) {
-        $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$settings.replications);
+        $postprocessor = new SimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(), (int) replEval.getResult());
       } else {
         $postprocessor = new SimulationAnalysisNumericalPostprocessor(
-            stopEval.getResult(),stepEval.getResult(),$settings.replications, $settings.parameters);
+            stopEval.getResult(),stepEval.getResult(),(int) replEval.getResult(), $settings.parameters);
       }
       $analysis.addPostprocessor($postprocessor);
     }
@@ -369,18 +371,18 @@ returns [PCTMCSimulation analysis, SimulationAnalysisNumericalPostprocessor post
 ;
 
 simulationSettings returns
-  [AbstractExpression stopTime, AbstractExpression stepSize, int replications,  Map<String, Object> parameters]
+  [AbstractExpression stopTime, AbstractExpression stepSize, AbstractExpression replications,  Map<String, Object> parameters]
  @init{
   $parameters = new HashMap<String, Object>();
 }:
   ^(SIMULATIONSETTINGS stopExpr=expression
-  	COMMA stepExpr=expression COMMA repl=INTEGER
+  	COMMA stepExpr=expression COMMA repl=expression
   	 (COMMA p=parameter {$parameters.put($p.name, $p.value);})*     	
   	)
   {
       $stopTime = $stopExpr.e;
       $stepSize = $stepExpr.e;
-      $replications = Integer.parseInt ($repl.text);
+      $replications = $repl.e;
   }
 ;
 
