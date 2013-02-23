@@ -80,7 +80,7 @@ LANGLE:'<';
 
 
 DERMEAN: 'dE';
-DER: 'd';
+DER: 'ddt';
 DT: 'dt';
 
 UPPERCASENAME : ('A'..'Z')('A'..'Z'|'a'..'z'|'0'..'9'|'_')*('\'')*;
