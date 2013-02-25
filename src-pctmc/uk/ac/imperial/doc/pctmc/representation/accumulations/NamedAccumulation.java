@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.pctmc.representation.accumulations;
 
-import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
 
 /**
@@ -15,11 +14,10 @@ public class NamedAccumulation extends AccumulationVariable {
 		super(new DoubleExpression(1.0));
 		this.name = name;
 	}
-	
-	
-	public void setDDt (AbstractExpression ddt) {
-		this.ddt = ddt;
-		calculateOrder();
+
+	@Override
+	public int getOrder() {
+		return 1;
 	}
 	
 	@Override

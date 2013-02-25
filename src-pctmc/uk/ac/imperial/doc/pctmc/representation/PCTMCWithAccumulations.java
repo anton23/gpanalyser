@@ -4,7 +4,6 @@ import java.util.Map;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulation;
-import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulationUnfolder;
 
 public class PCTMCWithAccumulations extends PCTMC {
 	
@@ -16,24 +15,8 @@ public class PCTMCWithAccumulations extends PCTMC {
 		super(pctmc.getInitMap(), pctmc.getEvolutionEvents());
 		this.accODEs = accODEs;		
 		this.accInit = accInit;
-		setNamedAccumulations();
 	}
 	
-	protected void setNamedAccumulations() {
-		for (Map.Entry<NamedAccumulation, AbstractExpression> e : accODEs.entrySet()) {
-			NamedAccumulationUnfolder unfolder = new NamedAccumulationUnfolder(accODEs);
-			e.getValue().accept(unfolder);
-		}
-		for (Map.Entry<NamedAccumulation, AbstractExpression> e : accInit.entrySet()) {
-			NamedAccumulationUnfolder unfolder = new NamedAccumulationUnfolder(accODEs);
-			e.getValue().accept(unfolder);
-		}
-		for (EvolutionEvent e : this.evolutionEvents) {
-			NamedAccumulationUnfolder unfolder = new NamedAccumulationUnfolder(accODEs);
-			e.getRate().accept(unfolder);
-		}
-	}
-
 	public Map<NamedAccumulation, AbstractExpression> getAccODEs() {
 		return accODEs;
 	}

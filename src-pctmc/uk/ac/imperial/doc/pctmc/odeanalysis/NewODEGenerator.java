@@ -25,7 +25,6 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMCWithAccumulations;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.AccumulationVariable;
 import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulation;
-import uk.ac.imperial.doc.pctmc.representation.accumulations.NamedAccumulationUnfolder;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 import uk.ac.imperial.doc.pctmc.utils.Binomial;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
@@ -43,15 +42,10 @@ public class NewODEGenerator {
 	protected Set<CombinedPopulationProduct> processing;
 	
 	protected Map<CombinedPopulationProduct, Integer> momentIndex;
+	protected Map<NamedAccumulation, AbstractExpression> accODEs;
 	
 	public ODEMethod getODEMethodWithCombinedMoments(Collection<CombinedPopulationProduct> combinedMoments) {
-		if (pctmc instanceof PCTMCWithAccumulations) {
-			Map<NamedAccumulation, AbstractExpression> accODEs = ((PCTMCWithAccumulations) pctmc).getAccODEs();
-			NamedAccumulationUnfolder unfolder = new NamedAccumulationUnfolder(accODEs);
-			for (CombinedPopulationProduct p : combinedMoments) {
-				CombinedProductExpression.create(p).accept(unfolder);
-			}
-		}
+
 		generateODESystem(combinedMoments);
 		AbstractStatement[] ret = new AbstractStatement[rhs.keySet().size()];
 		int i = 0;
@@ -59,7 +53,6 @@ public class NewODEGenerator {
 			ret[i++] = new Assignment(CombinedProductExpression
 					.create(e.getKey()), e.getValue());
 		}			
-
 		return new ODEMethod(ret, momentClosure.getVariables());
 	}
 	
@@ -84,7 +77,10 @@ public class NewODEGenerator {
 	public NewODEGenerator(PCTMC pctmc, MomentClosure momentClosure) {
 		super();
 		this.pctmc = pctmc;
-		this.momentClosure = momentClosure;		
+		this.momentClosure = momentClosure;
+		if (pctmc instanceof PCTMCWithAccumulations) {
+			 accODEs = ((PCTMCWithAccumulations) pctmc).getAccODEs();
+		}
 	}
 
 	private class CoefficientMoment {
@@ -142,7 +138,14 @@ public class NewODEGenerator {
 			}
 			newAccumulatedMoments.remove(accumulatedMoment.getElement(), 1);
 			
-			AbstractExpression product = momentClosure.insertProductIntoRate(accumulatedMoment.getElement().getDdt(), combinedProduct.getPopulationProduct());
+			AbstractExpression ddt = null;
+			if (accumulatedMoment.getElement() instanceof NamedAccumulation) {
+				ddt = accODEs.get(accumulatedMoment.getElement()); 
+			} else {
+				ddt = accumulatedMoment.getElement().getDdt();
+			}
+			
+			AbstractExpression product = momentClosure.insertProductIntoRate(ddt, combinedProduct.getPopulationProduct());
 			product = momentClosure.insertAccumulations(product, new CombinedPopulationProduct(null, newAccumulatedMoments));
 
 			AbstractExpression diff = ProductExpression.create(coefficient, product);

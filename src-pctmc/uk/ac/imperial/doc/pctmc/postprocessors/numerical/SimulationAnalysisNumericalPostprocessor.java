@@ -339,7 +339,10 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 	public static final String accumulatorUpdaterName = "GeneratedAccumulatorUpdater";
 	
 	public static String getAccumulatorUpdaterCode(PCTMCSimulation simulation, Constants constants) {
-
+		Map<NamedAccumulation, AbstractExpression> accODEs = null;
+		if (simulation.getPCTMC() instanceof PCTMCWithAccumulations) {
+			accODEs = ((PCTMCWithAccumulations)simulation.getPCTMC()).getAccODEs();
+		}
 		StringBuilder ret = new StringBuilder();
 		ret.append("import " + AccumulatorUpdater.class.getName() + ";\n");
 		ret.append("import " + JExpressionsJavaUtils.class.getName() + ";\n");		
@@ -354,8 +357,13 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 			ret.append("values[" + entry.getValue() + "]=delta*(");			
 			JavaPrinterPopulationBased printer = new JavaPrinterPopulationBased(constants, simulation.getPCTMC().getStateIndex(),simulation.getAccumulatedMomentIndex(), "counts", true);
 
-			AbstractExpression tmp = entry.getKey().getDdt(); 
-			tmp.accept(printer); 		
+			AbstractExpression ddt = null;
+			if (entry.getKey() instanceof NamedAccumulation) {
+				ddt = accODEs.get(entry.getKey() ); 
+			} else {
+				ddt = entry.getKey().getDdt();
+			} 
+			ddt.accept(printer); 		
 			ret.append(printer.toString()); 
 			ret.append(");\n");
 		}
