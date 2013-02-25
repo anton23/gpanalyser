@@ -1,0 +1,18 @@
+E[{S}], E[{R}], E[{S}^2];
+
+dE[{S}]/dt = -E[{S}{I}]*r_infect;
+dE[{S}{I}]/dt =
+           -E[{S} {I}]* r_infect -E[{S} {I}]*r_recover
+           +(2*E[{S}] * E[{S} {I}] - 2*E[{I}]*E[{S}]*E[{S}]+E[{I}]*E[{S}^2])*r_infect
+           -(E[{I}^2]*E[{S}]+2*E[{I}]*E[{S} {I}]-2*E[{I}]*E[{I}]*E[{S}])*r_infect;
+
+dE[{S}^2]/dt = E[{S} {I}]*r_infect 
+		  + (2*E[{S}]*E[{S} {I}]-2*E[{I}]*E[{S}]*E[{S}]+E[{I}]*E[{S}^2])*(-2*r_infect);
+		  
+dE[{I}^2]/dt = E[{S} {I}]*r_infect
+		  + ((E[{I}^2]*E[{S}]+2*E[{I}]*E[{S} {I}]-2*E[{I}]*E[{I}]*E[{S}]))*r_infect*2+E[{I}]*r_recover-2*E[{I}^2]*r_recover;		  
+
+dE[{I}]/dt = E[{S}{I}]*r_infect - E[{I}] * r_recover;
+dE[{R}]/dt = E[{I}] * r_recover;
+
+

@@ -1,0 +1,7 @@
+E[{S}], E[{R}];
+
+dE[{S}]/dt = -E[{S}]*E[{I}]*r_infect;
+dE[{I}]/dt = E[{S}]*E[{I}]*r_infect - E[{I}] * r_recover;
+dE[{R}]/dt = E[{I}] * r_recover;
+
+

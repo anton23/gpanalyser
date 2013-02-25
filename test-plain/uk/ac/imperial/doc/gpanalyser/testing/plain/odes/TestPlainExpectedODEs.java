@@ -35,7 +35,7 @@ public class TestPlainExpectedODEs extends BaseTestODEGeneratorExpectedODEs {
 	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
-				{"nonSmooth"}, {"mm1aircon"}});
+				{"nonSmooth"}, {"mm1aircon"}, {"SIR"}});
 	}
 	
 	public TestPlainExpectedODEs(String file) throws ParseException {
