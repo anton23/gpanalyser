@@ -43,7 +43,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 	protected CombinedPopulationProduct m_moment;
 
 	private static Map<Integer,Map<AbstractExpression,Integer>> s_genClosures = new HashMap<Integer,Map<AbstractExpression,Integer>>();
-	private static String[] s_genMomentNames = {"M1","M2","M3","M4","M5","M6","M7","M8","M9"}; 
+	private static String[] s_genMomentNames = {"M1","M2","M3","M4","M5","M6","M7","M8","M9", "M10", "M11", "M12"}; 
 	private static  Map<String,Integer> s_genMomentNameId = new HashMap<String,Integer>();
 	static
 	{
@@ -57,6 +57,8 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 		s_genMomentNameId.put("M8", 7);
 		s_genMomentNameId.put("M9", 8);
 		s_genMomentNameId.put("M10", 9);
+		s_genMomentNameId.put("M11", 10);
+		s_genMomentNameId.put("M12", 10);
 	}
 	
 	public NormalClosureVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder)
