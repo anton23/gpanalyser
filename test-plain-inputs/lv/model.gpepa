@@ -1,0 +1,22 @@
+alpha = 1.5;
+delta = 1;
+gamma = 3;
+
+scale = 1;
+
+-> {X} @ {X} * alpha;
+{Y} -> @ {Y} * gamma;
+{X} + {Y} -> {Y} + {Y} @ {X}{Y} * (delta / scale);
+
+{X} = 10 * scale;
+{Y} = 1 * scale;
+
+ODEs[momentClosure = LognormalClosure, maxOrder = 2]
+(stopTime = 10.0, stepSize = 0.05, density=1000) {
+    E[{X}], E[{Y}];
+    Var[{X}], Var[{Y}];
+}
+Simulation(stopTime = 10.0, stepSize = 0.05, replications=100) {
+    E[{X}], E[{Y}];
+    Var[{X}], Var[{Y}];
+}
