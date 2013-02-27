@@ -85,12 +85,47 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 		}
 	}
 	
+	
+	public static MomentClosure getClosure(Map<String, Object> parameters) {
+		if (parameters != null && parameters.containsKey("momentClosure"))
+		{
+			Object nameO = parameters.get("momentClosure");
+			if (!(nameO instanceof String))
+			{
+				throw new AssertionError("Name of the moment closure has to be a string");
+			}
+			String name = (String) nameO;
+			if (s_momentClosures.containsKey(name))
+			{
+				try
+				{
+					return s_momentClosures.get(name).getConstructor(Map.class).newInstance(parameters);
+				}
+				catch (Exception e)
+				{
+					throw new AssertionError("Unexpected internal error " + e);
+				} 
+			}
+			else
+			{
+				throw new AssertionError("Unknown moment closure " + name);
+			}			
+		}
+		return null;
+	}
+	
 	public PCTMCODEAnalysis(PCTMC pctmc, Map<String, Object> parameters)
 	{
 		super(pctmc);
 		this.constructorParameters = parameters;
 		m_autoClosure = true;
-		if (parameters.containsKey("momentClosure"))
+		MomentClosure closure = getClosure(parameters);
+		if (closure != null) {
+			m_autoClosure = false;
+			m_momentClosure = closure;
+		}
+		
+		/*if (parameters.containsKey("momentClosure"))
 		{
 			m_autoClosure = false;
 			Object nameO = parameters.get("momentClosure");
@@ -114,7 +149,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 			{
 				throw new AssertionError("Unknown moment closure " + name);
 			}			
-		}
+		}*/
 	}
 
 	@Override

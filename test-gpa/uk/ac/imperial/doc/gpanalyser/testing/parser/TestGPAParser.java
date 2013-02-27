@@ -194,10 +194,13 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"ODEs(){}"
 				, 
 				Lists.newArrayList(
-				  "[line 8:5] mismatched input ')' expecting 'stopTime' (ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"
+				  "[line 8:5] mismatched input ')' expecting 'stopTime' "
+				+"(ODE analysis has to be of the form\n   "
+				+"ODEs(stopTime=<number>, stepSize=<number> (, parameter=<integer|string|float>)*){}')"
 				  ));
 	}
 	
+	/*
 	@Test
 	public void testWrongAnalysis2() throws ParseException {				
 		testReportsMoreParseErrors(
@@ -212,7 +215,7 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				, 
 				Lists.newArrayList(
 				  "[line 8:42] mismatched input '10.0' expecting an integer (ODE analysis has to be of the form\n   ODEs(stopTime=<number>, stepSize=<number>, density=<integer>){}')"));
-	}
+	}*/
 	
 	@Test
 	public void testWrongAnalysis3() throws ParseException {				
@@ -276,12 +279,11 @@ public class TestGPAParser extends BaseTestPCTMCParser {
 				"A = (a, ra).B + (c,rb).A;\n" +
 				"B = (b, rb).A;\n" +
 				"As{A[n]}\n" + 
-				"odes(stopTime=10.0, stepSize=0.1, density=10){\n"+ 
+				"ASDF(stopTime=10.0, stepSize=0.1, density=10){\n"+ 
 				"E[As:A];}"
 				, 
 				Lists.newArrayList(
-				   "[line 8:0] unknown command 'odes' (allowed analyses are 'ODEs', 'Simulation', 'Compare' and experiments 'Iterate' and 'Minimise')"
-				   // the parser tries to be too clever TODO fix, matches 'od' and reports 'es'   				    						
+				   "[line 8:0] unknown command 'ASDF'"   				    					
 				));
 	}
 	

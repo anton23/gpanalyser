@@ -641,7 +641,9 @@ odeTest
 @after{
   requiresExpectation = oldRequiresExpectation;
 }:
- expressionList SEMI expectedODE+-> ^(ODETEST expressionList SEMI expectedODE+);
+ (ODES 
+  odeParameters)?  
+ expressionList SEMI expectedODE+-> ^(ODETEST odeParameters? expressionList SEMI expectedODE+);
 
 expectedODE: 
 DERMEAN LBRACK combinedPowerProduct RBRACK DIVIDE DT DEF expression SEMI -> ^(EXPODE combinedPowerProduct expression);   
