@@ -1,4 +1,6 @@
-E[{S}], E[{R}], E[{S}^2];
+ODEs[momentClosure=NormalClosure, maxOrder=2]
+
+E[{S}], E[{R}];
 
 dE[{S}]/dt = -E[{S}{I}]*r_infect;
 dE[{S}{I}]/dt =

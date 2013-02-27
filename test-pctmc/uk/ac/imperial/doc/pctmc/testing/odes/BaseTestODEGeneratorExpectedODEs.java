@@ -27,6 +27,8 @@ import uk.ac.imperial.doc.pctmc.interpreter.PCTMCFileRepresentation;
 import uk.ac.imperial.doc.pctmc.interpreter.PCTMCInterpreter;
 import uk.ac.imperial.doc.pctmc.interpreter.ParseException;
 import uk.ac.imperial.doc.pctmc.odeanalysis.NewODEGenerator;
+import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
+import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
@@ -100,7 +102,14 @@ public abstract class BaseTestODEGeneratorExpectedODEs {
 		for (CombinedPopulationProduct m:moments) {
 			order = Math.max(order, m.getOrder());
 		}
-		NewODEGenerator generator = new NewODEGenerator(representation.getPctmc(), new NormalMomentClosure(order));
+		
+		Map<String, Object> parameters = (Map<String, Object>) compilerReturn.getClass().getField("parameters").get(compilerReturn);
+		MomentClosure closure = PCTMCODEAnalysis.getClosure(parameters);
+		if (closure == null) {
+			closure = new NormalMomentClosure(order);
+		}
+			
+		NewODEGenerator generator = new NewODEGenerator(representation.getPctmc(), closure);
 		generator.getODEMethodWithCombinedMoments(moments);		
 		for (Map.Entry<CombinedPopulationProduct, AbstractExpression> e:expectedODEs.entrySet()) {
 			ExpandedExpression expectedExpanded = expandExpression(e.getValue());

@@ -294,11 +294,7 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
   Map<String, Object> parameters = new HashMap<String, Object>();
 }:
   ^(ODES
-         (LBRACK
-             p1=parameter {parameters.put($p1.name, $p1.value);}
-             (COMMA p=parameter
-                          {parameters.put($p.name, $p.value);})*
-          RBRACK)?
+         (par=odeParameters {parameters = $par.parameters;})?
          settings=odeSettings         
          {
 		      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
@@ -315,6 +311,17 @@ returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
          
     )
 
+;
+
+odeParameters returns [Map<String, Object> parameters]
+@init{
+ $parameters = new HashMap<String, Object>();
+}:
+          LBRACK
+             p1=parameter {parameters.put($p1.name, $p1.value);}
+             (COMMA p=parameter
+                          {parameters.put($p.name, $p.value);})*
+          RBRACK
 ;
 
 odeSettings returns
@@ -615,12 +622,15 @@ integer returns [Integer value]:
   {$value = Integer.parseInt($r.text);}
 ;
 
-odeTest returns [List<AbstractExpression> moments, Map<CombinedPopulationProduct, AbstractExpression> odes]
+odeTest returns [Map<String, Object> parameters, List<AbstractExpression> moments, Map<CombinedPopulationProduct, AbstractExpression> odes]
 @init{
   $moments = new LinkedList<AbstractExpression>();
   $odes = new HashMap<CombinedPopulationProduct, AbstractExpression>();
 }:
-^(ODETEST el=expressionList {$moments.addAll($el.e);}
+^(ODETEST
+  (par=odeParameters {$parameters=$par.parameters;})?
+
+ el=expressionList {$moments.addAll($el.e);}
         SEMI
           (^(EXPODE lhs=combinedPowerProduct rhs=expression {$odes.put($lhs.c, $rhs.e);}))+
 );
