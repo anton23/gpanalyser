@@ -43,9 +43,6 @@ NEGATION_OP
 EMPTY
 	:	'eE' ;
 
-CCA
-	:	'~' ;
-
 //Global
 
 START
