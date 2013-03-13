@@ -39,7 +39,7 @@ MAXRELCIWIDTH:'maxRelCIWidth';
 BATCHSIZE:'batchSize';
 
 ACC: 'acc';
-ACCV: '~';
+ACCV: '~'; 
 
 TO: '->';
 
