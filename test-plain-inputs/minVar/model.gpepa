@@ -1,0 +1,34 @@
+l = 1.0;
+u = 1.0;
+n1 = 10;
+n2 = 4;
+b = 0.5;
+r = 0.1;
+
+$s = {S1} + {S2};
+
+-> {C} @ l;
+
+{C} + {S1} -> {S1} @ div({S1}, $s) * min({C}, $s) * u; 
+{C} + {S2} -> {S2} @ div({S2}, $s) * min({C}, $s) * u;
+
+{S1} -> {S1b} @ {S1} * b;
+{S1b} -> {S1} @ {S1b} * r;
+
+{S1} = n1;
+{S2} = n2;
+
+ODEs//[momentClosure=NormalClosureMinApproximation]
+(stopTime = 10.0, stepSize = 0.1, density=10) {
+	E[{C}];
+	Var[{C}];
+	E[$s];
+	Var[$s];
+}
+
+Simulation(stopTime = 10.0, stepSize = 0.1, replications=1000) {
+	E[{C}];
+	Var[{C}];
+	E[$s];
+	Var[$s];
+}
