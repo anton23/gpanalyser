@@ -1,0 +1,8 @@
+E[{C}];
+
+dE[{C}]/dt = l - div(E[{S1}], $s) * min(E[{C}], $s) * u 
+				- div(E[{S2}], $s) * min(E[{C}], $s) * u;
+				
+dE[{S1}]/dt = -E[{S1}]*b + E[{S1b}]*r;
+dE[{S1b}]/dt = E[{S1}]*b - E[{S1b}]*r;
+dE[{S2}]/dt = 0;

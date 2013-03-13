@@ -1,0 +1,40 @@
+E[{C}^2];
+
+dE[{C}]/dt = l - div(E[{S1}], $s) * min(E[{C}], $s) * u 
+				- div(E[{S2}], $s) * min(E[{C}], $s) * u;
+				
+dE[{S1}]/dt = -E[{S1}]*b + E[{S1b}]*r;
+dE[{S1b}]/dt = E[{S1}]*b - E[{S1b}]*r;
+dE[{S2}]/dt = 0;
+
+dE[{C}^2]/dt = 
+	-2*u*div(E[{C} {S1}], $s)* min(E[{C}],E[{S2}] + E[{S1}])
+	-2*u*div(E[{C} {S2}], $s) * min(E[{C}],E[{S2}] + E[{S1}])
+    +2*l*E[{C}] + u*div(E[{S2}], $s)*min(E[{C}],$s) 
+	 + l + u* div(E[{S1}], $s) * min(E[{C}],$s);
+	 
+dE[{C}{S1}]/dt = l * E[{S1}] 
+	+ r * E[{C} {S1b}] 
+	-u*div(E[{S1}{S2}], $s)*min(E[{C}],E[{S2}] + E[{S1}])-b*E[{C} {S1}]
+    -u*div(E[{S1}^2], $s)*min(E[{C}],E[{S2}] + E[{S1}]);
+    
+dE[{C}{S2}]/dt =
+ -u*div(E[{S2}^2], $s)*min(E[{C}],E[{S2}] + E[{S1}]) 
+ -u*div(E[{S2}{S1}], $s)*min(E[{C}],E[{S2}] + E[{S1}])
+  + l*E[{S2}];
+  
+dE[{C}{S1b}]/dt = 
+ 	l * E[{S1b}] 
+	+ b * E[{C} {S1}] 
+	-u*div(E[{S1b}{S2}], $s)*min(E[{C}],E[{S2}] + E[{S1}])
+	-r*E[{C} {S1b}]
+    -u*div(E[{S1}{S1b}], $s)*min(E[{C}],E[{S2}] + E[{S1}]);
+    
+dE[{S1}^2]/dt = -2*b*E[{S1}^2] + r*E[{S1b}] + 2*r*E[{S1b} {S1}] + b*E[{S1}];
+dE[{S1}{S2}]/dt = -b *E[{S2} {S1}] + r *E[{S2} {S1b}];
+dE[{S1}{S1b}]/dt = b*E[{S1}^2]
+ -r*E[{S1b}] -r*E[{S1}{S1b}] -b*E[{S1b} {S1}] + r*E[{S1b}^2] -b*E[{S1}];
+dE[{S2}^2]/dt = 0.0;
+dE[{S2}{S1b}]/dt = b*E[{S2} {S1}] -r*E[{S2} {S1b}];
+dE[{S1b}^2]/dt = r*E[{S1b}] + 
+2*b*E[{S1b} {S1}] -2 * r *E[{S1b}^2] + b*E[{S1}];
