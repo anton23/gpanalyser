@@ -421,7 +421,7 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 		code.append("   }\n");
 		StringBuilder method = new StringBuilder();
 
-		String methodHeader = "   public void recalculateWeights(double[] counts){\n";
+		String methodHeader = "   public void recalculateWeights(double[] counts, double t){\n";
 		i = 0;
 		method.append("         totalRate=0.0;\n");
 		Set<ExpressionVariable> variables = new HashSet<ExpressionVariable>();

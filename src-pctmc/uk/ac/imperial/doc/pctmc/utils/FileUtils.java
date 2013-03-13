@@ -27,6 +27,11 @@ public class FileUtils {
 		}
 
 	}
+	
+	public static String stripFileName(String filename) {
+		String[] tmp = filename.split("/");
+		return tmp[tmp.length-1];
+	}
 
 	public static void createNeededDirectories(String filename) {
 		String[] pathTmp = filename.split("/");
@@ -90,6 +95,11 @@ public class FileUtils {
 		}
 	}
 		
+	public static String gnuplotEscape(String str){
+		String ret = str.replace("\"", "\\\"");
+		return ret;
+	}
+	
 	public static void write3DGnuplotFile(String filename, String xlabel, String ylabel, String zlabel) {
 		FileUtils.createNeededDirectories(filename);
 		String[] pathTmp = filename.split("/");
@@ -100,7 +110,7 @@ public class FileUtils {
 			Writer out = new BufferedWriter(new FileWriter(file));
 			out.write("set terminal postscript eps enhanced color \n");
 			out.write("set output \"" + strippedFilename + ".eps" + "\"\n");
-			out.write("set title \"" + zlabel + "\" \n");
+			out.write("set title \"" + gnuplotEscape(zlabel) + "\" \n");
 			out.write("set xlabel \"" + xlabel + "\"\n");
 			out.write("set ylabel \"" + ylabel + "\"\n");
 			out.write("splot '" + strippedFilename +"' with pm3d\n");
