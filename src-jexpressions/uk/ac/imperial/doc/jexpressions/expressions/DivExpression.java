@@ -79,7 +79,7 @@ public class DivExpression extends AbstractExpression {
 
 	@Override
 	public String toString() {
-		return numerator.toString() + "/" + denominator.toString();
+		return "(" + numerator.toString() + ")/(" + denominator.toString() + ")";
 	}
 
 }

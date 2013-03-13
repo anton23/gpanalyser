@@ -51,6 +51,15 @@ public abstract class AbstractPCTMCAnalysis {
 		return postprocessors;
 	}
 
+	
+	public String getPostprocessorString() {
+		StringBuilder ret = new StringBuilder();
+		for (PCTMCAnalysisPostprocessor p : postprocessors) {
+			ret.append(p.toString());
+		}
+		return ret.toString();
+	}
+	
 	public PCTMC getPCTMC() {
 		return pctmc;
 	}

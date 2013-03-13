@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import com.google.common.collect.Lists;
 
@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
  * 
  */
 public class ProductExpression extends AbstractExpression {
+	
 
 	public static ProductExpression forceProduct(AbstractExpression e) {
 		if (e instanceof ProductExpression) {

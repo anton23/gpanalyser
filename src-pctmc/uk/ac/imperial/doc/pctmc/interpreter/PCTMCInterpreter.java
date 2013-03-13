@@ -18,12 +18,17 @@ import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.TreeNodeStream;
 import org.antlr.runtime.tree.TreeParser;
 
+import uk.ac.imperial.doc.gpa.plain.syntax.PlainParser;
+
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.PlotDescription;
 import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
+import uk.ac.imperial.doc.pctmc.condor.CondorGenerator;
+import uk.ac.imperial.doc.pctmc.condor.CondorMerger;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.PCTMCExperiment;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
@@ -93,7 +98,7 @@ public class PCTMCInterpreter {
 	public void addGlobalPostprocessor(PCTMCAnalysisPostprocessor postprocessor) {
 		globalPostprocessors.add(postprocessor);
 	}
-
+	
 	boolean twoPass = true;
 	
 	public Object parseGenericRule(String string, String rule, boolean twoPass) throws ParseException {
@@ -234,11 +239,30 @@ public class PCTMCInterpreter {
 	public void processFileRepresentation(
 			PCTMCFileRepresentation fileRepresentation) {
 		Constants constants = fileRepresentation.getConstants();
+		if (constants.getFiles() != null) {
+			JExpressionsJavaUtils.loadFiles(constants.getFiles());
+		}
 		Multimap<AbstractPCTMCAnalysis, PlotDescription> plots = fileRepresentation
 				.getPlots();
 		List<PCTMCExperiment> experiments = fileRepresentation.getExperiments();
 		PCTMC pctmc = fileRepresentation.getPctmc();
 
+		if (PCTMCOptions.condor) {
+			String options = "";
+			// A not so nice hack
+			if (PlainParser.class.equals(parserClass)) {
+				options = "-plain";
+			}
+
+			new CondorGenerator(fileRepresentation, file, options).generate();
+			return;
+		}
+		
+		if (PCTMCOptions.condor_merge) {
+			new CondorMerger(fileRepresentation, file, "").merge();
+			return;
+		}
+		
 		fileRepresentation.unfoldVariablesAndSetUsedProducts();
 
 		PCTMCLogging.info("Read a PCTMC with " + pctmc.getStateIndex().size()
@@ -266,8 +290,17 @@ public class PCTMCInterpreter {
 		}
 	}
 
+	protected String file = "";
+	
 	public void processFile(String file) {
 		PCTMCLogging.info("Opening file " + file);
+		this.file = file;
+		String[] pathTmp = file.split("/");
+		String path = "";
+		for (int i = 0; i < pathTmp.length - 1; i++) {
+			path += pathTmp[i] + "/";
+		}
+		PCTMCOptions.filePath = path;
 		PCTMCLogging.increaseIndent();
 
 		try {

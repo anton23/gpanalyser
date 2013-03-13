@@ -2,8 +2,8 @@ package uk.ac.imperial.doc.jexpressions.constants;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * This class provides mapping from constants to their (double) values. It also
@@ -15,9 +15,9 @@ import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
 public class Constants {
 
 	protected Map<String, Integer> constantIndex;
-
 	private Map<String, Double> constants;
-
+	private Map<String, FileColumn> files;
+	
 	/**
 	 * Creates a Constants objects with the given underlying value map. Also
 	 * creates an index from constant names to integers.
@@ -27,6 +27,7 @@ public class Constants {
 	public Constants(Map<String, Double> constants) {
 		super();
 		this.constants = constants;
+		files = new HashMap<String, FileColumn>();
 		calculateConstantIndex();
 	}
 
@@ -34,6 +35,15 @@ public class Constants {
 			Map<String, Integer> constantIndex) {
 		this.constantIndex = constantIndex;
 		this.constants = constants;
+		files = new HashMap<String, FileColumn>();
+	}
+	
+	public void addFile(String filename, String fun) {
+		files.put(fun, new FileColumn(filename, 1));
+	}
+	
+	public void addFile(String filename, int i, String fun) {
+		files.put(fun, new FileColumn(filename, i));
 	}
 
 	private void calculateConstantIndex() {
@@ -111,6 +121,12 @@ public class Constants {
 		}
 		return ret;
 	}
+	
+	
+
+	public Map<String, FileColumn> getFiles() {
+		return files;
+	}
 
 	/**
 	 * Sets the current value of the given parameter.
@@ -126,6 +142,22 @@ public class Constants {
 	 * Returns textual representation of the system.
 	 */
 	public String toString() {
-		return ToStringUtils.mapToDefinitionList(constants, "=", ";\n");
+		StringBuilder out = new StringBuilder();
+		for (Map.Entry<String, Double> e : constants.entrySet()) {
+			out.append(e.getKey());
+			out.append(" = ");
+			String value = String.format("%.10f", e.getValue());		
+			value = value.replaceAll("0+$", "").replaceAll("\\.$", ".0");		
+			out.append(value);
+			out.append(";\n");
+		}
+		if (!files.isEmpty()) {
+			out.append("\n");
+			for (Entry<String, FileColumn> e:files.entrySet()){
+				out.append("load \"" + e.getValue().getFile()+"\" " + e.getValue().getColumn() + " into " + e.getKey()+";\n");
+			}			
+		}
+
+		return out.toString();
 	}
 }

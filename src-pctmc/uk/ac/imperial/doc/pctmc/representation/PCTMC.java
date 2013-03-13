@@ -87,6 +87,7 @@ public class PCTMC {
 	
 	@Override
 	public String toString() {
+		StringBuilder ret = new StringBuilder();
 		Map<State,AbstractExpression> initMap = new HashMap<State, AbstractExpression>(); 
 		//BiMap<Integer, State> inverseIndex = stateIndex.inverse();
 		Map<Integer, State> inverseIndex = new HashMap<Integer, State>();		
@@ -95,8 +96,9 @@ public class PCTMC {
 		}
 		for (int i = 0; i<initCounts.length; i++){
 			initMap.put(inverseIndex.get(i),initCounts[i]); 
-		}
-		return ToStringUtils.mapToDefinitionList(initMap, "=", ";\n") + 
-			   ToStringUtils.iterableToSSV(evolutionEvents, "\n");
+		}		
+		ret.append(ToStringUtils.iterableToSSV(evolutionEvents, "\n"));
+		ret.append(ToStringUtils.mapToDefinitionList(initMap, "=", ";\n"));
+		return ret.toString();
 	}
 }
