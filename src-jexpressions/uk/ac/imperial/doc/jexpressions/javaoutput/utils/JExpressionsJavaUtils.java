@@ -63,6 +63,7 @@ public class JExpressionsJavaUtils {
 	private static void loadFile(String fun, FileColumn fileColumn) {
 		try {
 			String path = PCTMCOptions.filePath;
+			// TODO investigate why this doesn't work properly in jar files
 			FileReader f = new FileReader(path + "/" + fileColumn.getFile());
 			BufferedReader in = new BufferedReader(f);
 			String s = "";
@@ -82,11 +83,12 @@ public class JExpressionsJavaUtils {
 			}
 			Arrays.sort(values, comparator);
 			fileValues.put(fun, values);
+			in.close();
 		} catch (FileNotFoundException e) {
 			throw new AssertionError("File " + fileColumn + " not found!");
 		} catch (IOException e) {
 			throw new AssertionError("Problems reading the file " + fileColumn + "!");
-		}		
+		} 
 	}
 	
 	public static void loadFiles(Map<String, FileColumn> _files) {

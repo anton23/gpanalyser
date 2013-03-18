@@ -1,6 +1,8 @@
 package uk.ac.imperial.doc.jexpressions.expressions.visitors;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.Math;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
@@ -20,6 +22,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
+import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 
 /**
  * Numerical evaluator of basic expressions.
@@ -94,15 +97,20 @@ public class ExpressionEvaluator implements IExpressionVisitor {
 		Object[] args = new Double[e.getArguments().size()];
 		int i = 0;
 		for (AbstractExpression arg : e.getArguments()) {
-			argTypes[i] = Double.class;
+			argTypes[i] = double.class;
 			arg.accept(this);
 			args[i] = result;
 			i++;
 		}
-
+		
 		try {
-			result = (Double) Math.class.getMethod(e.getName(), argTypes)
-					.invoke(null, args);
+			if (JExpressionsJavaUtils.fileValues.containsKey(e.getName())) {
+				result = JExpressionsJavaUtils.evaluate(e.getName(), (Double)args[0]);
+			} else {
+				
+				result = (Double) Math.class.getMethod(e.getName(), argTypes)
+					.invoke(null, args); // TODO: doesn't seem to find static methods						
+			}
 		} catch (SecurityException e1) {
 			e1.printStackTrace();
 		} catch (NoSuchMethodException e1) {
