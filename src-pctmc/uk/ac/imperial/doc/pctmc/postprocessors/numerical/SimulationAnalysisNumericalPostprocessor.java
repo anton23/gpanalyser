@@ -330,6 +330,16 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 					+ ((!noadd) ? "+" : "") + "= newValues[" + entry.getValue()
 					+ "]" + ";\n");
 		}
+		
+		for (Map.Entry<AbstractExpression, Integer> entry:generalExpectationIndex.entrySet()){
+            ret.append("values["+(momentIndex.size() + entry.getValue()) + "]+=");
+            JavaPrinterPopulationBased printer =
+                      new JavaPrinterPopulationBased(variables, simulation.getPCTMC().getStateIndex(), 
+                    		  accumulatedMomentIndex, "oldValues", true);
+            entry.getKey().accept(printer); 
+            ret.append(printer.toString()); 
+            ret.append(";\n"); 
+    }
 
 		ret.append("    }");
 		ret.append("}");
