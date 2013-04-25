@@ -63,6 +63,12 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 		} else if (e.getName().equals("normalInequality")) {
 			output.append(utilsClassName
 					+ ".normalInequality(");
+		} else if (e.getName().equals("estimateLCDF")) {
+			output.append(utilsClassName
+					+ ".estimateLCDF(");
+		} else if (e.getName().equals("estimateUCDF")) {
+			output.append(utilsClassName
+					+ ".estimateUCDF(");
 		} else {
 			output.append("Math." + e.getName() + "(");
 		}
