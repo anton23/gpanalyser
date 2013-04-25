@@ -54,6 +54,7 @@ public class CollectUsedMomentsVisitor implements IExpressionVisitor,
 	@Override
 	public void visit(GeneralExpectationExpression e) {
 		usedGeneralExpectations.add(e.getExpression());
+		e.getExpression().accept(this);
 	}
 
 	@Override
