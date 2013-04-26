@@ -6,11 +6,11 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 public class JExpressionsJavaUtils {
 	
 	public static double estimateLCDF(double a, double b, double x, double... moments) {
-		return DistributionEstimation.estimateDistribution(moments.length, moments, x, a, b)[3];
+		return DistributionEstimation.estimateDistribution(moments, x, a, b)[3];
 	}
 	
 	public static double estimateUCDF(double a, double b, double x, double... moments) {
-		return DistributionEstimation.estimateDistribution(moments.length, moments, x, a, b)[2];
+		return DistributionEstimation.estimateDistribution(moments, x, a, b)[2];
 	}
 
 
