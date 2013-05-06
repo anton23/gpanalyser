@@ -9,6 +9,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.optim.InitialGuess;
+import org.apache.commons.math3.optim.MaxEval;
+import org.apache.commons.math3.optim.PointValuePair;
+import org.apache.commons.math3.optim.SimpleBounds;
+import org.apache.commons.math3.optim.SimpleValueChecker;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.MultiStartMultivariateOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer.PopulationSize;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer.Sigma;
+import org.apache.commons.math3.random.MersenneTwister;
+import org.apache.commons.math3.random.RandomVectorGenerator;
 import org.jfree.data.xy.XYDataset;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
@@ -28,6 +42,9 @@ import uk.ac.imperial.doc.pctmc.utils.FileUtils;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
 
+import com.cureos.numerics.Calcfc;
+import com.cureos.numerics.Cobyla;
+import com.cureos.numerics.CobylaExitStatus;
 import com.google.common.collect.Lists;
 
 public class PCTMCIterate extends PCTMCExperiment {
@@ -369,10 +386,175 @@ public class PCTMCIterate extends PCTMCExperiment {
 		}
 		
 	}
+	private PointValuePair globalOptimiseCOBYLA(final Constants constants) {
+		 int n = minRanges.size();
+		 final int[] neval = new int[]{0};
+		Calcfc calcfc = new Calcfc() {
+	            @Override
+	            public double Compute(int n, int m, double[] v, double[] con) {
+	            	neval[0]++;
+	        		boolean satisfied = true;
+
+	            	for (int s = 0; s < v.length; s++) {
+						constants.setConstantValue(minRangesArray[s].getConstant(),
+								v[s]);
+					}
+					postprocessor.calculateDataPoints(constants);
+
+	            	double[] values = postprocessor.evaluateExpressionsAtTimes(minSpecification
+	        				.getEvaluator(), minSpecification.getAtTimes(), constants);
+	        		int ncon = minSpecification.getConstraints().size();
+	        		for (int j = 0; j < ncon; j++) {
+	        			PlotConstraint pc = minSpecification.getConstraints().get(j);
+	        			double cValue = values[j + 1];
+	        			con[j] = cValue - pc.getMinValue() - 1e-5;	  
+	        			if (con[j] < 0) {
+	        				satisfied = false;
+	        			}
+	        		}
+	        		for (int r = 0; r < n; r++) {
+	    				con[ncon + 2*r] = v[r] - minRangesArray[r].getFrom();	
+	    				con[ncon + 2*r + 1] = minRangesArray[r].getTo() - v[r];					
+	    			}
+	        		/*
+	        		if (!satisfied) {
+	        			return Double.POSITIVE_INFINITY;	        				
+	        		}*/
+	        		return values[0];
+	            }
+	        };
+	        
+	        
+	        int m = minSpecification
+					.getConstraints().size() + n * 2;
+	    double best = Double.MAX_VALUE; 
+	    double[] bestPoint = null;
+	    for (int s = 0; s < 1; s++) {    
+		double[] initial = new double[n];
+		for (int r = 0; r < n; r++) {
+				double lb = minRangesArray[r].getFrom();
+				double ub = minRangesArray[r].getTo();
+				initial[r] = lb + (-lb + ub) * Math.random();							
+			}
+
+		
+		CobylaExitStatus result = Cobyla
+				.FindMinimum(calcfc, n, m,
+						initial, 0.5, 1.0e-6, 0, 500);
+		double[] con = new double[m];
+		double value = calcfc.Compute(n, m, initial, con);
+		/*for (int i = 0; i < con.length; i++) {
+			if (con[i] < 0) {
+				value = Double.POSITIVE_INFINITY;
+			}
+		}*/
+		if (value < best) {
+			best = value;
+			bestPoint = initial;
+		}
+	    }
+		System.out.println("COBYLA " + Arrays.toString(bestPoint) + " " + best);
+		System.out.println("with neval " + neval[0]);
+
+		return new PointValuePair(bestPoint, best);
+	}
+	
+	
+	private PointValuePair globalOptimise(final Constants constants) {
+		 SimpleValueChecker cchecker = new SimpleValueChecker(1e-8, 1e-8);
+		CMAESOptimizer optimiser = new CMAESOptimizer(10000, Double.NEGATIVE_INFINITY, false, 0, 1, new MersenneTwister(), true, 
+				null);
+		
+		RandomVectorGenerator generator = new RandomVectorGenerator() {
+			
+			@Override
+			public double[] nextVector() {
+				double [] ret = new double[minRanges.size()];
+				for (int r = 0; r < minRanges.size(); r++) {
+					double l = minRangesArray[r].getFrom();
+					double u = minRangesArray[r].getTo();
+					ret[r] = l + Math.random()*(u - l);					
+				}
+				return ret;
+			}
+		};
+		
+		MultiStartMultivariateOptimizer moptimiser =
+				new MultiStartMultivariateOptimizer(optimiser, 3, generator);
+		final int[] neval = new int[1];
+		final double[] bestEver = new double[]{Double.POSITIVE_INFINITY};
+		final double[][] bestEverP = new double[1][];
+		MultivariateFunction f = new MultivariateFunction() {
+			@Override
+			public double value(double[] v) {
+				for (int s = 0; s < v.length; s++) {
+					constants.setConstantValue(minRangesArray[s].getConstant(),
+							v[s]);
+				}
+				postprocessor.calculateDataPoints(constants);
+				neval[0]++;
+				double reward = evaluateConstrainedReward(minSpecification,
+						constants);
+				if (reward == Double.POSITIVE_INFINITY) {
+					reward = Double.NaN;
+				}
+				//System.out.println("Call " + Arrays.toString(v) + " " + reward);
+				if (reward < bestEver[0]) {
+					bestEver[0] = reward;
+					bestEverP[0] = v;
+				}
+				return reward;
+			}
+		};
+		
+		double[] lb = new double[minRanges.size()];
+		double[] ub = new double[minRanges.size()];
+		double[] initial = new double[minRanges.size()];
+		double[] sigma = new double[minRanges.size()];
+
+
+		for (int r = 0; r < minRanges.size(); r++) {
+			lb[r] = minRangesArray[r].getFrom();
+			ub[r] = minRangesArray[r].getTo();
+			initial[r] = lb[r] + (ub[r] - ub[r]) * Math.random();
+			//sigma[r] = (ub[r] - lb[r]) / 3.0;
+			sigma[r] = minRangesArray[r].getDc();
+		}
+		int lambda = 4 + (int)(3.*Math.log(minRanges.size()));
+		PointValuePair optim = moptimiser.optimize(new ObjectiveFunction(f), 
+				GoalType.MINIMIZE, new InitialGuess(initial), 
+				new MaxEval(10000),
+				new PopulationSize(lambda),
+				new Sigma(sigma),
+				new SimpleBounds(lb, ub)		
+				);
+		/*System.out.println(optimiser.getStatisticsFitnessHistory());
+		System.out.println(optimiser.getStatisticsDHistory());
+		System.out.println(optimiser.getStatisticsSigmaHistory());
+		System.out.println(optimiser.getStatisticsMeanHistory());*/
+		System.out.println("Optimum " + Arrays.toString(optim.getPoint()) + " " + optim.getValue());
+		System.out.println(" with neval " + neval[0]);
+		System.out.println("Optimum " + Arrays.toString(bestEverP[0]) + " " + bestEver[0]);
+
+		return new PointValuePair(bestEverP[0], bestEver[0]);
+		//return optim;
+		
+	}
 	
 	
 	private boolean minimise(Constants constants) {
-		int step[] = new int[minRanges.size()];
+		//PointValuePair optim =globalOptimiseCOBYLA(constants);
+		PointValuePair optim = globalOptimise(constants);
+		if (optim.getValue() == Double.MAX_VALUE)
+			return false;
+		else {
+			for (int s = 0; s < minRanges.size(); s++) {
+				constants.setConstantValue(minRangesArray[s].getConstant(),
+						optim.getPoint()[s]);
+			}
+			return true;
+		}
+		/*int step[] = new int[minRanges.size()];
 		double min = 0.0;
 		boolean notYet = true;
 		int[] minStep = null;
@@ -409,7 +591,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 						minRangesArray[s].getStep(minStep[s]));
 			}
 		}
-		return true;
+		return true;*/
 	}
 
 	private double evaluateConstrainedReward(PlotAtDescription plot,
