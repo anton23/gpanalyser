@@ -440,7 +440,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 		
 		CobylaExitStatus result = Cobyla
 				.FindMinimum(calcfc, n, m,
-						initial, 0.5, 1.0e-6, 0, 500);
+						initial, 0.5, 1.0e-6, 0, 50000);
 		double[] con = new double[m];
 		double value = calcfc.Compute(n, m, initial, con);
 		/*for (int i = 0; i < con.length; i++) {
@@ -543,8 +543,8 @@ public class PCTMCIterate extends PCTMCExperiment {
 	
 	
 	private boolean minimise(Constants constants) {
-		//PointValuePair optim =globalOptimiseCOBYLA(constants);
-		PointValuePair optim = globalOptimise(constants);
+		PointValuePair optim =globalOptimiseCOBYLA(constants);
+		//PointValuePair optim = globalOptimise(constants);
 		if (optim.getValue() == Double.MAX_VALUE)
 			return false;
 		else {
