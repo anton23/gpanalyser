@@ -154,11 +154,12 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 	@Override
 	public void visit(FunctionCallExpression _e)
 	{
+		List<AbstractExpression> args = _e.getArguments();
 		if (_e.getName().equals("normalMin") && m_insert)
 		{
-			AbstractExpression muA = _e.getArguments().get(0);
-			AbstractExpression muB = _e.getArguments().get(1);
-			AbstractExpression theta = _e.getArguments().get(2);
+			AbstractExpression muA = args.get(0);
+			AbstractExpression muB = args.get(1);
+			AbstractExpression theta = args.get(2);
 			m_inserted = false;
 			muA.accept(this);
 			AbstractExpression muA2 = considerVariable(result);
@@ -167,10 +168,29 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 			AbstractExpression muB2 = considerVariable(result);
 
 			result = FunctionCallExpression.create("normalMinProduct",Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression.create(m_moment)));
+			m_inserted = true;
 		}
 		else if (_e.getName().equals("normalMinProduct") && m_insert)
 		{
-			throw new AssertionError("This should not happen!");
+			AbstractExpression muA = args.get(0);
+			AbstractExpression muB = args.get(1);
+			AbstractExpression muA2 = args.get(3);
+			AbstractExpression muB2 = args.get(4);
+			AbstractExpression theta = args.get(2);
+			AbstractExpression add = args.get(5);
+
+			m_inserted = false;
+			muA2.accept(this);
+			AbstractExpression muA3 = considerVariable(result);
+			m_inserted = false;
+			muB2.accept(this);
+			AbstractExpression muB3 = considerVariable(result);
+			m_inserted = false;
+			add.accept(this);
+			AbstractExpression add2 = considerVariable(result);
+						
+			result = FunctionCallExpression.create("normalMinProduct",Lists.newArrayList(muA, muB, theta, muA3, muB3,add2));
+			m_inserted = true;
 		}
 		else
 		{
