@@ -15,6 +15,7 @@ import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
 import uk.ac.imperial.doc.pctmc.expressions.patterns.PatternMatcher;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.representation.PCTMCWithAccumulations;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class GPEPAPatternMatcher extends PatternMatcher{
@@ -49,6 +50,9 @@ public class GPEPAPatternMatcher extends PatternMatcher{
 	
 	public GPEPAPatternMatcher(PCTMC pctmc) {		
 		super(pctmc);
+		if (pctmc instanceof PCTMCWithAccumulations) {
+			pctmc = ((PCTMCWithAccumulations) pctmc).getPctmc();
+		}
 		if (pctmc instanceof GPEPAPCTMC){
 			GPEPAPCTMC gpctmc = (GPEPAPCTMC)pctmc; 
 			this.model=gpctmc.getModel(); 

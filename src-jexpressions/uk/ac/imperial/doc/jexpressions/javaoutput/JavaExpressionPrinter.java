@@ -1,6 +1,28 @@
 package uk.ac.imperial.doc.jexpressions.javaoutput;
 
-import uk.ac.imperial.doc.jexpressions.expressions.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
+
+import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivDivMinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.FunctionCallExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.IExpressionVisitor;
+import uk.ac.imperial.doc.jexpressions.expressions.IndicatorFunction;
+import uk.ac.imperial.doc.jexpressions.expressions.IntegerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MaxExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MinExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.MinusExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.PEPADivExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.PowerExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.ProductExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.SumExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.TimeExpression;
+import uk.ac.imperial.doc.jexpressions.expressions.UMinusExpression;
 import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
 
 /**
@@ -12,11 +34,18 @@ import uk.ac.imperial.doc.jexpressions.javaoutput.utils.JExpressionsJavaUtils;
  */
 public class JavaExpressionPrinter implements IExpressionVisitor {
 	public static String utilsClassName;
-	{
+	protected static Set<String> utilMethods;
+	
+	static {
 		utilsClassName = JExpressionsJavaUtils.class.getName();
 		String[] packagePath = utilsClassName.split("\\.");
 		utilsClassName = packagePath[packagePath.length - 1];
-		
+		utilMethods = new HashSet<String>();
+		for (Method m : JExpressionsJavaUtils.class.getMethods()){
+			if (Modifier.isStatic(m.getModifiers())) {
+				utilMethods.add(m.getName());
+			}
+		}
 	}
 	
 	@Override
@@ -31,44 +60,13 @@ public class JavaExpressionPrinter implements IExpressionVisitor {
 		output.append(")");
 
 	}
+	
+	
 
 	@Override
-	public void visit(FunctionCallExpression e) {		
-		if (e.getName().equals("ifpos")) {
-			output.append(utilsClassName + ".ifpos(");
-		} else if (e.getName().equals("chebyshev")) {
-			output
-					.append(utilsClassName
-							+ ".chebyshev(");
-		} else if (e.getName().equals("div")) {
-			output.append(utilsClassName + ".div(");
-		} else if (e.getName().equals("phi")) {
-			output.append(utilsClassName
-							+ ".phi(");
-		} else if (e.getName().equals("phiC")) {
-			output.append(utilsClassName
-					+ ".Phi(");
-		} else if (e.getName().equals("safe_phi")) {
-			output.append(utilsClassName
-					+ ".safe_phi(");
-		} else if (e.getName().equals("safe_Phi")) {
-			output.append(utilsClassName
-			+ ".safe_Phi(");
-		} else if (e.getName().equals("normalMin")) {
-			output.append(utilsClassName
-					+ ".normalMin(");
-		} else if (e.getName().equals("normalMinProduct")) {
-			output.append(utilsClassName
-					+ ".normalMinProduct(");
-		} else if (e.getName().equals("normalInequality")) {
-			output.append(utilsClassName
-					+ ".normalInequality(");
-		} else if (e.getName().equals("estimateLCDF")) {
-			output.append(utilsClassName
-					+ ".estimateLCDF(");
-		} else if (e.getName().equals("estimateUCDF")) {
-			output.append(utilsClassName
-					+ ".estimateUCDF(");
+	public void visit(FunctionCallExpression e) {			
+		if (utilMethods.contains(e.getName())) {
+			output.append(utilsClassName + "." + e.getName() + "(");
 		} else {
 			output.append("Math." + e.getName() + "(");
 		}
