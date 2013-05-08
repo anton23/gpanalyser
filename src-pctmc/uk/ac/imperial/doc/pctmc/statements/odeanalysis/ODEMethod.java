@@ -35,6 +35,11 @@ public class ODEMethod {
 	@Override
 	public String toString() {
 		StringBuilder ret = new StringBuilder();
+		if (variables != null) {
+		for (Map.Entry<ExpressionVariable, AbstractExpression> e:variables.entrySet()) {
+			ret.append(e.getKey() + " = " + e.getValue() + "\n");
+		}
+		}
 		for (int i = 0; i < body.length; i++) {
 			ret.append(body[i]);
 			ret.append("\n");

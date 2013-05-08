@@ -9,12 +9,15 @@ public class PCTMCWithAccumulations extends PCTMC {
 	
 	protected Map<NamedAccumulation, AbstractExpression> accODEs;
 	protected Map<NamedAccumulation, AbstractExpression> accInit;
+	
+	protected PCTMC pctmc;
 
 	public PCTMCWithAccumulations(PCTMC pctmc, Map<NamedAccumulation, AbstractExpression> accODEs,
 			Map<NamedAccumulation, AbstractExpression> accInit) {
 		super(pctmc.getInitMap(), pctmc.getEvolutionEvents());
 		this.accODEs = accODEs;		
 		this.accInit = accInit;
+		this.pctmc = pctmc;
 	}
 	
 	public Map<NamedAccumulation, AbstractExpression> getAccODEs() {
@@ -24,7 +27,9 @@ public class PCTMCWithAccumulations extends PCTMC {
 	public Map<NamedAccumulation, AbstractExpression> getAccInit() {
 		return accInit;
 	}
-	
-	
-	
+
+	public PCTMC getPctmc() {
+		return pctmc;
+	}
+
 }

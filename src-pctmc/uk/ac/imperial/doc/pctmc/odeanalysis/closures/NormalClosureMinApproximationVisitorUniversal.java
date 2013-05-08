@@ -22,6 +22,8 @@ import com.google.common.collect.Lists;
 
 public class NormalClosureMinApproximationVisitorUniversal extends NormalClosureVisitorUniversal
 {
+	
+	
 	Map<AbstractExpression, ExpressionVariable> m_usedVariables;
 	int m_variableIndex;
 	
@@ -39,6 +41,9 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 	
 	protected AbstractExpression considerVariable(AbstractExpression _a)
 	{
+		if (_a instanceof CombinedProductExpression) {
+			return _a;
+		}
 		if (m_usedVariables.containsKey(_a))
 		{
 			return m_usedVariables.get(_a);
@@ -178,7 +183,7 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 			AbstractExpression muB2 = args.get(4);
 			AbstractExpression theta = args.get(2);
 			AbstractExpression add = args.get(5);
-
+			
 			m_inserted = false;
 			muA2.accept(this);
 			AbstractExpression muA3 = considerVariable(result);

@@ -15,7 +15,19 @@ public class NormalMomentClosureMinApproximation extends NormalMomentClosure
 	
 	protected Map<AbstractExpression, ExpressionVariable> m_usedVariables;
 	protected int m_lastVariable;
+
 	
+	@Override
+	public Map<ExpressionVariable, AbstractExpression> getVariables() {
+		Map<ExpressionVariable, AbstractExpression> variables = new HashMap<ExpressionVariable, AbstractExpression>();
+		for (Map.Entry<AbstractExpression, ExpressionVariable> e:m_usedVariables.entrySet()) {
+			variables.put(e.getValue(), e.getKey());
+		}
+		return variables;
+	}
+	
+
+
 	public NormalMomentClosureMinApproximation(int _maxOrder)
 	{
 		super(_maxOrder);

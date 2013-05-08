@@ -80,10 +80,14 @@ public class JExpressionsJavaUtils {
 		double theta = Math.sqrt(Math.max(thetaSq, 0.0));
 		double safePhi = safe_Phi(mB2 - mA2, theta*add);
 		return 
-		mA2 * safePhi + mB2 * (1.0 - safePhi) - theta * add * safe_phi(mB2 - mA2, theta*add);	
-		/*double safePhi = safe_Phi(mB - mA, theta);
+		mA2 * safePhi + mB2 * (1.0 - safePhi) - theta * add * safe_phi(mB2 - mA2, theta*add);					
+	}
+	
+	public static double normalMinProduct2(double mA, double mB, double thetaSq, double mA2, double mB2, double add) {
+		double theta = Math.sqrt(Math.max(thetaSq, 0.0));
+		double safePhi = safe_Phi(mB - mA, theta);
 		return 
-		mA2 * safePhi + mB2 * (1.0 - safePhi) - theta * add * safe_phi(mB - mA, theta);*/
+		mA2 * safePhi + mB2 * (1.0 - safePhi) - theta * add * safe_phi(mB - mA, theta);
 		
 	}
 	
