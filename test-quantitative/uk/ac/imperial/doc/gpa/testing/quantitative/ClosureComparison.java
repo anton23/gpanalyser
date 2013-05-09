@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.jfree.data.xy.XYSeriesCollection;
 
-import com.google.common.collect.Lists;
-
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
@@ -19,8 +17,9 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessorC
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.ODEAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.simulation.PCTMCSimulation;
 import uk.ac.imperial.doc.pctmc.utils.FileUtils;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCOptions;
+
+import com.google.common.collect.Lists;
 
 public class ClosureComparison extends RangeRunner {
 	// The evaluated model and used constants
