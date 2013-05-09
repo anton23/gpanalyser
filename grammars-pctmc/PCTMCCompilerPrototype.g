@@ -266,7 +266,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
 :
 (o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
  | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
- | accs=accuratesimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+ | accs=accuratesimulation[pctmc,constants] {$analysis=$accs.analysis; $postprocessor=$s.postprocessor;}
  | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
 )
  (LBRACE       
