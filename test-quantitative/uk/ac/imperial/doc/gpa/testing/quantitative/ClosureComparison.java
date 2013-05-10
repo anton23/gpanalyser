@@ -118,7 +118,7 @@ public class ClosureComparison extends RangeRunner {
 	}
 
 	@Override
-	protected void join(Constants constants) {
+	protected void joinData(Constants constants) {
 		System.out.println("Joining data");
 		for (RangeRunner r : parts) {
 			ClosureComparison part = (ClosureComparison) r;
@@ -267,6 +267,8 @@ public class ClosureComparison extends RangeRunner {
 				}
 			}
 		}
+		System.out.println("Running " + this.toString());
+
 		for (PlotDescription pd : plots) {
 			if (simPostprocessor instanceof NumericalPostprocessorCI) {
 				((NumericalPostprocessorCI)simPostprocessor).plotData("Sim", constants, ((NumericalPostprocessorCI) simPostprocessor).getResultsCI().get(pd), pd.getExpressions(), null);

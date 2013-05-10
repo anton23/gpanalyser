@@ -26,12 +26,20 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 	
 	Map<AbstractExpression, ExpressionVariable> m_usedVariables;
 	int m_variableIndex;
+	boolean alternative;
 	
-	public NormalClosureMinApproximationVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder, Map<AbstractExpression, ExpressionVariable> _usedVariables, int _variableIndex)
+	String minProduct;
+	
+	public NormalClosureMinApproximationVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder, Map<AbstractExpression, ExpressionVariable> _usedVariables, int _variableIndex, boolean alternative)
 	{
 		super(_moment, _maxOrder);
 		m_usedVariables = _usedVariables;
 		m_variableIndex = _variableIndex;
+		this.alternative = alternative;
+		minProduct = "normalMinProduct";
+		if (alternative) {
+			minProduct = "normalMinProduct2";
+		} 
 	}
 	
 	public int getVariableIndex()
@@ -88,7 +96,7 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 			muB.accept(this);
 			muB2 = considerVariable(result);
 
-			result = considerVariable(FunctionCallExpression.create("normalMinProduct",	Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression.create(m_moment))));
+			result = considerVariable(FunctionCallExpression.create(minProduct,	Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression.create(m_moment))));
 		}
 		else
 		{ 
@@ -172,10 +180,10 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 			muB.accept(this);
 			AbstractExpression muB2 = considerVariable(result);
 
-			result = FunctionCallExpression.create("normalMinProduct",Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression.create(m_moment)));
+			result = FunctionCallExpression.create(minProduct,Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression.create(m_moment)));
 			m_inserted = true;
 		}
-		else if (_e.getName().equals("normalMinProduct") && m_insert)
+		else if (_e.getName().equals(minProduct) && m_insert)
 		{
 			AbstractExpression muA = args.get(0);
 			AbstractExpression muB = args.get(1);
@@ -194,7 +202,7 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 			add.accept(this);
 			AbstractExpression add2 = considerVariable(result);
 						
-			result = FunctionCallExpression.create("normalMinProduct",Lists.newArrayList(muA, muB, theta, muA3, muB3,add2));
+			result = FunctionCallExpression.create(minProduct,Lists.newArrayList(muA, muB, theta, muA3, muB3,add2));
 			m_inserted = true;
 		}
 		else
