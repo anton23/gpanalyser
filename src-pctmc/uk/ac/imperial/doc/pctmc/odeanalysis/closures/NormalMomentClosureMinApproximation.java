@@ -15,6 +15,7 @@ public class NormalMomentClosureMinApproximation extends NormalMomentClosure
 	
 	protected Map<AbstractExpression, ExpressionVariable> m_usedVariables;
 	protected int m_lastVariable;
+	protected boolean alternative;
 
 	
 	@Override
@@ -38,6 +39,9 @@ public class NormalMomentClosureMinApproximation extends NormalMomentClosure
 	public NormalMomentClosureMinApproximation(Map<String, Object> _parameters)
 	{
 		super(_parameters);
+		if (_parameters.containsKey("alternative")) {
+			alternative = true;
+		}
 		m_usedVariables = new LinkedHashMap<AbstractExpression, ExpressionVariable>();
 		m_lastVariable = 0;
 	}
@@ -45,7 +49,7 @@ public class NormalMomentClosureMinApproximation extends NormalMomentClosure
 	@Override
 	public AbstractExpression insertProductIntoRate(AbstractExpression rate, PopulationProduct moment)
 	{
-		NormalClosureMinApproximationVisitorUniversal visitor = new NormalClosureMinApproximationVisitorUniversal(new CombinedPopulationProduct(moment), m_maxOrder, m_usedVariables, m_lastVariable);
+		NormalClosureMinApproximationVisitorUniversal visitor = new NormalClosureMinApproximationVisitorUniversal(new CombinedPopulationProduct(moment), m_maxOrder, m_usedVariables, m_lastVariable, alternative);
 		rate.accept(visitor);
 		m_lastVariable = visitor.getVariableIndex();
 		return visitor.getResult();
@@ -54,7 +58,7 @@ public class NormalMomentClosureMinApproximation extends NormalMomentClosure
 	@Override
 	public AbstractExpression insertAccumulations(AbstractExpression derivative, CombinedPopulationProduct moment)
 	{
-		NormalClosureMinApproximationVisitorUniversal visitor = new NormalClosureMinApproximationVisitorUniversal(new CombinedPopulationProduct(null, moment.getAccumulatedProducts()), m_maxOrder, m_usedVariables, m_lastVariable);
+		NormalClosureMinApproximationVisitorUniversal visitor = new NormalClosureMinApproximationVisitorUniversal(new CombinedPopulationProduct(null, moment.getAccumulatedProducts()), m_maxOrder, m_usedVariables, m_lastVariable, alternative);
 		derivative.accept(visitor);
 		m_lastVariable = visitor.getVariableIndex();
 		return visitor.getResult();
@@ -63,6 +67,6 @@ public class NormalMomentClosureMinApproximation extends NormalMomentClosure
 	@Override
 	public String toString()
 	{
-		return MomentClosure.MOMENT_CLOSURE + "=" + NAME + ", " + MomentClosure.MAX_ORDER + "=" + m_maxOrder;
+		return MomentClosure.MOMENT_CLOSURE + "=" + NAME + ", " + MomentClosure.MAX_ORDER + "=" + m_maxOrder + ", alternative="+alternative ;
 	}
 }

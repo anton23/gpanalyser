@@ -87,14 +87,15 @@ public class SimulationAnalysisNumericalPostprocessor extends NumericalPostproce
 				stopTime, stepSize, replications, parameters);
 		ret.fastPrepare(momentIndex, generalExpectationIndex,
 				productUpdaterCode, accumulatorUpdaterCode, eventGeneratorCode,
-				initialExpressions, eventGeneratorClassName);
+				initialExpressions, eventGeneratorClassName, simulation);
 		return ret;
 	}
 	
 	protected void fastPrepare(Map<CombinedPopulationProduct, Integer> momentIndex, Map<AbstractExpression, Integer> generalExpectationIndex, 
 							   String productUpdaterCode, String accumulatorUpdaterCode, String eventGeneratorCode,
-							   AbstractExpression[] initialExpressions, String eventGeneratorClassName) {
+							   AbstractExpression[] initialExpressions, String eventGeneratorClassName, PCTMCSimulation simulation) {
 		this.prepared = true;
+		this.simulation = simulation;
 		this.momentIndex = momentIndex;
 		this.generalExpectationIndex = generalExpectationIndex;
 		this.productUpdaterCode = productUpdaterCode;

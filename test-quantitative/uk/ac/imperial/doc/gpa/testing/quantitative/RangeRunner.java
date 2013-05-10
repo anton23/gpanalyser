@@ -2,10 +2,8 @@ package uk.ac.imperial.doc.gpa.testing.quantitative;
 
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.experiments.iterate.RangeSpecification;
@@ -49,26 +47,28 @@ public abstract class RangeRunner {
 	public void run(final Constants constants) {	
 		if (parts.size() > 1) {
 			PCTMCLogging.setVisible(false);
-			ExecutorService es = Executors.newFixedThreadPool(parts.size());
+			List<Thread> threads = new LinkedList<Thread>();
 
 			for (final RangeRunner part:parts) {				
 				Runnable r = new Runnable() {
 					@Override
 					public void run() {
-						part.run(constants.getCopyOf());						
+						part.run(constants.getCopyOf());
 					}
 				};
-				es.submit(r);								
+				Thread t = new Thread(r);				
+				threads.add(t);			
+				t.start();
+			}		
+				try {
+					for (Thread t : threads) {
+					t.join();
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();				
 			}
-		
-			try {
-				es.shutdown();
-				es.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			PCTMCLogging.setVisible(true);
-			} catch(InterruptedException e) {
-				e.printStackTrace();
-			}
-			join(constants);
+			joinData(constants);
 		} else {
 			runSerial(constants);
 		}		
@@ -77,7 +77,7 @@ public abstract class RangeRunner {
 		}
 	}
 	
-	protected abstract void join(Constants constants);
+	protected abstract void joinData(Constants constants);
 	protected abstract RangeRunner createSlave(List<RangeSpecification> ranges, int nParts);
 	protected abstract void runSingle(Constants constants);
 	protected abstract void processData(Constants constants);
