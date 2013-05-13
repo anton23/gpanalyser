@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -179,8 +180,13 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 			m_inserted = false;
 			muB.accept(this);
 			AbstractExpression muB2 = considerVariable(result);
-
-			result = FunctionCallExpression.create(minProduct,Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression.create(m_moment)));
+			if (m_moment.getAccumulatedProducts().isEmpty()) {
+				result = FunctionCallExpression.create(minProduct,Lists.newArrayList(muA, muB, theta, muA2, muB2, CombinedProductExpression.create(m_moment)));
+			} else {
+				result = FunctionCallExpression.create(minProduct+"Acc",Lists.newArrayList(
+						muA, muB, theta, muA, muB, DoubleExpression.ONE, muA2, muB2, 
+						CombinedProductExpression.create(m_moment)));
+			}
 			m_inserted = true;
 		}
 		else if (_e.getName().equals(minProduct) && m_insert)
@@ -201,8 +207,12 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 			m_inserted = false;
 			add.accept(this);
 			AbstractExpression add2 = considerVariable(result);
-						
-			result = FunctionCallExpression.create(minProduct,Lists.newArrayList(muA, muB, theta, muA3, muB3,add2));
+			if (m_moment.getAccumulatedProducts().isEmpty()) {			
+				result = FunctionCallExpression.create(minProduct,Lists.newArrayList(muA, muB, theta, muA3, muB3,add2));
+			} else {
+				result = FunctionCallExpression.create(
+						minProduct+"Acc",Lists.newArrayList(muA, muB, theta, muA2, muB2,add, muA3, muB3, add2));
+			}
 			m_inserted = true;
 		}
 		else
