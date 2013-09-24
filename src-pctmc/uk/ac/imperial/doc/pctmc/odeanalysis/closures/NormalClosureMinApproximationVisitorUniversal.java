@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;
@@ -18,6 +17,7 @@ import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CentralMomentOfLinearCo
 import uk.ac.imperial.doc.pctmc.analysis.plotexpressions.CovarianceOfLinearCombinationsExpression;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedProductExpression;
+import uk.ac.imperial.doc.pctmc.representation.State;
 
 import com.google.common.collect.Lists;
 
@@ -33,7 +33,7 @@ public class NormalClosureMinApproximationVisitorUniversal extends NormalClosure
 	
 	public NormalClosureMinApproximationVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder, Map<AbstractExpression, ExpressionVariable> _usedVariables, int _variableIndex, boolean alternative)
 	{
-		super(_moment, _maxOrder);
+		super(_moment, _maxOrder, new HashMap<State, Map<State, Integer>>());
 		m_usedVariables = _usedVariables;
 		m_variableIndex = _variableIndex;
 		this.alternative = alternative;

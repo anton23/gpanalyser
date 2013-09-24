@@ -3,11 +3,13 @@ package uk.ac.imperial.doc.pctmc.representation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
+import uk.ac.imperial.doc.pctmc.expressions.ExpressionWalkerForStates;
 
 public class PCTMC {
 	private Map<State,Integer> stateIndex; 
@@ -98,5 +100,66 @@ public class PCTMC {
 		}
 		return ToStringUtils.mapToDefinitionList(initMap, "=", ";\n") + 
 			   ToStringUtils.iterableToSSV(evolutionEvents, "\n");
+	}
+
+	public Map<State,Map<State, Integer>> getDistanceBetweenPopulations(int minDist) {
+		Map<State,Map<State, Integer>> distMap = new HashMap<State,Map<State, Integer>>();
+		
+		for (int i=0; i<inverseStateIndex.length; i++) {
+			State a = inverseStateIndex[i];
+			for (int j=i; j<inverseStateIndex.length; j++) {
+				State b = inverseStateIndex[j];
+				int dist = 0;
+				if (!a.equals(b)) {
+					dist = 1000000;
+					HashSet<State> fringe = new HashSet<State>();
+					HashSet<State> explored = new HashSet<State>();
+					fringe.add(a);
+					fringe.add(b);
+					int curDist = 1;
+					while (!fringe.isEmpty()) {
+						HashSet<State> newFringe = new HashSet<State>();
+						for (EvolutionEvent e : this.evolutionEvents) {
+							ExpressionWalkerForStates efs = new ExpressionWalkerForStates();
+							e.getRate().accept(efs);
+							for (State s : fringe) {
+								if (!e.getIncreasing().contains(s)) {
+									continue;
+								}
+								newFringe.addAll(efs.getStates());
+								if (s != a && efs.getStates().contains(a) ||
+									s != b && efs.getStates().contains(b)) {
+									dist = curDist;
+									break;
+								}
+							}
+						}
+						
+						if (dist == curDist) {
+							break;
+						}
+
+						++curDist;
+						explored.addAll(fringe);
+						newFringe.removeAll(fringe);
+						fringe = newFringe;
+					}
+				}
+
+				if (dist >= minDist) {
+					if (distMap.get(a) == null) {
+						distMap.put(a,new HashMap<State, Integer>());
+					}
+					if (distMap.get(b) == null) {
+						distMap.put(b,new HashMap<State, Integer>());
+					}
+					distMap.get(a).put(b,dist);
+					distMap.get(b).put(a,dist);
+					System.out.println("Dist("+a+","+b+")="+dist);
+				}
+			}
+		}
+		
+		return distMap;
 	}
 }

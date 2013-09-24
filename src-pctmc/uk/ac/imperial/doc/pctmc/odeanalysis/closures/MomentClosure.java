@@ -12,6 +12,8 @@ public abstract class MomentClosure
 	public static final String MOMENT_CLOSURE = "momentClosure";
 	public static final String MAX_ORDER = "maxOrder";
 	public static final String MEAN_FIELD_STABILISER = "mfStabiliser";
+	public static final String EVENT_INDEPENDENCE_DIST = "eventIndepDist";
+	public static final String DISTANCE_MAP = "distanceMap";
 	
 	public MomentClosure(Map<String, Object> parameters) {}
 	public abstract AbstractExpression insertProductIntoRate(AbstractExpression rate, PopulationProduct moment);
