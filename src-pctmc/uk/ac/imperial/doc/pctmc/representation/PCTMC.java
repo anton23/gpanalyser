@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.utils.ToStringUtils;
@@ -105,6 +107,13 @@ public class PCTMC {
 	public Map<State,Map<State, Integer>> getDistanceBetweenPopulations(int minDist) {
 		Map<State,Map<State, Integer>> distMap = new HashMap<State,Map<State, Integer>>();
 		
+		Map<EvolutionEvent, Set<State>> rateStates = new HashMap<EvolutionEvent, Set<State>>();
+		for (EvolutionEvent e : this.evolutionEvents) {
+			ExpressionWalkerForStates efs = new ExpressionWalkerForStates();
+			e.getRate().accept(efs);
+			rateStates.put(e,efs.getStates());
+		}
+		
 		for (int i=0; i<inverseStateIndex.length; i++) {
 			State a = inverseStateIndex[i];
 			for (int j=i; j<inverseStateIndex.length; j++) {
@@ -120,15 +129,14 @@ public class PCTMC {
 					while (!fringe.isEmpty()) {
 						HashSet<State> newFringe = new HashSet<State>();
 						for (EvolutionEvent e : this.evolutionEvents) {
-							ExpressionWalkerForStates efs = new ExpressionWalkerForStates();
-							e.getRate().accept(efs);
 							for (State s : fringe) {
-								if (!e.getIncreasing().contains(s)) {
+								if (!e.getIncreasing().contains(s) &&
+									!rateStates.get(e).contains(s)) {
 									continue;
 								}
-								newFringe.addAll(efs.getStates());
-								if (s != a && efs.getStates().contains(a) ||
-									s != b && efs.getStates().contains(b)) {
+								newFringe.addAll(rateStates.get(e));
+								if (s != a && rateStates.get(e).contains(a) ||
+									s != b && rateStates.get(e).contains(b)) {
 									dist = curDist;
 									break;
 								}
@@ -141,7 +149,7 @@ public class PCTMC {
 
 						++curDist;
 						explored.addAll(fringe);
-						newFringe.removeAll(fringe);
+						newFringe.removeAll(explored);
 						fringe = newFringe;
 					}
 				}

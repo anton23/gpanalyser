@@ -1,0 +1,64 @@
+a = 0.3;
+b = 0.3;
+c = 0.9;
+
+am = 0.4;
+bm = 0.5;
+cm = 0.2;
+
+n = 10;
+m = 20;
+
+$q = 1/(10*m*n);
+
+      -> {S1}   @ n;
+{S1}  -> {S2}   @ {S1}*b;
+{S2}  -> {S3}   @ {S2}*b;
+{S3}  -> {S4}   @ {S3}*b;
+{S4}  -> {S5}   @ {S4}*b;
+{S5}  -> {S6}   @ {S5}*b;
+{S6}  -> {S7}   @ {S6}*c;
+{S7}  -> {S8}   @ {S7}*c;
+{S8}  -> {S9}   @ {S8}*c;
+{S9}  -> {S10}  @ {S9}*c;
+{S10} -> {S11}  @ {S10}*c;
+{S11} -> {S12}  @ {S11}*a;
+{S12} -> {S13}  @ {S12}*a;
+{S13} -> {S14}  @ {S13}*a;
+{S14} ->        @ {S14}*a;
+//{S14} -> {S1}   @ {S14}*a;
+
+      -> {M1}   @ m;
+{M1}  -> {M2}   @ {M1}*b;
+{M2}  -> {M3}   @ {M2}*b;
+{M3}  -> {M4}   @ {M3}*b;
+{M4}  -> {M5}   @ {M4}*b;
+{M5}  -> {M6}   @ {M5}*b;
+{M6}  -> {M7}   @ {M6}*c;
+{M7}  ->        @ {M7}*c;
+//{M7}  -> {M1}   @ {M7}*c;
+
+      -> {MYACC}  @ $q*{M3}{S5};
+
+{S1} = 0;//n;
+{M1} = 0;//m;
+{MYACC} = 0;
+
+Compare (
+
+ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=2](stopTime = 200.0, stepSize = 0.1, density = 1000){
+	SCM[{S1},2]/n, SCM[{S2},2]/n, SCM[{S3},2]/n, SCM[{S4},2]/n, SCM[{S5},2]/n, SCM[{S6},2]/n,
+	SCM[{S7},2]/n, SCM[{S8},2]/n, SCM[{S9},2]/n, SCM[{S10},2]/n, SCM[{S11},2]/n, SCM[{S12},2]/n;
+	E[{MYACC}], SCM[{MYACC},2];
+},
+
+ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=15](stopTime = 200.0, stepSize = 0.1, density = 1000){
+	SCM[{S1},2]/n, SCM[{S2},2]/n, SCM[{S3},2]/n, SCM[{S4},2]/n, SCM[{S5},2]/n, SCM[{S6},2]/n,
+	SCM[{S7},2]/n, SCM[{S8},2]/n, SCM[{S9},2]/n, SCM[{S10},2]/n, SCM[{S11},2]/n, SCM[{S12},2]/n;
+	E[{MYACC}], SCM[{MYACC},2];
+}
+) {
+	SCM[{S1},2]/n, SCM[{S2},2]/n, SCM[{S3},2]/n, SCM[{S4},2]/n, SCM[{S5},2]/n, SCM[{S6},2]/n,
+	SCM[{S7},2]/n, SCM[{S8},2]/n, SCM[{S9},2]/n, SCM[{S10},2]/n, SCM[{S11},2]/n, SCM[{S12},2]/n;
+	E[{MYACC}], SCM[{MYACC},2];
+}

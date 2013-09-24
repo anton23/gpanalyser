@@ -130,11 +130,11 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 		{
 			int evtIndDist = (Integer) parameters.get(MomentClosure.EVENT_INDEPENDENCE_DIST);
 			// Check distance between all pairs
-			Map<State,Map<State, Integer>> distMap = pctmc.getDistanceBetweenPopulations(evtIndDist+1);
+			Map<State,Map<State, Integer>> distMap = pctmc.getDistanceBetweenPopulations(evtIndDist);
 			parameters.put(MomentClosure.DISTANCE_MAP, distMap);
 		}
 		else {
-			Map<State,Map<State, Integer>> distMap = pctmc.getDistanceBetweenPopulations(-1);
+			Map<State,Map<State, Integer>> distMap = pctmc.getDistanceBetweenPopulations(0);
 			parameters.put(MomentClosure.DISTANCE_MAP, distMap);
 		}
 		MomentClosure closure = getClosure(parameters);

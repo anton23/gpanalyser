@@ -1,0 +1,28 @@
+
+      -> {O}    @ 20;
+      -> {S1}   @ 40;
+{O}   -> {S1}   @ 0.6*{O};
+{O}   -> {F1}   @ 0.4*{O};
+
+{S1}  -> {S2}   @ 0.6*{S1};
+{S2}  ->        @ 0.8*{S2};
+
+{F1}  -> {F2}   @ 0.2*{F1};
+{F2}  ->        @ 1.6*{F2};
+
+{O} = 0;
+
+Compare (
+	ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=1](stopTime = 200.0, stepSize = 0.1, density = 1000){
+		SCM[{S1},2], SCM[{S2},2], SCM[{F1},2], SCM[{F2},2];
+	},
+	ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=10000000](stopTime = 200.0, stepSize = 0.1, density = 1000){
+		SCM[{S1},2], SCM[{S2},2], SCM[{F1},2], SCM[{F2},2];
+	}
+) {
+		SCM[{S1},2], SCM[{S2},2], SCM[{F1},2], SCM[{F2},2];
+}
+
+Simulation(stopTime=200.0,stepSize=0.1,replications=10000){
+	SCM[{S1},2], SCM[{S2},2], SCM[{F1},2], SCM[{F2},2];
+}
