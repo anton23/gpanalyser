@@ -245,7 +245,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 				
 				// Finally we separate moments that are distances independent
 				// Currently this only works with order 2 closures
-				if (m_maxOrder == 2 && m_distMap.size() > 0 && product.getOrder() == 2) {
+				if (m_distMap.size() > 0 && product.getOrder() == 2) {
 					// Should we assume independence - if so we separate
 					Multiset<State> ms = product.getPopulationProduct().getRepresentation();
 					Object[] state = ms.toArray();
@@ -302,7 +302,29 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 				List<AbstractExpression> closure = new LinkedList<AbstractExpression>();
 				for (Entry<AbstractExpression, Integer> exp : closureSummands.entrySet())
 				{
-					closure.add(ProductExpression.create(new DoubleExpression((double)exp.getValue()),exp.getKey()));
+					ProductExpression pe = (ProductExpression)exp.getKey();
+					AbstractExpression prod = null;
+					for (AbstractExpression ae : pe.getTerms()) {
+						CombinedProductExpression cpe = (CombinedProductExpression)ae;
+						CombinedPopulationProduct product = cpe.getProduct();
+						// Finally we separate moments that are distances independent
+						// Currently this only works with order 2 closures
+						if (m_distMap.size() > 0 && product.getOrder() == 2) {
+							// Should we assume independence - if so we separate
+							Multiset<State> ms = product.getPopulationProduct().getRepresentation();
+							Object[] state = ms.toArray();
+							
+							Map<State, Integer> m = m_distMap.get(state[0]);
+							if (m != null && m.containsKey(state[1])) {
+								ae = ProductExpression.create(
+									CombinedProductExpression.createMeanExpression((State)state[0]),
+									CombinedProductExpression.createMeanExpression((State)state[1])
+								);
+							}
+						}
+						prod = (prod == null) ? ae : ProductExpression.create(prod,ae);
+					}					
+					closure.add(ProductExpression.create(new DoubleExpression((double)exp.getValue()),prod));
 				}
 				result = SumExpression.create(closure);
 			}

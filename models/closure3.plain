@@ -1,0 +1,30 @@
+mu=10;
+gamma=1;
+
+    -> {BT1_1}   @ 1.5*mu;
+    -> {BT1_2}   @ mu;
+{BT1_1} -> {AT1} @ {BT1_1}{Off}*60;
+{BT1_2} -> {AT1} @ {BT1_2}{On}*60;
+{AT1} -> {AT2}   @ {AT1}{On2};
+{AT2} ->         @ {AT2};
+
+{On} -> {Off} @ {On}*gamma;
+{Off} -> {On} @ {Off}*gamma;
+
+{On2} -> {Off2} @ {On2}*gamma;
+{Off2} -> {On2} @ {Off2}*gamma;
+
+{BT1_1} = 0;
+{BT1_2} = 0;
+{On} = 0.5;
+{Off} = 0.5;
+{On2}  = 0.5;
+{Off2} = 0.5;
+
+ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=10](stopTime = 20.0, stepSize = 0.1, density = 1000){
+	SCM[{AT1},2], SCM[{AT2},2], SCM[{On},2], SCM[{Off},2] , SCM[{On2},2], SCM[{Off2},2];
+}
+/*
+Simulation(stopTime=20.1,stepSize=0.1,replications=4000){
+	SCM[{AT1},2], SCM[{AT2},2];
+}*/
