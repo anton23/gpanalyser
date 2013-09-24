@@ -1,4 +1,4 @@
-mu=2.0;
+mu=1.0;
 theta=0.4;
 delta=0.4;
 gamma=0.2;
@@ -14,12 +14,20 @@ gamma=0.2;
 {On} -> {Off} @ {On}*gamma;
 {Off} -> {On} @ {Off}*gamma;
 
-{A} = 5;
-{Off} = 5;
+{A} = 50;
+{Off} = 1;
 
-ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=3](stopTime = 40.0, stepSize = 0.1, density = 1000){
-//	E[{A}], E[{B}], E[{C}];
+Compare (
+ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=2](stopTime = 70.0, stepSize = 0.1, density = 1000){
 	SCM[{A},2], SCM[{B},2], SCM[{C},2], SCM[{D},2], SCM[{F},2], SCM[{G},2];
+},
+
+ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=5](stopTime = 70.0, stepSize = 0.1, density = 1000){
+	SCM[{A},2], SCM[{B},2], SCM[{C},2], SCM[{D},2], SCM[{F},2], SCM[{G},2];
+}
+)
+{
+SCM[{A},2], SCM[{B},2], SCM[{C},2], SCM[{D},2], SCM[{F},2], SCM[{G},2];
 }
 
 /*

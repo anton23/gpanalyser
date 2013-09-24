@@ -1,0 +1,47 @@
+mu=0.2;
+theta=0.4;
+delta=0.6;
+gamma=0.03;
+
+    -> {A} @ mu;
+    -> {B} @ mu;
+    -> {C} @ mu;
+{A} -> {D} @ {A}*theta;
+{B} -> {D} @ {B}{On};
+{C} -> {D} @ {C}*delta;
+{D} -> {F} @ {D}*mu;
+{F} -> {G} @ {F}*delta;
+{G} ->     @ {G};
+
+{On} -> {Off} @ {On}*gamma;
+{Off} -> {On} @ {Off}*gamma;
+
+{A} = 0;
+{B} = 0;
+{C} = 0;
+{Off} = 5;
+
+Compare (
+/*ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=2](stopTime = 60.0, stepSize = 0.05, density = 1000){
+	SCM[{A},2], SCM[{B},2], SCM[{C},2], SCM[{D},2], SCM[{F},2], SCM[{G},2];
+},*/
+
+ODEs[momentClosure=NormalClosure,maxOrder=2,eventIndepDist=1000](stopTime = 100.0, stepSize = 0.05, density = 1000){
+	E[{B}];
+	E[{On}];
+	SCM[{A},2], SCM[{B},2], SCM[{C},2], SCM[{D},2], SCM[{F},2], SCM[{G},2];
+},
+Simulation(stopTime=100.1,stepSize=0.05,replications=40000){
+	SCM[{A},2], SCM[{B},2], SCM[{C},2], SCM[{D},2], SCM[{F},2], SCM[{G},2];
+}
+
+)
+{
+SCM[{A},2], SCM[{B},2], SCM[{C},2], SCM[{D},2], SCM[{F},2], SCM[{G},2];
+}
+
+/*
+Simulation(stopTime=20.0,stepSize=0.1,replications=100000){
+//	E[{A}], E[{B}], E[{C}];
+	SCM[{A},2], SCM[{B},2], SCM[{C},2];
+}*/
