@@ -40,6 +40,7 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 	protected boolean m_insert;
 	protected boolean m_inserted;
 	protected int m_maxOrder;
+	protected Map<State,Map<State, Integer>> m_distMap;
 	protected CombinedPopulationProduct m_moment;
 
 	private static Map<Integer,Map<AbstractExpression,Integer>> s_genClosures = new HashMap<Integer,Map<AbstractExpression,Integer>>();
@@ -61,9 +62,10 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 		s_genMomentNameId.put("M12", 10);
 	}
 	
-	public NormalClosureVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder)
+	public NormalClosureVisitorUniversal(CombinedPopulationProduct _moment, int _maxOrder, Map<State, Map<State, Integer>> _distMap)
 	{
 		m_maxOrder = _maxOrder;
+		m_distMap = _distMap;
 		m_moment = _moment;
 		m_inserted = false;
 		m_insert = true;
@@ -238,7 +240,24 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 			int order = m_moment.getOrder() + _e.getProduct().getOrder();
 			if (order <= m_maxOrder)
 			{
-				result = CombinedProductExpression.create(CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct()));
+				CombinedPopulationProduct product = CombinedPopulationProduct.getProductOf(m_moment,_e.getProduct());
+				result = CombinedProductExpression.create(product);
+				
+				// Finally we separate moments that are distances independent
+				// Currently this only works with order 2 closures
+				if (m_maxOrder == 2 && m_distMap.size() > 0 && product.getOrder() == 2) {
+					// Should we assume independence - if so we separate
+					Multiset<State> ms = product.getPopulationProduct().getRepresentation();
+					Object[] state = ms.toArray();
+					
+					Map<State, Integer> m = m_distMap.get(state[0]);
+					if (m != null && m.containsKey(state[1])) {
+						result = ProductExpression.create(
+							CombinedProductExpression.createMeanExpression((State)state[0]),
+							CombinedProductExpression.createMeanExpression((State)state[1])
+						);
+					}
+				}
 			}
 
 			// Mean field closure
@@ -293,6 +312,8 @@ public class NormalClosureVisitorUniversal extends MomentCountTransformerWithPar
 			result = _e;
 		}
 	}
+	
+	
 	
 	/**
 	 * Load template for (_maxorder, order(_cpp)) normal closure and replace

@@ -4,15 +4,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
 import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.expressions.CombinedPopulationProduct;
+import uk.ac.imperial.doc.pctmc.expressions.PopulationProduct;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.LognormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosureMinApproximation;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
+import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
 public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
@@ -89,6 +92,8 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 	public static MomentClosure getClosure(Map<String, Object> parameters) {
 		if (parameters != null && parameters.containsKey("momentClosure"))
 		{
+			Set<PopulationProduct> m = new HashSet<PopulationProduct>();
+			
 			Object nameO = parameters.get("momentClosure");
 			if (!(nameO instanceof String))
 			{
@@ -119,7 +124,21 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 		super(pctmc);
 		this.constructorParameters = parameters;
 		m_autoClosure = true;
+		
+		// Distance dependent independence between populations
+		if (parameters != null && parameters.containsKey(MomentClosure.EVENT_INDEPENDENCE_DIST))
+		{
+			int evtIndDist = (Integer) parameters.get(MomentClosure.EVENT_INDEPENDENCE_DIST);
+			// Check distance between all pairs
+			Map<State,Map<State, Integer>> distMap = pctmc.getDistanceBetweenPopulations(evtIndDist+1);
+			parameters.put(MomentClosure.DISTANCE_MAP, distMap);
+		}
+		else {
+			Map<State,Map<State, Integer>> distMap = pctmc.getDistanceBetweenPopulations(-1);
+			parameters.put(MomentClosure.DISTANCE_MAP, distMap);
+		}
 		MomentClosure closure = getClosure(parameters);
+		
 		if (closure != null) {
 			m_autoClosure = false;
 			m_momentClosure = closure;
