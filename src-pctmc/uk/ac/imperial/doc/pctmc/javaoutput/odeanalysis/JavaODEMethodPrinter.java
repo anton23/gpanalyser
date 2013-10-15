@@ -185,7 +185,7 @@ public class JavaODEMethodPrinter implements IODEMethodVisitor {
 		while (line < totalLines - 1) {
 			if (method == 0) {
 				header
-						.append("public void computeDerivatives(double x, double[] y, double[] newy) {\n");
+						.append("public void computeDerivatives(double t, double[] y, double[] newy) {\n");
 
 			} else {
 				code.append("private void derivn" + method
