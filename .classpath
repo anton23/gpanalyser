@@ -9,8 +9,6 @@
 	<classpathentry kind="src" path="src-probes"/>
 	<classpathentry kind="src" path="test-quantitative"/>
 	<classpathentry kind="src" path="test-pctmc"/>
-	<classpathentry kind="src" path="src-masspa"/>
-	<classpathentry kind="src" path="test-masspa"/>
 	<classpathentry kind="src" path="src-gpa">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>

@@ -36,7 +36,7 @@ public class ChartUtils3D {
 				double y = miny + iy * dy;				
 				double z00 = data[ix][iy];
 				double z01 = data[ix][iy + 1];
-				double z11 = data[ix + 1][iy + 1];
+				//double z11 = data[ix + 1][iy + 1];
 				double z10 = data[ix + 1][iy];
 				
 				Polygon polygonTop = new Polygon();				
