@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import uk.ac.imperial.doc.jexpressions.constants.ConstantExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.AbstractExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DivMinExpression;
 import uk.ac.imperial.doc.jexpressions.expressions.DoubleExpression;

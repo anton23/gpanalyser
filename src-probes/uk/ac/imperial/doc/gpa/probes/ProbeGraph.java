@@ -16,7 +16,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class ProbeGraph extends JFrame
 {
-    private final static String title = "CDF";
+	private static final long serialVersionUID = -2098466371691836445L;
+	private final static String title = "CDF";
     private final XYSeriesCollection times = new XYSeriesCollection ();
 
     public ProbeGraph ()
