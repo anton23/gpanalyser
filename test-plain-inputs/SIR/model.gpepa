@@ -1,0 +1,20 @@
+r_infect = 0.001;
+r_recover = 0.1;
+
+{S} + {I} -> {I} + {I} @ {S}{I} * r_infect;
+{I} -> {R} @ {I} * r_recover;
+
+{S} = 500;
+{I} = 10;
+
+ODEs(stopTime = 100, stepSize = 1, density=10) {
+    E[{S}], E[{I}], E[{R}];
+	Var[{S}], Var[{I}], Var[{R}];    
+    E[{I}] + 1.95*Var[{I}]^0.5, E[{I}], E[{I}] - 1.95 * Var[{I}]^0.5;
+}
+
+Simulation(stopTime = 100, stepSize = 1, replications=10000) {
+    E[{S}], E[{I}], E[{R}];
+    Var[{S}], Var[{I}], Var[{R}];
+    E[{I}] + 1.95*Var[{I}]^0.5, E[{I}], E[{I}] - 1.95 * Var[{I}]^0.5;
+}

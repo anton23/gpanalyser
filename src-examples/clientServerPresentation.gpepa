@@ -1,0 +1,67 @@
+r_think = 0.6;
+r_request = 0.4;
+r_use = 0.9;
+
+r_init = 0.2;
+r_reinit = 0.5;
+r_reset = 0.1;
+
+nc = 10;
+ns = 6;
+
+Client_0 = (think, r_think).Client_1;
+Client_1 = (request, r_request).Client_2;
+Client_2 = (use, r_use).Client_0;
+
+Server_0 = (init, r_init).Server_1;
+Server_1 = (request, r_request).Server_2 + (reset, r_reset).Server_0;
+Server_2 = (reinit, r_reinit).Server_1 + (reset, r_reset).Server_0;
+
+Clients {Client_0[nc]} <request> Servers {Server_0[ns]}
+
+Probe ["preso-steady.dat"] (stopTime=500, stepSize=0.5, density=10) steady 1000
+//SimProbe ["preso-steady-100-60.dat"] (stopTime=500, stepSize=0.5, replications=10000) steady 1000
+{
+    SimHIPT = begin : start, end : stop <-
+    observes
+    {
+    	LProbe = init : begin, ((request[3] / reset)[2] / init) : end <-
+    }
+    where
+    {
+    	Servers {Server_0[ns]} =>
+    		Servers {Server_0 <request, init, reset> LProbe
+    				 | Server_0[ns - 1]}
+    }
+}
+
+Probe ["preso-transient.dat"] (stopTime=100, stepSize=0.25, density=10) transient 0.25
+//SimProbe ["preso-transient-100-60.dat"] (stopTime=100, stepSize=0.5, replications=10000) transient 500
+{
+    SimHIPT = begin : start, end : stop
+    observes
+    {
+    	LProbe = eE : begin, (request[3] ; reset) : end
+    }
+    where
+    {
+    	Servers {Server_0[ns]} =>
+    		Servers {Server_0 <request, reset> LProbe
+    				 | Server_0[ns - 1]}
+    }
+}
+
+//Probe ["preso-global.dat"] (stopTime=350, stepSize=0.5, density=10)
+SimProbe ["preso-global-10-6.dat"] (stopTime=350, stepSize=0.5, replications=7500)
+{
+    SimHIPT = eE : start, end[nc*0.1] : stop
+    observes
+    {
+    	LProbe = eE : begin, request[20] : end
+    }
+    where
+    {
+    	Clients {Client_0[nc]} =>
+    		Clients {Client_0<request> LProbe [nc]}
+    }
+}

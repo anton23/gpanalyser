@@ -1,0 +1,24 @@
+rt = 0.4;
+rs = 0.15;
+ri = 0.6;
+rf = 0.1;
+rr = 0.35;
+
+n = 100.0;
+m = 60.0;
+
+Client0 = (fetch, rt).Client1;
+Client1 = (reset, T, 1.0).Client0;
+
+Serv0 = (initialise, ri).Serv1;
+Serv1 = (fetch, rt).Serv0 + (fail, rf).Serv2;
+Serv2 = (recover, rr).Serv0;
+
+Clients {Client0[n]} <fetch> Servers {Serv0[m]}
+
+Count fetch;
+
+ODEs (stopTime=500, stepSize=1, density=10)
+{
+	E[#fetch];
+}

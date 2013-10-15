@@ -1,0 +1,8 @@
+E[{A}];
+
+dE[{C}]/dt = r_arrive * scale - min(E[{C}], E[{S}]) * r_service;
+dE[{S}]/dt = 0.0;
+dE[{A}]/dt = -min(thresh * scale - E[~T], 0) * E[{A}] * (-r_on / scale) + E[{A1}] * r_off;
+dE[{A1}]/dt = min(thresh * scale - E[~T], 0) * E[{A}] * (-r_on / scale) - E[{A1}] * r_off;
+dE[~T]/dt = min(E[{C}], E[{S}]) * t_s - E[{A1}] * t_a;
+ 

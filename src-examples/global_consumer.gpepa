@@ -1,0 +1,55 @@
+rt  = 0.5;
+rg  = 0.4;
+rgp = 0.5;
+rs  = 0.9;
+rti = 0.05;
+ru  = 0.8;
+ri  = 0.6;
+rp  = 0.2;
+rcl = 0.4;
+
+nc = 84;
+np = 28;
+
+Consumer			= (think, rt).Consumer_decided;
+Consumer_decided	= (get_product, rg).Consumer_prep;
+Consumer_prep		= (use, ru).Consumer;
+
+Terminal			= (setup, rs).Terminal_get;
+Terminal_get		= (get_product, T).Terminal
+					+ (timeout, rti).Terminal;
+
+Producer			= (init, ri).Producer_inited;
+Producer_inited		= (produce, rp).Producer_full;
+Producer_full		= (get_product, rgp).Producer
+					+ (clear, rcl).Producer;
+
+Consumers {Consumer [nc]} <get_product> Producers {(Producer <get_product> Terminal)[np]}
+
+Probe (stopTime=500, stepSize=1, density=10)
+{
+	GPT = eE : start, end[nc * 0.3] : stop
+	observes
+	{
+		LProbe = get_product[10] : end
+	}
+	where
+	{
+		Consumers {Consumer[nc]} =>
+			Consumers {(Consumer <get_product> LProbe)[nc]}
+	}
+}
+
+SimProbe (stopTime=500, stepSize=1, replications=2000)
+{
+	GPT = eE : start, end[nc * 0.3] : stop
+	observes
+	{
+		LProbe = get_product[10] : end
+	}
+	where
+	{
+		Consumers {Consumer[nc]} =>
+			Consumers {(Consumer <get_product> LProbe)[nc]}
+	}
+}
