@@ -18,11 +18,11 @@ public abstract class AggregatedStateNextEventGenerator {
 
 	public abstract void initCoefficients(); // needs only at the beginning
 
-	public abstract void recalculateWeights(double[] counts); // responsible for
+	public abstract void recalculateWeights(double t, double[] counts); // responsible for
 	// calculating the total weight as well
 
-	public double nextStep(double[] counts) {
-		recalculateWeights(counts);
+	public double nextStep(double t, double[] counts) {
+		recalculateWeights(t, counts);
 		if (totalRate == 0.0)
 			return -1;
 		int nextEvent = DiscreteSampler.getSample(weights, totalRate);

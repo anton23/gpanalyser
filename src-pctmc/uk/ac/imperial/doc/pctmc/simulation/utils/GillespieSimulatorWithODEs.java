@@ -71,7 +71,7 @@ public class GillespieSimulatorWithODEs extends GillespieSimulator {
 				previousCounts[i] = counts[i]; 
 			}
 			
-			double duration = g.nextStep(counts);
+			double duration = g.nextStep(currentTime, counts);
 			
 			if (duration == 0.0) {
 				duration = stopTime - currentTime;
