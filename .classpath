@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" path="src-jexpressions"/>
 	<classpathentry kind="src" path="src-pctmc">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="test-probes"/>
-	<classpathentry kind="src" path="src-probes"/>
-	<classpathentry kind="src" path="test-quantitative"/>
-	<classpathentry kind="src" path="test-pctmc"/>
+	<classpathentry kind="src" path="src-ipctmc"/>
+	<classpathentry kind="src" path="src-plain"/>
 	<classpathentry kind="src" path="src-gpa">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="gpanalyser/lib/linux-amd64"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="test-gpa"/>
-	<classpathentry kind="src" path="src-jexpressions"/>
-	<classpathentry kind="src" path="test-jexpressions"/>
-	<classpathentry kind="src" path="src-plain"/>
-	<classpathentry kind="src" path="test-plain"/>
+	<classpathentry kind="src" path="src-probes"/>
 	<classpathentry kind="src" path="src-examples"/>
 	<classpathentry kind="src" path="genSrc"/>
+	<classpathentry kind="src" path="test-jexpressions"/>
+	<classpathentry kind="src" path="test-pctmc"/>
+	<classpathentry kind="src" path="test-plain"/>
+	<classpathentry kind="src" path="test-gpa"/>
+	<classpathentry kind="src" path="test-probes"/>
+	<classpathentry kind="src" path="test-quantitative"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/jcommon-1.0.16.jar"/>

@@ -35,8 +35,6 @@ public class CombinedPopulationProduct {
 	public CombinedPopulationProduct(PopulationProduct populationProduct) {
 		super();
 		this.populationProduct = populationProduct;
-		if (populationProduct == null)
-			populationProduct = new PopulationProduct(HashMultiset.<State>create());
 		this.accumulatedProducts = HashMultiset.<AccumulationVariable> create();
 	}
 	

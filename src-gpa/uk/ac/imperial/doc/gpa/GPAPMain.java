@@ -49,9 +49,6 @@ public class GPAPMain {
 
 				accepts("plain",
 						"reads model descriptions in plain PCTMC format");
-				
-				accepts("masspa",
-						"reads model descriptions in MASSPA format");
 
 				accepts("3D", "displays 3D plots for iterate experiments");
 				
