@@ -11,8 +11,7 @@ import uk.ac.imperial.doc.pctmc.simulation.utils.AggregatedStateNextEventGenerat
 public abstract class NativeAggregatedStateNextEventGenerator
         extends AggregatedStateNextEventGenerator
 {
-    @SuppressWarnings("unchecked")
-	public void initCoefficients
+    public void initCoefficients
             (PCTMC pctmc, Collection<EvolutionEvent> observableEvents)
     {
         int nevents = observableEvents.size();
