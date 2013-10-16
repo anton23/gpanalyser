@@ -25,7 +25,7 @@ DIVIDE	:	'/';
 DEF: '='; 
 PATTERN:'%';
 
-TIME: 't';
+
 MIN: 'min';
 MAX: 'max';
 
