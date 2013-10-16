@@ -3,8 +3,7 @@ package uk.ac.imperial.doc.gpa.probes;
 public class CDF
 {
     private final double[] values;
-    @SuppressWarnings("unused")
-	private final String name;
+    private final String name;
     private final double stepSize;
 
     public double[] getValues ()
