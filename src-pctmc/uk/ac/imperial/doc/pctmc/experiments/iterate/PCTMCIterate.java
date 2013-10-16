@@ -111,6 +111,7 @@ public class PCTMCIterate extends PCTMCExperiment {
 		this.unfoldedVariables = unfoldedVariables;
 		this.minSpecification = minSpecification;
 		this.minRanges = minRanges;
+		minRanges = new LinkedList<RangeSpecification>();
 		this.parts = split(nParts);
 		this.processPlots = processPlots;
 	}
