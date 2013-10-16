@@ -121,6 +121,7 @@ public class NFAtoDFA
         (Collection<NFAState> states, String name)
     {
         boolean createAccepting = false;
+        String predicate = "";
         for (NFAState s : states)
         {
             createAccepting = s.isAccepting () || createAccepting;
