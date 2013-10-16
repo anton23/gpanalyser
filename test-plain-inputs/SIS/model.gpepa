@@ -1,0 +1,26 @@
+a = 0.03; 
+b = 1; 
+b1 = 1.0;
+b2 = 0.02;
+l1 = 0.2;
+l2 = 0.2; 
+
+{S} -> {I} @ a * {I} {S} ;
+{I} -> {S} @ b * {I};
+ -> {S} @ {S} * b1 + {I} * b1 - b2*{S}^2 - 2* b2*{S}{I} - b2* {I}^2; 
+{S} -> @ l1 * {S};
+{I} -> @ l2 * {I};
+
+{I} = 5;
+{S} = 35;
+
+ODEs[momentClosure = LognormalClosure, maxOrder = 4]
+//[momentClosure = NormalClosure, maxOrder = 5]
+(stopTime = 100.0, stepSize = 0.1, density=1000) {
+   E[{I}];
+   Var[{I}];
+}
+Simulation(stopTime = 100.0, stepSize = 0.1, replications=10000) {
+	E[{I}];
+   Var[{I}];
+}
