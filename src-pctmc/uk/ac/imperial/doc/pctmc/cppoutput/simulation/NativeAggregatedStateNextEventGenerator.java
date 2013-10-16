@@ -44,7 +44,7 @@ public abstract class NativeAggregatedStateNextEventGenerator
         (double[] counts, double[] weights, double[] r);
 
     @Override
-    public void recalculateWeights(double t, double[] counts) {
+    public void recalculateWeights(double[] counts) {
         totalRate = recalculateWeightsI(counts, weights, r);
     }
 }

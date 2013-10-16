@@ -33,7 +33,7 @@ public class GillespieSimulator {
 				previousCounts[i] = counts[i]; 
 			}
 			
-			double duration = g.nextStep(currentTime, counts);
+			double duration = g.nextStep(counts);
 			
 			double oldTime = currentTime; 
 			currentTime += duration;
