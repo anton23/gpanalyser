@@ -9,9 +9,7 @@ options{
 import PCTMCCompilerPrototype;
 
 @header{
-  
   package uk.ac.imperial.doc.gpa.plain.syntax;
- 
   
   import java.util.LinkedList;
   import java.util.Map;
@@ -68,56 +66,58 @@ import PCTMCCompilerPrototype;
   import uk.ac.imperial.doc.pctmc.experiments.distribution.DistributionsAtTimes;
 }
 
-
-
 @members {
 	// Reporting utility
-    protected Stack<String> hint = new Stack<String>(); 
-    protected ErrorReporter errorReporter;
+  protected Stack<String> hint = new Stack<String>(); 
+  protected ErrorReporter errorReporter;      
+  // Events for time inhomogenous PCTMCs 
+  protected TimedEvents mTimedEvents = new TimedEvents(); 
+  
+  public void setErrorReporter(ErrorReporter errorReporter) {
+    this.errorReporter = errorReporter;
+  }
      
-    public void setErrorReporter(ErrorReporter errorReporter) {
-    	this.errorReporter = errorReporter;
+  public String getErrorHeader(RecognitionException e) {
+  	return "line "+e.line+":"+e.charPositionInLine;
+  }
+     
+	public void displayRecognitionError(
+    String[] tokenNames,
+    RecognitionException e
+  ) {
+    String hdr = getErrorHeader(e);
+    String msg = getErrorMessage(e, tokenNames);
+    if (errorReporter != null) {
+      errorReporter.addError("[" + hdr + "] " + msg);
     }
-     
-    public String getErrorHeader(RecognitionException e) {
-    	return "line "+e.line+":"+e.charPositionInLine;
-  	}
-     
-	public void displayRecognitionError(String[] tokenNames,
-                                        RecognitionException e) {
-        String hdr = getErrorHeader(e);
-        String msg = getErrorMessage(e, tokenNames);
-       
-        if (errorReporter != null) {
-           errorReporter.addError("["+hdr + "] " + msg);
-        }
-    }
-    
-        
-	public String getErrorMessage(RecognitionException e,
-                              String[] tokenNames) {
-        if (!hint.isEmpty()) {
-          return hint.peek();
-        }
-        return  super.getErrorMessage(e, tokenNames);
-	}
-    
-    // Events for time inhomogenous PCTMCs 
-	protected TimedEvents mTimedEvents = new TimedEvents(); 
+  }
 
-  	public PCTMC genNewPCTMC(Map<State,AbstractExpression> initMap, List<EvolutionEvent> events) {
-		return new PlainPCTMC(initMap, events, mTimedEvents);
-  	}
+	public String getErrorMessage(
+	  RecognitionException e,
+    String[] tokenNames
+  ) {
+    if (!hint.isEmpty()) {
+      return hint.peek();
+    }
+    return super.getErrorMessage(e, tokenNames);
+	}
+
+  public PCTMC genNewPCTMC(
+    Map<State,AbstractExpression> initMap,
+    List<EvolutionEvent> events
+  ) {
+    return new PlainPCTMC(initMap, events, mTimedEvents);
+  }
 }
 
 @rulecatch {
 	catch (RecognitionException re) {
-		reportError(re);  
-		recover(input, re);
+    reportError(re);  
+    recover(input, re);
 	}
 	catch (AssertionError e) {
-		reportError(new CustomRecognitionException(input, e.getMessage()));
-		recover(input, new CustomRecognitionException(input, e.getMessage()));
+    reportError(new CustomRecognitionException(input, e.getMessage()));
+    recover(input, new CustomRecognitionException(input, e.getMessage()));
 	}
 }
 
@@ -129,262 +129,172 @@ state returns [State t]
 }
 :
   ^(TRANSACTION (id=UPPERCASENAME{components.add($id.text);})+) {
-  $t = new Transaction(components);
+    $t = new Transaction(components);
   }
-| ^(COUNT c=UPPERCASENAME) {$t = new CountingState($c.text);}
+| ^(COUNT c=UPPERCASENAME) {
+    $t = new CountingState($c.text);
+  }
 ;
 
 rateFileDefinitions[]:
-   (LOADRATES f=FILENAME INTO fun=LOWERCASENAME {mTimedEvents.addRateEventsFromFile($fun.text,$f.text.replace("\"","")); } SEMI)
+  LOADRATES f=FILENAME INTO fun=LOWERCASENAME {
+    mTimedEvents.addRateEventsFromFile($fun.text,$f.text.replace("\"",""));
+  } SEMI
 ;
 
 jumpFileDefinitions[]:
-   (LOADJUMPS f=FILENAME INTO t=state {mTimedEvents.addJumpEventsFromFile($t.t,$f.text.replace("\"","")); } SEMI)
+  LOADJUMPS f=FILENAME INTO t=state {
+    mTimedEvents.addJumpEventsFromFile($t.t,$f.text.replace("\"",""));
+  } SEMI
 ;
 
 resetFileDefinitions[]:
-   (LOADRESETS f=FILENAME INTO t=state {mTimedEvents.addResetEventsFromFile($t.t,$f.text.replace("\"","")); } SEMI)
+  LOADRESETS f=FILENAME INTO t=state {
+    mTimedEvents.addResetEventsFromFile($t.t,$f.text.replace("\"",""));
+  } SEMI
 ;
 
 analysis[PCTMC pctmc, Constants constants, Multimap<AbstractPCTMCAnalysis,PlotDescription> plots]
-returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]
-:
-(o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
- | io=inhomogeneousODEAnalysis[pctmc,constants] {$analysis=$io.analysis; $postprocessor=$io.postprocessor;}
- | f=forecastingAnalysis[pctmc,constants] {$analysis=$f.analysis; $postprocessor=$f.postprocessor;}
- | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
- | is=inhomogeneousSimulation[pctmc,constants] {$analysis=$is.analysis; $postprocessor=$is.postprocessor;}
- | fs=forecastingSimuAnalysis[pctmc,constants] {$analysis=$fs.analysis; $postprocessor=$fs.postprocessor;}
- | accs=accurateSimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
- | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
-)
- (LBRACE       
-         ps=plotDescriptions
- RBRACE
- {
-    if ($plots!=null) $plots.putAll($analysis,$ps.p);
- }
-)? 
+returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
+  (
+      o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
+    | accs=accurateSimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+    | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
+    | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+    | f=odeBikeFcastAnalysis[pctmc,constants] {$analysis=$f.analysis; $postprocessor=$f.postprocessor;}
+    | fs=simBikeFcastAnalysis[pctmc,constants] {$analysis=$fs.analysis; $postprocessor=$fs.postprocessor;}
+  )
+  (LBRACE ps = plotDescriptions RBRACE
+    {
+      if ($plots!=null) $plots.putAll($analysis,$ps.p);
+    }
+  )? 
 ;
 
-inhomogeneousODEAnalysis[PCTMC pctmc, Constants constants]
-returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
+odeBikeFcastAnalysis[PCTMC pctmc, Constants constants]
+returns [
+  PCTMCODEAnalysis analysis,
+  NumericalPostprocessor postprocessor
+]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
   Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
-  ^(INHOMOGENEOUSODES
-         (LBRACK
-             p1=parameter {parameters.put($p1.name, $p1.value);}
-             (COMMA p=parameter
-                          {parameters.put($p.name, $p.value);})*
-          RBRACK)?
-         settings=odeSettings 
-         {
-		      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
-		      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
-		      $settings.stopTime.accept(stopEval);
-		      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-		      $settings.stepSize.accept(stepEval);
-		      if (postprocessorParameters.isEmpty()) {
-		        $postprocessor = new InhomogeneousODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-		            stepEval.getResult(),$settings.density);
-		      } else {
-		        $postprocessor = new InhomogeneousODEAnalysisNumericalPostprocessor(stopEval.getResult(),
-		           stepEval.getResult(),$settings.density, postprocessorParameters);
-		      }
-		      $analysis.addPostprocessor($postprocessor);
-      }
-         
-    )
-;
-
-forecastingAnalysis[PCTMC pctmc, Constants constants]
-returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
-@init{
-  Map<String, Object> parameters = new HashMap<String, Object>();
-  Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
-}:
-  ^(FORECASTING
-         (LBRACK
-             p1=parameter {parameters.put($p1.name, $p1.value);}
-             (COMMA p=parameter
-                          {parameters.put($p.name, $p.value);})*
-          RBRACK)?
-         settings=forecastingSettings 
-         {
-		      $analysis = new PCTMCODEAnalysis($pctmc, parameters);
-		      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-		      $settings.stepSize.accept(stepEval);
-		      ExpressionEvaluatorWithConstants mixedMuRatioEval = new ExpressionEvaluatorWithConstants($constants);
-	 		  $settings.mixedMuRatio.accept(mixedMuRatioEval);
-		      if (postprocessorParameters.isEmpty()) {
-		        $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(stepEval.getResult(),
-		            $settings.density,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
-		            $settings.mixedMuTS, mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS);
-		      } else {
-		        $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(stepEval.getResult(),
-		            $settings.density,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
-		            $settings.mixedMuTS, mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS, postprocessorParameters);
-		      }
-		      $analysis.addPostprocessor($postprocessor);
-      }
-         
-    )
-;
-
-forecastingSettings returns
-  [AbstractExpression stepSize, int density, int warmup, int forecast,
-   int ibf, State arrState, List<State> startStates, List<String> destMus,
-   List<String> startDeltas, int maWindowSize, String muTS, String deltaTS,
-   List<String> mixedMuTS,AbstractExpression mixedMuRatio, List<String> arrTS, List<String> depTS]:
-	^(FORECASTINGSETTINGS 
-	stepSizeTmp=expression COMMA
-    densityTmp=INTEGER COMMA
-    warmupTmp=INTEGER COMMA
-    forecastTmp=INTEGER COMMA
-    ibfTmp=INTEGER COMMA
-    arrStateTmp=state COMMA
-    startStatesTmp=listOfStates COMMA
-    destMusTmp=listOfStrings COMMA
-    startDeltasTmp=listOfStrings COMMA
-    maWindowSizeTmp=INTEGER COMMA
-    muTSTmp=FILENAME COMMA
-    deltaTSTmp=FILENAME COMMA
-    mixedMuTSTmp=listOfStrings COMMA
-    mixedMuRatioTmp=expression COMMA
-    arrTSTmp=listOfStrings COMMA
-    depTSTmp=listOfStrings)
+  ^(ODE_BIKE_FCAST
+    (
+      LBRACK
+      p1 = parameter {parameters.put($p1.name, $p1.value);}
+      (COMMA p = parameter {parameters.put($p.name, $p.value);})*
+      RBRACK COMMA
+    )?
+    stepSize = expression COMMA 
+    density = INTEGER COMMA
+    cfg = bikeFcastConfig
+  )
   {
-      $stepSize = $stepSizeTmp.e;
-      $density = Integer.parseInt($densityTmp.text);
-      $warmup = Integer.parseInt($warmupTmp.text);
-      $forecast = Integer.parseInt($forecastTmp.text);
-      $ibf = Integer.parseInt($ibfTmp.text);
-      $arrState = $arrStateTmp.t;
-      $startStates = $startStatesTmp.l;
-      $destMus = $destMusTmp.l;
-      $startDeltas = $startDeltasTmp.l;
-      $maWindowSize = Integer.parseInt($maWindowSizeTmp.text);
-      $muTS = $muTSTmp.text.replace("\"","");
-      $deltaTS = $deltaTSTmp.text.replace("\"","");
-      $mixedMuTS= $mixedMuTSTmp.l;
-      $mixedMuRatio = $mixedMuRatioTmp.e; 
-      $arrTS = $arrTSTmp.l;
-      $depTS = $depTSTmp.l;
+    $analysis = new PCTMCODEAnalysis($pctmc, parameters);
+    ExpressionEvaluatorWithConstants stepEval =
+      new ExpressionEvaluatorWithConstants($constants);
+    $stepSize.e.accept(stepEval);
+    if (postprocessorParameters.isEmpty()) {
+      $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(
+        stepEval.getResult(), Integer.parseInt($density.text),
+        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS
+      );
+    } else {
+      $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(
+        stepEval.getResult(), Integer.parseInt($density.text),
+        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS,
+        postprocessorParameters
+      );
+    }
+    $analysis.addPostprocessor($postprocessor);
   }
 ;
 
-forecastingSimuAnalysis[PCTMC pctmc, Constants constants]
-returns [PCTMCSimulation analysis, ForecastingSimuAnalysisNumericalPostprocessor postprocessor]
+simBikeFcastAnalysis[PCTMC pctmc, Constants constants]
+returns [
+  PCTMCSimulation analysis,
+  NumericalPostprocessor postprocessor
+]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
   Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
-  ^(FORECASTINGSIMU
-         settings=forecastingSimuSettings 
-         {
-		      $analysis = new PCTMCSimulation($pctmc);
-		      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-		      $settings.stepSize.accept(stepEval);
-		      ExpressionEvaluatorWithConstants mixedMuRatioEval = new ExpressionEvaluatorWithConstants($constants);
-		      $settings.mixedMuRatio.accept(mixedMuRatioEval);
-		      if (postprocessorParameters.isEmpty()) {
-		        $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(stepEval.getResult(),
-		            $settings.replications,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
-		            $settings.mixedMuTS, mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS);
-		      } else {
-		        $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(stepEval.getResult(),
-		            $settings.replications,$settings.warmup, $settings.forecast, $settings.ibf, $settings.arrState, $settings.startStates,
-		            $settings.destMus, $settings.startDeltas, $settings.maWindowSize, $settings.muTS, $settings.deltaTS,
-		            $settings.mixedMuTS,mixedMuRatioEval.getResult(), $settings.arrTS, $settings.depTS, postprocessorParameters);
-		      }
-		      $analysis.addPostprocessor($postprocessor);
-      }
-         
-    )
+  ^(SIM_BIKE_FCAST
+    stepSize = expression COMMA
+    replications = INTEGER COMMA
+    cfg = bikeFcastConfig
+  )
+  {
+    $analysis = new PCTMCSimulation($pctmc);
+    ExpressionEvaluatorWithConstants stepEval =
+      new ExpressionEvaluatorWithConstants($constants);
+    $stepSize.e.accept(stepEval);
+    if (postprocessorParameters.isEmpty()) {
+      $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(
+        stepEval.getResult(), Integer.parseInt($replications.text),
+        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS
+      );
+    } else {
+      $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(
+        stepEval.getResult(), Integer.parseInt($replications.text),
+        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS,
+        postprocessorParameters
+      );
+    }
+    $analysis.addPostprocessor($postprocessor);
+  }
 ;
 
-forecastingSimuSettings returns
-  [AbstractExpression stepSize, int replications, int warmup, int forecast,
-   int ibf, State arrState, List<State> startStates, List<String> destMus,
-   List<String> startDeltas, int maWindowSize, String muTS, String deltaTS,
-   List<String> mixedMuTS, AbstractExpression mixedMuRatio, List<String> arrTS, List<String> depTS]:
-	^(FORECASTINGSIMUSETTINGS 
-	stepSizeTmp=expression COMMA
-    replicationsTmp=INTEGER COMMA
-    warmupTmp=INTEGER COMMA
-    forecastTmp=INTEGER COMMA
-    ibfTmp=INTEGER COMMA
-    arrStateTmp=state COMMA
-    startStatesTmp=listOfStates COMMA
-    destMusTmp=listOfStrings COMMA
-    startDeltasTmp=listOfStrings COMMA
-    maWindowSizeTmp=INTEGER COMMA
-    muTSTmp=FILENAME COMMA
-    deltaTSTmp=FILENAME COMMA
-    mixedMuTSTmp=listOfStrings COMMA
-    mixedMuRatioTmp=expression COMMA
-    arrTSTmp=listOfStrings COMMA
-    depTSTmp=listOfStrings)
-  {
-      $stepSize = $stepSizeTmp.e;
-      $replications = Integer.parseInt($replicationsTmp.text);
-      $warmup = Integer.parseInt($warmupTmp.text);
-      $forecast = Integer.parseInt($forecastTmp.text);
-      $ibf = Integer.parseInt($ibfTmp.text);
-      $arrState = $arrStateTmp.t;
-      $startStates = $startStatesTmp.l;
-      $destMus = $destMusTmp.l;
-      $startDeltas = $startDeltasTmp.l;
-      $maWindowSize = Integer.parseInt($maWindowSizeTmp.text);
-      $muTS = $muTSTmp.text.replace("\"","");
-      $deltaTS = $deltaTSTmp.text.replace("\"","");
-      $mixedMuTS= $mixedMuTSTmp.l;
-      $mixedMuRatio = $mixedMuRatioTmp.e; 
-      $arrTS = $arrTSTmp.l;
-      $depTS = $depTSTmp.l;
+bikeFcastConfig returns [
+  String fcastMode, int fcastWarmup, int fcastLen, int fcastFreq,
+  List<State> clDepStates, List<String> clDepTS,
+  List<State> clArrStates, List<String> clArrTS
+]:
+  ^(BIKE_FCAST_CFG 
+    fcastModeTmp=STRING COMMA
+    fcastWarmupTmp=INTEGER COMMA
+    fcastLenTmp=INTEGER COMMA
+    fcastFreqTmp=INTEGER COMMA
+    clDepStatesTmp=listOfStates COMMA
+    clDepTSTmp=listOfStrings COMMA
+    clArrStatesTmp=listOfStates COMMA
+    clArrTSTmp=listOfStrings
+  ) {
+    $fcastMode = $fcastModeTmp.text;
+    $fcastWarmup = Integer.parseInt($fcastWarmupTmp.text);
+    $fcastLen = Integer.parseInt($fcastLenTmp.text);
+    $fcastFreq = Integer.parseInt($fcastFreqTmp.text);
+    $clDepStates =  $clDepStatesTmp.l;
+    $clDepTS = $clDepTSTmp.l;
+    $clArrStates =  $clArrStatesTmp.l;
+    $clArrTS = $clArrTSTmp.l;
   }
 ;
 
 listOfStrings returns [List<String> l]
 @init {l = new LinkedList<String>();}
 :
-  ^(c1=LOWERCASENAME {l.add($c1.text);} (COMMA c2=LOWERCASENAME {l.add($c2.text);})*) 
-| ^(f1=FILENAME {l.add($f1.text.replace("\"",""));} (COMMA f2=FILENAME {l.add($f2.text.replace("\"",""));})*)
+  ^(
+    c1=LOWERCASENAME {l.add($c1.text);}
+    (COMMA c2=LOWERCASENAME {l.add($c2.text);})*
+  ) 
+| ^(
+    f1=FILENAME {l.add($f1.text.replace("\"",""));}
+    (COMMA f2=FILENAME {l.add($f2.text.replace("\"",""));})*
+  )
 ;
 
 listOfStates returns [List<State> l]
 @init {l = new LinkedList<State>();}
 :
-  ^(LOS s1=state {l.add(s1);} (COMMA s2=state {l.add(s2);})*)
-;
-
-inhomogeneousSimulation[PCTMC pctmc, Constants constants]
-returns [PCTMCSimulation analysis, InhomogeneousSimulationAnalysisNumericalPostprocessor postprocessor]
-@init{
-  Map<String, Object> parameters = new HashMap<String, Object>();
-}:
-  ^(INHOMOGENEOUSSIMULATION settings=simulationSettings
-    (COMMA p=parameter {parameters.put($p.name, $p.value);})*    
-    {
-      $analysis = new PCTMCSimulation($pctmc);
-
-      ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
-      $settings.stopTime.accept(stopEval);
-      ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
-      $settings.stepSize.accept(stepEval);
-      if (parameters.isEmpty()) {
-        $postprocessor = new InhomogeneousSimulationAnalysisNumericalPostprocessor(stopEval.getResult(),stepEval.getResult(),$settings.replications);
-      } else {
-        $postprocessor = new InhomogeneousSimulationAnalysisNumericalPostprocessor(
-            stopEval.getResult(),stepEval.getResult(),$settings.replications, parameters);
-      }
-      $analysis.addPostprocessor($postprocessor);
-    }
-       
-   )
+  ^(
+    LOS s1=state {l.add(s1);}
+    (COMMA s2=state {l.add(s2);})*
+  )
 ;

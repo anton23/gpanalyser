@@ -9,21 +9,14 @@ import PCTMCLexerPrototype;
  
  
 COUNT: '#';
-INHOMOGENEOUSODES: 'InhomogeneousODEs';
-INHOMOGENEOUSSIMULATION: 'InhomogeneousSimulation';
-FORECASTING: 'Forecasting';
-FORECASTINGSIMU: 'ForecastingSimu';
+ODE_BIKE_FCAST: 'OdeBikeFcast';
+SIM_BIKE_FCAST: 'SimBikeFcast';
 
-WARMUP: 'warmup';
-FORECAST: 'forecast';
-INTVLBETWEENFORECASTS: 'intvlBetweenForecasts';
-ARRSTATE: 'arrState';
-STARTSTATES: 'startStates';
-STARTDELTAS: 'startDeltas';
-DESTMUS: 'destMus';
-MAWINDOWSIZE: 'maWindowSize';
-MUTS: 'muTS';
-DELTATS: 'deltaTS';
-MIXEDMUTS: 'mixedMuTs';
-ARRTS: 'arrTS';
-DEPTS: 'depTS';
+FCAST_MODE: 'fcastMode';
+FCAST_WARMUP: 'fcastWarmup';
+FCAST_LEN: 'fcastLen';
+FCAST_FREQ: 'fcastFreq';
+CL_DEP_STATES: 'clDepStates';
+CL_DEP_TS: 'clDepTS';
+CL_ARR_STATE: 'clArrStates';
+CL_ARR_TS: 'clArrTS';

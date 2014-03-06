@@ -38,8 +38,6 @@ public class ODEAnalysisNumericalPostprocessor extends NumericalPostprocessor {
 		this.density = density;
 	}
 	
-	
-	
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new ODEAnalysisNumericalPostprocessor(stopTime, stepSize, density);
