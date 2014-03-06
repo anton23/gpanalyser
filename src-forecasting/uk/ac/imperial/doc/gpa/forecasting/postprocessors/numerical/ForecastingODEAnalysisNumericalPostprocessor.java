@@ -1,6 +1,6 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,84 +20,99 @@ import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class ForecastingODEAnalysisNumericalPostprocessor extends
-		InhomogeneousODEAnalysisNumericalPostprocessor
+  InhomogeneousODEAnalysisNumericalPostprocessor
 {	
-	private int mWarmup;
-	private int mForecast;
-	private int mIBF;
-	private State mArrState;
-	private List<State> mStartStates;
-	private List<String> mDestMus;
-	private List<String> mStartDeltas;
-	private int mMAWindowSize;
-	private String mMuTSFile;
-	private String mDeltaTSFile;
-	private List<String> mMixedMuTSFiles;
-	private double mMixedMuRatio;
-	private List<String> mArrTSFiles;
-	private List<String> mDepTSFiles;
-	private List<double[]> mData = new LinkedList<double[]>();
+	private final String mFcastMode;
+	private final int mFcastWarmup;
+	private final int mFcastLen;
+	private final int mFcastFreq;
+	private final List<State> mClDepStates;
+  private final List<String> mClDepTSFiles;
+	private final List<State> mClArrStates;
+  private final List<String> mClArrTSFiles;
 
-	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
-			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio,
-			   List<String> arrTSFiles, List<String> depTSFiles) {
-		super(warmup+forecast+stepSize, stepSize, density);
-		mWarmup = warmup;
-		mForecast = forecast;
-		mIBF = ibf;
-		mArrState = arrState;
-		mStartStates = startStates;
-		mDestMus = destMus;
-		mStartDeltas = startDeltas;
-		mMAWindowSize = maWindowSize;
-		mMuTSFile = muTSFile;
-		mDeltaTSFile = deltaTSFile;
-		mMixedMuTSFiles = mixedMuTSFile;
-		mMixedMuRatio = mixedMuRatio;
-		mArrTSFiles = arrTSFiles;
-		mDepTSFiles = depTSFiles;
+	public ForecastingODEAnalysisNumericalPostprocessor (
+	  final double stepSize, final int density,
+	  final String fcastMode, final int fcastWarmup,
+	  final int fcastLen, final int fcastFreq,
+	  final List<State> clDepStates, final List<String> clDepTSFiles,
+	  final List<State> clArrStates, final List<String> clArrTSFiles
+	) {
+		super(fcastWarmup + fcastLen + stepSize, stepSize, density);
+		mFcastMode = fcastMode;
+		mFcastWarmup = fcastWarmup;
+		mFcastLen = fcastLen;
+		mFcastFreq = fcastFreq;
+		mClDepStates = clDepStates;
+		mClDepTSFiles = clDepTSFiles;
+		mClArrStates = clArrStates;
+		mClArrTSFiles = clArrTSFiles;
 	}
 
-	public ForecastingODEAnalysisNumericalPostprocessor(double stepSize, int density, int warmup, int forecast,
-			   int ibf, State arrState, List<State> startStates, List<String> destMus, List<String> startDeltas,
-			   int maWindowSize, String muTSFile, String deltaTSFile, List<String> mixedMuTSFile, double mixedMuRatio,
-			   List<String> arrTSFiles, List<String> depTSFiles, Map<String, Object> parameters) {
-		super(warmup+forecast+stepSize, stepSize, density, parameters);
-		mWarmup = warmup;
-		mForecast = forecast;
-		mIBF = ibf;
-		mArrState = arrState;
-		mStartStates = startStates;
-		mDestMus = destMus;
-		mStartDeltas = startDeltas;
-		mMAWindowSize = maWindowSize;
-		mMuTSFile = muTSFile;
-		mDeltaTSFile = deltaTSFile;
-		mMixedMuTSFiles = mixedMuTSFile;
-		mMixedMuRatio = mixedMuRatio;
-		mArrTSFiles = arrTSFiles;
-		mDepTSFiles = depTSFiles;
+	public ForecastingODEAnalysisNumericalPostprocessor (
+	  final double stepSize, final int density,
+	  final String fcastMode, final int fcastWarmup,
+	  final int fcastLen, final int fcastFreq,
+	  final List<State> clDepStates, final List<String> clDepTSFiles,
+	  final List<State> clArrStates, final List<String> clArrTSFiles,
+	  final Map<String, Object> params
+	) {
+    super(fcastWarmup + fcastLen + stepSize, stepSize, density, params);
+    mFcastMode = fcastMode;
+    mFcastWarmup = fcastWarmup;
+    mFcastLen = fcastLen;
+    mFcastFreq = fcastFreq;
+    mClDepStates = clDepStates;
+    mClDepTSFiles = clDepTSFiles;
+    mClArrStates = clArrStates;
+    mClArrTSFiles = clArrTSFiles;
 	}
 	
-	protected ForecastingODEAnalysisNumericalPostprocessor(double stopTime, double stepSize, int density,
-			PCTMCODEAnalysis odeAnalysis, JavaODEsPreprocessed preprocessedImplementation) {
+	protected ForecastingODEAnalysisNumericalPostprocessor(
+	  final double stopTime,
+	  final double stepSize,
+	  final int density,
+		final PCTMCODEAnalysis odeAnalysis,
+		final JavaODEsPreprocessed preprocessedImplementation,
+    final String fcastMode, final int fcastWarmup,
+    final int fcastLen, final int fcastFreq,
+    final List<State> clDepStates, final List<String> clDepTSFiles,
+    final List<State> clArrStates, final List<String> clArrTSFiles
+	) {
 		super(stopTime, stepSize, density, odeAnalysis, preprocessedImplementation);
+    mFcastMode = fcastMode;
+    mFcastWarmup = fcastWarmup;
+    mFcastLen = fcastLen;
+    mFcastFreq = fcastFreq;
+    mClDepStates = clDepStates;
+    mClDepTSFiles = clDepTSFiles;
+    mClArrStates = clArrStates;
+    mClArrTSFiles = clArrTSFiles;
 	}
 	
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
-		return new ForecastingODEAnalysisNumericalPostprocessor(stepSize, density, mWarmup, mForecast,
-				   mIBF, mArrState, mStartStates, mDestMus, mStartDeltas,  mMAWindowSize, mMuTSFile, mDeltaTSFile,
-				   mMixedMuTSFiles, mMixedMuRatio, mArrTSFiles, mDepTSFiles);
+		return new ForecastingODEAnalysisNumericalPostprocessor(
+		  stepSize, density,
+		  mFcastMode, mFcastWarmup, mFcastLen, mFcastFreq,
+		  mClDepStates, mClDepTSFiles, mClArrStates, mClArrTSFiles
+		);
 	}
-	
+
 	@Override
 	public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
-		assert(odeAnalysis!=null);
-		PCTMCJavaImplementationProvider javaImplementation = new PCTMCJavaImplementationProvider();
-		ForecastingODEAnalysisNumericalPostprocessor ret = new ForecastingODEAnalysisNumericalPostprocessor(stopTime, stepSize, density, odeAnalysis, javaImplementation
-				.getPreprocessedODEImplementation(odeAnalysis.getOdeMethod(), constants, momentIndex));
+		assert(odeAnalysis != null);
+		PCTMCJavaImplementationProvider javaImplementation =
+		  new PCTMCJavaImplementationProvider();
+		ForecastingODEAnalysisNumericalPostprocessor ret =
+		  new ForecastingODEAnalysisNumericalPostprocessor(
+		    stopTime, stepSize, density, odeAnalysis,
+		    javaImplementation.getPreprocessedODEImplementation(
+		      odeAnalysis.getOdeMethod(), constants, momentIndex
+		    ),
+	      mFcastMode, mFcastWarmup, mFcastLen, mFcastFreq,
+	      mClDepStates, mClDepTSFiles, mClArrStates, mClArrTSFiles
+		  );
 		return ret;
 	}
 	
@@ -108,51 +123,58 @@ public class ForecastingODEAnalysisNumericalPostprocessor extends
 		PlainPCTMC pctmc = getPlainPCMTC(odeAnalysis);	
 
 		// Time series preparation
-		TimeSeriesForecast tsf = new TimeSeriesForecast(pctmc,mWarmup,mForecast,mIBF,
-														mArrState,mStartStates,mDestMus,
-														mStartDeltas, mMAWindowSize, mMuTSFile,
-														mDeltaTSFile, mMixedMuTSFiles, mMixedMuRatio,
-														mArrTSFiles, mDepTSFiles);
+		TimeSeriesForecast tsf = new TimeSeriesForecast(
+		  pctmc, mFcastMode, mFcastWarmup, mFcastLen, mFcastFreq,
+      mClDepStates, mClDepTSFiles, mClArrStates, mClArrTSFiles
+		);
 		
-		PopulationProduct pp = PopulationProduct.getMeanProduct(mArrState);
-		CombinedPopulationProduct cppArrMean = new CombinedPopulationProduct(pp);
-		int cppArrMeanIndex = odeAnalysis.getMomentIndex().get(cppArrMean);
-		CombinedPopulationProduct cppArrMeanSq = new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp));
-		int cppArrMeanSqIndex = odeAnalysis.getMomentIndex().get(cppArrMeanSq);
+		// Find arrival populations for all clusters
+		Map<State, int[]> clArrMomIndicies = new HashMap<State, int[]>();
+		for (State arrState : mClArrStates) {
+		  PopulationProduct pp = PopulationProduct.getMeanProduct(arrState);
+		  clArrMomIndicies.put(
+		    arrState,
+		    new int[] {
+		      odeAnalysis.getMomentIndex().get(
+		        new CombinedPopulationProduct(pp)
+		      ),
+		      odeAnalysis.getMomentIndex().get(
+		        new CombinedPopulationProduct(PopulationProduct.getProduct(pp,pp))
+		      )
+		    } 
+		  );
+		}
 
 		while (tsf.nextTSFile()) {
 			while (true) {
 				// Check if there is enough data for the forecast
 				// period on the current day
-				int actualArr = tsf.nextIntvl();
-				if (actualArr < 0) {break;}
+				int[] actualClArrivals = tsf.nextIntvl();
+				if (actualClArrivals == null) {break;}
 				
 				// Do the calculation
 				super.calculateDataPoints(constants);
 			
 				// Forecast vs Reality
+				/*
 				double forecastArr = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanIndex]);
 				double forecastArrSq = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanSqIndex]);
 				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
 				double[] data = {forecastArr, forecastStdDev, actualArr};
-
-				for (int i=0; i<mIBF*(1/stepSize); ++i) {
-					mData.add(data);
-				}
 				
 				// Compute what the normalised distance between forecast and actual number of arrivals
 				double normActArr = Math.abs(actualArr - forecastArr)/forecastStdDev;
 				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr + "\t Normalised Dist: "+normActArr);
+				*/
 			}
-			tsf.plotForecast(mData,stepSize,odeAnalysis.toString());
-			mData.clear();
 		}
 	}
 	
 	@Override
-	public void postprocessAnalysis(Constants constants,
-			AbstractPCTMCAnalysis analysis,
-			List<PlotDescription> plotDescriptions)
+	public void postprocessAnalysis(
+	  Constants constants,
+		AbstractPCTMCAnalysis analysis,
+		List<PlotDescription> plotDescriptions)
 	{
 		prepare(analysis, constants);
 		calculateDataPoints(constants);

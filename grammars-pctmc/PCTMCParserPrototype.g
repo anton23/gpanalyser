@@ -251,7 +251,7 @@ modelDefinition:
 analysis:
  (odeAnalysis
  |simulation
- |accuratesimulation
+ |accurateSimulation
  |compare)
  
  (LBRACE
@@ -428,7 +428,7 @@ simulationSettings:
   -> ^(SIMULATIONSETTINGS $stopTime COMMA $stepSize COMMA $replications)
 ;
 
-accuratesimulation:
+accurateSimulation:
   ACCURATESIMULATION LPAR
   STOPTIME DEF stopTime = expression COMMA
   STEPSIZE DEF stepSize = expression COMMA
