@@ -257,14 +257,14 @@ bikeFcastConfig returns [
   List<State> clArrStates, List<String> clArrTS
 ]:
   ^(BIKE_FCAST_CFG 
-    fcastModeTmp=STRING COMMA
-    fcastWarmupTmp=INTEGER COMMA
-    fcastLenTmp=INTEGER COMMA
-    fcastFreqTmp=INTEGER COMMA
-    clDepStatesTmp=listOfStates COMMA
-    clDepTSTmp=listOfStrings COMMA
-    clArrStatesTmp=listOfStates COMMA
-    clArrTSTmp=listOfStrings
+    fcastModeTmp = LOWERCASENAME COMMA
+    fcastWarmupTmp = INTEGER COMMA
+    fcastLenTmp = INTEGER COMMA
+    fcastFreqTmp = INTEGER COMMA
+    clDepStatesTmp = listOfStates COMMA
+    clDepTSTmp = listOfFiles COMMA
+    clArrStatesTmp = listOfStates COMMA
+    clArrTSTmp = listOfFiles
   ) {
     $fcastMode = $fcastModeTmp.text;
     $fcastWarmup = Integer.parseInt($fcastWarmupTmp.text);
@@ -277,24 +277,29 @@ bikeFcastConfig returns [
   }
 ;
 
-listOfStrings returns [List<String> l]
-@init {l = new LinkedList<String>();}
-:
-  ^(
-    c1=LOWERCASENAME {l.add($c1.text);}
-    (COMMA c2=LOWERCASENAME {l.add($c2.text);})*
-  ) 
-| ^(
-    f1=FILENAME {l.add($f1.text.replace("\"",""));}
-    (COMMA f2=FILENAME {l.add($f2.text.replace("\"",""));})*
-  )
-;
-
 listOfStates returns [List<State> l]
 @init {l = new LinkedList<State>();}
 :
-  ^(
-    LOS s1=state {l.add(s1);}
+  ^(LOS
+    s1=state {l.add(s1);}
     (COMMA s2=state {l.add(s2);})*
+  )
+;
+
+listOfConsts returns [List<String> l]
+@init {l = new LinkedList<String>();}
+:
+  ^(LOC
+    c1=LOWERCASENAME {l.add($c1.text);}
+    (COMMA c2=LOWERCASENAME {l.add($c2.text);})*
+  )
+;
+
+listOfFiles returns [List<String> l]
+@init {l = new LinkedList<String>();}
+:
+  ^(LOF
+    f1=FILENAME {l.add($f1.text.replace("\"",""));}
+    (COMMA f2=FILENAME {l.add($f2.text.replace("\"",""));})*
   )
 ;
