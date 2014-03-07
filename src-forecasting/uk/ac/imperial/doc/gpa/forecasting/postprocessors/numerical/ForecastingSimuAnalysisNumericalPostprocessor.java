@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import uk.ac.imperial.doc.gpa.forecasting.util.MathExtra;
 import uk.ac.imperial.doc.gpa.plain.postprocessors.numerical.InhomogeneousSimulationAnalysisNumericalPostprocessor;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
 import uk.ac.imperial.doc.jexpressions.constants.Constants;
@@ -88,7 +87,6 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 	
 	@Override
 	public void calculateDataPoints(Constants constants) {
-		
 		// Do analysis for all time series points
 		PlainPCTMC pctmc = getPlainPCMTC(simulation);	
 
@@ -99,10 +97,10 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
     );
 
     // Find arrival populations for all clusters
-    Map<State, int[]> clArrMomIndicies = new HashMap<State, int[]>();
-    for (State arrState : mClArrStates) {
-      PopulationProduct pp = PopulationProduct.getMeanProduct(arrState);
-      clArrMomIndicies.put(
+    final Map<State, int[]> clArrMomIndices = new HashMap<State, int[]>();
+    for (final State arrState : mClArrStates) {
+      final PopulationProduct pp = PopulationProduct.getMeanProduct(arrState);
+      clArrMomIndices.put(
         arrState,
         new int[] {
           simulation.getMomentIndex().get(
@@ -125,17 +123,13 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 				// Do the calculation
 				super.calculateDataPoints(constants);
 
-				// Forecast vs Reality
-				/*
-				double forecastArr = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanIndex]);
-				double forecastArrSq = MathExtra.twoDecim(dataPoints[dataPoints.length-1][cppArrMeanSqIndex]);
-				double forecastStdDev = MathExtra.twoDecim(Math.sqrt(forecastArrSq - forecastArr*forecastArr));
-				double[] data = {forecastArr, forecastStdDev, actualArr};
-
-				// Compute what the normalised distance between forecast and actual number of arrivals
-				double normActArr = Math.abs(actualArr - forecastArr)/forecastStdDev;
-				System.out.println (forecastArr + ", stdDev " + forecastStdDev + " actual arrivals: " + actualArr + "\t Normalised Dist: "+normActArr);
-				*/
+        // Forecast vs Reality output predict arrivals and actual arrivals
+        // originating from each cluster
+        tsf.printFcastResult(
+          clArrMomIndices,
+          dataPoints,
+          actualClArrivals
+        );
 			}
 		}
 	}

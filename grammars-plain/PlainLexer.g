@@ -18,5 +18,5 @@ FCAST_LEN: 'fcastLen';
 FCAST_FREQ: 'fcastFreq';
 CL_DEP_STATES: 'clDepStates';
 CL_DEP_TS: 'clDepTS';
-CL_ARR_STATE: 'clArrStates';
+CL_ARR_STATES: 'clArrStates';
 CL_ARR_TS: 'clArrTS';

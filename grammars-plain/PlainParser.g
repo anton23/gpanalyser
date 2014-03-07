@@ -24,6 +24,8 @@ tokens{
   RANGE;
   BIKE_FCAST_CFG;
   LOS;
+  LOC;
+  LOF;
 }
 
 @header{
@@ -48,14 +50,14 @@ tokens{
 //This is a hack until the composite grammars are implemented in a better way
 @members{
   public final String fcastSettingsHint =
-    "fcastMode=<string>,\n"+
-    "fcastWarmup=<integer>,\n"+
-    "fcastLen=<integer>,\n"+
-    "fcastFreq=<integer>,\n"+
-    "clDepStates={<state>,...},\n"+
-    "clDepTS={<StringFilename>,...}){}"+
-    "clArrStates={<state>,...},\n"+
-    "clArrTS={<StringFilename>,...},\n";
+    "  fcastMode=<lowercasename>,\n"+
+    "  fcastWarmup=<integer>,\n"+
+    "  fcastLen=<integer>,\n"+
+    "  fcastFreq=<integer>,\n"+
+    "  clDepStates={<state>,...},\n"+
+    "  clDepTS={\"file1\",...},\n"+
+    "  clArrStates={<state>,...},\n"+
+    "  clArrTS={\"file1\",...}\n";
   protected Stack<String> hint;
   protected ErrorReporter errorReporter;
   protected Set<Multiset<String>> tmpStates = new HashSet<Multiset<String>>();
@@ -156,21 +158,21 @@ odeBikeFcast:
   odeParameters?
   {
     hint.push("ODE based bike journey forecasting analysis has syntax\n"+
-      "OdeBikeFcast(BikeFcastSimu=<number>,\n" +
-      "density=<integer>,\n" + fcastSettingsHint
+      "OdeBikeFcast(\n  stepSize=<number>,\n" +
+      "  density=<integer>,\n" + fcastSettingsHint
     );
   }
   LPAR
     STEPSIZE DEF stepSize = expression COMMA
     DENSITY DEF density = INTEGER COMMA
-    bikeFcastConfig
+    cfg = bikeFcastConfig
   RPAR
   {
     hint.pop();
   }
   ->
   ^(ODE_BIKE_FCAST
-    (odeParameters COMMA)? $stepSize COMMA $density COMMA bikeFcastConfig
+    (odeParameters COMMA)? $stepSize COMMA $density COMMA $cfg
   )
 ;
 
@@ -178,33 +180,33 @@ simBikeFcast:
   SIM_BIKE_FCAST
   {
     hint.push("Simulation based bike journey forecasting analysis has syntax\n"+
-      "Forecasting(BikeFcastSimu=<number>,\n" +
-      "replications=<integer>,\n" + fcastSettingsHint
+      "SimBikeFcast(\n  stepSize=<number>,\n" +
+      "  replications=<integer>,\n" + fcastSettingsHint
     );
   }
   LPAR
     STEPSIZE DEF stepSize = expression COMMA
     REPLICATIONS DEF replications = INTEGER COMMA
-    bikeFcastConfig
+    cfg = bikeFcastConfig
   RPAR
   {
     hint.pop();
   }
   ->
   ^(SIM_BIKE_FCAST
-    $stepSize COMMA $replications COMMA bikeFcastConfig
+    $stepSize COMMA $replications COMMA $cfg
   )
 ;
 
 bikeFcastConfig:
-  FCAST_MODE DEF fcastMode = STRING COMMA
+  FCAST_MODE DEF fcastMode = LOWERCASENAME COMMA
   FCAST_WARMUP DEF fcastWarmup = INTEGER COMMA
   FCAST_LEN DEF fcastLen = INTEGER COMMA
   FCAST_FREQ DEF fcastFreq = INTEGER COMMA
-  CL_DEP_STATES DEF LBRACE clDepStates = listOfStates RBRACE COMMA
-  CL_DEP_TS DEF LBRACE clDepTS = listOfFiles RBRACE
-  CL_ARR_STATES DEF LBRACE clArrStates = listOfStates RBRACE COMMA
-  CL_ARR_TS DEF LBRACE clArrTS = listOfFiles RBRACE
+  CL_DEP_STATES DEF clDepStates = listOfStates COMMA
+  CL_DEP_TS DEF clDepTS = listOfFiles COMMA
+  CL_ARR_STATES DEF clArrStates = listOfStates COMMA
+  CL_ARR_TS DEF clArrTS = listOfFiles
   ->
   ^(BIKE_FCAST_CFG
     $fcastMode COMMA $fcastWarmup COMMA $fcastLen COMMA $fcastFreq COMMA
@@ -213,14 +215,26 @@ bikeFcastConfig:
 ;
 
 listOfStates:
-  state (COMMA state)* -> ^(LOS state (COMMA state)*)
+  {hint.push("List of states has following syntax {<state>,...}");}
+  LBRACE state (COMMA state)* RBRACE
+  {hint.pop();}
+  ->
+  ^(LOS state (COMMA state)*)
 ;
 
 listOfConsts:
-  LOWERCASENAME (COMMA LOWERCASENAME)* -> ^(LOWERCASENAME (COMMA LOWERCASENAME)*)
+  {hint.push("List of states has following syntax {LOWERCASENAME,...}");}
+  LBRACE LOWERCASENAME (COMMA LOWERCASENAME)* RBRACE
+  {hint.pop();}
+  ->
+  ^(LOC LOWERCASENAME (COMMA LOWERCASENAME)*)
 ;
 
 listOfFiles:
-  FILENAME (COMMA FILENAME)* -> ^(FILENAME (COMMA FILENAME)*)
+  {hint.push("List of states has following syntax {\"file1\",...}");}
+  LBRACE FILENAME (COMMA FILENAME)* RBRACE
+  {hint.pop();}
+  ->
+  ^(LOF FILENAME (COMMA FILENAME)*)
 ;
 

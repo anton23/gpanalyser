@@ -2,17 +2,12 @@ package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
 //import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.jfree.data.xy.XYDataset;
 
 import uk.ac.imperial.doc.gpa.forecasting.util.FileExtra;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
 import uk.ac.imperial.doc.gpa.plain.representation.timed.TimedEvents;
-import uk.ac.imperial.doc.pctmc.analysis.AnalysisUtils;
-import uk.ac.imperial.doc.pctmc.charts.PCTMCChartUtilities;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
@@ -126,7 +121,7 @@ public class TimeSeriesForecast {
 		// Prepare pop changes in inhomogenous PCTMC
     final Map <String, double[][]> allRateEvents =
       new HashMap<String, double[][]>();
-		final Map <State, double[][]> allJumpEvents =
+		final Map <State, double[][]> allDepEvents =
 		  new HashMap<State, double[][]>();
 		final Map <State, double[][]> allResetEvents =
 		  new HashMap<State, double[][]>();
@@ -135,13 +130,15 @@ public class TimeSeriesForecast {
 		// Time dependent departures and arrival count resets for each cluster
 		final int tsEndPoint = mFcastWarmup + mFcastLen;
 		for (int cl = 0; cl < numCl; cl++) {
-		  // New arrivals
-		  final double[][] jumpEvents =
-		    genDepartures(cl, mTSStartIndex, tsEndPoint, mFcastMode);
-			allJumpEvents.put(mClDepStates.get(cl), jumpEvents);
-		  // And the reset for the clusters arrival location
-	    final double[][] resets = {{mFcastWarmup, 0}};
-	    allResetEvents.put(mClArrStates.get(cl), resets);
+		  // New cluster departures
+		  allDepEvents.put(
+			  mClDepStates.get(cl),
+			  genDepartures(cl, mTSStartIndex, mFcastWarmup, tsEndPoint, mFcastMode)
+			);
+		  // Arrival cluster resets
+	    allResetEvents.put(
+	      mClArrStates.get(cl), new double[][] {{mFcastWarmup, 0}}
+	    );
 	    // Compute actual cluster arrivals during the time window
 	    for (int i = mFcastWarmup; i < tsEndPoint; ++i) {
 	      actualClArrivals[cl] += mClArrTS[cl][mTSStartIndex + i];
@@ -150,10 +147,57 @@ public class TimeSeriesForecast {
 
 		// Set events for TimedEvents in PCTMC
 		TimedEvents te = mPctmc.getTimedEvents();
-		te.setEvents(allRateEvents, allJumpEvents, allResetEvents);
+		te.setEvents(allRateEvents, allDepEvents, allResetEvents);
 		
 		// Move time series window by (Interval Between Forecasts) mIBF minutes
 		mTSStartIndex += mFcastFreq;
 		return actualClArrivals;
+	}
+	
+	private double[][] genDepartures(
+	  int cl,
+	  int tSStartIndex,
+    int fcastWarmup,
+    int tsEndPoint,
+    String fcastMode
+  ) {
+    // TODO Call R code
+	  // TODO For now we use dummy data
+	  double[][] retVal = new double[tsEndPoint + 1][2];
+	  for (int t = 0; t <= tsEndPoint; t++) {
+	    retVal[t][0] = t;
+	    retVal[t][1] = 2;
+	  }
+    return retVal;
+  }
+
+  /**
+	 * Print predicted vs actual cluster arrivals
+	 * @param clArrIds map arrival states to cluster ids
+	 * @param clArrMomIndicies moment indices of arrival states in dataPoints
+	 * @param fcastClArrivals cluster arrivals computed by forecast
+	 * @param actualClArrivals cluster arrivals from real data
+	 */
+	public void printFcastResult(
+	  Map<State, int[]> clArrMomIndices,
+	  double[][] fcastClArrivals,
+	  int[] actualClArrivals
+	) {
+	  PCTMCLogging.info("Prediction #"+ mTSStartIndex);
+    PCTMCLogging.increaseIndent();
+    for (int cl = 0; cl < mClArrStates.size(); cl++) {
+      final int[] indices = clArrMomIndices.get(mClArrStates.get(cl));
+      final double fcastClArr =
+          fcastClArrivals[fcastClArrivals.length - 1][indices[0]];
+      final double fcastClArrSq =
+          fcastClArrivals[fcastClArrivals.length - 1][indices[1]];
+      final double fcastClSD =
+        Math.sqrt(fcastClArrSq - fcastClArr * fcastClArr);
+      PCTMCLogging.info(String.format(
+        "Cl:%d Mean:%.2f SD:%.2f Actual:%d",
+        cl, fcastClArr, fcastClSD, actualClArrivals[cl]
+      ));
+    }
+    PCTMCLogging.decreaseIndent();
 	}
 }
