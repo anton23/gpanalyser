@@ -50,13 +50,16 @@ tokens{
 //This is a hack until the composite grammars are implemented in a better way
 @members{
   public final String fcastSettingsHint =
-    "  fcastMode=<lowercasename>,\n"+
-    "  fcastWarmup=<integer>,\n"+
-    "  fcastLen=<integer>,\n"+
-    "  fcastFreq=<integer>,\n"+
-    "  clDepStates={<state>,...},\n"+
-    "  clDepTS={\"file1\",...},\n"+
-    "  clArrStates={<state>,...},\n"+
+    "  fcastWarmup=<integer>,\n" +
+    "  fcastLen=<integer>,\n" +
+    "  fcastFreq=<integer>,\n" +
+    "  clDepStates={<state>,...},\n" +
+    "  clArrStates={<state>,...},\n" +
+    "  depFcastMode=<lowercasename>,\n" +
+    "  trainClDepTS={\"file1\",...},\n" +
+    "  trainClMuTS={\"file1\",...}\n" +  
+    "  clDepTS={\"file1\",...},\n" +
+    "  clMuTS={\"file1\",...}\n" + 
     "  clArrTS={\"file1\",...}\n";
   protected Stack<String> hint;
   protected ErrorReporter errorReporter;
@@ -199,18 +202,23 @@ simBikeFcast:
 ;
 
 bikeFcastConfig:
-  FCAST_MODE DEF fcastMode = LOWERCASENAME COMMA
   FCAST_WARMUP DEF fcastWarmup = INTEGER COMMA
   FCAST_LEN DEF fcastLen = INTEGER COMMA
   FCAST_FREQ DEF fcastFreq = INTEGER COMMA
   CL_DEP_STATES DEF clDepStates = listOfStates COMMA
+  CL_ARR_STATES DEF clArrStates = listOfStates COMMA  
+  DEP_FCAST_MODE DEF depFcastMode = LOWERCASENAME COMMA
+  TRAIN_CL_DEP_TS DEF trainClDepTS = listOfFiles COMMA
+  TRAIN_CL_MU_TS DEF trainClMuTS = listOfFiles COMMA
   CL_DEP_TS DEF clDepTS = listOfFiles COMMA
-  CL_ARR_STATES DEF clArrStates = listOfStates COMMA
+  CL_MU_TS DEF clMuTS = listOfFiles COMMA  
   CL_ARR_TS DEF clArrTS = listOfFiles
   ->
   ^(BIKE_FCAST_CFG
-    $fcastMode COMMA $fcastWarmup COMMA $fcastLen COMMA $fcastFreq COMMA
-    $clDepStates COMMA $clDepTS COMMA $clArrStates COMMA $clArrTS
+    $fcastWarmup COMMA $fcastLen COMMA $fcastFreq COMMA
+    $clDepStates COMMA $clArrStates COMMA
+    $depFcastMode COMMA $trainClDepTS COMMA $trainClMuTS COMMA
+    $clDepTS COMMA $clMuTS COMMA $clArrTS
   )
 ;
 

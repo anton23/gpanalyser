@@ -199,14 +199,18 @@ returns [
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(
         stepEval.getResult(), Integer.parseInt($density.text),
-        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS
+        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clArrStates,
+        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
+        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS
       );
     } else {
       $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(
         stepEval.getResult(), Integer.parseInt($density.text),
-        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS,
+        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clArrStates,
+        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
+        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS,
         postprocessorParameters
       );
     }
@@ -236,14 +240,18 @@ returns [
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(
         stepEval.getResult(), Integer.parseInt($replications.text),
-        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS
+        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clArrStates,
+        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
+        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS
       );
     } else {
       $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(
         stepEval.getResult(), Integer.parseInt($replications.text),
-        $cfg.fcastMode, $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clDepTS, $cfg.clArrStates, $cfg.clArrTS,
+        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
+        $cfg.clDepStates, $cfg.clArrStates,
+        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
+        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS,
         postprocessorParameters
       );
     }
@@ -252,27 +260,34 @@ returns [
 ;
 
 bikeFcastConfig returns [
-  String fcastMode, int fcastWarmup, int fcastLen, int fcastFreq,
-  List<State> clDepStates, List<String> clDepTS,
-  List<State> clArrStates, List<String> clArrTS
+  int fcastWarmup, int fcastLen, int fcastFreq,
+  List<State> clDepStates, List<State> clArrStates,
+  String depFcastMode, List<String> trainClDepTS, List<String> trainClMuTS,
+  List<String> clDepTS, List<String> clMuTS, List<String> clArrTS
 ]:
   ^(BIKE_FCAST_CFG 
-    fcastModeTmp = LOWERCASENAME COMMA
     fcastWarmupTmp = INTEGER COMMA
     fcastLenTmp = INTEGER COMMA
     fcastFreqTmp = INTEGER COMMA
     clDepStatesTmp = listOfStates COMMA
-    clDepTSTmp = listOfFiles COMMA
     clArrStatesTmp = listOfStates COMMA
+    depFcastModeTmp = LOWERCASENAME COMMA
+    trainClDepTSTmp = listOfFiles COMMA
+    trainClMuTSTmp = listOfFiles COMMA    
+    clDepTSTmp = listOfFiles COMMA
+    clMuTSTmp = listOfFiles COMMA    
     clArrTSTmp = listOfFiles
   ) {
-    $fcastMode = $fcastModeTmp.text;
     $fcastWarmup = Integer.parseInt($fcastWarmupTmp.text);
     $fcastLen = Integer.parseInt($fcastLenTmp.text);
     $fcastFreq = Integer.parseInt($fcastFreqTmp.text);
     $clDepStates =  $clDepStatesTmp.l;
-    $clDepTS = $clDepTSTmp.l;
     $clArrStates =  $clArrStatesTmp.l;
+    $depFcastMode = $depFcastModeTmp.text;
+    $trainClDepTS = $trainClDepTSTmp.l;
+    $trainClMuTS = $trainClMuTSTmp.l;
+    $clDepTS = $clDepTSTmp.l;
+    $clMuTS = $clMuTSTmp.l;
     $clArrTS = $clArrTSTmp.l;
   }
 ;
