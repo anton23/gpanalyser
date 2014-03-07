@@ -15,13 +15,16 @@ public class TimeSeriesForecast {
 
   // These are the input fields
 	private final PlainPCTMC mPctmc;
-  private final String mFcastMode;
   private final int mFcastWarmup;
   private final int mFcastLen;
   private final int mFcastFreq;
   private final List<State> mClDepStates;
-  private final List<String> mClDepTSFiles;
   private final List<State> mClArrStates;
+  private final String mDepFcastMode;
+  private final List<String> mTrainClDepTSFiles;
+  private final List<String> mTrainClMuTSFiles;
+  private final List<String> mClDepTSFiles;
+  private final List<String> mClMuTSFiles;
   private final List<String> mClArrTSFiles;
   
   // These fields may change during analysis
@@ -31,19 +34,23 @@ public class TimeSeriesForecast {
 	
 	public TimeSeriesForecast(
 	  final PlainPCTMC pctmc,
-	  final String fcastMode, final int fcastWarmup,
-    final int fcastLen, final int fcastFreq,
-    final List<State> clDepStates, final List<String> clDepTSFiles,
-    final List<State> clArrStates, final List<String> clArrTSFiles
+    final int fcastWarmup, final int fcastLen, final int fcastFreq,
+    final List<State> clDepStates, final List<State> clArrStates,
+    final String depFcastMode, final List<String> trainClDepTSFiles,
+    final List<String> trainClMuTSFiles, final List<String> clDepTSFiles,
+    final List<String> clMuTSFiles, final List<String> clArrTSFiles
 	) {
 		mPctmc = pctmc;
-    mFcastMode = fcastMode;
     mFcastWarmup = fcastWarmup;
     mFcastLen = fcastLen;
     mFcastFreq = fcastFreq;
     mClDepStates = clDepStates;
-    mClDepTSFiles = clDepTSFiles;
     mClArrStates = clArrStates;
+    mDepFcastMode = depFcastMode;
+    mTrainClDepTSFiles = trainClDepTSFiles;
+    mTrainClMuTSFiles = trainClMuTSFiles;
+    mClDepTSFiles = clDepTSFiles;
+    mClMuTSFiles = clMuTSFiles;
     mClArrTSFiles = clArrTSFiles;
 
 		// Check departure and arrival time series files
@@ -133,7 +140,9 @@ public class TimeSeriesForecast {
 		  // New cluster departures
 		  allDepEvents.put(
 			  mClDepStates.get(cl),
-			  genDepartures(cl, mTSStartIndex, mFcastWarmup, tsEndPoint, mFcastMode)
+			  genDepartures(
+			    cl, mTSStartIndex, mFcastWarmup, tsEndPoint, mDepFcastMode
+			  )
 			);
 		  // Arrival cluster resets
 	    allResetEvents.put(

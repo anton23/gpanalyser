@@ -18,49 +18,60 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 public class ForecastingSimuAnalysisNumericalPostprocessor extends
   InhomogeneousSimulationAnalysisNumericalPostprocessor
 {	
-  private final String mFcastMode;
   private final int mFcastWarmup;
   private final int mFcastLen;
   private final int mFcastFreq;
   private final List<State> mClDepStates;
-  private final List<String> mClDepTSFiles;
   private final List<State> mClArrStates;
+  private final String mDepFcastMode;
+  private final List<String> mTrainClDepTSFiles;
+  private final List<String> mTrainClMuTSFiles;
+  private final List<String> mClDepTSFiles;
+  private final List<String> mClMuTSFiles;
   private final List<String> mClArrTSFiles;
 
 	public ForecastingSimuAnalysisNumericalPostprocessor(
 	  final double stepSize, final int replications,
-	  final String fcastMode, final int fcastWarmup,
-	  final int fcastLen, final int fcastFreq,
-	  final List<State> clDepStates, final List<String> clDepTSFiles,
-	  final List<State> clArrStates, final List<String> clArrTSFiles
+    final int fcastWarmup, final int fcastLen, final int fcastFreq,
+    final List<State> clDepStates, final List<State> clArrStates,
+    final String depFcastMode, final List<String> trainClDepTSFiles,
+    final List<String> trainClMuTSFiles, final List<String> clDepTSFiles,
+    final List<String> clMuTSFiles, final List<String> clArrTSFiles
 	) {
     super(fcastWarmup + fcastLen + stepSize, stepSize, replications);
-    mFcastMode = fcastMode;
     mFcastWarmup = fcastWarmup;
     mFcastLen = fcastLen;
     mFcastFreq = fcastFreq;
     mClDepStates = clDepStates;
-    mClDepTSFiles = clDepTSFiles;
     mClArrStates = clArrStates;
+    mDepFcastMode = depFcastMode;
+    mTrainClDepTSFiles = trainClDepTSFiles;
+    mTrainClMuTSFiles = trainClMuTSFiles;
+    mClDepTSFiles = clDepTSFiles;
+    mClMuTSFiles = clMuTSFiles;
     mClArrTSFiles = clArrTSFiles;
 	}
 
 	public ForecastingSimuAnalysisNumericalPostprocessor(
 	  final double stepSize, final int replications,
-	  final String fcastMode, final int fcastWarmup,
-	  final int fcastLen, final int fcastFreq,
-	  final List<State> clDepStates, final List<String> clDepTSFiles,
-	  final List<State> clArrStates, final List<String> clArrTSFiles,
+    final int fcastWarmup, final int fcastLen, final int fcastFreq,
+    final List<State> clDepStates, final List<State> clArrStates,
+    final String depFcastMode, final List<String> trainClDepTSFiles,
+    final List<String> trainClMuTSFiles, final List<String> clDepTSFiles,
+    final List<String> clMuTSFiles, final List<String> clArrTSFiles,
 	  Map<String, Object> params
 	) {
     super(fcastWarmup + fcastLen + stepSize, stepSize, replications, params);
-    mFcastMode = fcastMode;
     mFcastWarmup = fcastWarmup;
     mFcastLen = fcastLen;
     mFcastFreq = fcastFreq;
     mClDepStates = clDepStates;
-    mClDepTSFiles = clDepTSFiles;
     mClArrStates = clArrStates;
+    mDepFcastMode = depFcastMode;
+    mTrainClDepTSFiles = trainClDepTSFiles;
+    mTrainClMuTSFiles = trainClMuTSFiles;
+    mClDepTSFiles = clDepTSFiles;
+    mClMuTSFiles = clMuTSFiles;
     mClArrTSFiles = clArrTSFiles;
 	}
 
@@ -68,8 +79,10 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new ForecastingSimuAnalysisNumericalPostprocessor(
 	    stepSize, replications,
-	    mFcastMode, mFcastWarmup, mFcastLen, mFcastFreq,
-	    mClDepStates, mClDepTSFiles, mClArrStates, mClArrTSFiles
+      mFcastWarmup, mFcastLen, mFcastFreq,
+      mClDepStates, mClArrStates,
+      mDepFcastMode, mTrainClDepTSFiles, mTrainClMuTSFiles,
+      mClDepTSFiles, mClMuTSFiles, mClArrTSFiles
 		);
 	}
 	
@@ -92,8 +105,10 @@ public class ForecastingSimuAnalysisNumericalPostprocessor extends
 
 	  // Time series preparation
     TimeSeriesForecast tsf = new TimeSeriesForecast(
-      pctmc, mFcastMode, mFcastWarmup, mFcastLen, mFcastFreq,
-      mClDepStates, mClDepTSFiles, mClArrStates, mClArrTSFiles
+      pctmc, mFcastWarmup, mFcastLen, mFcastFreq,
+      mClDepStates, mClArrStates,
+      mDepFcastMode, mTrainClDepTSFiles, mTrainClMuTSFiles,
+      mClDepTSFiles, mClMuTSFiles, mClArrTSFiles
     );
 
     // Find arrival populations for all clusters
