@@ -197,20 +197,12 @@ returns [
       new ExpressionEvaluatorWithConstants($constants);
     $stepSize.e.accept(stepEval);
     if (postprocessorParameters.isEmpty()) {
-      $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(
-        stepEval.getResult(), Integer.parseInt($density.text),
-        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clArrStates,
-        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
-        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS
+      $postprocessor = new BikeArrivalODEPostprocessor(
+        stepEval.getResult(), Integer.parseInt($density.text), $cfg.cfg
       );
     } else {
-      $postprocessor = new ForecastingODEAnalysisNumericalPostprocessor(
-        stepEval.getResult(), Integer.parseInt($density.text),
-        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clArrStates,
-        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
-        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS,
+      $postprocessor = new BikeArrivalODEPostprocessor(
+        stepEval.getResult(), Integer.parseInt($density.text), $cfg.cfg,
         postprocessorParameters
       );
     }
@@ -238,20 +230,12 @@ returns [
       new ExpressionEvaluatorWithConstants($constants);
     $stepSize.e.accept(stepEval);
     if (postprocessorParameters.isEmpty()) {
-      $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(
-        stepEval.getResult(), Integer.parseInt($replications.text),
-        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clArrStates,
-        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
-        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS
+      $postprocessor = new BikeArrivalSimPostprocessor(
+        stepEval.getResult(), Integer.parseInt($replications.text), $cfg.cfg
       );
     } else {
-      $postprocessor = new ForecastingSimuAnalysisNumericalPostprocessor(
-        stepEval.getResult(), Integer.parseInt($replications.text),
-        $cfg.fcastWarmup, $cfg.fcastLen, $cfg.fcastFreq,
-        $cfg.clDepStates, $cfg.clArrStates,
-        $cfg.depFcastMode, $cfg.trainClDepTS, $cfg.trainClMuTS,
-        $cfg.clDepTS, $cfg.clMuTS, $cfg.clArrTS,
+      $postprocessor = new BikeArrivalSimPostprocessor(
+        stepEval.getResult(), Integer.parseInt($replications.text), $cfg.cfg,
         postprocessorParameters
       );
     }
@@ -260,10 +244,7 @@ returns [
 ;
 
 bikeFcastConfig returns [
-  int fcastWarmup, int fcastLen, int fcastFreq,
-  List<State> clDepStates, List<State> clArrStates,
-  String depFcastMode, List<String> trainClDepTS, List<String> trainClMuTS,
-  List<String> clDepTS, List<String> clMuTS, List<String> clArrTS
+  BikeModelConfig cfg
 ]:
   ^(BIKE_FCAST_CFG 
     fcastWarmupTmp = INTEGER COMMA
@@ -278,17 +259,19 @@ bikeFcastConfig returns [
     clMuTSTmp = listOfFiles COMMA    
     clArrTSTmp = listOfFiles
   ) {
-    $fcastWarmup = Integer.parseInt($fcastWarmupTmp.text);
-    $fcastLen = Integer.parseInt($fcastLenTmp.text);
-    $fcastFreq = Integer.parseInt($fcastFreqTmp.text);
-    $clDepStates =  $clDepStatesTmp.l;
-    $clArrStates =  $clArrStatesTmp.l;
-    $depFcastMode = $depFcastModeTmp.text;
-    $trainClDepTS = $trainClDepTSTmp.l;
-    $trainClMuTS = $trainClMuTSTmp.l;
-    $clDepTS = $clDepTSTmp.l;
-    $clMuTS = $clMuTSTmp.l;
-    $clArrTS = $clArrTSTmp.l;
+    $cfg = new BikeModelConfig(
+      Integer.parseInt($fcastWarmupTmp.text),
+      Integer.parseInt($fcastLenTmp.text),
+      Integer.parseInt($fcastFreqTmp.text),
+      $clDepStatesTmp.l,
+      $clArrStatesTmp.l,
+      $depFcastModeTmp.text,
+      $trainClDepTSTmp.l,
+      $trainClMuTSTmp.l,
+      $clDepTSTmp.l,
+      $clMuTSTmp.l,
+      $clArrTSTmp.l
+    );
   }
 ;
 

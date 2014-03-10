@@ -11,15 +11,14 @@ import uk.ac.imperial.doc.gpa.plain.representation.timed.TimedEvents;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
-public class TimeSeriesForecast {
+public class BikeModelConfig {
 
   // These are the input fields
-	private final PlainPCTMC mPctmc;
-  private final int mFcastWarmup;
-  private final int mFcastLen;
-  private final int mFcastFreq;
-  private final List<State> mClDepStates;
-  private final List<State> mClArrStates;
+  public final int mFcastWarmup;
+  public final int mFcastLen;
+  public final int mFcastFreq;
+  public final List<State> mClDepStates;
+  public final List<State> mClArrStates;
   private final String mDepFcastMode;
   private final List<String> mTrainClDepTSFiles;
   private final List<String> mTrainClMuTSFiles;
@@ -32,15 +31,13 @@ public class TimeSeriesForecast {
   private int[][] mClArrTS;
   private int mTSStartIndex;
 	
-	public TimeSeriesForecast(
-	  final PlainPCTMC pctmc,
+	public BikeModelConfig(
     final int fcastWarmup, final int fcastLen, final int fcastFreq,
     final List<State> clDepStates, final List<State> clArrStates,
     final String depFcastMode, final List<String> trainClDepTSFiles,
     final List<String> trainClMuTSFiles, final List<String> clDepTSFiles,
     final List<String> clMuTSFiles, final List<String> clArrTSFiles
 	) {
-		mPctmc = pctmc;
     mFcastWarmup = fcastWarmup;
     mFcastLen = fcastLen;
     mFcastFreq = fcastFreq;
@@ -119,7 +116,7 @@ public class TimeSeriesForecast {
 	 *         if there aren't enough time series points to make another
 	 *         prediction the function returns null
 	 */
-	public int[] nextIntvl() {
+	public int[] nextIntvl(final PlainPCTMC pctmc) {
 	  final int numCl = mClDepStates.size();
 	  final int numTSPoints = mClDepTS[0].length;
 		// Not enough data in time series to do a forecast
@@ -155,7 +152,7 @@ public class TimeSeriesForecast {
 		}
 
 		// Set events for TimedEvents in PCTMC
-		TimedEvents te = mPctmc.getTimedEvents();
+		TimedEvents te = pctmc.getTimedEvents();
 		te.setEvents(allRateEvents, allDepEvents, allResetEvents);
 		
 		// Move time series window by (Interval Between Forecasts) mIBF minutes
