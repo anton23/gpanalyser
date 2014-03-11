@@ -1,9 +1,16 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
 //import java.util.Arrays;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.Rserve.RConnection;
+import org.rosuda.REngine.Rserve.RFileInputStream;
+import org.rosuda.REngine.Rserve.RserveException;
 
 import uk.ac.imperial.doc.gpa.forecasting.util.FileExtra;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
@@ -21,9 +28,9 @@ public class BikeModelConfig {
   public final List<State> mClArrStates;
   private final String mDepFcastMode;
   private final List<String> mTrainClDepTSFiles;
-  private final List<String> mTrainClMuTSFiles;
+  private final List<String> mTrainClDepToDestTSFiles;
   private final List<String> mClDepTSFiles;
-  private final List<String> mClMuTSFiles;
+  private final List<String> mClDepToDestTSFiles;
   private final List<String> mClArrTSFiles;
   
   // These fields may change during analysis
@@ -35,8 +42,8 @@ public class BikeModelConfig {
     final int fcastWarmup, final int fcastLen, final int fcastFreq,
     final List<State> clDepStates, final List<State> clArrStates,
     final String depFcastMode, final List<String> trainClDepTSFiles,
-    final List<String> trainClMuTSFiles, final List<String> clDepTSFiles,
-    final List<String> clMuTSFiles, final List<String> clArrTSFiles
+    final List<String> trainClDepToDestTSFiles, final List<String> clDepTSFiles,
+    final List<String> clDepToDestTSFiles, final List<String> clArrTSFiles
 	) {
     mFcastWarmup = fcastWarmup;
     mFcastLen = fcastLen;
@@ -45,9 +52,9 @@ public class BikeModelConfig {
     mClArrStates = clArrStates;
     mDepFcastMode = depFcastMode;
     mTrainClDepTSFiles = trainClDepTSFiles;
-    mTrainClMuTSFiles = trainClMuTSFiles;
+    mTrainClDepToDestTSFiles = trainClDepToDestTSFiles;
     mClDepTSFiles = clDepTSFiles;
-    mClMuTSFiles = clMuTSFiles;
+    mClDepToDestTSFiles = clDepToDestTSFiles;
     mClArrTSFiles = clArrTSFiles;
 
 		// Check departure and arrival time series files
@@ -58,6 +65,27 @@ public class BikeModelConfig {
 			);
 			System.exit(0);
 		}
+
+		// The working directory
+		final String dir = System.getProperty("user.dir");
+		
+		// Train departure time series using R and rJava
+		RConnection c;
+    try {
+      c = new RConnection();
+      // Train the model departure time series model
+      c.eval("setwd(\"" + dir + "/src-R/\")");
+      c.eval("source(\"departureFcast.R\")");
+      REXP x = c.eval("test('aaaa')");
+      //REXP x = c.eval("R.version.string");
+      System.out.println(x.asString());
+    } catch (RserveException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (REXPMismatchException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 	}
 
 	/**
