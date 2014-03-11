@@ -1,7 +1,6 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
 //import java.util.Arrays;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import java.util.Map;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.Rserve.RConnection;
-import org.rosuda.REngine.Rserve.RFileInputStream;
 import org.rosuda.REngine.Rserve.RserveException;
 
 import uk.ac.imperial.doc.gpa.forecasting.util.FileExtra;
@@ -26,7 +24,7 @@ public class BikeModelConfig {
   public final int mFcastFreq;
   public final List<State> mClDepStates;
   public final List<State> mClArrStates;
-  private final String mDepFcastMode;
+  private RConnection mRConn;
   private final List<String> mTrainClDepTSFiles;
   private final List<String> mTrainClDepToDestTSFiles;
   private final List<String> mClDepTSFiles;
@@ -34,7 +32,8 @@ public class BikeModelConfig {
   private final List<String> mClArrTSFiles;
   
   // These fields may change during analysis
-  private int[][] mClDepTS;
+  private String curClDepTSFile;
+  private String curClDepToDestTSFile;
   private int[][] mClArrTS;
   private int mTSStartIndex;
 	
@@ -50,7 +49,6 @@ public class BikeModelConfig {
     mFcastFreq = fcastFreq;
     mClDepStates = clDepStates;
     mClArrStates = clArrStates;
-    mDepFcastMode = depFcastMode;
     mTrainClDepTSFiles = trainClDepTSFiles;
     mTrainClDepToDestTSFiles = trainClDepToDestTSFiles;
     mClDepTSFiles = clDepTSFiles;
@@ -70,19 +68,16 @@ public class BikeModelConfig {
 		final String dir = System.getProperty("user.dir");
 		
 		// Train departure time series using R and rJava
-		RConnection c;
     try {
-      c = new RConnection();
+      mRConn = new RConnection();
       // Train the model departure time series model
-      c.eval("setwd(\"" + dir + "/src-R/\")");
-      c.eval("source(\"departureFcast.R\")");
-      REXP x = c.eval("test('aaaa')");
-      //REXP x = c.eval("R.version.string");
-      System.out.println(x.asString());
+      mRConn.eval(String.format("setwd(\"%s/src-R/\")", dir));
+      mRConn.eval("source(\"departureFcast.R\")");
+      mRConn.eval(String.format(
+        "model <- trainDepartureFcastModels(\"%s\",%d)",
+        depFcastMode, mFcastFreq
+      ));
     } catch (RserveException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (REXPMismatchException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -101,32 +96,19 @@ public class BikeModelConfig {
 		
 		// Expecting 1 observation per time unit per cluster
 		final int numCl = mClDepStates.size();
-    final String clDepTSRaw =
-      FileExtra.readFromTextFile(mClDepTSFiles.remove(0));
+    curClDepTSFile = mClDepTSFiles.remove(0);
+		curClDepToDestTSFile = mClDepToDestTSFiles.remove(0);
 		final String clArrTSRaw =
 		  FileExtra.readFromTextFile(mClArrTSFiles.remove(0));
-		final int numTSPoints = clDepTSRaw.split("\n")[0].split(" ").length;
+		final int numTSPoints = clArrTSRaw.split("\n")[0].split(" ").length;
 		
 		// Load observed cluster departures and arrivals for the day
-		String[] clDep = clDepTSRaw.split("\n");
     String[] clArr = clArrTSRaw.split("\n");
-		mClDepTS = new int[numCl][numTSPoints];
     mClArrTS = new int[numCl][numTSPoints];
 		for (int cl = 0; cl < numCl; cl++) {
-			String[] curClDep = clDep[cl].split(" ");
       String[] curClArr = clArr[cl].split(" ");
 			for (int i=0; i < numTSPoints; ++i) {
-			  mClDepTS[cl][i] = Integer.parseInt(curClDep[i]);
 			  mClArrTS[cl][i] = Integer.parseInt(curClArr[i]);
-			}
-			
-			// Sanity check
-			if (numTSPoints != curClDep.length ||
-			    numTSPoints != curClArr.length) {
-				PCTMCLogging.error (
-				  "There must be equally many departure and arrival observations"
-				);
-				System.exit(0);
 			}
 		}
 		
@@ -146,9 +128,6 @@ public class BikeModelConfig {
 	 */
 	public int[] nextIntvl(final PlainPCTMC pctmc) {
 	  final int numCl = mClDepStates.size();
-	  final int numTSPoints = mClDepTS[0].length;
-		// Not enough data in time series to do a forecast
-    if (mTSStartIndex + mFcastWarmup + mFcastLen >= numTSPoints) {return null;}
 
 		// Prepare pop changes in inhomogenous PCTMC
     final Map <String, double[][]> allRateEvents =
@@ -159,16 +138,36 @@ public class BikeModelConfig {
 		  new HashMap<State, double[][]>();
 		final int[] actualClArrivals = new int[numCl];
 		
+		double[][] data = null;
+	  try {
+      REXP res = mRConn.eval(String.format(
+        "genDepartureTS(model, \"../%s\", \"../%s\", %d, %d, %d)",
+        curClDepTSFile, curClDepToDestTSFile,
+        mTSStartIndex + 1, mFcastWarmup, mFcastLen
+      ));
+      if (!res.isNull()) {
+        data = res.asDoubleMatrix();
+      }
+    } catch (RserveException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (REXPMismatchException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+	  // Not enough data in time series to do a forecast
+	  if (data == null) {return null;}
+		
 		// Time dependent departures and arrival count resets for each cluster
 		final int tsEndPoint = mFcastWarmup + mFcastLen;
 		for (int cl = 0; cl < numCl; cl++) {
+	    double[][] depEvts = new double[tsEndPoint + 1][2];
+	    for (int t = 0; t < tsEndPoint; t++) {
+	      depEvts[t][0] = t;
+	      depEvts[t][1] = data[cl][t];
+	    }
 		  // New cluster departures
-		  allDepEvents.put(
-			  mClDepStates.get(cl),
-			  genDepartures(
-			    cl, mTSStartIndex, mFcastWarmup, tsEndPoint, mDepFcastMode
-			  )
-			);
+		  allDepEvents.put(mClDepStates.get(cl), depEvts);
 		  // Arrival cluster resets
 	    allResetEvents.put(
 	      mClArrStates.get(cl), new double[][] {{mFcastWarmup, 0}}
@@ -187,23 +186,6 @@ public class BikeModelConfig {
 		mTSStartIndex += mFcastFreq;
 		return actualClArrivals;
 	}
-	
-	private double[][] genDepartures(
-	  int cl,
-	  int tSStartIndex,
-    int fcastWarmup,
-    int tsEndPoint,
-    String fcastMode
-  ) {
-    // TODO Call R code
-	  // TODO For now we use dummy data
-	  double[][] retVal = new double[tsEndPoint + 1][2];
-	  for (int t = 0; t <= tsEndPoint; t++) {
-	    retVal[t][0] = t;
-	    retVal[t][1] = 2;
-	  }
-    return retVal;
-  }
 
   /**
 	 * Print predicted vs actual cluster arrivals
@@ -219,19 +201,28 @@ public class BikeModelConfig {
 	) {
 	  PCTMCLogging.info("Prediction #"+ mTSStartIndex);
     PCTMCLogging.increaseIndent();
+    double ttlAvg = 0;
+    double ttlSD = 0;
+    int actArr = 0;
     for (int cl = 0; cl < mClArrStates.size(); cl++) {
       final int[] indices = clArrMomIndices.get(mClArrStates.get(cl));
-      final double fcastClArr =
+      final double fcastClAvg =
           fcastClArrivals[fcastClArrivals.length - 1][indices[0]];
-      final double fcastClArrSq =
+      final double fcastClAvgSq =
           fcastClArrivals[fcastClArrivals.length - 1][indices[1]];
       final double fcastClSD =
-        Math.sqrt(fcastClArrSq - fcastClArr * fcastClArr);
+        Math.sqrt(fcastClAvgSq - fcastClAvg * fcastClAvg);
+      ttlAvg += fcastClAvg;
+      ttlSD += fcastClSD;
+      actArr += actualClArrivals[cl];
       PCTMCLogging.info(String.format(
         "Cl:%d Mean:%.2f SD:%.2f Actual:%d",
-        cl, fcastClArr, fcastClSD, actualClArrivals[cl]
+        cl, fcastClAvg, fcastClSD, actualClArrivals[cl]
       ));
     }
+    PCTMCLogging.info(String.format(
+      "Ttl: Mean:%.2f SD:%.2f Actual:%d", ttlAvg, ttlSD, actArr
+    ));
     PCTMCLogging.decreaseIndent();
 	}
 }
