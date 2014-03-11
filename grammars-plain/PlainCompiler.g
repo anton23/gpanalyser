@@ -254,9 +254,9 @@ bikeFcastConfig returns [
     clArrStatesTmp = listOfStates COMMA
     depFcastModeTmp = LOWERCASENAME COMMA
     trainClDepTSTmp = listOfFiles COMMA
-    trainClMuTSTmp = listOfFiles COMMA    
+    trainClDepToDestTSTmp = listOfFiles COMMA    
     clDepTSTmp = listOfFiles COMMA
-    clMuTSTmp = listOfFiles COMMA    
+    clDepToDestTSTmp = listOfFiles COMMA    
     clArrTSTmp = listOfFiles
   ) {
     $cfg = new BikeModelConfig(
@@ -267,9 +267,9 @@ bikeFcastConfig returns [
       $clArrStatesTmp.l,
       $depFcastModeTmp.text,
       $trainClDepTSTmp.l,
-      $trainClMuTSTmp.l,
+      $trainClDepToDestTSTmp.l,
       $clDepTSTmp.l,
-      $clMuTSTmp.l,
+      $clDepToDestTSTmp.l,
       $clArrTSTmp.l
     );
   }

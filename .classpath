@@ -40,5 +40,7 @@
 	<classpathentry kind="lib" path="lib/commons-math-2.2.jar"/>
 	<classpathentry kind="lib" path="lib/cloning-1.7.8.jar"/>
 	<classpathentry kind="lib" path="lib/objenesis-tck-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/REngine.jar"/>
+	<classpathentry kind="lib" path="lib/Rserve.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

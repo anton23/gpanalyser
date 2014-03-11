@@ -57,9 +57,9 @@ tokens{
     "  clArrStates={<state>,...},\n" +
     "  depFcastMode=<lowercasename>,\n" +
     "  trainClDepTS={\"file1\",...},\n" +
-    "  trainClMuTS={\"file1\",...}\n" +  
+    "  trainClDepToDestTS={\"file1\",...}\n" +  
     "  clDepTS={\"file1\",...},\n" +
-    "  clMuTS={\"file1\",...}\n" + 
+    "  clDepToDestTS={\"file1\",...}\n" + 
     "  clArrTS={\"file1\",...}\n";
   protected Stack<String> hint;
   protected ErrorReporter errorReporter;
@@ -209,16 +209,16 @@ bikeFcastConfig:
   CL_ARR_STATES DEF clArrStates = listOfStates COMMA  
   DEP_FCAST_MODE DEF depFcastMode = LOWERCASENAME COMMA
   TRAIN_CL_DEP_TS DEF trainClDepTS = listOfFiles COMMA
-  TRAIN_CL_MU_TS DEF trainClMuTS = listOfFiles COMMA
+  TRAIN_CL_DEP_TO_DEST_TS DEF trainClDepToDestTS = listOfFiles COMMA
   CL_DEP_TS DEF clDepTS = listOfFiles COMMA
-  CL_MU_TS DEF clMuTS = listOfFiles COMMA  
+  CL_DEP_TO_DEST_TS DEF clDepToDestTS = listOfFiles COMMA  
   CL_ARR_TS DEF clArrTS = listOfFiles
   ->
   ^(BIKE_FCAST_CFG
     $fcastWarmup COMMA $fcastLen COMMA $fcastFreq COMMA
     $clDepStates COMMA $clArrStates COMMA
-    $depFcastMode COMMA $trainClDepTS COMMA $trainClMuTS COMMA
-    $clDepTS COMMA $clMuTS COMMA $clArrTS
+    $depFcastMode COMMA $trainClDepTS COMMA $trainClDepToDestTS COMMA
+    $clDepTS COMMA $clDepToDestTS COMMA $clArrTS
   )
 ;
 
