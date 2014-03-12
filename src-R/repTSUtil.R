@@ -21,63 +21,69 @@ library("zoo")
 avgAndSDRepTS <- function(repTS) {
   # Compute seasonal (i.e. for each obs at the same time)
   # mean and s.d.
-  avgTs <- apply(repTS, 2, mean)
-  avgTs2 <- rollapply(avgTs, 3, function(x) c(1, 1, 1) %*% x / 3)
-  avgTs <- c(avgTs[1], avgTs2, avgTs[length(avgTs)])
-  sdTs <- apply(repTS, 2, sd)
-  sdTs2 <- rollapply(sdTs, 3, function(x) c(1, 1, 1) %*% x / 3)
-  sdTs <- c(sdTs[1], sdTs2, sdTs[length(sdTs)])
-  list(avgTs = avgTs, sdTs = sdTs)
+  avgTS <- apply(repTS, 2, mean)
+  avgTS2 <- rollapply(avgTS, 3, function(x) c(1, 1, 1) %*% x / 3)
+  avgTS <- c(avgTS[1], avgTS2, avgTS[length(avgTS)])
+  sdTS <- apply(repTS, 2, sd)
+  sdTS2 <- rollapply(sdTS, 3, function(x) c(1, 1, 1) %*% x / 3)
+  sdTS <- c(sdTS[1], sdTS2, sdTS[length(sdTS)])
+  list(avgTS = avgTS, sdTS = sdTS)
 }
 
 # Normalise an observation using its respective time point avg and std
 #
 # idxRep - index of replication in time series
-# idxTp  - index of time point in time series
+# idxTPt  - index of time point in time series
 # M      - matrix storing replicated time series
-# avgTs  - average observation by time point
-# sdTs   - standard deviation by time point
+# avgTS  - average observation by time point
+# sdTS   - standard deviation by time point
 #
-# Return normalised M[idxRep, idxTp]
-normObs <- function(idxRep, idxTp, M, avgTs, sdTs) {
-  if (sdTs[idxTp] == 0) { return(M[idxRep, idxTp]) }
-  (M[x, y] - avgTs[y]) / sdTs[y]
+# Return normalised M[idxRep, idxTPt]
+normObs <- function(idxRep, idxTPt, M, avgTS, sdTS) {
+  if (sdTS[idxTPt] == 0) { return(M[idxRep, idxTPt]) }
+  (M[idxRep, idxTPt] - avgTS[idxTPt]) / sdTS[idxTPt]
 }
-normRep <- Vectorize(normObs, vectorize.args = c('x', 'y'))
+norm <- Vectorize(normObs, vectorize.args = c('idxRep', 'idxTPt'))
 
 # Normalise replicated time series
 # 
 # repTS   - has n time series with m obs each
-# avgTs   - average of time points 
-# sdTs    - standard deviation of time points
+# avgTS   - average of time points 
+# sdTS    - standard deviation of time points
 #
 # Return normalised replicated time series observations
 normRepTS <- function(repTS, avgTS, sdTS) {
-  outer(1:nrow(repTS), 1:ncol(repTS), FUN = normRep, repTS, avgTs, sdTs)
+  outer(1 : nrow(repTS), 1 : ncol(repTS), FUN = norm, repTS, avgTS, sdTS)
+}
+normTS <- function(ts, avgTS, sdTS) {
+  normRepTS(t(matrix(ts)), avgTS, sdTS)[1,]
 }
 
 # Denormalise an observation using its respective time point avg and std
 #
 # idxRep - index of replication in time series
-# idxTp  - index of time point in time series
+# idxTPt  - index of time point in time series
 # M      - matrix storing replicated time series
-# avgTs  - average observation by time point
-# sdTs   - standard deviation by time point
+# avgTS  - average observation by time point
+# sdTS   - standard deviation by time point
 #
-# Return denormalised M[idxRep, idxTp]
-denormObs <- function(idxRep, idxTp, M, avgTs, sdTs) {
-  if (sdTs[idxTp] == 0) {return(M[idxRep, idxTp])}
-  (M[idxRep, idxTp] * sdTs[idxTp) + avgTs[idxTp]
+# Return denormalised M[idxRep, idxTPt]
+denormObs <- function(idxRep, idxTPt, M, avgTS, sdTS) {
+  if (sdTS[idxTPt] == 0) {return(M[idxRep, idxTPt])}
+  (M[idxRep, idxTPt] * sdTS[idxTPt]) + avgTS[idxTPt]
 }
-denormRep <- Vectorize(denormObs, vectorize.args = c('x', 'y'))
+denorm <- Vectorize(denormObs, vectorize.args = c('idxRep', 'idxTPt'))
 
 # Denormalise replicated time series
 # 
 # repTS   - has n time series with m obs each
-# avgTs   - average of time points 
-# sdTs    - standard deviation of time points
+# avgTS   - average of time points 
+# sdTS    - standard deviation of time points
 #
 # Return normalised replicated time series observations
 denormRepTS <- function(repTS, avgTS, sdTS) {
-  outer(1:nrow(repTS), 1:ncol(repTS), FUN = denormRep, repTS, avgTs, sdTs)
+  outer(1:nrow(repTS), 1:ncol(repTS), FUN = denorm, repTS, avgTS, sdTS)
+}
+denormTS <- function(ts, avgTS, sdTS) {
+  denormRepTS(t(matrix(ts)), avgTS, sdTS)[1,]
 }

@@ -10,11 +10,8 @@ library("zoo")
 # Return array of elements resulting from applying fun to x with windowSize
 #
 aggregate <- function(x, startOffset, windowSize, freq, fun) {
-  #Elements in array should be multiple of freq
-  assert_that((length(x) - startOffset) %% freq == 0)
   rollapply(
-    tail(x, length(x) - startOffset),
-    width = windowSize, by = freq, FUN = fun
+    tail(x, length(x) - startOffset), width = windowSize, by = freq, FUN = fun
   )
 }
 
@@ -34,8 +31,8 @@ loadFile <- function(filename) {
 #
 # Return array (rep, rows, cols). Each row is a unique repTS.
 loadRepTS <- function(files) {
-  data <- sapply(files, simplify="array", function(x) {
+  data <- sapply(files, simplify = "array", function(x) {
     loadFile(x)
   })
-  aperm(data,c(3,1,2))
+  aperm(data, c(3,1,2))
 }
