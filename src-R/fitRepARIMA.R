@@ -14,7 +14,7 @@ library('forecast')
 #
 # Return best model
 getBestModel <- function(models) {
-  bestIndex <- which.min(lapply(models,function(t){t$aic}))
+  bestIndex <- which.min(lapply(models, function(t){t$aic}))
   # Print model fit statistics
   cat("Best model - Order:", models[[bestIndex]]$order,
       "#Xreg:", models[[bestIndex]]$numXreg,
@@ -86,7 +86,6 @@ fitRepARIMA <- function (repTS, p, d, q, w, xreg = NULL) {
   )
   # Our return structure for the RepARIMA
   list(
-    model = model,
     coef = interleavedSARIMAToARIMACoeffs(model$coef, p, q, m),
     order = c(p, d, q),
     numXreg = length(xreg),

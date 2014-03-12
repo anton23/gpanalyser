@@ -65,27 +65,31 @@ public class BikeModelConfig {
 		final String dir = System.getProperty("user.dir");
 		
 		// Train departure time series using R and rJava
-    String[] depTSTrainFiles = new String[trainClDepTSFiles.size()];
-    trainClDepTSFiles.toArray(depTSTrainFiles);
-    String[] depToDestTSTrainFiles = new String[trainClDepToDestTSFiles.size()];
-    trainClDepToDestTSFiles.toArray(depToDestTSTrainFiles);
+    final String[] trainClDepRepTSFiles =
+      new String[trainClDepTSFiles.size()];
+    trainClDepTSFiles.toArray(trainClDepRepTSFiles);
+    final String[] trainClDepToDestRepTSFiles =
+      new String[trainClDepToDestTSFiles.size()];
+    trainClDepToDestTSFiles.toArray(trainClDepToDestRepTSFiles);
+    for (int i = 0; i < trainClDepRepTSFiles.length; i++) {
+      trainClDepRepTSFiles[i] = "../" + trainClDepRepTSFiles[i];
+      trainClDepToDestRepTSFiles[i] = "../" + trainClDepToDestRepTSFiles[i];
+    }
     try {
       mRConn = new RConnection();
       // Train the model departure time series model
       mRConn.eval(String.format("setwd(\"%s/src-R/\")", dir));
       mRConn.eval("source(\"departureFcast.R\")");
-      mRConn.assign("trainDepTSFiles", depTSTrainFiles);
-      mRConn.assign("trainDepToDestTSFiles", depToDestTSTrainFiles);
+      mRConn.assign("trainClDepRepTSFiles", trainClDepRepTSFiles);
+      mRConn.assign("trainClDepToDestRepTSFiles", trainClDepToDestRepTSFiles);
       mRConn.eval(String.format(
         "model <- genDepFcastModel("+
-          "\"%s\", %d, %d, %d, trainDepTSFiles, trainDepToDestTSFiles)",
+        "\"%s\", %d, %d, %d, trainClDepRepTSFiles, trainClDepToDestRepTSFiles)",
         depFcastMode, mFcastFreq, mFcastWarmup, mFcastLen
       ));
     } catch (RserveException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch (REngineException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 	}
@@ -155,10 +159,8 @@ public class BikeModelConfig {
         data = res.asDoubleMatrix();
       }
     } catch (RserveException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch (REXPMismatchException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 	  // Not enough data in time series to do a forecast

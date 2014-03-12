@@ -3,8 +3,8 @@
 # normal seasonal time series which gaps. A good example for a replicated
 # time series observations are time arrivals at a tube station between
 # 9 - 11am for dates 11/05/2013 - 21/05/2013. We refer each consecutive time
-# interval in the replicated series as a repl(ication). A time point refers to a
-# specific time such that for a replicated time series with n replications we
+# interval in the replicated series as a repl(ication). A time point refers to
+# a specific time such that for a replicated time series with n replications we
 # have n observations for each distinct time point, e.g. for 9.30am. Each
 # observation is uniquely identified by its corresponding replication and time
 # point.
@@ -22,11 +22,13 @@ avgAndSDRepTS <- function(repTS) {
   # Compute seasonal (i.e. for each obs at the same time)
   # mean and s.d.
   avgTS <- apply(repTS, 2, mean)
-  avgTS2 <- rollapply(avgTS, 3, function(x) c(1, 1, 1) %*% x / 3)
-  avgTS <- c(avgTS[1], avgTS2, avgTS[length(avgTS)])
+  avgTS <- rollapply(
+    c(avgTS[1], avgTS, tail(avgTS, 1)), 3, function(x) {c(1, 1, 1) %*% x / 3}
+  )
   sdTS <- apply(repTS, 2, sd)
-  sdTS2 <- rollapply(sdTS, 3, function(x) c(1, 1, 1) %*% x / 3)
-  sdTS <- c(sdTS[1], sdTS2, sdTS[length(sdTS)])
+  sdTS <- rollapply(
+    c(sdTS[1], sdTS, tail(sdTS, 1)), 3, function(x) {c(1, 1, 1) %*% x / 3}
+  )
   list(avgTS = avgTS, sdTS = sdTS)
 }
 
@@ -40,7 +42,7 @@ avgAndSDRepTS <- function(repTS) {
 #
 # Return normalised M[idxRep, idxTPt]
 normObs <- function(idxRep, idxTPt, M, avgTS, sdTS) {
-  if (sdTS[idxTPt] == 0) { return(M[idxRep, idxTPt]) }
+  if (sdTS[idxTPt] == 0) { return(0) }
   (M[idxRep, idxTPt] - avgTS[idxTPt]) / sdTS[idxTPt]
 }
 norm <- Vectorize(normObs, vectorize.args = c('idxRep', 'idxTPt'))
@@ -69,7 +71,7 @@ normTS <- function(ts, avgTS, sdTS) {
 #
 # Return denormalised M[idxRep, idxTPt]
 denormObs <- function(idxRep, idxTPt, M, avgTS, sdTS) {
-  if (sdTS[idxTPt] == 0) {return(M[idxRep, idxTPt])}
+  if (sdTS[idxTPt] == 0) { return(0) }
   (M[idxRep, idxTPt] * sdTS[idxTPt]) + avgTS[idxTPt]
 }
 denorm <- Vectorize(denormObs, vectorize.args = c('idxRep', 'idxTPt'))
