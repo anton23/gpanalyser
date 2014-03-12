@@ -43,8 +43,9 @@ genDepFcastModel <- function (
   fcastFreq,
   fcastWarmup,
   fcastLen,
-  trainDepRepTSFiles = NULL,
-  trainDepToDestRepTSFiles = NULL
+  trainClDepRepTSFiles = NULL,
+  trainClDepToDestRepTSFiles = NULL,
+  trainClArrRepTSFiles = NULL
 ) {
   # Make sure warmup and len are multiples of frequency
   assert_that(fcastWarmup %% fcastFreq == 0)
@@ -57,7 +58,7 @@ genDepFcastModel <- function (
     ),
     arima = genARIMADepFcastModel(
       fcastFreq, fcastWarmup, fcastLen,
-      trainDepRepTSFiles, trainDepToDestRepTSFiles
+      trainClDepRepTSFiles, trainClDepToDestRepTSFiles
     ),
     oracle = genOracleDepFcastModel(
       fcastWarmup, fcastLen
@@ -83,11 +84,11 @@ genARIMADepFcastModel <- function (
   fcastFreq,
   fcastWarmup,
   fcastLen,
-  trainDepRepTSFiles,
-  trainDepToDestRepTSFiles
+  trainClDepRepTSFiles,
+  trainClDepToDestRepTSFiles
 ) {  
   # Aggregate departures to fcastFreq
-  trainRepTS <- loadRepTS(trainDepToDestRepTSFiles);
+  trainRepTS <- loadRepTS(trainClDepToDestRepTSFiles);
   trainRepTSAtFreq <- apply(trainRepTS, c(1,2), function(x) {
     aggregate(x, fcastFreq, fcastFreq, sum) 
   })

@@ -40,7 +40,8 @@ public class BikeModelConfig {
     final int fcastWarmup, final int fcastLen, final int fcastFreq,
     final List<State> clDepStates, final List<State> clArrStates,
     final String depFcastMode, final List<String> trainClDepTSFiles,
-    final List<String> trainClDepToDestTSFiles, final List<String> clDepTSFiles,
+    final List<String> trainClDepToDestTSFiles,
+    final List<String> trainClArrTSFiles, final List<String> clDepTSFiles,
     final List<String> clDepToDestTSFiles, final List<String> clArrTSFiles
 	) {
     mFcastWarmup = fcastWarmup;
@@ -71,20 +72,25 @@ public class BikeModelConfig {
     final String[] trainClDepToDestRepTSFiles =
       new String[trainClDepToDestTSFiles.size()];
     trainClDepToDestTSFiles.toArray(trainClDepToDestRepTSFiles);
+    final String[] trainClArrRepTSFiles =
+      new String[trainClArrTSFiles.size()];
+    trainClArrTSFiles.toArray(trainClArrRepTSFiles);
     for (int i = 0; i < trainClDepRepTSFiles.length; i++) {
       trainClDepRepTSFiles[i] = "../" + trainClDepRepTSFiles[i];
       trainClDepToDestRepTSFiles[i] = "../" + trainClDepToDestRepTSFiles[i];
+      trainClArrRepTSFiles[i] = "../" + trainClArrRepTSFiles[i];
     }
     try {
       mRConn = new RConnection();
       // Train the model departure time series model
       mRConn.eval(String.format("setwd(\"%s/src-R/\")", dir));
       mRConn.eval("source(\"departureFcast.R\")");
-      mRConn.assign("trainClDepRepTSFiles", trainClDepRepTSFiles);
-      mRConn.assign("trainClDepToDestRepTSFiles", trainClDepToDestRepTSFiles);
+      mRConn.assign("trainClDepRepTSF", trainClDepRepTSFiles);
+      mRConn.assign("trainClDepToDestRepTSF", trainClDepToDestRepTSFiles);
+      mRConn.assign("trainClArrRepTSF", trainClArrRepTSFiles);
       mRConn.eval(String.format(
-        "model <- genDepFcastModel("+
-        "\"%s\", %d, %d, %d, trainClDepRepTSFiles, trainClDepToDestRepTSFiles)",
+        "model <- genDepFcastModel(\"%s\", %d, %d, %d, "+
+        "trainClDepRepTSF, trainClDepToDestRepTSF, trainClArrRepTSF)",
         depFcastMode, mFcastFreq, mFcastWarmup, mFcastLen
       ));
     } catch (RserveException e) {

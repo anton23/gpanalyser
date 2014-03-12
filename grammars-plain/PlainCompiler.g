@@ -255,6 +255,7 @@ bikeFcastConfig returns [
     depFcastModeTmp = LOWERCASENAME COMMA
     trainClDepTSTmp = listOfFiles COMMA
     trainClDepToDestTSTmp = listOfFiles COMMA    
+    trainClArrTSTmp = listOfFiles COMMA
     clDepTSTmp = listOfFiles COMMA
     clDepToDestTSTmp = listOfFiles COMMA    
     clArrTSTmp = listOfFiles
@@ -268,6 +269,7 @@ bikeFcastConfig returns [
       $depFcastModeTmp.text,
       $trainClDepTSTmp.l,
       $trainClDepToDestTSTmp.l,
+      $trainClArrTSTmp.l,
       $clDepTSTmp.l,
       $clDepToDestTSTmp.l,
       $clArrTSTmp.l
