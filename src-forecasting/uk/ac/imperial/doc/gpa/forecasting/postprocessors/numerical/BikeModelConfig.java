@@ -124,7 +124,7 @@ public class BikeModelConfig {
 		}
 		
 		// We start every analysis from the first observation in the time series
-		mTSStartIndex = 0;
+		mTSStartIndex = -mFcastFreq;
 		return true;
 	}
 
@@ -138,6 +138,8 @@ public class BikeModelConfig {
 	 *         prediction the function returns null
 	 */
 	public int[] nextIntvl(final PlainPCTMC pctmc) {
+	  // Move time series window by (Interval Between Forecasts) mIBF minutes
+    mTSStartIndex += mFcastFreq;
 	  final int numCl = mClDepStates.size();
 
 		// Prepare pop changes in inhomogenous PCTMC
@@ -189,9 +191,7 @@ public class BikeModelConfig {
 		// Set events for TimedEvents in PCTMC
 		TimedEvents te = pctmc.getTimedEvents();
 		te.setEvents(allRateEvents, allDepEvents, allResetEvents);
-		
-		// Move time series window by (Interval Between Forecasts) mIBF minutes
-		mTSStartIndex += mFcastFreq;
+
 		return actualClArrivals;
 	}
 

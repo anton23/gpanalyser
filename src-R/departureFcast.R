@@ -68,7 +68,7 @@ genDepFcastModel <- function (
 genNaiveDepFcastModel <- function(fcastFreq, fcastWarmup, fcastLen) {
   list(name = "NaiveDepartureForecast",
     genTS = function(cId, depTS, depToDestTS, startTPt) {
-      if (startTPt + fcastWarmup + fcastLen >= length(depTS)) { return(NULL) }
+      if (startTPt + fcastWarmup + fcastLen > length(depTS)) { return(NULL) }
       # Time series assumed to be known until end of warmup period
       deps <- depToDestTS[startTPt : (startTPt + fcastWarmup - 1)]
       # After warmup we repeat the departures observed in the last
@@ -99,7 +99,7 @@ genARIMADepFcastModel <- function (
   
   list(name = "ARIMADepartureForecast",
     genTS = function(cId, depTS, depToDestTS, startTPt) {
-      if (startTPt + fcastWarmup + fcastLen >= length(depTS)) { return(NULL) }
+      if (startTPt + fcastWarmup + fcastLen > length(depTS)) { return(NULL) }
       m <- models[[cId]]
       # Time series assumed to be known up to the end of warmup period
       depToDestTS <- head(depToDestTS, startTPt + fcastWarmup - 1)
@@ -137,7 +137,7 @@ genARIMADepFcastModel <- function (
 genOracleDepFcastModel <- function (fcastWarmup, fcastLen) {
   list(name = "OracleDepartureForecast",
     genTS = function(cId, depTS, depToDestTS, startTPt) {
-      if (startTPt + fcastWarmup + fcastLen >= length(depTS)) { return(NULL) }
+      if (startTPt + fcastWarmup + fcastLen > length(depTS)) { return(NULL) }
       # Pick real departure observations
       depToDestTS[startTPt : (startTPt + fcastWarmup + fcastLen - 1)]
     }
