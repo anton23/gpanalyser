@@ -6,6 +6,7 @@
 # Bowden et al.
 #------------------------------------------------------------------------------
 source('repTSUtil.R')
+library('forecast')
 
 # Choose the best among all ARIMA models
 #
@@ -66,10 +67,12 @@ fitRepARIMA <- function (repTS, p, d, q, w, xreg = NULL) {
   m = dim(repTS)[1] # number of replications
   
   # We only fit for observations that lie in our forecast period
-  repTSInterleaved <- as.vector(tsReps[, (w - s) : dim(repTS)[2]])
-  xregInterleaved <- ifelse(is.null(xreg), NULL,
-    matrix(as.vector(xreg[, (w - s) : (dim(xreg)[2]),]), ncol = dim(xreg)[3])
-  )
+  repTSInterleaved <- as.vector(repTS[, (w - s) : dim(repTS)[2]])
+  xregInterleaved <- NULL
+  if (!is.null(xreg)) {
+    xregInterleaved <- 
+      matrix(as.vector(xreg[, (w - s) : (dim(xreg)[2]),]), ncol = dim(xreg)[3])
+  }
   
   # Build the model using the interleaved time series
   # The seasonal difference D=d is like the ARIMA difference d in a non-interleaved model

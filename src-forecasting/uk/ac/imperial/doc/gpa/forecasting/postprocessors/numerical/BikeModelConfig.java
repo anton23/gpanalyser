@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 
@@ -25,8 +26,6 @@ public class BikeModelConfig {
   public final List<State> mClDepStates;
   public final List<State> mClArrStates;
   private RConnection mRConn;
-  private final List<String> mTrainClDepTSFiles;
-  private final List<String> mTrainClDepToDestTSFiles;
   private final List<String> mClDepTSFiles;
   private final List<String> mClDepToDestTSFiles;
   private final List<String> mClArrTSFiles;
@@ -49,8 +48,6 @@ public class BikeModelConfig {
     mFcastFreq = fcastFreq;
     mClDepStates = clDepStates;
     mClArrStates = clArrStates;
-    mTrainClDepTSFiles = trainClDepTSFiles;
-    mTrainClDepToDestTSFiles = trainClDepToDestTSFiles;
     mClDepTSFiles = clDepTSFiles;
     mClDepToDestTSFiles = clDepToDestTSFiles;
     mClArrTSFiles = clArrTSFiles;
@@ -68,16 +65,26 @@ public class BikeModelConfig {
 		final String dir = System.getProperty("user.dir");
 		
 		// Train departure time series using R and rJava
+    String[] depTSTrainFiles = new String[trainClDepTSFiles.size()];
+    trainClDepTSFiles.toArray(depTSTrainFiles);
+    String[] depToDestTSTrainFiles = new String[trainClDepToDestTSFiles.size()];
+    trainClDepToDestTSFiles.toArray(depToDestTSTrainFiles);
     try {
       mRConn = new RConnection();
       // Train the model departure time series model
       mRConn.eval(String.format("setwd(\"%s/src-R/\")", dir));
       mRConn.eval("source(\"departureFcast.R\")");
+      mRConn.assign("trainDepTSFiles", depTSTrainFiles);
+      mRConn.assign("trainDepToDestTSFiles", depToDestTSTrainFiles);
       mRConn.eval(String.format(
-        "model <- trainDepartureFcastModels(\"%s\",%d)",
-        depFcastMode, mFcastFreq
+        "model <- genDepFcastModel("+
+          "\"%s\", %d, %d, %d, trainDepTSFiles, trainDepToDestTSFiles)",
+        depFcastMode, mFcastFreq, mFcastWarmup, mFcastLen
       ));
     } catch (RserveException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (REngineException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -141,9 +148,8 @@ public class BikeModelConfig {
 		double[][] data = null;
 	  try {
       REXP res = mRConn.eval(String.format(
-        "genDepartureTS(model, \"../%s\", \"../%s\", %d, %d, %d)",
-        curClDepTSFile, curClDepToDestTSFile,
-        mTSStartIndex + 1, mFcastWarmup, mFcastLen
+        "fcastDepartureTS(model, \"../%s\", \"../%s\", %d)",
+        curClDepTSFile, curClDepToDestTSFile, mTSStartIndex + 1
       ));
       if (!res.isNull()) {
         data = res.asDoubleMatrix();
