@@ -20,6 +20,7 @@ CL_ARR_STATES: 'clArrStates';
 DEP_FCAST_MODE: 'depFcastMode';
 TRAIN_CL_DEP_TS: 'trainClDepTS';
 TRAIN_CL_DEP_TO_DEST_TS: 'trainClDepToDestTS';
+TRAIN_CL_ARR_TS: 'trainClArrTS';
 CL_DEP_TS: 'clDepTS';
 CL_DEP_TO_DEST_TS: 'clDepToDestTS';
 CL_ARR_TS: 'clArrTS';
