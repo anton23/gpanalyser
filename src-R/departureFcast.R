@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------
 # Routines for fitting time series models to forecast future departures for
-# time points of a replicated time series.
+# time points of a replicated bike journey time series.
 #------------------------------------------------------------------------------
 library("assertthat")
 source("fileUtil.R")
@@ -11,31 +11,28 @@ source("fitRepARIMA.R")
 # p integer vector
 # d integer vector
 # q integer vector
-# trainDepRepTS departure observations over several days
-# w number of warmup intervals for each day in ARIMATrainDepTs
+# normTrainCls list of departure observations and its normalisation constants
+#   for each cluster
+# w number of warmup intervals
+# h number of forecast intervals
+#
 # Return best departure model for each cluster trying all
-#         possible RepARIMA on p x d x q for each cluster in
-#         RepARIMATrainDepTs observations
-fitRepARIMADepartures <- function(p, d, q, trainDepRepTS, w) {
+#   possible RepARIMA on p x d x q for each cluster in
+#   RepARIMATrainDepTs observations
+fitRepARIMADepartures <- function(p, d, q, normTrainCls, w, h) {
   # Configurations that we will check
   configs = as.matrix(expand.grid(p = p, d = d, q = q))
-  mapply(c, apply(trainDepRepTS, 2, function(clDepRepTS) {
-    # Normalise
-    clDepRepTSMoments <- avgAndSDRepTS(clDepRepTS)
-    clDepRepTSNorm <- normRepTS(
-      clDepRepTS, clDepRepTSMoments$avgTS, clDepRepTSMoments$sdTS
-    )
-
+  lapply(normTrainCls, function(normTrainCl) {
     # Try different ARIMA departure models
     res <- apply(configs, 1, function(c) {
       tryCatch(
-        c(fitRepARIMA(clDepRepTSNorm, c["p"], c["d"], c["q"], w), 
-          clDepRepTSMoments),
+        c(fitRepARIMA(normTrainCl$repTSNorm, c["p"], c["d"], c["q"], w), 
+          normTrainCl$repTSMoments),
         error = function(e) {list(loglik = -1000000000, aic = 1000000000)}
       )
     })
     getBestModel(res)
-  }), SIMPLIFY = FALSE)
+  })
 }
 
 genDepFcastModel <- function (
@@ -55,14 +52,14 @@ genDepFcastModel <- function (
   switch(depFcastMode,
     naive = genNaiveDepFcastModel(
       fcastFreq, fcastWarmup, fcastLen,
-      trainClDepRepTSFiles, trainClDepToDestRepTSFiles
+      trainClDepToDestRepTSFiles
     ),
     arima = genARIMADepFcastModel(
       fcastFreq, fcastWarmup, fcastLen,
-      trainClDepRepTSFiles, trainClDepToDestRepTSFiles
+      trainClDepToDestRepTSFiles
     ),
     oracle = genOracleDepFcastModel(
-      fcastWarmup, fcastLen
+      fcastFreq, fcastWarmup, fcastLen
     )
   )
 }
@@ -71,47 +68,44 @@ genNaiveDepFcastModel <- function(
   fcastFreq,
   fcastWarmup,
   fcastLen,
-  trainClDepRepTSFiles,
   trainClDepToDestRepTSFiles
 ) {
-  trainRepTS <- loadRepTS(trainClDepToDestRepTSFiles);
-  moments <- list()
-  for (i in 1 : dim(trainRepTS)[2]) {
-    moments[[i]] <- avgAndSDRepTS(trainRepTS[,i,])$avgTS
+  trainDepToDestRepTS <- loadRepTS(trainClDepToDestRepTSFiles);
+  avgDepToDest <- list()
+  for (i in 1 : dim(trainDepToDestRepTS)[2]) {
+    avgDepToDest[[i]] <- avgAndSDRepTS(trainDepToDestRepTS[,i,])$avgTS
   }
   list(name = "NaiveDepartureForecast",
     genTS = function(cId, depTS, depToDestTS, startTPt) {
       if (startTPt + fcastWarmup + fcastLen > length(depTS)) { return(NULL) }
+      sw <- startTPt + fcastWarmup
+      swl <- sw + fcastLen - 1
       # Time series assumed to be known until end of warmup period
-      deps <- depToDestTS[startTPt : (startTPt + fcastWarmup - 1)]
+      deps <- depToDestTS[startTPt : (sw - 1)]
       # After warmup we repeat the departures observed in the last
       # fcastFreq minutes of the time series repeatedly over the
       # fcastLen interval
-      #(c(deps, rep(tail(deps, fcastFreq), fcastLen / fcastFreq)) +
-      c(deps, moments[[cId]][(startTPt + fcastWarmup) : (startTPt + fcastWarmup + fcastLen)])
-      #) / 2
+      c(deps, round(avgDepToDest[[cId]][sw : swl]))
     }
   )
 }
 
-genARIMADepFcastModel <- function (
+genARIMADepFcastModel <- function(
   fcastFreq,
   fcastWarmup,
   fcastLen,
-  trainClDepRepTSFiles,
   trainClDepToDestRepTSFiles
 ) {  
-  # Aggregate departures to fcastFreq
-  trainRepTS <- loadRepTS(trainClDepToDestRepTSFiles);
-  trainRepTSAtFreq <- apply(trainRepTS, c(1,2), function(x) {
-    aggregate(x, fcastFreq, fcastFreq, sum) 
-  })
-  trainRepTSAtFreq <- aperm(trainRepTSAtFreq, c(2,3,1))
-  warmupFreq <- fcastWarmup / fcastFreq
-  
+  # Change frequency of observations and normalise to make
+  # time homogeneous
+  trainDepRepTS <-
+    lowerClRepTSFreq(loadRepTS(trainClDepToDestRepTSFiles), fcastFreq)
+  normTrainCl <- normClRepTS(trainDepRepTS)
+  w <- fcastWarmup / fcastFreq
+  h = fcastLen / fcastFreq
   # Fit RepARIMA models for each RepARIMA series
-  models <- fitRepARIMADepartures(0:1, 0:1, 0:1, trainRepTSAtFreq, warmupFreq)
-  
+  models <- fitRepARIMADepartures(0:1, 0, 0:1, normTrainCl, w, h)
+
   list(name = "ARIMADepartureForecast",
     genTS = function(cId, depTS, depToDestTS, startTPt) {
       if (startTPt + fcastWarmup + fcastLen > length(depTS)) { return(NULL) }
@@ -123,7 +117,6 @@ genARIMADepFcastModel <- function (
       depToDestTSAggrNorm <- normTS(depToDestTSAggr, m$avgTS, m$sdTS)
 
       # Forecast
-      h = fcastLen / fcastFreq
       clDepRepARIMA<- Arima(
         c(rep(0, 10), depToDestTSAggrNorm), # Pad series a little
         order = m$order, fixed = m$coef,
@@ -149,7 +142,11 @@ genARIMADepFcastModel <- function (
   )
 }
 
-genOracleDepFcastModel <- function (fcastWarmup, fcastLen) {
+genOracleDepFcastModel <- function(
+  fcastFreq,
+  fcastWarmup,
+  fcastLen
+) {
   list(name = "OracleDepartureForecast",
     genTS = function(cId, depTS, depToDestTS, startTPt) {
       if (startTPt + fcastWarmup + fcastLen > length(depTS)) { return(NULL) }

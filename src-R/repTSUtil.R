@@ -15,6 +15,7 @@
 # 
 # Routines for making replicated TS time inhomogeneous
 #------------------------------------------------------------------------------
+library("assertthat")
 library("zoo")
 
 # Compute first and second moments of the replicate time series
@@ -30,6 +31,11 @@ avgAndSDRepTS <- function(repTS) {
     c(sdTS[1], sdTS, tail(sdTS, 1)), 3, function(x) {c(0.25, 0.5, 0.25) %*% x}
   )
   list(avgTS = avgTS, sdTS = sdTS)
+}
+
+# In case we want to skip normalisation
+avgAndSDRepTSNoNorm <- function(repTS) {
+  list(avgTS = rep(0, dim(repTS)[2]), sdTS = rep(1, dim(repTS)[2]))
 }
 
 # Normalise an observation using its respective time point avg and std
@@ -54,11 +60,26 @@ norm <- Vectorize(normObs, vectorize.args = c('idxRep', 'idxTPt'))
 # sdTS    - standard deviation of time points
 #
 # Return normalised replicated time series observations
+normTS <- function(ts, avgTS, sdTS) {
+  normRepTS(t(matrix(ts)), avgTS, sdTS)[1,]
+}
+
+# Same as above but for entire rep ts
 normRepTS <- function(repTS, avgTS, sdTS) {
   outer(1 : nrow(repTS), 1 : ncol(repTS), FUN = norm, repTS, avgTS, sdTS)
 }
-normTS <- function(ts, avgTS, sdTS) {
-  normRepTS(t(matrix(ts)), avgTS, sdTS)[1,]
+
+# Normalise an rep ts for a number of clusters
+#
+# clRepTs - dim(reps, cl, obs)
+# fun     - function that computes the moments for clRepTS
+#
+normClRepTS <- function(clRepTS, fun = avgAndSDRepTS) {
+  apply(clRepTS, 2, function(repTS) {
+    repTSMoments <- fun(repTS)
+    repTSNorm <- normRepTS(repTS, repTSMoments$avgTS, repTSMoments$sdTS)
+    list(repTSMoments = repTSMoments, repTSNorm = repTSNorm)
+  })
 }
 
 # Denormalise an observation using its respective time point avg and std
@@ -83,9 +104,25 @@ denorm <- Vectorize(denormObs, vectorize.args = c('idxRep', 'idxTPt'))
 # sdTS    - standard deviation of time points
 #
 # Return normalised replicated time series observations
+denormTS <- function(ts, avgTS, sdTS) {
+  denormRepTS(t(matrix(ts)), avgTS, sdTS)[1,]
+}
+# Same as above but for entire rep ts
 denormRepTS <- function(repTS, avgTS, sdTS) {
   outer(1:nrow(repTS), 1:ncol(repTS), FUN = denorm, repTS, avgTS, sdTS)
 }
-denormTS <- function(ts, avgTS, sdTS) {
-  denormRepTS(t(matrix(ts)), avgTS, sdTS)[1,]
+
+# ts - incoming time series with frequency of 1 unit
+# freq - time in ts units that each aggregate we shift startOffset by
+#
+# Return TS with reduced frequency
+#
+lowerTSFreq <- function(ts, freq) {
+  rollapply(ts, width = freq, by = freq, FUN = sum)
+}
+
+lowerClRepTSFreq <- function(clRepTS, freq) {
+  aperm(apply(clRepTS, c(1,2), function(ts) {
+    lowerTSFreq(ts, freq) 
+  }), c(2,3,1))
 }
