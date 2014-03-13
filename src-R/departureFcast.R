@@ -25,7 +25,7 @@ fitRepARIMADepartures <- function(p, d, q, trainDepRepTS, w) {
     clDepRepTSNorm <- normRepTS(
       clDepRepTS, clDepRepTSMoments$avgTS, clDepRepTSMoments$sdTS
     )
-    
+
     # Try different ARIMA departure models
     res <- apply(configs, 1, function(c) {
       tryCatch(
@@ -54,7 +54,8 @@ genDepFcastModel <- function (
   # Class like generation of models
   switch(depFcastMode,
     naive = genNaiveDepFcastModel(
-      fcastFreq, fcastWarmup, fcastLen
+      fcastFreq, fcastWarmup, fcastLen,
+      trainClDepRepTSFiles, trainClDepToDestRepTSFiles
     ),
     arima = genARIMADepFcastModel(
       fcastFreq, fcastWarmup, fcastLen,
@@ -66,7 +67,18 @@ genDepFcastModel <- function (
   )
 }
 
-genNaiveDepFcastModel <- function(fcastFreq, fcastWarmup, fcastLen) {
+genNaiveDepFcastModel <- function(
+  fcastFreq,
+  fcastWarmup,
+  fcastLen,
+  trainClDepRepTSFiles,
+  trainClDepToDestRepTSFiles
+) {
+  trainRepTS <- loadRepTS(trainClDepToDestRepTSFiles);
+  moments <- list()
+  for (i in 1 : dim(trainRepTS)[2]) {
+    moments[[i]] <- avgAndSDRepTS(trainRepTS[,i,])$avgTS
+  }
   list(name = "NaiveDepartureForecast",
     genTS = function(cId, depTS, depToDestTS, startTPt) {
       if (startTPt + fcastWarmup + fcastLen > length(depTS)) { return(NULL) }
@@ -75,7 +87,9 @@ genNaiveDepFcastModel <- function(fcastFreq, fcastWarmup, fcastLen) {
       # After warmup we repeat the departures observed in the last
       # fcastFreq minutes of the time series repeatedly over the
       # fcastLen interval
-      c(deps, rep(tail(deps, fcastFreq), fcastLen / fcastFreq))
+      #(c(deps, rep(tail(deps, fcastFreq), fcastLen / fcastFreq)) +
+      c(deps, moments[[cId]][(startTPt + fcastWarmup) : (startTPt + fcastWarmup + fcastLen)])
+      #) / 2
     }
   )
 }
@@ -108,30 +122,30 @@ genARIMADepFcastModel <- function (
       depToDestTSAggr <- aggregate(depToDestTS, fcastFreq, fcastFreq, sum)
       depToDestTSAggrNorm <- normTS(depToDestTSAggr, m$avgTS, m$sdTS)
 
-       # Forecast
-       h = fcastLen / fcastFreq
-       clDepRepARIMA<- Arima(
-         c(rep(0, 10), depToDestTSAggrNorm), # Pad series a little
-         order = m$order, fixed = m$coef,
-         transform.pars = FALSE
-       )
-       depToDestTSAggrNorm <- c(depToDestTSAggrNorm,
-         forecast(clDepRepARIMA, h = h)$mean
-       )
-       # Denormalise
-       depToDestTSAggr <- denormTS(
-         depToDestTSAggrNorm, m$avgTS, m$sdTS
-       )
-       # Disaggregate split fcastFreq min aggregate departures
-       # into fcastFreq 1-minute departures
-       depToDestTSDisAggr <- 
-         as.vector(sapply(round(tail(depToDestTSAggr, h)), function(x) {
-           disAggr <- rep(floor(x / fcastFreq), fcastFreq)
-           d <- round(x) - sum(disAggr)
-           disAggr + c(rep(1, d), rep(0, fcastFreq - d))
-         }))
-       c(tail(depToDestTS, fcastWarmup), depToDestTSDisAggr)
-     }
+      # Forecast
+      h = fcastLen / fcastFreq
+      clDepRepARIMA<- Arima(
+        c(rep(0, 10), depToDestTSAggrNorm), # Pad series a little
+        order = m$order, fixed = m$coef,
+        transform.pars = FALSE
+      )
+      depToDestTSAggrNorm <- c(depToDestTSAggrNorm,
+        forecast(clDepRepARIMA, h = h)$mean
+      )
+      # Denormalise
+      depToDestTSAggr <- denormTS(
+        depToDestTSAggrNorm, m$avgTS, m$sdTS
+      )
+      # Disaggregate split fcastFreq min aggregate departures
+      # into fcastFreq 1-minute departures
+      depToDestTSDisAggr <- 
+        as.vector(sapply(round(tail(depToDestTSAggr, h)), function(x) {
+          disAggr <- rep(floor(x / fcastFreq), fcastFreq)
+          d <- round(x) - sum(disAggr)
+          disAggr + c(rep(1, d), rep(0, fcastFreq - d))
+        }))
+      c(tail(depToDestTS, fcastWarmup), depToDestTSDisAggr)
+    }
   )
 }
 
