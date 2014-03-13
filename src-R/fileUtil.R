@@ -2,18 +2,6 @@
 # Routines for loading time series and replicated time series
 #------------------------------------------------------------------------------
 library("assertthat")
-library("zoo")
-
-# x - incoming array
-# windowSize - time in minutes that we aggregate
-# freq - time in minutes that each aggregate we shift startOffset by
-# fun - function to be applied to windows of size fcastFreq
-#
-# Return array of elements resulting from applying fun to x with windowSize
-#
-aggregate <- function(x, windowSize, freq, fun) {
-  rollapply(x, width = windowSize, by = freq, FUN = fun)
-}
 
 # filename - filename of time series file as string
 #
