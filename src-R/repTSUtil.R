@@ -23,11 +23,11 @@ avgAndSDRepTS <- function(repTS) {
   # mean and s.d.
   avgTS <- apply(repTS, 2, mean)
   avgTS <- rollapply(
-    c(avgTS[1], avgTS, tail(avgTS, 1)), 3, function(x) {c(1, 1, 1) %*% x / 3}
+    c(avgTS[1], avgTS, tail(avgTS, 1)), 3, function(x) {c(0.25, 0.5, 0.25) %*% x}
   )
   sdTS <- apply(repTS, 2, sd)
   sdTS <- rollapply(
-    c(sdTS[1], sdTS, tail(sdTS, 1)), 3, function(x) {c(1, 1, 1) %*% x / 3}
+    c(sdTS[1], sdTS, tail(sdTS, 1)), 3, function(x) {c(0.25, 0.5, 0.25) %*% x}
   )
   list(avgTS = avgTS, sdTS = sdTS)
 }
