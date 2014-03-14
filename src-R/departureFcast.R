@@ -117,7 +117,7 @@ genARIMADepFcastModel <- function(
       depToDestTSAggrNorm <- normTS(depToDestTSAggr, m$avgTS, m$sdTS)
 
       # Forecast
-      clDepRepARIMA<- Arima(
+      clDepRepARIMA <- Arima(
         c(rep(0, 10), depToDestTSAggrNorm), # Pad series a little
         order = m$order, fixed = m$coef,
         transform.pars = FALSE

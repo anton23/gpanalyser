@@ -15,14 +15,14 @@ source("departureFcast.R")
 # normTrainClArr list of arrival observations and its normalisation constants
 #   for each cluster
 # w number of warmup intervals (this determine the forecast start warmup)
-# numXreg number of xreg observations used
+# nx number of xreg observations used
 # h number of forecast intervals
 #
 # Return best departure -> arrival regression model with ARIMA error
 #   for each cluster trying all possible RepARIMA on p x d x q for
 #   each cluster in RepARIMATrainDepTs observations
 fitRepARIMAArrivals <- function(
-  p, d, q, normTrainClDep, normTrainClArr, w, numXreg, h
+  p, d, q, normTrainClDep, normTrainClArr, w, nx, h
 ) {
   # Configurations that we will check
   configs = as.matrix(expand.grid(p = p, d = d, q = q))
@@ -32,23 +32,24 @@ fitRepARIMAArrivals <- function(
     clArrRepTS = normTrainClArr[[clId]]$repTSNorm
 
     # Generate xreg from departures
-    depXreg = array(dim = c(dim(clDepRepTS), numXreg))
+    depXreg = array(dim = c(dim(clDepRepTS), nx))
     for (rep in 1 : dim(clDepRepTS)[1]) {
       depXreg[rep,,] <- rollapply(
-        c(rep(0, numXreg), head(clDepRepTS[rep,], -1)), numXreg, identity
+        c(rep(0, nx), head(clDepRepTS[rep,], -1)), nx, identity
       )
     }
     
     # Try different ARIMA departure models
     res <- apply(configs, 1, function(c) {
-      tryCatch(
-        c(fitRepARIMA(clArrRepTS, c["p"], c["d"], c["q"], w, depXreg), 
-          depMoments = normTrainClDep[[clId]]$repTSMoments,
-          arrMoments = normTrainClArr[[clId]]$repTSMoments),
-        error = function(e) {list(loglik = -1000000000, aic = 1000000000)}
+      tryCatch(c(fitRepARIMA(clArrRepTS, c["p"], c["d"], c["q"], w, depXreg)),
+               error = function(e) {list(loglik = -1000000000, aic = 1000000000)}
       )
     })
-    models <- list(models, getBestModel(res))
+    models[[clId]] <- getBestModel(res)
+    models[[clId]]$depAvgTS <- normTrainClDep[[clId]]$repTSMoments$avgTS
+    models[[clId]]$depSDTS <- normTrainClDep[[clId]]$repTSMoments$sdTS
+    models[[clId]]$arrAvgTS <- normTrainClArr[[clId]]$repTSMoments$avgTS
+    models[[clId]]$arrSDTS <- normTrainClArr[[clId]]$repTSMoments$sdTS
   }
   models
 }
@@ -87,7 +88,81 @@ genArrFcastModel <- function (
   normTrainClArr <- normClRepTS(clArrRepTS)
   
   # Fit arrival model for all clusters
-  models <- fitRepARIMAArrivals(
-    0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
+  arrModels <- fitRepARIMAArrivals(
+    #0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
+    1, 0, 1, normTrainClDep, normTrainClArr, w, nx, h
   )
+  
+  list(name = "LinRegARIMAForecast",
+    genTS = function(cId, depTS, depToDestTS, arrTS) {
+      depMod <- depModels[[cId]]
+      arrMod <- arrModels[[cId]]
+
+      fcastArr <- c()
+      for (startTPt in seq(1, length(depTS), fcastFreq)) {
+        # Calculate the xreg using known and forecasted departures
+        depTSFcast <- depModels$genTS(cId, depTS, depToDestTS, startTPt)
+        if (is.null(depTSFcast)) {
+          break;
+        }
+        depTSFcastNorm <- normTS(
+          lowerTSFreq(
+            c(head(depToDestTS, startTPt - 1), depTSFcast), fcastFreq
+          ),
+          arrMod$depAvgTS, arrMod$depSDTS
+        )
+
+        xreg = rollapply(
+          c(rep(0, nx), head(depTSFcastNorm, -1)), nx, identity
+        )
+
+        # Get known arrivals
+        arrTSNorm <- normTS(
+          lowerTSFreq(head(arrTS, startTPt + fcastWarmup - 1), fcastFreq),
+          arrMod$arrAvgTS, arrMod$arrSDTS
+        )
+        
+        # Forecast
+        clArrRepARIMA <- Arima(
+          arrTSNorm,
+          order = arrMod$order, fixed = arrMod$coef,
+          xreg = head(xreg, -h),
+          transform.pars = FALSE
+        )
+        arrTSNorm <- c(
+          arrTSNorm, forecast(clArrRepARIMA, xreg = tail(xreg, h), h = h)$mean
+        )
+        arrTSFcast <- denormTS(
+          arrTSNorm, arrMod$arrAvgTS, arrMod$arrSDTS
+        )
+        fcastArr <- c(fcastArr, max(sum(tail(arrTSFcast, h)), 0))
+      }
+      fcastArr
+    }
+  )
+}
+
+fcastArrivalTS <- function (
+  arrModel,
+  depTSFile,
+  depToDestTSFile,
+  arrTSFile
+) {
+  depTS <- loadTS(depTSFile)
+  depToDestTS <- loadTS(depToDestTSFile)
+  arrTS <- loadTS(arrTSFile)
+  assert_that(all(dim(depTS) == dim(depToDestTS)))
+  assert_that(all(dim(depTS) == dim(arrTS)))
+  
+  # Use forecast model to create future arrival forecasts
+  fcastArrTS <- c()
+  for (i in 1 : dim(depTS)[1]) {
+    # Each observation in depToDestTS must be smaller than in depTS
+    assert_that(length(which((depTS[i,] - depToDestTS[i,]) < 0)) == 0)
+    assert_that(length(which(arrTS[i,] < 0)) == 0)
+    fcastArrTS <- rbind(
+      fcastArrTS, arrModel$genTS(i, depTS[i,], depToDestTS[i,], arrTS[i,])
+    )
+  }
+  fcastArrTS
 }
