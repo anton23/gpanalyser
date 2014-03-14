@@ -100,9 +100,9 @@ genARIMADepFcastModel <- function(
   # time homogeneous
   trainDepRepTS <-
     lowerClRepTSFreq(loadRepTS(trainClDepToDestRepTSFiles), fcastFreq)
-  normTrainCl <- normClRepTS(trainDepRepTS)
   w <- fcastWarmup / fcastFreq
-  h = fcastLen / fcastFreq
+  h <- fcastLen / fcastFreq
+  normTrainCl <- normClRepTS(trainDepRepTS)
   # Fit RepARIMA models for each RepARIMA series
   models <- fitRepARIMADepartures(0:1, 0, 0:1, normTrainCl, w, h)
 
@@ -113,7 +113,7 @@ genARIMADepFcastModel <- function(
       # Time series assumed to be known up to the end of warmup period
       depToDestTS <- head(depToDestTS, startTPt + fcastWarmup - 1)
       # Aggregate in order to obtain the right frequency
-      depToDestTSAggr <- aggregate(depToDestTS, fcastFreq, fcastFreq, sum)
+      depToDestTSAggr <- lowerTSFreq(depToDestTS, fcastFreq)
       depToDestTSAggrNorm <- normTS(depToDestTSAggr, m$avgTS, m$sdTS)
 
       # Forecast

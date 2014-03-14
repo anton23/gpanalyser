@@ -10,32 +10,24 @@ source('departureFcast.R')
 # p integer vector
 # d integer vector
 # q integer vector
-# trainDepRepTS departure observations over several days
-# trainArrRepTS arrrival observations over several days
+# normTrainClDep list of departure observations and its normalisation constants
+#   for each cluster
+# normTrainClArr list of arrival observations and its normalisation constants
+#   for each cluster
 # w number of warmup intervals
 # h number of forecast intervals
 #
 # Return best departure -> arrival regression model with ARIMA error
 #   for each cluster trying all possible RepARIMA on p x d x q for
 #   each cluster in RepARIMATrainDepTs observations
-fitRepARIMAArrivals <- function(p, d, q, trainDepRepTS, trainArrRepTS, w, h) {
+fitRepARIMAArrivals <- function(p, d, q, normTrainClDep, normTrainClArr, w, h) {
   # Configurations that we will check
   configs = as.matrix(expand.grid(p = p, d = d, q = q))
   models <- list()
-  for (clId in 1 : dim(trainDepRepTS)[2]) {
-    clDepRepTS = trainDepRepTS[, clId, ]
-    clArrRepTS = trainArrRepTS[, clId, ]
-        
-    # Normalise
-    clDepRepTSMoments <- avgAndSDRepTS(clDepRepTS)
-    clDepRepTS <- normRepTS(
-      clDepRepTS, clDepRepTSMoments$avgTS, clDepRepTSMoments$sdTS
-    )
-    clArrRepTSMoments <- avgAndSDRepTS(clArrRepTS)
-    clArrRepTS <- normRepTS(
-      clArrRepTS, clArrRepTSMoments$avgTS, clArrRepTSMoments$sdTS
-    )
-    
+  for (clId in 1 : length(normTrainClDep)) {
+    clDepRepTS = normTrainClDep[[clId]]$repTSNorm
+    clArrRepTS = normTrainClArr[[clId]]$repTSNorm
+
     # Generate xreg from departures
     depXreg = array(dim = c(dim(clDepRepTS), w))
     for (rep in 1 : dim(clDepRepTS)[1]) {
@@ -47,7 +39,8 @@ fitRepARIMAArrivals <- function(p, d, q, trainDepRepTS, trainArrRepTS, w, h) {
     res <- apply(configs, 1, function(c) {
       tryCatch(
         c(fitRepARIMA(clArrRepTS, c["p"], c["d"], c["q"], w, depXreg), 
-          clDepRepTSMoments, clArrRepTSMoments),
+          depMoments = normTrainClDep[[clId]]$repTSMoments,
+          arrMoments = normTrainClArr[[clId]]$repTSMoments),
         error = function(e) {list(loglik = -1000000000, aic = 1000000000)}
       )
     })
@@ -71,23 +64,20 @@ genArrFcastModel <- function (
   funCall[[1]] <- genDepFcastModel
   depModels <- eval(funCall, parent.frame())
 
-  # Aggregate departures to fcastFreq
-  depRepTSAtFreq <- aperm(
-    apply(loadRepTS(trainClDepToDestRepTSFiles), c(1,2), function(x) {
-      aggregate(x, fcastFreq, fcastFreq, sum) 
-    }), c(2,3,1)
-  )
-  # Aggregate arrivals to fcastFreq
-  arrRepTSAtFreq <- aperm(
-    apply(loadRepTS(trainClArrRepTSFiles), c(1,2), function(x) {
-      aggregate(x, fcastFreq, fcastFreq, sum) 
-    }), c(2,3,1)
-  )
-  warmupFreq <- fcastWarmup / fcastFreq
-  lenFreq = fcastLen / fcastFreq
+  # Load repTS and change time series sample frequency to fcastFreq
+  clDepRepTS <-
+    lowerClRepTSFreq(loadRepTS(trainClDepToDestRepTSFiles), fcastFreq)
+  clArrRepTS <-
+    lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
+  w <- fcastWarmup / fcastFreq
+  h <- fcastLen / fcastFreq
+  
+  # Normalise samples
+  normTrainClDep <- normClRepTS(clDepRepTS)
+  normTrainClArr <- normClRepTS(clArrRepTS)
   
   # Fit arrival model for all clusters
   models <- fitRepARIMAArrivals(
-    0:2, 0, 0:2, depRepTSAtFreq, arrRepTSAtFreq, warmupFreq, lenFreq
+    0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, h
   )
 }
