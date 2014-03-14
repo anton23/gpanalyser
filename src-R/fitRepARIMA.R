@@ -5,8 +5,8 @@
 # "A single series representation of multiple independent ARMA processes",
 # Bowden et al.
 #------------------------------------------------------------------------------
-source('repTSUtil.R')
-library('forecast')
+source("repTSUtil.R")
+library("forecast")
 
 printModel <- function(msg, model) {
   # Print model fit statistics
@@ -15,6 +15,7 @@ printModel <- function(msg, model) {
     "#Xreg:", model$numXreg,
     "AIC:", model$aic,
     "Log-Likelihood:", model$loglik,
+    "Coeff:", model$coef,
   "\n")
 } 
 
