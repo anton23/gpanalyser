@@ -72,7 +72,7 @@ genArrFcastModel <- function (
   funCall <- match.call(expand = TRUE)
   funCall[[1]] <- genDepFcastModel
   funCall$numXreg <- NULL
-  depModels <- eval(funCall, parent.frame())
+  depModel <- eval(funCall, parent.frame())
 
   # Load repTS and change time series sample frequency to fcastFreq
   clDepRepTS <-
@@ -89,19 +89,18 @@ genArrFcastModel <- function (
   
   # Fit arrival model for all clusters
   arrModels <- fitRepARIMAArrivals(
-    #0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
-    1, 0, 1, normTrainClDep, normTrainClArr, w, nx, h
+    0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
+    #1, 0, 1, normTrainClDep, normTrainClArr, w, nx, h
   )
   
   list(name = "LinRegARIMAForecast",
     genTS = function(cId, depTS, depToDestTS, arrTS) {
-      depMod <- depModels[[cId]]
       arrMod <- arrModels[[cId]]
 
       fcastArr <- c()
       for (startTPt in seq(1, length(depTS), fcastFreq)) {
         # Calculate the xreg using known and forecasted departures
-        depTSFcast <- depModels$genTS(cId, depTS, depToDestTS, startTPt)
+        depTSFcast <- depModel$genTS(cId, depTS, depToDestTS, startTPt)
         if (is.null(depTSFcast)) {
           break;
         }
@@ -156,12 +155,12 @@ fcastArrivalTS <- function (
   
   # Use forecast model to create future arrival forecasts
   fcastArrTS <- c()
-  for (i in 1 : dim(depTS)[1]) {
+  for (cId in 1 : dim(depTS)[1]) {
     # Each observation in depToDestTS must be smaller than in depTS
-    assert_that(length(which((depTS[i,] - depToDestTS[i,]) < 0)) == 0)
-    assert_that(length(which(arrTS[i,] < 0)) == 0)
+    assert_that(length(which((depTS[cId,] - depToDestTS[cId,]) < 0)) == 0)
+    assert_that(length(which(arrTS[cId,] < 0)) == 0)
     fcastArrTS <- rbind(
-      fcastArrTS, arrModel$genTS(i, depTS[i,], depToDestTS[i,], arrTS[i,])
+      fcastArrTS, arrModel$genTS(cId, depTS[cId,], depToDestTS[cId,], arrTS[cId,])
     )
   }
   fcastArrTS
