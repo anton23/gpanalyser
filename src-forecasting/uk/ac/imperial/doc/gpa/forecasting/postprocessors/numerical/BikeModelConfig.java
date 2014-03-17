@@ -26,16 +26,25 @@ public class BikeModelConfig {
   public final List<State> mClDepStates;
   public final List<State> mClArrStates;
   private RConnection mRConn;
+  private final String mDir;
+  private final String[] mTrainClDepTSFiles;
+  private final String[] mTrainClDepToDestRepTSFiles;
+  private final String[] mTrainClArrRepTSFiles;
   private final List<String> mClDepTSFiles;
   private final List<String> mClDepToDestTSFiles;
   private final List<String> mClArrTSFiles;
+  private final String mDepModelVar;
+  private final int numCl;
+  private final int mTSEndPoint;
   
   // These fields may change during analysis
   private String curClDepTSFile;
   private String curClDepToDestTSFile;
+  private String curArrTSFile;
   private int[][] mClArrTS;
+  private int mTSFileIdx;
   private int mTSStartIndex;
-	
+  
 	public BikeModelConfig(
     final int fcastWarmup, final int fcastLen, final int fcastFreq,
     final List<State> clDepStates, final List<State> clArrStates,
@@ -52,6 +61,8 @@ public class BikeModelConfig {
     mClDepTSFiles = clDepTSFiles;
     mClDepToDestTSFiles = clDepToDestTSFiles;
     mClArrTSFiles = clArrTSFiles;
+    numCl = mClDepStates.size();
+    mTSEndPoint = mFcastWarmup + mFcastLen;
 
 		// Check departure and arrival time series files
 		if (mClDepTSFiles.size() != mClArrTSFiles.size()) {
@@ -63,43 +74,62 @@ public class BikeModelConfig {
 		}
 
 		// The working directory
-		final String dir = System.getProperty("user.dir");
+		mDir = System.getProperty("user.dir");
 		
 		// Train departure time series using R and rJava
-    final String[] trainClDepRepTSFiles =
-      new String[trainClDepTSFiles.size()];
-    trainClDepTSFiles.toArray(trainClDepRepTSFiles);
-    final String[] trainClDepToDestRepTSFiles =
-      new String[trainClDepToDestTSFiles.size()];
-    trainClDepToDestTSFiles.toArray(trainClDepToDestRepTSFiles);
-    final String[] trainClArrRepTSFiles =
-      new String[trainClArrTSFiles.size()];
-    trainClArrTSFiles.toArray(trainClArrRepTSFiles);
-    for (int i = 0; i < trainClDepRepTSFiles.length; i++) {
-      trainClDepRepTSFiles[i] = "../" + trainClDepRepTSFiles[i];
-      trainClDepToDestRepTSFiles[i] = "../" + trainClDepToDestRepTSFiles[i];
-      trainClArrRepTSFiles[i] = "../" + trainClArrRepTSFiles[i];
-    }
+		int size = trainClDepTSFiles.size();
+		mTrainClDepTSFiles =
+      trainClDepTSFiles.toArray(new String[size]);
+    mTrainClDepToDestRepTSFiles =
+      trainClDepToDestTSFiles.toArray(new String[size]);
+    mTrainClArrRepTSFiles =
+      trainClArrTSFiles.toArray(new String[size]);
+    mDepModelVar = "depModel" + System.currentTimeMillis();
     try {
       mRConn = new RConnection();
       // Train the model departure time series model
-      mRConn.eval(String.format("setwd(\"%s/src-R/\")", dir));
-      mRConn.eval("source(\"departureFcast.R\")");
-      mRConn.assign("trainClDepRepTSF", trainClDepRepTSFiles);
-      mRConn.assign("trainClDepToDestRepTSF", trainClDepToDestRepTSFiles);
-      mRConn.assign("trainClArrRepTSF", trainClArrRepTSFiles);
-      mRConn.eval(String.format(
-        "model <- genDepFcastModel(\"%s\", %d, %d, %d, "+
+      mRConn.voidEval(String.format("setwd(\"%s/src-R/\")", mDir));
+      mRConn.voidEval("source(\"arrivalFcast.R\")");
+      mRConn.voidEval(String.format("setwd(\"%s\")", mDir));
+      mRConn.assign("trainClDepRepTSF", mTrainClDepTSFiles);
+      mRConn.assign("trainClDepToDestRepTSF", mTrainClDepToDestRepTSFiles);
+      mRConn.assign("trainClArrRepTSF", mTrainClArrRepTSFiles);
+      mRConn.voidEval(String.format(
+        "%s <- genDepFcastModel(\"%s\", %d, %d, %d, "+
         "trainClDepRepTSF, trainClDepToDestRepTSF, trainClArrRepTSF)",
-        depFcastMode, mFcastFreq, mFcastWarmup, mFcastLen
+        mDepModelVar, depFcastMode, mFcastFreq, mFcastWarmup, mFcastLen
       ));
     } catch (RserveException e) {
       e.printStackTrace();
     } catch (REngineException e) {
       e.printStackTrace();
     }
+    
+    // Initialise the model
+    mTSFileIdx = -1;
+    mTSStartIndex = 0;
 	}
-
+	
+	public String genLinRegArimaArrivalFcastModel(final int numXreg) {
+	  final String arrModelVar = "arrModel" + System.currentTimeMillis();
+	  try {
+      // Train the model departure time series model
+      mRConn.assign("trainClDepRepTSF", mTrainClDepTSFiles);
+      mRConn.assign("trainClDepToDestRepTSF", mTrainClDepToDestRepTSFiles);
+      mRConn.assign("trainClArrRepTSF", mTrainClArrRepTSFiles);
+      mRConn.voidEval(String.format(
+        "%s <- genArrFcastModel(%s, %d, %d, %d, "+
+        "trainClDepRepTSF, trainClDepToDestRepTSF, trainClArrRepTSF, %d)",
+        arrModelVar, mDepModelVar, mFcastFreq, mFcastWarmup, mFcastLen, numXreg
+      ));
+    } catch (RserveException e) {
+      e.printStackTrace();
+    } catch (REngineException e) {
+      e.printStackTrace();
+    }
+	  return arrModelVar;
+	}
+	
 	/**
 	 * Prepare departure and arrival time series data for the next
 	 * time series
@@ -107,16 +137,16 @@ public class BikeModelConfig {
 	 */
 	public boolean nextTSFile() {
 	  // Are we done yet?
-		if (mClDepTSFiles.size() == 0) {
+		if (mClDepTSFiles.size() <= ++mTSFileIdx) {
 		  return false;
 		}
 		
 		// Expecting 1 observation per time unit per cluster
 		final int numCl = mClDepStates.size();
-    curClDepTSFile = mClDepTSFiles.remove(0);
-		curClDepToDestTSFile = mClDepToDestTSFiles.remove(0);
-		final String clArrTSRaw =
-		  FileExtra.readFromTextFile(mClArrTSFiles.remove(0));
+    curClDepTSFile = mClDepTSFiles.get(mTSFileIdx);
+		curClDepToDestTSFile = mClDepToDestTSFiles.get(mTSFileIdx);
+		curArrTSFile = mClArrTSFiles.get(mTSFileIdx);
+		final String clArrTSRaw = FileExtra.readFromTextFile(curArrTSFile);
 		final int numTSPoints = clArrTSRaw.split("\n")[0].split(" ").length;
 		
 		// Load observed cluster departures and arrivals for the day
@@ -130,24 +160,42 @@ public class BikeModelConfig {
 		}
 		
 		// We start every analysis from the first observation in the time series
-		mTSStartIndex = -mFcastFreq;
+		mTSStartIndex = 0;
 		return true;
 	}
+	
+  public double[][] linRegARIMAArrForecast(final String arrModelVar) {
+    double data[][] = null;
+    try {
+      REXP res = mRConn.eval(String.format(
+        "fcastArrivalTS(%s, %s, \"%s\", \"%s\", \"%s\")", mDepModelVar,
+        arrModelVar, curClDepTSFile, curClDepToDestTSFile, curArrTSFile
+      ));
+      if (!res.isNull()) {
+        data = res.asDoubleMatrix();
+      }
+    } catch (RserveException e) {
+      e.printStackTrace();
+    } catch (REXPMismatchException e) {
+      e.printStackTrace();
+    }
+    
+    return data;
+  }
 
+	public int nextIntvl() {
+	  mTSStartIndex += mFcastFreq;
+	  return mTSStartIndex;
+	}
+	
 	/**
 	 * Run the forecast for a subset of our data at a time. From one forecast
 	 * to another we leave an mFcastWarmup minute gap. The warmup period will be
 	 * used to initialise the populations from where bicycles start.
 	 * 
-	 * @return number of arrivals per cluster during forecast window,
-	 *         if there aren't enough time series points to make another
-	 *         prediction the function returns null
+	 * @return true iff there it is possible to make a forecast for the interval
 	 */
-	public int[] nextIntvl(final PlainPCTMC pctmc) {
-	  // Move time series window by (Interval Between Forecasts) mIBF minutes
-    mTSStartIndex += mFcastFreq;
-	  final int numCl = mClDepStates.size();
-
+	public boolean preparePCTMCForCurIntvlPCTMC(final PlainPCTMC pctmc) {
 		// Prepare pop changes in inhomogenous PCTMC
     final Map <String, double[][]> allRateEvents =
       new HashMap<String, double[][]>();
@@ -155,13 +203,12 @@ public class BikeModelConfig {
 		  new HashMap<State, double[][]>();
 		final Map <State, double[][]> allResetEvents =
 		  new HashMap<State, double[][]>();
-		final int[] actualClArrivals = new int[numCl];
 		
 		double[][] data = null;
 	  try {
       REXP res = mRConn.eval(String.format(
-        "fcastDepartureTS(model, \"../%s\", \"../%s\", %d)",
-        curClDepTSFile, curClDepToDestTSFile, mTSStartIndex + 1
+        "fcastDepartureTS(%s, \"%s\", \"%s\", %d)",
+        mDepModelVar, curClDepTSFile, curClDepToDestTSFile, mTSStartIndex + 1
       ));
       if (!res.isNull()) {
         data = res.asDoubleMatrix();
@@ -172,13 +219,12 @@ public class BikeModelConfig {
       e.printStackTrace();
     }
 	  // Not enough data in time series to do a forecast
-	  if (data == null) {return null;}
+	  if (data == null) {return false;}
 		
 		// Time dependent departures and arrival count resets for each cluster
-		final int tsEndPoint = mFcastWarmup + mFcastLen;
 		for (int cl = 0; cl < numCl; cl++) {
-	    double[][] depEvts = new double[tsEndPoint + 1][2];
-	    for (int t = 0; t < tsEndPoint; t++) {
+	    double[][] depEvts = new double[mTSEndPoint + 1][2];
+	    for (int t = 0; t < mTSEndPoint; t++) {
 	      depEvts[t][0] = t;
 	      depEvts[t][1] = data[cl][t];
 	    }
@@ -188,19 +234,16 @@ public class BikeModelConfig {
 	    allResetEvents.put(
 	      mClArrStates.get(cl), new double[][] {{mFcastWarmup, 0}}
 	    );
-	    // Compute actual cluster arrivals during the time window
-	    for (int i = mFcastWarmup; i < tsEndPoint; ++i) {
-	      actualClArrivals[cl] += mClArrTS[cl][mTSStartIndex + i];
-	    }
+
 		}
 
 		// Set events for TimedEvents in PCTMC
 		TimedEvents te = pctmc.getTimedEvents();
 		te.setEvents(allRateEvents, allDepEvents, allResetEvents);
 
-		return actualClArrivals;
+		return true;
 	}
-
+	
   /**
 	 * Print predicted vs actual cluster arrivals
 	 * @param clArrIds map arrival states to cluster ids
@@ -210,9 +253,18 @@ public class BikeModelConfig {
 	 */
 	public void printFcastResult(
 	  Map<State, int[]> clArrMomIndices,
-	  double[][] fcastClArrivals,
-	  int[] actualClArrivals
+	  double[] fcastClArrivals
 	) {
+	  // Compute actual cluster arrivals during current time window
+	  final int mNumCl = mClDepStates.size();
+	  final int[] actualClArrivals = new int[mNumCl];
+	  for (int cl = 0; cl < mNumCl; cl++) {
+	    for (int i = mFcastWarmup; i < mTSEndPoint; ++i) {
+	      actualClArrivals[cl] += mClArrTS[cl][mTSStartIndex + i];
+	    }
+	  }
+	  
+	  // Compare actual arrivals with the prediction
 	  PCTMCLogging.info("Prediction #"+ mTSStartIndex);
     PCTMCLogging.increaseIndent();
     double ttlAvg = 0;
@@ -220,10 +272,8 @@ public class BikeModelConfig {
     int actArr = 0;
     for (int cl = 0; cl < mClArrStates.size(); cl++) {
       final int[] indices = clArrMomIndices.get(mClArrStates.get(cl));
-      final double fcastClAvg =
-          fcastClArrivals[fcastClArrivals.length - 1][indices[0]];
-      final double fcastClAvgSq =
-          fcastClArrivals[fcastClArrivals.length - 1][indices[1]];
+      final double fcastClAvg = fcastClArrivals[indices[0]];
+      final double fcastClAvgSq = fcastClArrivals[indices[1]];
       final double fcastClSD =
         Math.sqrt(fcastClAvgSq - fcastClAvg * fcastClAvg);
       ttlAvg += fcastClAvg;

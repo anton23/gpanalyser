@@ -37,10 +37,10 @@ public class BikeArrivalODEPostprocessor extends
     Map<String, Object> params
 	) {
     super(
-        tsf.mFcastWarmup + tsf.mFcastLen + stepSize,
-        stepSize, density, params
-      );
-      mTSF = tsf;
+      tsf.mFcastWarmup + tsf.mFcastLen + stepSize,
+      stepSize, density, params
+    );
+    mTSF = tsf;
 	}
 	
 	protected BikeArrivalODEPostprocessor(
@@ -57,9 +57,7 @@ public class BikeArrivalODEPostprocessor extends
 	
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
-		return new BikeArrivalODEPostprocessor(
-		  stepSize, density, mTSF
-		);
+		return new BikeArrivalODEPostprocessor(stepSize, density, mTSF);
 	}
 
 	@Override
@@ -102,21 +100,19 @@ public class BikeArrivalODEPostprocessor extends
 
 		while (mTSF.nextTSFile()) {
 			while (true) {
-				// Check if there is enough data for the forecast
-				// period on the current day
-				final int[] actualClArrivals = mTSF.nextIntvl(pctmc);
-				if (actualClArrivals == null) {break;}
-				
-				// Make a prediction
-				super.calculateDataPoints(constants);
+        // Check if there is enough data for the forecast
+        // period on the current day
+        if (!mTSF.preparePCTMCForCurIntvlPCTMC(pctmc)) {break;}
+        
+        // Do the calculation
+        super.calculateDataPoints(constants);
 
-				// Forecast vs Reality output predict arrivals and actual arrivals
-				// originating from each cluster
-				mTSF.printFcastResult(
-				  clArrMomIndices,
-				  dataPoints,
-				  actualClArrivals
-				);
+        // Forecast vs Reality output predict arrivals and actual arrivals
+        // originating from each cluster
+        mTSF.printFcastResult(
+          clArrMomIndices, dataPoints[dataPoints.length - 1]
+        );
+        mTSF.nextIntvl();
 			}
 		}
 	}

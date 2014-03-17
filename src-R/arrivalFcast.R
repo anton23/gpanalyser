@@ -55,7 +55,7 @@ fitRepARIMAArrivals <- function(
 }
 
 genArrFcastModel <- function (
-  depFcastMode,
+  depModel,
   fcastFreq,
   fcastWarmup,
   fcastLen,
@@ -66,13 +66,6 @@ genArrFcastModel <- function (
 ) {
   assert_that(fcastWarmup > numXreg)
   assert_that(numXreg %% fcastFreq == 0)
-  
-  # Generate departures models - we simply call the
-  # model building function using this function's parameters
-  funCall <- match.call(expand = TRUE)
-  funCall[[1]] <- genDepFcastModel
-  funCall$numXreg <- NULL
-  depModel <- eval(funCall, parent.frame())
 
   # Load repTS and change time series sample frequency to fcastFreq
   clDepRepTS <-
@@ -89,12 +82,12 @@ genArrFcastModel <- function (
   
   # Fit arrival model for all clusters
   arrModels <- fitRepARIMAArrivals(
-    0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
-    #1, 0, 1, normTrainClDep, normTrainClArr, w, nx, h
+    #0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
+    1, 0, 1, normTrainClDep, normTrainClArr, w, nx, h
   )
   
   list(name = "LinRegARIMAForecast",
-    genTS = function(cId, depTS, depToDestTS, arrTS) {
+    genTS = function(cId, depModel, depTS, depToDestTS, arrTS) {
       arrMod <- arrModels[[cId]]
 
       fcastArr <- c()
@@ -142,6 +135,7 @@ genArrFcastModel <- function (
 }
 
 fcastArrivalTS <- function (
+  depModel,
   arrModel,
   depTSFile,
   depToDestTSFile,
@@ -160,7 +154,8 @@ fcastArrivalTS <- function (
     assert_that(length(which((depTS[cId,] - depToDestTS[cId,]) < 0)) == 0)
     assert_that(length(which(arrTS[cId,] < 0)) == 0)
     fcastArrTS <- rbind(
-      fcastArrTS, arrModel$genTS(cId, depTS[cId,], depToDestTS[cId,], arrTS[cId,])
+      fcastArrTS,
+      arrModel$genTS(cId, depModel, depTS[cId,], depToDestTS[cId,], arrTS[cId,])
     )
   }
   fcastArrTS
