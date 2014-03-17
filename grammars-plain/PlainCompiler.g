@@ -163,6 +163,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
     | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
     | f=odeBikeFcastAnalysis[pctmc,constants] {$analysis=$f.analysis; $postprocessor=$f.postprocessor;}
     | fs=simBikeFcastAnalysis[pctmc,constants] {$analysis=$fs.analysis; $postprocessor=$fs.postprocessor;}
+    | ls=linRegARIMABikeFcastAnalysis[pctmc,constants] {$analysis=$ls.analysis; $postprocessor=$ls.postprocessor;}
   )
   (LBRACE ps = plotDescriptions RBRACE
     {
@@ -237,6 +238,34 @@ returns [
       $postprocessor = new BikeArrivalSimPostprocessor(
         stepEval.getResult(), Integer.parseInt($replications.text), $cfg.cfg,
         postprocessorParameters
+      );
+    }
+    $analysis.addPostprocessor($postprocessor);
+  }
+;
+
+linRegARIMABikeFcastAnalysis[PCTMC pctmc, Constants constants]
+returns [
+  PCTMCLinRegARIMA analysis,
+  NumericalPostprocessor postprocessor
+]
+@init{
+  Map<String, Object> parameters = new HashMap<String, Object>();
+  Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
+}:
+  ^(LIN_REG_ARIMA_BIKE_FCAST
+    numXreg = INTEGER COMMA
+    cfg = bikeFcastConfig
+  )
+  {
+    $analysis = new PCTMCLinRegARIMA($pctmc);
+    if (postprocessorParameters.isEmpty()) {
+      $postprocessor = new BikeArrivalLinRegARIMAPostprocessor(
+        Integer.parseInt($numXreg.text), $cfg.cfg
+      );
+    } else {
+      $postprocessor = new BikeArrivalLinRegARIMAPostprocessor(
+        Integer.parseInt($numXreg.text), $cfg.cfg, postprocessorParameters
       );
     }
     $analysis.addPostprocessor($postprocessor);

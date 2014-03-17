@@ -85,8 +85,7 @@ public class BikeArrivalSimPostprocessor extends
 			while (true) {
 				// Check if there is enough data for the forecast
 				// period on the current day
-        int[] actualClArrivals = mTSF.nextIntvl(pctmc);
-        if (actualClArrivals == null) {break;}
+        if (!mTSF.preparePCTMCForCurIntvlPCTMC(pctmc)) {break;}
 				
 				// Do the calculation
 				super.calculateDataPoints(constants);
@@ -94,10 +93,9 @@ public class BikeArrivalSimPostprocessor extends
         // Forecast vs Reality output predict arrivals and actual arrivals
         // originating from each cluster
 				mTSF.printFcastResult(
-          clArrMomIndices,
-          dataPoints,
-          actualClArrivals
+          clArrMomIndices, dataPoints[dataPoints.length - 1]
         );
+				mTSF.nextIntvl();
 			}
 		}
 	}

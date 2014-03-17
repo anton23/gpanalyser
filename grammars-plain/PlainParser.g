@@ -57,10 +57,10 @@ tokens{
     "  clArrStates={<state>,...},\n" +
     "  depFcastMode=<lowercasename>,\n" +
     "  trainClDepTS={\"file1\",...},\n" +
-    "  trainClDepToDestTS={\"file1\",...}\n" +
-    "  trainClArrTS={\"file1\",...}\n" +
+    "  trainClDepToDestTS={\"file1\",...},\n" +
+    "  trainClArrTS={\"file1\",...},\n" +
     "  clDepTS={\"file1\",...},\n" +
-    "  clDepToDestTS={\"file1\",...}\n" + 
+    "  clDepToDestTS={\"file1\",...},\n" + 
     "  clArrTS={\"file1\",...}\n";
   protected Stack<String> hint;
   protected ErrorReporter errorReporter;
@@ -153,6 +153,7 @@ analysis:
     | compare
     | odeBikeFcast
     | simBikeFcast
+    | linRegARIMABikeFcast
   )
   (LBRACE plotDescription* RBRACE)?
 ;
@@ -163,7 +164,7 @@ odeBikeFcast:
   {
     hint.push("ODE based bike journey forecasting analysis has syntax\n"+
       "OdeBikeFcast(\n  stepSize=<number>,\n" +
-      "  density=<integer>,\n" + fcastSettingsHint
+      "  density=<integer>,\n" + fcastSettingsHint + ")"
     );
   }
   LPAR
@@ -185,7 +186,7 @@ simBikeFcast:
   {
     hint.push("Simulation based bike journey forecasting analysis has syntax\n"+
       "SimBikeFcast(\n  stepSize=<number>,\n" +
-      "  replications=<integer>,\n" + fcastSettingsHint
+      "  replications=<integer>,\n" + fcastSettingsHint + ")"
     );
   }
   LPAR
@@ -201,6 +202,27 @@ simBikeFcast:
     $stepSize COMMA $replications COMMA $cfg
   )
 ;
+
+linRegARIMABikeFcast:
+  LIN_REG_ARIMA_BIKE_FCAST
+  {
+    hint.push(
+      "Linear regression, ARIMA error based bike journey forecasting " +
+      "analysis has syntax\nLinRegARIMABikeFcast(\n  numXreg=<number>,\n" +
+      fcastSettingsHint + ")"
+    );
+  }
+  LPAR
+    NUM_XREG DEF numXreg = INTEGER COMMA
+    cfg = bikeFcastConfig
+  RPAR
+  {
+    hint.pop();
+  }
+  ->
+  ^(LIN_REG_ARIMA_BIKE_FCAST $numXreg COMMA $cfg)
+;
+
 
 bikeFcastConfig:
   FCAST_WARMUP DEF fcastWarmup = INTEGER COMMA
