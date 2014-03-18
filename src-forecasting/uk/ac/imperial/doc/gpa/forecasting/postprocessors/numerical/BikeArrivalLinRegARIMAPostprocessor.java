@@ -9,13 +9,12 @@ import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor {
 
   private final int mMinXreg;
   private final BikeModelConfig mTSF;
-  private PlainPCTMC mPCTMC;
+  //private PlainPCTMC mPCTMC;
   
   public BikeArrivalLinRegARIMAPostprocessor(  
     int minXreg,
@@ -48,7 +47,7 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
   @Override
   public void prepare(AbstractPCTMCAnalysis analysis, Constants constants){
     super.prepare(analysis, constants);
-    mPCTMC = getPlainPCMTC(analysis);
+    //mPCTMC = getPlainPCMTC(analysis);
   }
   
   @Override

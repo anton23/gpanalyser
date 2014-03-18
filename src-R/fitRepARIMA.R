@@ -25,7 +25,7 @@ printModel <- function(msg, model) {
 #
 # Return best model
 getBestModel <- function(models) {
-  bestIndex <- which.min(lapply(models, function(t){t$aic}))
+  bestIndex <- which.max(lapply(models, function(t){t$loglik}))
   printModel("Best model", models[[bestIndex]])
   models[[bestIndex]]
 }
