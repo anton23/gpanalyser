@@ -13,26 +13,26 @@ import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor {
 
-  private final int mNumXreg;
+  private final int mMinXreg;
   private final BikeModelConfig mTSF;
   private PlainPCTMC mPCTMC;
   
   public BikeArrivalLinRegARIMAPostprocessor(  
-    int numXreg,
+    int minXreg,
     final BikeModelConfig tsf
   ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
-    mNumXreg = numXreg;
+    mMinXreg = minXreg;
     mTSF = tsf;
   }
 
   public BikeArrivalLinRegARIMAPostprocessor(  
-    int numXreg,
+    int minXreg,
     final BikeModelConfig tsf,
     Map<String, Object> params
    ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
-    mNumXreg = numXreg;
+    mMinXreg = minXreg;
     mTSF = tsf;
   }
   
@@ -53,12 +53,12 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
   
   @Override
   public PCTMCAnalysisPostprocessor regenerate() {
-    return new BikeArrivalLinRegARIMAPostprocessor(mNumXreg, mTSF);
+    return new BikeArrivalLinRegARIMAPostprocessor(mMinXreg, mTSF);
   }
 
   @Override
   public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
-    return new BikeArrivalLinRegARIMAPostprocessor(mNumXreg, mTSF);
+    return new BikeArrivalLinRegARIMAPostprocessor(mMinXreg, mTSF);
   }
 
   @Override
@@ -69,7 +69,7 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
       clArrMomIndices.put(mTSF.mClArrStates.get(clId), new int[] {clId, clId});
     }
 
-    String arrModelVar = mTSF.genLinRegArimaArrivalFcastModel(mNumXreg);
+    String arrModelVar = mTSF.genLinRegArimaArrivalFcastModel(mMinXreg);
     double[] intvlArrFcast = new double[mTSF.mClArrStates.size()];
     while (mTSF.nextTSFile()) {
       dataPoints = mTSF.linRegARIMAArrForecast(arrModelVar);

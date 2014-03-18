@@ -110,7 +110,7 @@ public class BikeModelConfig {
     mTSStartIndex = 0;
 	}
 	
-	public String genLinRegArimaArrivalFcastModel(final int numXreg) {
+	public String genLinRegArimaArrivalFcastModel(final int minXreg) {
 	  final String arrModelVar = "arrModel" + System.currentTimeMillis();
 	  try {
       // Train the model departure time series model
@@ -120,7 +120,7 @@ public class BikeModelConfig {
       mRConn.voidEval(String.format(
         "%s <- genArrFcastModel(%s, %d, %d, %d, "+
         "trainClDepRepTSF, trainClDepToDestRepTSF, trainClArrRepTSF, %d)",
-        arrModelVar, mDepModelVar, mFcastFreq, mFcastWarmup, mFcastLen, numXreg
+        arrModelVar, mDepModelVar, mFcastFreq, mFcastWarmup, mFcastLen, minXreg
       ));
     } catch (RserveException e) {
       e.printStackTrace();

@@ -254,18 +254,18 @@ returns [
   Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
   ^(LIN_REG_ARIMA_BIKE_FCAST
-    numXreg = INTEGER COMMA
+    minXreg = INTEGER COMMA
     cfg = bikeFcastConfig
   )
   {
     $analysis = new PCTMCLinRegARIMA($pctmc);
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new BikeArrivalLinRegARIMAPostprocessor(
-        Integer.parseInt($numXreg.text), $cfg.cfg
+        Integer.parseInt($minXreg.text), $cfg.cfg
       );
     } else {
       $postprocessor = new BikeArrivalLinRegARIMAPostprocessor(
-        Integer.parseInt($numXreg.text), $cfg.cfg, postprocessorParameters
+        Integer.parseInt($minXreg.text), $cfg.cfg, postprocessorParameters
       );
     }
     $analysis.addPostprocessor($postprocessor);

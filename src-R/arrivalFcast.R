@@ -62,10 +62,10 @@ genArrFcastModel <- function (
   trainClDepRepTSFiles = NULL,
   trainClDepToDestRepTSFiles = NULL,
   trainClArrRepTSFiles = NULL,
-  numXreg
+  minXreg
 ) {
-  assert_that(fcastWarmup > numXreg)
-  assert_that(numXreg %% fcastFreq == 0)
+  assert_that(fcastWarmup > minXreg)
+  assert_that(minXreg %% fcastFreq == 0)
 
   # Load repTS and change time series sample frequency to fcastFreq
   clDepRepTS <-
@@ -73,7 +73,7 @@ genArrFcastModel <- function (
   clArrRepTS <-
     lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
   w <- fcastWarmup / fcastFreq
-  nx <- numXreg / fcastFreq
+  nx <- minXreg / fcastFreq
   h <- fcastLen / fcastFreq
   
   # Normalise samples
@@ -82,8 +82,7 @@ genArrFcastModel <- function (
   
   # Fit arrival model for all clusters
   arrModels <- fitRepARIMAArrivals(
-    #0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
-    1, 0, 1, normTrainClDep, normTrainClArr, w, nx, h
+    0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
   )
   
   list(name = "LinRegARIMAForecast",
