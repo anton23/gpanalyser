@@ -25,4 +25,4 @@ TRAIN_CL_ARR_TS: 'trainClArrTS';
 CL_DEP_TS: 'clDepTS';
 CL_DEP_TO_DEST_TS: 'clDepToDestTS';
 CL_ARR_TS: 'clArrTS';
-NUM_XREG: 'numXreg';
+MIN_XREG: 'minXreg';

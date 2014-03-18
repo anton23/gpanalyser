@@ -208,19 +208,19 @@ linRegARIMABikeFcast:
   {
     hint.push(
       "Linear regression, ARIMA error based bike journey forecasting " +
-      "analysis has syntax\nLinRegARIMABikeFcast(\n  numXreg=<number>,\n" +
+      "analysis has syntax\nLinRegARIMABikeFcast(\n  minXreg=<integer>,\n" +
       fcastSettingsHint + ")"
     );
   }
   LPAR
-    NUM_XREG DEF numXreg = INTEGER COMMA
+    MIN_XREG DEF minXreg = INTEGER COMMA
     cfg = bikeFcastConfig
   RPAR
   {
     hint.pop();
   }
   ->
-  ^(LIN_REG_ARIMA_BIKE_FCAST $numXreg COMMA $cfg)
+  ^(LIN_REG_ARIMA_BIKE_FCAST $minXreg COMMA $cfg)
 ;
 
 
