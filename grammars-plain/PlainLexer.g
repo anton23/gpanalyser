@@ -13,6 +13,7 @@ ODE_BIKE_FCAST: 'OdeBikeFcast';
 SIM_BIKE_FCAST: 'SimBikeFcast';
 LIN_REG_ARIMA_BIKE_FCAST: 'LinRegARIMABikeFcast';
 
+ARR_FCAST_MODE: 'arrFcastMode';
 FCAST_WARMUP: 'fcastWarmup';
 FCAST_LEN: 'fcastLen';
 FCAST_FREQ: 'fcastFreq';

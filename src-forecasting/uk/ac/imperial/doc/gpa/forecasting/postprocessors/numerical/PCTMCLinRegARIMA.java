@@ -6,21 +6,28 @@ import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 
 public class PCTMCLinRegARIMA extends AbstractPCTMCAnalysis {
 
-  public PCTMCLinRegARIMA(PCTMC pctmc) {
+  private final String sArrFcastMode;
+  public PCTMCLinRegARIMA(
+    final PCTMC pctmc,
+    final String arrFcastMode
+  ) {
     super(pctmc);
+    sArrFcastMode = arrFcastMode;
   }
 
   @Override
   public String toString() {
-    return "Approximating IPCTMC using linear regression with arima error";
+    return "Arrival time series prediction with " + sArrFcastMode + " model";
   }
 
   @Override
-  public AbstractPCTMCAnalysis regenerate(PCTMC pctmc) {
-    return new PCTMCLinRegARIMA(pctmc);
+  public AbstractPCTMCAnalysis regenerate(
+    final PCTMC pctmc
+  ) {
+    return new PCTMCLinRegARIMA(pctmc, sArrFcastMode);
   }
 
   @Override
-  public void prepare(Constants constants) {}
+  public void prepare(final Constants constants) {}
 
 }

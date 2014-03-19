@@ -27,16 +27,19 @@ fitRepARIMAArrivals <- function(
   # Configurations that we will check
   configs = as.matrix(expand.grid(p = p, d = d, q = q))
   models <- list()
-  for (clId in 1 : length(normTrainClDep)) {
-    clDepRepTS = normTrainClDep[[clId]]$repTSNorm
+  for (clId in 1 : length(normTrainClArr)) {
     clArrRepTS = normTrainClArr[[clId]]$repTSNorm
 
     # Generate xreg from departures
-    depXreg = array(dim = c(dim(clDepRepTS), nx))
-    for (rep in 1 : dim(clDepRepTS)[1]) {
-      depXreg[rep,,] <- rollapply(
-        c(rep(0, nx), head(clDepRepTS[rep,], -1)), nx, identity
-      )
+    depXreg = NULL
+    if (!is.null(normTrainClDep)) {
+      clDepRepTS = normTrainClDep[[clId]]$repTSNorm
+      depXreg = array(dim = c(dim(clDepRepTS), nx))
+      for (rep in 1 : dim(clDepRepTS)[1]) {
+        depXreg[rep,,] <- rollapply(
+          c(rep(0, nx), head(clDepRepTS[rep,], -1)), nx, identity
+        )
+      }
     }
     
     # Try different ARIMA departure models
@@ -46,23 +49,108 @@ fitRepARIMAArrivals <- function(
       )
     })
     models[[clId]] <- getBestModel(res)
-    models[[clId]]$depAvgTS <- normTrainClDep[[clId]]$repTSMoments$avgTS
-    models[[clId]]$depSDTS <- normTrainClDep[[clId]]$repTSMoments$sdTS
+    if (!is.null(normTrainClDep)) {
+      models[[clId]]$depAvgTS <- normTrainClDep[[clId]]$repTSMoments$avgTS
+      models[[clId]]$depSDTS <- normTrainClDep[[clId]]$repTSMoments$sdTS
+    }
     models[[clId]]$arrAvgTS <- normTrainClArr[[clId]]$repTSMoments$avgTS
     models[[clId]]$arrSDTS <- normTrainClArr[[clId]]$repTSMoments$sdTS
   }
   models
 }
 
-genArrFcastModel <- function (
-  depModel,
+genArrFcastModel <- function(
+  arrFcastMode,
   fcastFreq,
   fcastWarmup,
   fcastLen,
+  minXreg,
   trainClDepRepTSFiles = NULL,
   trainClDepToDestRepTSFiles = NULL,
-  trainClArrRepTSFiles = NULL,
-  minXreg
+  trainClArrRepTSFiles = NULL
+) {
+  # Class like generation of models
+  arrModel <- switch(arrFcastMode,
+    naive = genNaiveArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen
+    ),
+    arima = genARIMAArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen,
+      trainClArrRepTSFiles
+    ),
+    linregarima = genLinRegARIMAArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen, minXreg,
+      trainClDepRepTSFiles,
+      trainClDepToDestRepTSFiles,
+      trainClArrRepTSFiles
+    )
+  )
+  arrModel$fcastFreq = fcastFreq
+  arrModel$fcastWarmup = fcastWarmup
+  arrModel$fcastLen = fcastLen
+  arrModel
+}
+
+genNaiveArrFcastModel <- function(
+  fcastFreq,
+  fcastWarmup,
+  fcastLen
+) {
+  list(name = "NaiveArrForecast",
+    genTS = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
+      sum(tail(arrTS[1 : (startTPt + fcastWarmup - 1)], fcastLen))
+    }
+  )
+}
+
+genARIMAArrFcastModel <- function(
+  fcastFreq,
+  fcastWarmup,
+  fcastLen,
+  trainClArrRepTSFiles
+) {
+  # Load repTS and change time series sample frequency to fcastFreq
+  clArrRepTS <- lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
+  w <- fcastWarmup / fcastFreq
+  h <- fcastLen / fcastFreq
+
+  # Normalise samples
+  normTrainClArr <- normClRepTS(clArrRepTS)
+  
+  # Fit arrival model for all clusters
+  arrModels <- fitRepARIMAArrivals(
+    0:2, 0, 0:2, NULL, normTrainClArr, w, 0, h
+  )
+  
+  list(name = "ARIMAArrForecast",
+    genTS = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
+      arrMod <- arrModels[[cId]]
+      # Normalise
+      arrTSNorm <- normTS(
+        lowerTSFreq(head(arrTS, startTPt + fcastWarmup - 1), fcastFreq),
+        arrMod$arrAvgTS, arrMod$arrSDTS
+      )
+      # Forecast
+      clArrRepARIMA <- Arima(
+        arrTSNorm, order = arrMod$order, fixed = arrMod$coef,
+        transform.pars = FALSE
+      )
+      arrTSNorm <- c(arrTSNorm, forecast(clArrRepARIMA, h = h)$mean)
+      # Denormalise
+      arrTSFcast <- denormTS(arrTSNorm, arrMod$arrAvgTS, arrMod$arrSDTS)
+      max(sum(tail(arrTSFcast, h)), 0)
+    }
+  )
+}
+
+genLinRegARIMAArrFcastModel <- function (
+  fcastFreq,
+  fcastWarmup,
+  fcastLen,
+  minXreg,
+  trainClDepRepTSFiles = NULL,
+  trainClDepToDestRepTSFiles = NULL,
+  trainClArrRepTSFiles = NULL
 ) {
   assert_that(fcastWarmup > minXreg)
   assert_that(minXreg %% fcastFreq == 0)
@@ -70,8 +158,7 @@ genArrFcastModel <- function (
   # Load repTS and change time series sample frequency to fcastFreq
   clDepRepTS <-
     lowerClRepTSFreq(loadRepTS(trainClDepToDestRepTSFiles), fcastFreq)
-  clArrRepTS <-
-    lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
+  clArrRepTS <- lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
   w <- fcastWarmup / fcastFreq
   nx <- minXreg / fcastFreq
   h <- fcastLen / fcastFreq
@@ -85,50 +172,39 @@ genArrFcastModel <- function (
     0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
   )
   
-  list(name = "LinRegARIMAForecast",
-    genTS = function(cId, depModel, depTS, depToDestTS, arrTS) {
+  list(name = "LinRegARIMAArrForecast",
+    genTS = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
       arrMod <- arrModels[[cId]]
 
-      fcastArr <- c()
-      for (startTPt in seq(1, length(depTS), fcastFreq)) {
-        # Calculate the xreg using known and forecasted departures
-        depTSFcast <- depModel$genTS(cId, depTS, depToDestTS, startTPt)
-        if (is.null(depTSFcast)) {
-          break;
-        }
-        depTSFcastNorm <- normTS(
-          lowerTSFreq(
-            c(head(depToDestTS, startTPt - 1), depTSFcast), fcastFreq
-          ),
-          arrMod$depAvgTS, arrMod$depSDTS
-        )
+      # Calculate the xreg using known and forecasted departures
+      depTSFcast <- depModel$genTS(cId, depTS, depToDestTS, startTPt)
+      depTSFcastNorm <- normTS(
+        lowerTSFreq(
+          c(head(depToDestTS, startTPt - 1), depTSFcast), fcastFreq
+        ),
+        arrMod$depAvgTS, arrMod$depSDTS
+      )
+      xreg = rollapply(
+        c(rep(0, nx), head(depTSFcastNorm, -1)), nx, identity
+      )
 
-        xreg = rollapply(
-          c(rep(0, nx), head(depTSFcastNorm, -1)), nx, identity
-        )
-
-        # Get known arrivals
-        arrTSNorm <- normTS(
-          lowerTSFreq(head(arrTS, startTPt + fcastWarmup - 1), fcastFreq),
-          arrMod$arrAvgTS, arrMod$arrSDTS
-        )
+      # Normalise known arrivals
+      arrTSNorm <- normTS(
+        lowerTSFreq(head(arrTS, startTPt + fcastWarmup - 1), fcastFreq),
+        arrMod$arrAvgTS, arrMod$arrSDTS
+      )
         
-        # Forecast
-        clArrRepARIMA <- Arima(
-          arrTSNorm,
-          order = arrMod$order, fixed = arrMod$coef,
-          xreg = head(xreg, -h),
-          transform.pars = FALSE
-        )
-        arrTSNorm <- c(
-          arrTSNorm, forecast(clArrRepARIMA, xreg = tail(xreg, h), h = h)$mean
-        )
-        arrTSFcast <- denormTS(
-          arrTSNorm, arrMod$arrAvgTS, arrMod$arrSDTS
-        )
-        fcastArr <- c(fcastArr, max(sum(tail(arrTSFcast, h)), 0))
-      }
-      fcastArr
+      # Forecast
+      clArrRepARIMA <- Arima(
+        arrTSNorm, order = arrMod$order, fixed = arrMod$coef,
+        xreg = head(xreg, -h), transform.pars = FALSE
+      )
+      arrTSNorm <- c(
+        arrTSNorm, forecast(clArrRepARIMA, xreg = tail(xreg, h), h = h)$mean
+      )
+      # Denormalise
+      arrTSFcast <- denormTS(arrTSNorm, arrMod$arrAvgTS, arrMod$arrSDTS)
+      max(sum(tail(arrTSFcast, h)), 0)
     }
   )
 }
@@ -152,10 +228,17 @@ fcastArrivalTS <- function (
     # Each observation in depToDestTS must be smaller than in depTS
     assert_that(length(which((depTS[cId,] - depToDestTS[cId,]) < 0)) == 0)
     assert_that(length(which(arrTS[cId,] < 0)) == 0)
-    fcastArrTS <- rbind(
-      fcastArrTS,
-      arrModel$genTS(cId, depModel, depTS[cId,], depToDestTS[cId,], arrTS[cId,])
-    )
+    fcastArr <- c()
+    for (startTPt in seq(1, length(depTS), arrModel$fcastFreq)) {
+      if (startTPt + arrModel$fcastWarmup + arrModel$fcastLen > length(depTS))
+      { 
+        break 
+      }
+      fcastArr <- c(fcastArr, arrModel$genTS(
+        cId, startTPt, depModel, depTS[cId,], depToDestTS[cId,], arrTS[cId,]
+      ))
+    }
+    fcastArrTS <- rbind(fcastArrTS, fcastArr)
   }
   fcastArrTS
 }

@@ -41,8 +41,7 @@ genDepFcastModel <- function (
   fcastWarmup,
   fcastLen,
   trainClDepRepTSFiles = NULL,
-  trainClDepToDestRepTSFiles = NULL,
-  trainClArrRepTSFiles = NULL
+  trainClDepToDestRepTSFiles = NULL
 ) {
   # Make sure warmup and len are multiples of frequency
   assert_that(fcastWarmup %% fcastFreq == 0)
