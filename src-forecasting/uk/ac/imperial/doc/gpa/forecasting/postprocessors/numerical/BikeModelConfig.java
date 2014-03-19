@@ -97,7 +97,7 @@ public class BikeModelConfig {
       mRConn.assign("trainClArrRepTSF", mTrainClArrRepTSFiles);
       mRConn.voidEval(String.format(
         "%s <- genDepFcastModel(\"%s\", %d, %d, %d, "+
-        "trainClDepRepTSF, trainClDepToDestRepTSF, trainClArrRepTSF)",
+        "trainClDepRepTSF, trainClDepToDestRepTSF)",
         mDepModelVar, depFcastMode, mFcastFreq, mFcastWarmup, mFcastLen
       ));
     } catch (RserveException e) {
@@ -111,7 +111,10 @@ public class BikeModelConfig {
     mTSStartIndex = 0;
 	}
 	
-	public String genLinRegArimaArrivalFcastModel(final int minXreg) {
+	public String genLinRegArimaArrivalFcastModel(
+	  final String arrFcastMode,
+	  final int minXreg
+	) {
 	  final String arrModelVar = "arrModel" + System.currentTimeMillis();
 	  try {
       // Train the model departure time series model
@@ -119,9 +122,9 @@ public class BikeModelConfig {
       mRConn.assign("trainClDepToDestRepTSF", mTrainClDepToDestRepTSFiles);
       mRConn.assign("trainClArrRepTSF", mTrainClArrRepTSFiles);
       mRConn.voidEval(String.format(
-        "%s <- genArrFcastModel(%s, %d, %d, %d, "+
-        "trainClDepRepTSF, trainClDepToDestRepTSF, trainClArrRepTSF, %d)",
-        arrModelVar, mDepModelVar, mFcastFreq, mFcastWarmup, mFcastLen, minXreg
+        "%s <- genArrFcastModel(\"%s\", %d, %d, %d, %d,"+
+        "trainClDepRepTSF, trainClDepToDestRepTSF, trainClArrRepTSF)",
+        arrModelVar, arrFcastMode, mFcastFreq, mFcastWarmup, mFcastLen, minXreg
       ));
     } catch (RserveException e) {
       e.printStackTrace();

@@ -213,6 +213,7 @@ linRegARIMABikeFcast:
     );
   }
   LPAR
+    ARR_FCAST_MODE DEF arrFcastMode = LOWERCASENAME COMMA
     MIN_XREG DEF minXreg = INTEGER COMMA
     cfg = bikeFcastConfig
   RPAR
@@ -220,7 +221,7 @@ linRegARIMABikeFcast:
     hint.pop();
   }
   ->
-  ^(LIN_REG_ARIMA_BIKE_FCAST $minXreg COMMA $cfg)
+  ^(LIN_REG_ARIMA_BIKE_FCAST $arrFcastMode COMMA $minXreg COMMA $cfg)
 ;
 
 

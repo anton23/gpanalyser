@@ -12,25 +12,30 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor {
 
+  private final String mArrFcastMode;
   private final int mMinXreg;
   private final BikeModelConfig mTSF;
   //private PlainPCTMC mPCTMC;
   
-  public BikeArrivalLinRegARIMAPostprocessor(  
-    int minXreg,
+  public BikeArrivalLinRegARIMAPostprocessor(
+    final String arrFcastMode,
+    final int minXreg,
     final BikeModelConfig tsf
   ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
+    mArrFcastMode = arrFcastMode;
     mMinXreg = minXreg;
     mTSF = tsf;
   }
 
   public BikeArrivalLinRegARIMAPostprocessor(  
-    int minXreg,
+    final String arrFcastMode,
+    final int minXreg,
     final BikeModelConfig tsf,
     Map<String, Object> params
    ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
+    mArrFcastMode = arrFcastMode;
     mMinXreg = minXreg;
     mTSF = tsf;
   }
@@ -52,12 +57,14 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
   
   @Override
   public PCTMCAnalysisPostprocessor regenerate() {
-    return new BikeArrivalLinRegARIMAPostprocessor(mMinXreg, mTSF);
+    return
+      new BikeArrivalLinRegARIMAPostprocessor(mArrFcastMode, mMinXreg, mTSF);
   }
 
   @Override
   public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
-    return new BikeArrivalLinRegARIMAPostprocessor(mMinXreg, mTSF);
+    return
+      new BikeArrivalLinRegARIMAPostprocessor(mArrFcastMode, mMinXreg, mTSF);
   }
 
   @Override
@@ -68,7 +75,8 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
       clArrMomIndices.put(mTSF.mClArrStates.get(clId), new int[] {clId, clId});
     }
 
-    String arrModelVar = mTSF.genLinRegArimaArrivalFcastModel(mMinXreg);
+    String arrModelVar =
+      mTSF.genLinRegArimaArrivalFcastModel(mArrFcastMode, mMinXreg);
     double[] intvlArrFcast = new double[mTSF.mClArrStates.size()];
     while (mTSF.nextTSFile()) {
       dataPoints = mTSF.linRegARIMAArrForecast(arrModelVar);
