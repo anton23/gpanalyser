@@ -83,6 +83,9 @@ genArrFcastModel <- function(
       trainClDepRepTSFiles,
       trainClDepToDestRepTSFiles,
       trainClArrRepTSFiles
+    ),
+    oracle = genOracleArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen
     )
   )
   arrModel$fcastFreq = fcastFreq
@@ -208,6 +211,18 @@ genLinRegARIMAArrFcastModel <- function (
   )
 }
 
+genOracleArrFcastModel <- function(
+  fcastFreq,
+  fcastWarmup,
+  fcastLen
+) {
+  list(name = "OracleArrForecast",
+    fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
+      sum(fcastPeriod(arrTS, startTPt, fcastWarmup, fcastLen))
+    }
+  )
+}
+
 fcastArrivalTS <- function (
   depModel,
   arrModel,
@@ -222,16 +237,45 @@ fcastArrivalTS <- function (
   assert_that(all(dim(depTS) == dim(arrTS)))
   
   # Use forecast model to create future arrival forecasts
+  startTPts <- seq(
+    1,
+    length(depTS[1, ]) - arrModel$fcastWarmup - arrModel$fcastLen,
+    arrModel$fcastFreq
+  )
   fcastArrTS <- c()
   for (cId in 1 : dim(depTS)[1]) {
     # Each observation in depToDestTS must be smaller than in depTS
     assert_that(length(which((depTS[cId,] - depToDestTS[cId,]) < 0)) == 0)
     assert_that(length(which(arrTS[cId,] < 0)) == 0)
     fcastArr <- c()
-    for (startTPt in seq(1, length(depTS), arrModel$fcastFreq)) {
-      if (startTPt + arrModel$fcastWarmup + arrModel$fcastLen > length(depTS)) { break }
+    for (startTPt in startTPts) {
       fcastArr <- c(fcastArr, arrModel$fcastTPt(
         cId, startTPt, depModel, depTS[cId,], depToDestTS[cId,], arrTS[cId,]
+      ))
+    }
+    fcastArrTS <- rbind(fcastArrTS, fcastArr)
+  }
+  fcastArrTS
+}
+
+fcastOracleArrivalTS <- function (
+  fcastFreq,
+  fcastWarmup,
+  fcastLen,
+  arrTSFile
+) {
+  arrModel = genOracleArrFcastModel(fcastFreq, fcastWarmup, fcastLen)
+  arrTS <- loadTS(arrTSFile)
+
+  startTPts <- seq(
+    1, length(arrTS[1, ]) - fcastWarmup - fcastLen, fcastFreq
+  )
+  fcastArrTS <- c()
+  for (cId in 1 : dim(arrTS)[1]) {
+    fcastArr <- c()
+    for (startTPt in startTPts) {
+      fcastArr <- c(fcastArr, arrModel$fcastTPt(
+        cId, startTPt, NULL, NULL, NULL, arrTS[cId,]
       ))
     }
     fcastArrTS <- rbind(fcastArrTS, fcastArr)

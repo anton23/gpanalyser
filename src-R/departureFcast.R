@@ -6,9 +6,19 @@ library("assertthat")
 source("fileUtil.R")
 source("fitRepARIMA.R")
 
-histPeriod <- function(ts, stPt, wUp) {head(ts, stPt + wUp - 1)}
-warmupPeriod <- function(ts, stPt, wUp) {ts[stPt : (stPt + wUp - 1)]}
-fcastPeriod <- function(ts, stPt, wUp, len) {ts[(stPt + wUp) + (0 : len - 1)]}
+histPeriod <- function(ts, stTPt, wUp) {
+  assert_that(stTPt > 0)
+  assert_that(wUp >= 0)
+  head(ts, (stTPt - 1) + wUp)
+}
+warmupPeriod <- function(ts, stTPt, wUp) {
+  assert_that(stTPt > 0)
+  assert_that(wUp > 0)
+  ts[stTPt + (0 : (wUp - 1))]
+}
+fcastPeriod <- function(ts, stTPt, wUp, len) {
+  warmupPeriod(ts, stTPt + wUp, len)
+}
 
 # Fit RepARIMA models to departure time series reps
 #

@@ -11,7 +11,6 @@ import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 
-import uk.ac.imperial.doc.gpa.forecasting.util.FileExtra;
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
 import uk.ac.imperial.doc.gpa.plain.representation.timed.TimedEvents;
 import uk.ac.imperial.doc.pctmc.representation.State;
@@ -41,8 +40,8 @@ public class BikeModelConfig {
   private String curClDepTSFile;
   private String curClDepToDestTSFile;
   private String curArrTSFile;
-  private int[][] mClArrTS;
-  private int[] mClArrTtlTS;
+  private double[][] mClArrTS;
+  private double[] mClArrTtlTS;
   private int mTSFileIdx;
   private int mTSStartIndex;
   
@@ -145,36 +144,26 @@ public class BikeModelConfig {
 		  return false;
 		}
 		
-		// Expecting 1 observation per time unit per cluster
-		final int numCl = mClDepStates.size();
+		// Get actual cluster arrivals in target area and total arrivals
     curClDepTSFile = mClDepTSFiles.get(mTSFileIdx);
 		curClDepToDestTSFile = mClDepToDestTSFiles.get(mTSFileIdx);
 		curArrTSFile = mClArrTSFiles.get(mTSFileIdx);
-		final String clArrTSRaw = FileExtra.readFromTextFile(curArrTSFile);
-		final String clArrTtlTSRaw = FileExtra.readFromTextFile(
-		  curArrTSFile.replace("Arrivals", "ArrivalsTtl")
-		);
-		final int numTSPoints = clArrTSRaw.split("\n")[0].split(" ").length;
-		
-		// Load observed cluster departures and arrivals for the day
-    String[] clArr = clArrTSRaw.split("\n");
-    mClArrTS = new int[numCl][numTSPoints];
-		for (int cl = 0; cl < numCl; cl++) {
-      String[] curClArr = clArr[cl].split(" ");
-			for (int i = 0; i < numTSPoints; ++i) {
-			  mClArrTS[cl][i] = Integer.parseInt(curClArr[i]);
-			}
-		}
-		
-		// Total arrivals might be slightly higher in case the are stations in the
-		// forecast data from which there were no journeys going to our destination
-		// area in the training data
-    String[] curClArrTtl = clArrTtlTSRaw.split(" ");
-    mClArrTtlTS = new int[numTSPoints];
-    for (int i = 0; i < numTSPoints; ++i) {
-		  mClArrTtlTS[i] = Integer.parseInt(curClArrTtl[i]);
+		try {
+		  mClArrTS = mRConn.eval(String.format(
+        "fcastOracleArrivalTS(%d, %d, %d, \"%s\") ",
+        mFcastFreq, mFcastWarmup, mFcastLen, curArrTSFile
+      )).asDoubleMatrix();
+		  mClArrTtlTS = mRConn.eval(String.format(
+        "fcastOracleArrivalTS(%d, %d, %d, \"%s\") ",
+        mFcastFreq, mFcastWarmup, mFcastLen,
+        curArrTSFile.replace("Arrivals", "ArrivalsTtl")
+      )).asDoubles();
+    } catch (RserveException e) {
+      e.printStackTrace();
+    } catch (REXPMismatchException e) {
+      e.printStackTrace();
     }
-    
+
 		// We start every analysis from the first observation in the time series
     PCTMCLogging.info(String.format("Interval: %s", curArrTSFile));
     mTSStartIndex = 0;
@@ -275,16 +264,13 @@ public class BikeModelConfig {
 	  // Compute actual cluster arrivals during current time window
 	  final int mNumCl = mClDepStates.size();
 	  final int[] actualClArrivals = new int[mNumCl];
-	  int ttlArr = 0;
-    for (int i = mFcastWarmup; i < mTSEndPoint; ++i) {
-      for (int cl = 0; cl < mNumCl; cl++) {
-	      actualClArrivals[cl] += mClArrTS[cl][mTSStartIndex + i];
-	    }
-      ttlArr += mClArrTtlTS[mTSStartIndex + i];
-	  }
+    for (int cl = 0; cl < mNumCl; cl++) {
+      actualClArrivals[cl] += mClArrTS[cl][mTSStartIndex / mFcastFreq];
+    }
+    int ttlArr = (int) mClArrTtlTS[mTSStartIndex / mFcastFreq];
 	  
 	  // Compare actual arrivals with the prediction
-	  PCTMCLogging.info("Prediction #"+ mTSStartIndex);
+	  PCTMCLogging.info("Prediction #" + mTSStartIndex);
     PCTMCLogging.increaseIndent();
     double ttlAvg = 0;
     double ttlSD = 0;
