@@ -74,6 +74,10 @@ genArrFcastModel <- function(
     naive = genNaiveArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen
     ),
+    avg = genARIMAArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen,
+      trainClArrRepTSFiles, TRUE
+    ),
     arima = genARIMAArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen,
       trainClArrRepTSFiles
@@ -110,7 +114,8 @@ genARIMAArrFcastModel <- function(
   fcastFreq,
   fcastWarmup,
   fcastLen,
-  trainClArrRepTSFiles
+  trainClArrRepTSFiles,
+  avg = FALSE
 ) {
   # Load repTS and change time series sample frequency to fcastFreq
   clArrRepTS <- lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
@@ -121,7 +126,10 @@ genARIMAArrFcastModel <- function(
   normTrainClArr <- normClRepTS(clArrRepTS)
   
   # Fit arrival model for all clusters
-  arrModels <- fitRepARIMAArrivals(1, 0, 0:1, NULL, normTrainClArr, w, 0, h)
+  arrModels <- fitRepARIMAArrivals(0, 0, 0, NULL, normTrainClArr, w, 0, h)
+  if (!avg) {
+    arrModels <- fitRepARIMAArrivals(1, 0, 0:1, NULL, normTrainClArr, w, 0, h)
+  }
   
   list(name = "ARIMAArrForecast",
     fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {

@@ -57,6 +57,7 @@ reResTtl      = re.compile(".*Ttl: " + reResStr + " All:(\d+)")
 fcasts = {
   'IPCTMC' : [],
   'Naive' : [],
+  'Avg' : [],
   'ARIMA' : [],
   'LinRegARIMA' : []
 }
@@ -69,6 +70,7 @@ with open(sys.argv[1], "r") as f:
     if (reAnalysis.match(line) is not None):
       if 'ODE' in line: analysis = 'IPCTMC'
       if 'naive' in line: analysis = 'Naive'
+      if 'avg' in line: analysis = 'Avg'
       if 'arima' in line: analysis = 'ARIMA'
       if 'linregarima' in line: analysis = 'LinRegARIMA'
       continue
