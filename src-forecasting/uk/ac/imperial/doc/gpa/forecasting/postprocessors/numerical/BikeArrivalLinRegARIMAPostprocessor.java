@@ -14,13 +14,13 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
 
   private final String mArrFcastMode;
   private final int mMinXreg;
-  private final BikeModelConfig mTSF;
+  private final BikeModelTSRBridge mTSF;
   //private PlainPCTMC mPCTMC;
   
   public BikeArrivalLinRegARIMAPostprocessor(
     final String arrFcastMode,
     final int minXreg,
-    final BikeModelConfig tsf
+    final BikeModelTSRBridge tsf
   ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
     mArrFcastMode = arrFcastMode;
@@ -31,7 +31,7 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
   public BikeArrivalLinRegARIMAPostprocessor(  
     final String arrFcastMode,
     final int minXreg,
-    final BikeModelConfig tsf,
+    final BikeModelTSRBridge tsf,
     Map<String, Object> params
    ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
