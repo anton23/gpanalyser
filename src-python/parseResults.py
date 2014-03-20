@@ -18,6 +18,8 @@ reResTtl      = re.compile(".*Ttl: " + reResStr + " All:(\d+)")
 filename = sys.argv[1]
 fcasts = {
   'IPCTMC' : [],
+  'Naive' : [],
+  'ARIMA' : [],
   'LinRegARIMA' : []
 }
 with open(filename, "r") as f:
@@ -28,7 +30,9 @@ with open(filename, "r") as f:
     # Which results are we analysing
     if (reAnalysis.match(line) is not None):
       if 'ODE' in line: analysis = 'IPCTMC'
-      if 'regression' in line: analysis = 'LinRegARIMA'
+      if 'naive' in line: analysis = 'Naive'
+      if 'arima' in line: analysis = 'ARIMA'
+      if 'linregarima' in line: analysis = 'LinRegARIMA'
       continue
     
     # A new interval
