@@ -18,11 +18,11 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 public class BikeArrivalSimPostprocessor extends
   InhomogeneousSimulationAnalysisNumericalPostprocessor
 {	
-  private final BikeModelConfig mTSF;
+  private final BikeModelTSRBridge mTSF;
 
 	public BikeArrivalSimPostprocessor(
 	  final double stepSize, final int replications,
-    final BikeModelConfig tsf
+    final BikeModelTSRBridge tsf
 	) {
     super(tsf.mFcastWarmup + tsf.mFcastLen + stepSize, stepSize, replications);
     mTSF = tsf;
@@ -30,7 +30,7 @@ public class BikeArrivalSimPostprocessor extends
 
 	public BikeArrivalSimPostprocessor(
 	  final double stepSize, final int replications,
-    final BikeModelConfig tsf,
+    final BikeModelTSRBridge tsf,
 	  Map<String, Object> params
 	) {
     super(

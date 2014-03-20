@@ -275,7 +275,7 @@ returns [
 ;
 
 bikeFcastConfig returns [
-  BikeModelConfig cfg
+  BikeModelTSRBridge cfg
 ]:
   ^(BIKE_FCAST_CFG 
     fcastWarmupTmp = INTEGER COMMA
@@ -291,7 +291,7 @@ bikeFcastConfig returns [
     clDepToDestTSTmp = listOfFiles COMMA    
     clArrTSTmp = listOfFiles
   ) {
-    $cfg = new BikeModelConfig(
+    $cfg = new BikeModelTSRBridge(
       Integer.parseInt($fcastWarmupTmp.text),
       Integer.parseInt($fcastLenTmp.text),
       Integer.parseInt($fcastFreqTmp.text),
