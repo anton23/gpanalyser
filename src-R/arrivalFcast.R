@@ -97,8 +97,8 @@ genNaiveArrFcastModel <- function(
   fcastLen
 ) {
   list(name = "NaiveArrForecast",
-    genTS = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
-      sum(tail(arrTS[1 : (startTPt + fcastWarmup - 1)], fcastLen))
+    fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
+      sum(tail(warmupPeriod(arrTS, startTPt, fcastWarmup), fcastLen))
     }
   )
 }
@@ -118,16 +118,14 @@ genARIMAArrFcastModel <- function(
   normTrainClArr <- normClRepTS(clArrRepTS)
   
   # Fit arrival model for all clusters
-  arrModels <- fitRepARIMAArrivals(
-    0:2, 0, 0:2, NULL, normTrainClArr, w, 0, h
-  )
+  arrModels <- fitRepARIMAArrivals(0:2, 0, 0:2, NULL, normTrainClArr, w, 0, h)
   
   list(name = "ARIMAArrForecast",
-    genTS = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
+    fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
       arrMod <- arrModels[[cId]]
       # Normalise
       arrTSNorm <- normTS(
-        lowerTSFreq(head(arrTS, startTPt + fcastWarmup - 1), fcastFreq),
+        lowerTSFreq(histPeriod(arrTS, startTPt, fcastWarmup), fcastFreq),
         arrMod$arrAvgTS, arrMod$arrSDTS
       )
       # Forecast
@@ -138,6 +136,7 @@ genARIMAArrFcastModel <- function(
       arrTSNorm <- c(arrTSNorm, forecast(clArrRepARIMA, h = h)$mean)
       # Denormalise
       arrTSFcast <- denormTS(arrTSNorm, arrMod$arrAvgTS, arrMod$arrSDTS)
+      # We are interested in sum of all arrivals within fcast horizon
       max(sum(tail(arrTSFcast, h)), 0)
     }
   )
@@ -173,27 +172,26 @@ genLinRegARIMAArrFcastModel <- function (
   )
   
   list(name = "LinRegARIMAArrForecast",
-    genTS = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
+    fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
       arrMod <- arrModels[[cId]]
-
       # Calculate the xreg using known and forecasted departures
-      depTSFcast <- depModel$genTS(cId, depTS, depToDestTS, startTPt)
+      depTSFcast <- depModel$genTS(cId, startTPt, depTS, depToDestTS)
       depTSFcastNorm <- normTS(
         lowerTSFreq(
-          c(head(depToDestTS, startTPt - 1), depTSFcast), fcastFreq
+          # Append history and forecast
+          c(histPeriod(depToDestTS, startTPt, 0), depTSFcast), fcastFreq
         ),
         arrMod$depAvgTS, arrMod$depSDTS
       )
-      xreg = rollapply(
-        c(rep(0, nx), head(depTSFcastNorm, -1)), nx, identity
-      )
+      xreg <-
+        rollapply(c(rep(0, nx), head(depTSFcastNorm, -1)), nx, identity)
 
       # Normalise known arrivals
       arrTSNorm <- normTS(
-        lowerTSFreq(head(arrTS, startTPt + fcastWarmup - 1), fcastFreq),
+        lowerTSFreq(histPeriod(arrTS, startTPt, fcastWarmup), fcastFreq),
         arrMod$arrAvgTS, arrMod$arrSDTS
       )
-        
+
       # Forecast
       clArrRepARIMA <- Arima(
         arrTSNorm, order = arrMod$order, fixed = arrMod$coef,
@@ -204,6 +202,7 @@ genLinRegARIMAArrFcastModel <- function (
       )
       # Denormalise
       arrTSFcast <- denormTS(arrTSNorm, arrMod$arrAvgTS, arrMod$arrSDTS)
+      # We are interested in sum of all arrivals within fcast horizon
       max(sum(tail(arrTSFcast, h)), 0)
     }
   )
@@ -230,11 +229,8 @@ fcastArrivalTS <- function (
     assert_that(length(which(arrTS[cId,] < 0)) == 0)
     fcastArr <- c()
     for (startTPt in seq(1, length(depTS), arrModel$fcastFreq)) {
-      if (startTPt + arrModel$fcastWarmup + arrModel$fcastLen > length(depTS))
-      { 
-        break 
-      }
-      fcastArr <- c(fcastArr, arrModel$genTS(
+      if (startTPt + arrModel$fcastWarmup + arrModel$fcastLen > length(depTS)) { break }
+      fcastArr <- c(fcastArr, arrModel$fcastTPt(
         cId, startTPt, depModel, depTS[cId,], depToDestTS[cId,], arrTS[cId,]
       ))
     }
