@@ -16,7 +16,7 @@ import uk.ac.imperial.doc.gpa.plain.representation.timed.TimedEvents;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
-public class BikeModelTSRBridge {
+public class BikeModelRBridge {
 
   // These are the input fields
   public final int mFcastWarmup;
@@ -45,7 +45,7 @@ public class BikeModelTSRBridge {
   private int mTSFileIdx;
   private int mTSStartIndex;
   
-	public BikeModelTSRBridge(
+	public BikeModelRBridge(
     final int fcastWarmup, final int fcastLen, final int fcastFreq,
     final List<State> clDepStates, final List<State> clArrStates,
     final String depFcastMode, final List<String> trainClDepTSFiles,

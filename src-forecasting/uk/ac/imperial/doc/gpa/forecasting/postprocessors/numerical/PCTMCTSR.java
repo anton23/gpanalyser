@@ -4,10 +4,10 @@ import uk.ac.imperial.doc.pctmc.analysis.AbstractPCTMCAnalysis;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 
 
-public class PCTMCLinRegARIMA extends AbstractPCTMCAnalysis {
+public class PCTMCTSR extends AbstractPCTMCAnalysis {
 
   private final String sArrFcastMode;
-  public PCTMCLinRegARIMA(
+  public PCTMCTSR(
     final PCTMC pctmc,
     final String arrFcastMode
   ) {
@@ -17,14 +17,14 @@ public class PCTMCLinRegARIMA extends AbstractPCTMCAnalysis {
 
   @Override
   public String toString() {
-    return "Arrival time series prediction with " + sArrFcastMode + " model";
+    return "R time series prediction with " + sArrFcastMode + " model";
   }
 
   @Override
   public AbstractPCTMCAnalysis regenerate(
     final PCTMC pctmc
   ) {
-    return new PCTMCLinRegARIMA(pctmc, sArrFcastMode);
+    return new PCTMCTSR(pctmc, sArrFcastMode);
   }
 
   @Override

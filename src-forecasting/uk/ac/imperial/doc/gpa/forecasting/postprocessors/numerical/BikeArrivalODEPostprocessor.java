@@ -21,11 +21,11 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 public class BikeArrivalODEPostprocessor extends
   InhomogeneousODEAnalysisNumericalPostprocessor
 {	
-  private final BikeModelTSRBridge mTSF;
+  private final BikeModelRBridge mTSF;
 
 	public BikeArrivalODEPostprocessor (
 	  final double stepSize, final int density,
-    final BikeModelTSRBridge tsf
+    final BikeModelRBridge tsf
 	) {
     super(tsf.mFcastWarmup + tsf.mFcastLen + stepSize, stepSize, density);
     mTSF = tsf;
@@ -33,7 +33,7 @@ public class BikeArrivalODEPostprocessor extends
 
 	public BikeArrivalODEPostprocessor (
 	  final double stepSize, final int density,
-    final BikeModelTSRBridge tsf,
+    final BikeModelRBridge tsf,
     Map<String, Object> params
 	) {
     super(
@@ -49,7 +49,7 @@ public class BikeArrivalODEPostprocessor extends
 	  final int density,
 		final PCTMCODEAnalysis odeAnalysis,
 		final JavaODEsPreprocessed preprocessedImplementation,
-    final BikeModelTSRBridge tsf
+    final BikeModelRBridge tsf
 	) {
 		super(stopTime, stepSize, density, odeAnalysis, preprocessedImplementation);
 		mTSF = tsf;
