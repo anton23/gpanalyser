@@ -7,6 +7,46 @@ import numpy as np
 import scipy.stats
 from pprint import pprint
 import math as math
+import numpy as np
+
+# Mean absolute scaled error
+def MASE(actualTS, naiveTS, fcastTS):
+  avgNaiveE = np.mean([abs(a - b) for (a, b) in zip(actualTS, naiveTS)])
+  fcastE = [abs(a - b) for (a, b) in zip(actualTS, fcastTS)]
+  return sum(fcastE) / (len(actualTS) * avgNaiveE)
+
+# Root mean square error
+def RMSE(actualTS, fcastTS):
+  return \
+    math.sqrt(np.mean([(a - b) * (a - b) for (a, b) in zip(actualTS, fcastTS)]))
+
+# Get TS by cluster
+def getTSByCluster(clId, fcastResult):
+  meanFcast = [float(fcastResult[a][b][clId][0]) for b in range(len(fcastResult[0]))
+		  for a in range(len(fcastResult))]
+  sdFcast = [float(fcastResult[a][b][clId][1]) for b in range(len(fcastResult[0]))
+		  for a in range(len(fcastResult))]
+  act = [float(fcastResult[a][b][clId][2]) for b in range(len(fcastResult[0]))
+		  for a in range(len(fcastResult))]
+  return (meanFcast, sdFcast, act)
+
+# Analysis
+def analyse(fcasts, analysis):
+  fcastRes = fcasts[analysis]
+  naiveRes = fcasts['Naive']
+  numClusters = len(fcastRes[0][0]) - 1
+  print("%s results:" % analysis)
+  for clId in range(numClusters):
+    (m, sd, act) = getTSByCluster(clId, fcastRes)
+    (mNaive, sdNaive, act2) = getTSByCluster(clId, naiveRes)
+    print(
+      "Cl#%d: MASE: %.4f RMSE: %.4f" % (clId, MASE(act, mNaive, m), RMSE(act, m))
+    ) 
+  (m, sd, act) = getTSByCluster(numClusters, fcastRes)
+  (mNaive, sdNaive, act2) = getTSByCluster(numClusters, naiveRes)
+  print(
+    "Ttl:  MASE: %.4f RMSE: %.4f" % (MASE(act, mNaive, m), RMSE(act, m))
+  )
 
 reAnalysis    = re.compile(".*Running analysis.*")
 reInterval    = re.compile(".*Interval: (.*)")
@@ -14,15 +54,13 @@ rePrediction  = re.compile(".*Prediction #(\d+)")
 reResStr      = "Mean:(\d+\.\d+) SD:(\d+\.\d+|NaN) Actual:(\d+)"
 reResCl       = re.compile(".*Cl:(\d+) " + reResStr)
 reResTtl      = re.compile(".*Ttl: " + reResStr + " All:(\d+)")
-
-filename = sys.argv[1]
 fcasts = {
   'IPCTMC' : [],
   'Naive' : [],
   'ARIMA' : [],
   'LinRegARIMA' : []
 }
-with open(filename, "r") as f:
+with open(sys.argv[1], "r") as f:
   analysis = 'dummy'
 
   # Parse results
@@ -48,3 +86,7 @@ with open(filename, "r") as f:
     # A new aggregate prediction
     if (reResTtl.match(line) is not None):
       fcasts[analysis][-1][-1].append(reResTtl.match(line).groups()[0:4])
+
+# Analysis
+for analysis in fcasts.keys():
+  analyse(fcasts, analysis)

@@ -121,7 +121,7 @@ genARIMAArrFcastModel <- function(
   normTrainClArr <- normClRepTS(clArrRepTS)
   
   # Fit arrival model for all clusters
-  arrModels <- fitRepARIMAArrivals(0:2, 0, 0:2, NULL, normTrainClArr, w, 0, h)
+  arrModels <- fitRepARIMAArrivals(1, 0, 0:1, NULL, normTrainClArr, w, 0, h)
   
   list(name = "ARIMAArrForecast",
     fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
@@ -171,7 +171,7 @@ genLinRegARIMAArrFcastModel <- function (
   
   # Fit arrival model for all clusters
   arrModels <- fitRepARIMAArrivals(
-    0:2, 0, 0:2, normTrainClDep, normTrainClArr, w, nx, h
+    1, 0, 0:1, normTrainClDep, normTrainClArr, w, nx, h
   )
   
   list(name = "LinRegARIMAArrForecast",
