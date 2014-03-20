@@ -10,17 +10,17 @@ import uk.ac.imperial.doc.pctmc.analysis.PCTMCAnalysisPostprocessor;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
 
-public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor {
+public class BikeArrivalTSRPostprocessor extends NumericalPostprocessor {
 
   private final String mArrFcastMode;
   private final int mMinXreg;
-  private final BikeModelTSRBridge mTSF;
+  private final BikeModelRBridge mTSF;
   //private PlainPCTMC mPCTMC;
   
-  public BikeArrivalLinRegARIMAPostprocessor(
+  public BikeArrivalTSRPostprocessor(
     final String arrFcastMode,
     final int minXreg,
-    final BikeModelTSRBridge tsf
+    final BikeModelRBridge tsf
   ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
     mArrFcastMode = arrFcastMode;
@@ -28,10 +28,10 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
     mTSF = tsf;
   }
 
-  public BikeArrivalLinRegARIMAPostprocessor(  
+  public BikeArrivalTSRPostprocessor(  
     final String arrFcastMode,
     final int minXreg,
-    final BikeModelTSRBridge tsf,
+    final BikeModelRBridge tsf,
     Map<String, Object> params
    ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
@@ -58,13 +58,13 @@ public class BikeArrivalLinRegARIMAPostprocessor extends NumericalPostprocessor 
   @Override
   public PCTMCAnalysisPostprocessor regenerate() {
     return
-      new BikeArrivalLinRegARIMAPostprocessor(mArrFcastMode, mMinXreg, mTSF);
+      new BikeArrivalTSRPostprocessor(mArrFcastMode, mMinXreg, mTSF);
   }
 
   @Override
   public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
     return
-      new BikeArrivalLinRegARIMAPostprocessor(mArrFcastMode, mMinXreg, mTSF);
+      new BikeArrivalTSRPostprocessor(mArrFcastMode, mMinXreg, mTSF);
   }
 
   @Override

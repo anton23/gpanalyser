@@ -153,7 +153,7 @@ analysis:
     | compare
     | odeBikeFcast
     | simBikeFcast
-    | linRegARIMABikeFcast
+    | tsRBikeFcast
   )
   (LBRACE plotDescription* RBRACE)?
 ;
@@ -203,12 +203,12 @@ simBikeFcast:
   )
 ;
 
-linRegARIMABikeFcast:
-  LIN_REG_ARIMA_BIKE_FCAST
+tsRBikeFcast:
+  TS_R_BIKE_FCAST
   {
     hint.push(
-      "Linear regression, ARIMA error based bike journey forecasting " +
-      "analysis has syntax\nLinRegARIMABikeFcast(\n  minXreg=<integer>,\n" +
+      "Time series bike journey arrival analysis using R " +
+      "has syntax\nTSRBikeFcast(\n  minXreg=<integer>,\n" +
       fcastSettingsHint + ")"
     );
   }
@@ -221,7 +221,7 @@ linRegARIMABikeFcast:
     hint.pop();
   }
   ->
-  ^(LIN_REG_ARIMA_BIKE_FCAST $arrFcastMode COMMA $minXreg COMMA $cfg)
+  ^(TS_R_BIKE_FCAST $arrFcastMode COMMA $minXreg COMMA $cfg)
 ;
 
 

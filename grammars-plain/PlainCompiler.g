@@ -163,7 +163,7 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
     | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
     | f=odeBikeFcastAnalysis[pctmc,constants] {$analysis=$f.analysis; $postprocessor=$f.postprocessor;}
     | fs=simBikeFcastAnalysis[pctmc,constants] {$analysis=$fs.analysis; $postprocessor=$fs.postprocessor;}
-    | ls=linRegARIMABikeFcastAnalysis[pctmc,constants] {$analysis=$ls.analysis; $postprocessor=$ls.postprocessor;}
+    | ls=tsRBikeFcastAnalysis[pctmc,constants] {$analysis=$ls.analysis; $postprocessor=$ls.postprocessor;}
   )
   (LBRACE ps = plotDescriptions RBRACE
     {
@@ -244,28 +244,28 @@ returns [
   }
 ;
 
-linRegARIMABikeFcastAnalysis[PCTMC pctmc, Constants constants]
+tsRBikeFcastAnalysis[PCTMC pctmc, Constants constants]
 returns [
-  PCTMCLinRegARIMA analysis,
+  PCTMCTSR analysis,
   NumericalPostprocessor postprocessor
 ]
 @init{
   Map<String, Object> parameters = new HashMap<String, Object>();
   Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
-  ^(LIN_REG_ARIMA_BIKE_FCAST
+  ^(TS_R_BIKE_FCAST
     arrFcastMode = LOWERCASENAME COMMA
     minXreg = INTEGER COMMA
     cfg = bikeFcastConfig
   )
   {
-    $analysis = new PCTMCLinRegARIMA($pctmc, $arrFcastMode.text);
+    $analysis = new PCTMCTSR($pctmc, $arrFcastMode.text);
     if (postprocessorParameters.isEmpty()) {
-      $postprocessor = new BikeArrivalLinRegARIMAPostprocessor(
+      $postprocessor = new BikeArrivalTSRPostprocessor(
         $arrFcastMode.text, Integer.parseInt($minXreg.text), $cfg.cfg
       );
     } else {
-      $postprocessor = new BikeArrivalLinRegARIMAPostprocessor(
+      $postprocessor = new BikeArrivalTSRPostprocessor(
         $arrFcastMode.text, Integer.parseInt($minXreg.text), $cfg.cfg,
         postprocessorParameters
       );
@@ -275,7 +275,7 @@ returns [
 ;
 
 bikeFcastConfig returns [
-  BikeModelTSRBridge cfg
+  BikeModelRBridge cfg
 ]:
   ^(BIKE_FCAST_CFG 
     fcastWarmupTmp = INTEGER COMMA
@@ -291,7 +291,7 @@ bikeFcastConfig returns [
     clDepToDestTSTmp = listOfFiles COMMA    
     clArrTSTmp = listOfFiles
   ) {
-    $cfg = new BikeModelTSRBridge(
+    $cfg = new BikeModelRBridge(
       Integer.parseInt($fcastWarmupTmp.text),
       Integer.parseInt($fcastLenTmp.text),
       Integer.parseInt($fcastFreqTmp.text),

@@ -11,7 +11,7 @@ import PCTMCLexerPrototype;
 COUNT: '#';
 ODE_BIKE_FCAST: 'OdeBikeFcast';
 SIM_BIKE_FCAST: 'SimBikeFcast';
-LIN_REG_ARIMA_BIKE_FCAST: 'LinRegARIMABikeFcast';
+TS_R_BIKE_FCAST: 'TSRBikeFcast';
 
 ARR_FCAST_MODE: 'arrFcastMode';
 FCAST_WARMUP: 'fcastWarmup';
