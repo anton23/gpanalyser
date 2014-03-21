@@ -55,7 +55,6 @@ tokens{
     "  fcastFreq=<integer>,\n" +
     "  clDepStates={<state>,...},\n" +
     "  clArrStates={<state>,...},\n" +
-    "  depFcastMode=<lowercasename>,\n" +
     "  trainClDepTS={\"file1\",...},\n" +
     "  trainClDepToDestTS={\"file1\",...},\n" +
     "  trainClArrTS={\"file1\",...},\n" +
@@ -164,12 +163,15 @@ odeBikeFcast:
   {
     hint.push("ODE based bike journey forecasting analysis has syntax\n"+
       "OdeBikeFcast(\n  stepSize=<number>,\n" +
-      "  density=<integer>,\n" + fcastSettingsHint + ")"
+      "  density=<integer>,\n" +
+      "  depFcastMode=<lowercasename>,\n" +
+      fcastSettingsHint + ")"
     );
   }
   LPAR
     STEPSIZE DEF stepSize = expression COMMA
     DENSITY DEF density = INTEGER COMMA
+    DEP_FCAST_MODE DEF depFcastM = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   RPAR
   {
@@ -177,7 +179,7 @@ odeBikeFcast:
   }
   ->
   ^(ODE_BIKE_FCAST
-    (odeParameters COMMA)? $stepSize COMMA $density COMMA $cfg
+    (odeParameters COMMA)? $stepSize COMMA $density COMMA $depFcastM COMMA $cfg
   )
 ;
 
@@ -186,12 +188,15 @@ simBikeFcast:
   {
     hint.push("Simulation based bike journey forecasting analysis has syntax\n"+
       "SimBikeFcast(\n  stepSize=<number>,\n" +
-      "  replications=<integer>,\n" + fcastSettingsHint + ")"
+      "  replications=<integer>,\n" +
+      "  depFcastMode=<lowercasename>,\n" +
+      fcastSettingsHint + ")"
     );
   }
   LPAR
     STEPSIZE DEF stepSize = expression COMMA
     REPLICATIONS DEF replications = INTEGER COMMA
+    DEP_FCAST_MODE DEF depFcastM = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   RPAR
   {
@@ -199,7 +204,7 @@ simBikeFcast:
   }
   ->
   ^(SIM_BIKE_FCAST
-    $stepSize COMMA $replications COMMA $cfg
+    $stepSize COMMA $replications COMMA $depFcastM COMMA $cfg
   )
 ;
 
@@ -208,12 +213,16 @@ tsRBikeFcast:
   {
     hint.push(
       "Time series bike journey arrival analysis using R " +
-      "has syntax\nTSRBikeFcast(\n  minXreg=<integer>,\n" +
+      "has syntax\nTSRBikeFcast(\n  " +
+      "  depFcastMode=<lowercasename>,\n" +
+      "  arrFcastMode=<lowercasename>,\n" +
+      "  minXreg=<integer>,\n"+
       fcastSettingsHint + ")"
     );
   }
   LPAR
-    ARR_FCAST_MODE DEF arrFcastMode = LOWERCASENAME COMMA
+    DEP_FCAST_MODE DEF depFcastM = LOWERCASENAME COMMA
+    ARR_FCAST_MODE DEF arrFcastM = LOWERCASENAME COMMA
     MIN_XREG DEF minXreg = INTEGER COMMA
     cfg = bikeFcastConfig
   RPAR
@@ -221,7 +230,7 @@ tsRBikeFcast:
     hint.pop();
   }
   ->
-  ^(TS_R_BIKE_FCAST $arrFcastMode COMMA $minXreg COMMA $cfg)
+  ^(TS_R_BIKE_FCAST $depFcastM COMMA $arrFcastM COMMA $minXreg COMMA $cfg)
 ;
 
 
@@ -231,7 +240,6 @@ bikeFcastConfig:
   FCAST_FREQ DEF fcastFreq = INTEGER COMMA
   CL_DEP_STATES DEF clDepStates = listOfStates COMMA
   CL_ARR_STATES DEF clArrStates = listOfStates COMMA  
-  DEP_FCAST_MODE DEF depFcastMode = LOWERCASENAME COMMA
   TRAIN_CL_DEP_TS DEF trainClDepTS = listOfFiles COMMA
   TRAIN_CL_DEP_TO_DEST_TS DEF trainClDepToDestTS = listOfFiles COMMA
   TRAIN_CL_ARR_TS DEF trainClArrTS = listOfFiles COMMA
@@ -242,7 +250,6 @@ bikeFcastConfig:
   ^(BIKE_FCAST_CFG
     $fcastWarmup COMMA $fcastLen COMMA $fcastFreq COMMA
     $clDepStates COMMA $clArrStates COMMA
-    $depFcastMode COMMA
     $trainClDepTS COMMA $trainClDepToDestTS COMMA $trainClArrTS COMMA
     $clDepTS COMMA $clDepToDestTS COMMA $clArrTS
   )

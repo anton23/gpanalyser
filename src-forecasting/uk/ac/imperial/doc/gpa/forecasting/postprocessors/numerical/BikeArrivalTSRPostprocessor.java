@@ -12,29 +12,33 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class BikeArrivalTSRPostprocessor extends NumericalPostprocessor {
 
+  private final String mDepFcastMode;
   private final String mArrFcastMode;
   private final int mMinXreg;
   private final BikeModelRBridge mTSF;
-  //private PlainPCTMC mPCTMC;
   
   public BikeArrivalTSRPostprocessor(
+    final String depFcastMode,
     final String arrFcastMode,
     final int minXreg,
     final BikeModelRBridge tsf
   ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
+    mDepFcastMode = depFcastMode;
     mArrFcastMode = arrFcastMode;
     mMinXreg = minXreg;
     mTSF = tsf;
   }
 
-  public BikeArrivalTSRPostprocessor(  
+  public BikeArrivalTSRPostprocessor(
+    final String depFcastMode,
     final String arrFcastMode,
     final int minXreg,
     final BikeModelRBridge tsf,
     Map<String, Object> params
    ) {
     super(tsf.mFcastWarmup + tsf.mFcastLen, 1);
+    mDepFcastMode = depFcastMode;
     mArrFcastMode = arrFcastMode;
     mMinXreg = minXreg;
     mTSF = tsf;
@@ -57,14 +61,16 @@ public class BikeArrivalTSRPostprocessor extends NumericalPostprocessor {
   
   @Override
   public PCTMCAnalysisPostprocessor regenerate() {
-    return
-      new BikeArrivalTSRPostprocessor(mArrFcastMode, mMinXreg, mTSF);
+    return new BikeArrivalTSRPostprocessor(
+      mDepFcastMode, mArrFcastMode, mMinXreg, mTSF.newInstance()
+    );
   }
 
   @Override
   public NumericalPostprocessor getNewPreparedPostprocessor(Constants constants) {
-    return
-      new BikeArrivalTSRPostprocessor(mArrFcastMode, mMinXreg, mTSF);
+    return new BikeArrivalTSRPostprocessor(
+      mDepFcastMode, mArrFcastMode, mMinXreg, mTSF.newInstance()
+    );
   }
 
   @Override
@@ -75,11 +81,11 @@ public class BikeArrivalTSRPostprocessor extends NumericalPostprocessor {
       clArrMomIndices.put(mTSF.mClArrStates.get(clId), new int[] {clId, clId});
     }
 
-    String arrModelVar =
-      mTSF.genLinRegArimaArrivalFcastModel(mArrFcastMode, mMinXreg);
+    mTSF.genTSDepModel(mDepFcastMode);
+    mTSF.genTSArrivalFcastModel(mArrFcastMode, mMinXreg);
     double[] intvlArrFcast = new double[mTSF.mClArrStates.size()];
     while (mTSF.nextTSFile()) {
-      dataPoints = mTSF.linRegARIMAArrForecast(arrModelVar);
+      dataPoints = mTSF.tsArrivalForecast();
       int intvl = 0;
       while (intvl < dataPoints[0].length) {
         for (int clId = 0; clId < mTSF.mClArrStates.size(); clId++) {
@@ -92,6 +98,7 @@ public class BikeArrivalTSRPostprocessor extends NumericalPostprocessor {
         intvl++;
       }
     }
+    mTSF.closeConnection();
   }
 
 }

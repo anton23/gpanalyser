@@ -190,6 +190,7 @@ returns [
     )?
     stepSize = expression COMMA 
     density = INTEGER COMMA
+    depFcastMode = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   )
   {
@@ -199,11 +200,13 @@ returns [
     $stepSize.e.accept(stepEval);
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new BikeArrivalODEPostprocessor(
-        stepEval.getResult(), Integer.parseInt($density.text), $cfg.cfg
+        stepEval.getResult(), Integer.parseInt($density.text),
+        $depFcastMode.text, $cfg.cfg
       );
     } else {
       $postprocessor = new BikeArrivalODEPostprocessor(
-        stepEval.getResult(), Integer.parseInt($density.text), $cfg.cfg,
+        stepEval.getResult(), Integer.parseInt($density.text),
+        $depFcastMode.text, $cfg.cfg,
         postprocessorParameters
       );
     }
@@ -223,6 +226,7 @@ returns [
   ^(SIM_BIKE_FCAST
     stepSize = expression COMMA
     replications = INTEGER COMMA
+    depFcastMode = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   )
   {
@@ -232,11 +236,13 @@ returns [
     $stepSize.e.accept(stepEval);
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new BikeArrivalSimPostprocessor(
-        stepEval.getResult(), Integer.parseInt($replications.text), $cfg.cfg
+        stepEval.getResult(), Integer.parseInt($replications.text),
+        $depFcastMode.text, $cfg.cfg
       );
     } else {
       $postprocessor = new BikeArrivalSimPostprocessor(
-        stepEval.getResult(), Integer.parseInt($replications.text), $cfg.cfg,
+        stepEval.getResult(), Integer.parseInt($replications.text),
+        $depFcastMode.text, $cfg.cfg,
         postprocessorParameters
       );
     }
@@ -254,6 +260,7 @@ returns [
   Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
 }:
   ^(TS_R_BIKE_FCAST
+    depFcastMode = LOWERCASENAME COMMA
     arrFcastMode = LOWERCASENAME COMMA
     minXreg = INTEGER COMMA
     cfg = bikeFcastConfig
@@ -262,11 +269,13 @@ returns [
     $analysis = new PCTMCTSR($pctmc, $arrFcastMode.text);
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new BikeArrivalTSRPostprocessor(
-        $arrFcastMode.text, Integer.parseInt($minXreg.text), $cfg.cfg
+        $depFcastMode.text, $arrFcastMode.text,
+        Integer.parseInt($minXreg.text), $cfg.cfg
       );
     } else {
       $postprocessor = new BikeArrivalTSRPostprocessor(
-        $arrFcastMode.text, Integer.parseInt($minXreg.text), $cfg.cfg,
+        $depFcastMode.text, $arrFcastMode.text,
+        Integer.parseInt($minXreg.text), $cfg.cfg,
         postprocessorParameters
       );
     }
@@ -278,32 +287,30 @@ bikeFcastConfig returns [
   BikeModelRBridge cfg
 ]:
   ^(BIKE_FCAST_CFG 
-    fcastWarmupTmp = INTEGER COMMA
-    fcastLenTmp = INTEGER COMMA
-    fcastFreqTmp = INTEGER COMMA
-    clDepStatesTmp = listOfStates COMMA
-    clArrStatesTmp = listOfStates COMMA
-    depFcastModeTmp = LOWERCASENAME COMMA
-    trainClDepTSTmp = listOfFiles COMMA
-    trainClDepToDestTSTmp = listOfFiles COMMA    
-    trainClArrTSTmp = listOfFiles COMMA
-    clDepTSTmp = listOfFiles COMMA
-    clDepToDestTSTmp = listOfFiles COMMA    
-    clArrTSTmp = listOfFiles
+    fcastWarmup = INTEGER COMMA
+    fcastLen = INTEGER COMMA
+    fcastFreq = INTEGER COMMA
+    clDepStates = listOfStates COMMA
+    clArrStates = listOfStates COMMA
+    trainClDepTS = listOfFiles COMMA
+    trainClDepToDestTS = listOfFiles COMMA    
+    trainClArrTS = listOfFiles COMMA
+    clDepTS = listOfFiles COMMA
+    clDepToDestTS = listOfFiles COMMA    
+    clArrTS = listOfFiles
   ) {
     $cfg = new BikeModelRBridge(
-      Integer.parseInt($fcastWarmupTmp.text),
-      Integer.parseInt($fcastLenTmp.text),
-      Integer.parseInt($fcastFreqTmp.text),
-      $clDepStatesTmp.l,
-      $clArrStatesTmp.l,
-      $depFcastModeTmp.text,
-      $trainClDepTSTmp.l,
-      $trainClDepToDestTSTmp.l,
-      $trainClArrTSTmp.l,
-      $clDepTSTmp.l,
-      $clDepToDestTSTmp.l,
-      $clArrTSTmp.l
+      Integer.parseInt($fcastWarmup.text),
+      Integer.parseInt($fcastLen.text),
+      Integer.parseInt($fcastFreq.text),
+      $clDepStates.l,
+      $clArrStates.l,
+      $trainClDepTS.l,
+      $trainClDepToDestTS.l,
+      $trainClArrTS.l,
+      $clDepTS.l,
+      $clDepToDestTS.l,
+      $clArrTS.l
     );
   }
 ;
