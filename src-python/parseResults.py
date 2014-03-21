@@ -59,6 +59,7 @@ fcasts = {
   'Naive' : [],
   'Avg' : [],
   'ARIMA' : [],
+  'LinReg' : [],
   'LinRegARIMA' : []
 }
 with open(sys.argv[1], "r") as f:
@@ -72,6 +73,7 @@ with open(sys.argv[1], "r") as f:
       if 'naive' in line: analysis = 'Naive'
       if 'avg' in line: analysis = 'Avg'
       if 'arima' in line: analysis = 'ARIMA'
+      if 'linreg' in line: analysis = 'LinReg'
       if 'linregarima' in line: analysis = 'LinRegARIMA'
       continue
     
