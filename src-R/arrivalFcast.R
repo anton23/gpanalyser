@@ -76,11 +76,19 @@ genArrFcastModel <- function(
     ),
     avg = genARIMAArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen,
-      trainClArrRepTSFiles, TRUE
+      trainClArrRepTSFiles,
+      TRUE
     ),
     arima = genARIMAArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen,
       trainClArrRepTSFiles
+    ),
+    linreg = genLinRegARIMAArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen, minXreg,
+      trainClDepRepTSFiles,
+      trainClDepToDestRepTSFiles,
+      trainClArrRepTSFiles,
+      TRUE
     ),
     linregarima = genLinRegARIMAArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen, minXreg,
@@ -115,7 +123,7 @@ genARIMAArrFcastModel <- function(
   fcastWarmup,
   fcastLen,
   trainClArrRepTSFiles,
-  avg = FALSE
+  zerofcast = FALSE
 ) {
   # Load repTS and change time series sample frequency to fcastFreq
   clArrRepTS <- lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
@@ -127,7 +135,7 @@ genARIMAArrFcastModel <- function(
   
   # Fit arrival model for all clusters
   arrModels <- fitRepARIMAArrivals(0, 0, 0, NULL, normTrainClArr, w, 0, h)
-  if (!avg) {
+  if (!zerofcast) {
     arrModels <- fitRepARIMAArrivals(1, 0, 0:1, NULL, normTrainClArr, w, 0, h)
   }
   
@@ -160,7 +168,8 @@ genLinRegARIMAArrFcastModel <- function (
   minXreg,
   trainClDepRepTSFiles = NULL,
   trainClDepToDestRepTSFiles = NULL,
-  trainClArrRepTSFiles = NULL
+  trainClArrRepTSFiles = NULL,
+  zerofcast = FALSE
 ) {
   assert_that(fcastWarmup > minXreg)
   assert_that(minXreg %% fcastFreq == 0)
@@ -178,9 +187,12 @@ genLinRegARIMAArrFcastModel <- function (
   normTrainClArr <- normClRepTS(clArrRepTS)
   
   # Fit arrival model for all clusters
-  arrModels <- fitRepARIMAArrivals(
-    1, 0, 0:1, normTrainClDep, normTrainClArr, w, nx, h
-  )
+  arrModels <-
+    fitRepARIMAArrivals(0, 0, 0, normTrainClDep, normTrainClArr, w, nx, h)
+  if (!zerofcast) {
+    arrModels <-
+      fitRepARIMAArrivals(1, 0, 0:1, normTrainClDep, normTrainClArr, w, nx, h)
+  }
   
   list(name = "LinRegARIMAArrForecast",
     fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
