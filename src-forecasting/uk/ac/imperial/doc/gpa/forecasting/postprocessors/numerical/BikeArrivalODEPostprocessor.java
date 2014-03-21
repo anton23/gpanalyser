@@ -21,18 +21,24 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 public class BikeArrivalODEPostprocessor extends
   InhomogeneousODEAnalysisNumericalPostprocessor
 {	
+  private final String mDepFcastMode;
   private final BikeModelRBridge mTSF;
 
 	public BikeArrivalODEPostprocessor (
-	  final double stepSize, final int density,
+	  final double stepSize,
+	  final int density,
+	  final String depFcastMode,
     final BikeModelRBridge tsf
 	) {
     super(tsf.mFcastWarmup + tsf.mFcastLen + stepSize, stepSize, density);
+    mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
 
 	public BikeArrivalODEPostprocessor (
-	  final double stepSize, final int density,
+	  final double stepSize,
+	  final int density,
+	  final String depFcastMode,
     final BikeModelRBridge tsf,
     Map<String, Object> params
 	) {
@@ -40,6 +46,7 @@ public class BikeArrivalODEPostprocessor extends
       tsf.mFcastWarmup + tsf.mFcastLen + stepSize,
       stepSize, density, params
     );
+    mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
 	
@@ -49,15 +56,19 @@ public class BikeArrivalODEPostprocessor extends
 	  final int density,
 		final PCTMCODEAnalysis odeAnalysis,
 		final JavaODEsPreprocessed preprocessedImplementation,
+    final String depFcastMode,
     final BikeModelRBridge tsf
 	) {
 		super(stopTime, stepSize, density, odeAnalysis, preprocessedImplementation);
+    mDepFcastMode = depFcastMode;
 		mTSF = tsf;
 	}
 	
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
-		return new BikeArrivalODEPostprocessor(stepSize, density, mTSF);
+		return new BikeArrivalODEPostprocessor(
+		  stepSize, density, mDepFcastMode, mTSF.newInstance()
+		);
 	}
 
 	@Override
@@ -71,7 +82,8 @@ public class BikeArrivalODEPostprocessor extends
 		    javaImplementation.getPreprocessedODEImplementation(
 		      odeAnalysis.getOdeMethod(), constants, momentIndex
 		    ),
-	      mTSF
+		    mDepFcastMode,
+	      mTSF.newInstance()
 		  );
 		return ret;
 	}
@@ -98,6 +110,7 @@ public class BikeArrivalODEPostprocessor extends
 		  );
 		}
 
+    mTSF.genTSDepModel(mDepFcastMode);
 		while (mTSF.nextTSFile()) {
 			while (true) {
         // Check if there is enough data for the forecast
@@ -115,6 +128,7 @@ public class BikeArrivalODEPostprocessor extends
         mTSF.nextIntvl();
 			}
 		}
+		mTSF.closeConnection();
 	}
 	
 	@Override

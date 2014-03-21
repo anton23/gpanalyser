@@ -18,32 +18,39 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 public class BikeArrivalSimPostprocessor extends
   InhomogeneousSimulationAnalysisNumericalPostprocessor
 {	
+  private final String mDepFcastMode;
   private final BikeModelRBridge mTSF;
 
 	public BikeArrivalSimPostprocessor(
-	  final double stepSize, final int replications,
+	  final double stepSize,
+	  final int replications,
+	  final String depFcastMode,
     final BikeModelRBridge tsf
 	) {
     super(tsf.mFcastWarmup + tsf.mFcastLen + stepSize, stepSize, replications);
+    mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
 
 	public BikeArrivalSimPostprocessor(
-	  final double stepSize, final int replications,
-    final BikeModelRBridge tsf,
+	  final double stepSize,
+	  final int replications,
+	  final String depFcastMode,
+	  final BikeModelRBridge tsf,
 	  Map<String, Object> params
 	) {
     super(
       tsf.mFcastWarmup + tsf.mFcastLen + stepSize,
       stepSize, replications, params
     );
+    mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
 
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new BikeArrivalSimPostprocessor(
-	    stepSize, replications, mTSF
+	    stepSize, replications, mDepFcastMode, mTSF.newInstance()
 		);
 	}
 	
@@ -81,6 +88,7 @@ public class BikeArrivalSimPostprocessor extends
       );
     }
 
+    mTSF.genTSDepModel(mDepFcastMode);
 		while (mTSF.nextTSFile()) {
 			while (true) {
 				// Check if there is enough data for the forecast
@@ -98,6 +106,7 @@ public class BikeArrivalSimPostprocessor extends
 				mTSF.nextIntvl();
 			}
 		}
+		mTSF.closeConnection();
 	}
 
 	@Override
