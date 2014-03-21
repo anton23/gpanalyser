@@ -11,7 +11,6 @@ import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 
 import uk.ac.imperial.doc.gpa.plain.representation.PlainPCTMC;
-import uk.ac.imperial.doc.gpa.plain.representation.timed.TimedEvents;
 import uk.ac.imperial.doc.pctmc.representation.State;
 import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
@@ -90,20 +89,27 @@ public class BikeModelRBridge {
       e.printStackTrace();
     }
 
-    // Initialise the model
+    // Initialise the series
     mCurTSFileIdx = -1;
     mCurTSStartIndex = 0;
 	}
 	
-	 public BikeModelRBridge newInstance() {
-	    return new BikeModelRBridge(
-	      mFcastWarmup, mFcastLen, mFcastFreq,
-	      mClDepStates, mClArrStates,
-	      mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles,
-	      mClDepTSFiles, mClDepToDestTSFiles, mClArrTSFiles
-	    );  
-	  }
+	/**
+	 * @return a duplicate instance with its on R connection
+	 */
+	public BikeModelRBridge newInstance() {
+	  return new BikeModelRBridge(
+	    mFcastWarmup, mFcastLen, mFcastFreq,
+	    mClDepStates, mClArrStates,
+	    mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles,
+	    mClDepTSFiles, mClDepToDestTSFiles, mClArrTSFiles
+	  );  
+	}
 	
+	 /**
+   * @return a duplicate instance with its on R connection where training and
+   *   forecast are done on the same data
+   */
 	public BikeModelRBridge trainingForecast() {
 	  return new BikeModelRBridge(
 	    mFcastWarmup, mFcastLen, mFcastFreq,
@@ -113,10 +119,18 @@ public class BikeModelRBridge {
 	  );  
 	}
 	
+	/**
+	 * Close the R connection
+	 */
 	public void closeConnection() {
 	  mRConn.close();
 	}
 	
+	/**
+	 * Train departure time series model for each cluster on the training data
+	 * 
+	 * @param depFcastMode name of method we use to forecast future departures
+	 */
 	public void genTSDepModel(
 	  final String depFcastMode
 	) {
@@ -132,6 +146,13 @@ public class BikeModelRBridge {
     }
 	}
 	
+	 /**
+   * Train arrival time series model for each cluster on the training data
+   * 
+   * @param arrFcastMode name of method we use to forecast future arrivals
+   * @param minXreg regress on departures that happen in interval
+   *        [fcastTime - minXreg, fcastTime]
+   */
 	public void genTSArrivalFcastModel(
 	  final String arrFcastMode,
 	  final int minXreg
@@ -148,36 +169,15 @@ public class BikeModelRBridge {
     }
 	}
 	
-  public double[][] tsArrivalForecast() {
-    double data[][] = null;
-    try {
-      REXP res = mRConn.eval(String.format(
-        "fcastArrivalTS(depModel, arrModel, \"%s\", \"%s\", \"%s\")",
-        mCurClDepTSFile, mCurClDepToDestTSFile, mCurArrTSFile
-      ));
-      if (!res.isNull()) {
-        data = res.asDoubleMatrix();
-      }
-    } catch (RserveException e) {
-      e.printStackTrace();
-    } catch (REXPMismatchException e) {
-      e.printStackTrace();
-    }
-    
-    return data;
-  }
-	
 	/**
-	 * Run the forecast for a subset of our data at a time. From one forecast
-	 * to another we leave an mFcastWarmup minute gap. The warmup period will be
-	 * used to initialise the populations from where bicycles start.
+	 * Set departure and reset events for {@code pctmc} for current interval
+	 * 
+	 * @pctmc forecast model for which we want to set the events
 	 * 
 	 * @return true iff there it is possible to make a forecast for the interval
 	 */
-	public boolean preparePCTMCForCurIntvlPCTMC(final PlainPCTMC pctmc) {
+	public boolean loadPCTMCEvents(final PlainPCTMC pctmc) {
 		// Prepare pop changes in inhomogenous PCTMC
-    final Map <String, double[][]> allRateEvents =
-      new HashMap<String, double[][]>();
 		final Map <State, double[][]> allDepEvents =
 		  new HashMap<State, double[][]>();
 		final Map <State, double[][]> allResetEvents =
@@ -202,7 +202,7 @@ public class BikeModelRBridge {
 		
 		// Time dependent departures and arrival count resets for each cluster
 		for (int cl = 0; cl < mClDepStates.size(); cl++) {
-	    double[][] depEvts = new double[data[cl].length][2];
+	    final double[][] depEvts = new double[data[cl].length][2];
 	    for (int t = 0; t < data[cl].length; t++) {
 	      depEvts[t][0] = t;
 	      depEvts[t][1] = data[cl][t];
@@ -217,16 +217,39 @@ public class BikeModelRBridge {
 		}
 
 		// Set events for TimedEvents in PCTMC
-		TimedEvents te = pctmc.getTimedEvents();
-		te.setEvents(allRateEvents, allDepEvents, allResetEvents);
+		pctmc.getTimedEvents().setEvents(
+		  new HashMap<String, double[][]>(), allDepEvents, allResetEvents
+		);
 
 		return true;
 	}
 
+	/**
+	 * @return time series arrival forecast for current interval
+	 */
+  public double[][] tsArrivalForecast() {
+    double data[][] = null;
+    try {
+      REXP res = mRConn.eval(String.format(
+        "fcastArrivalTS(depModel, arrModel, \"%s\", \"%s\", \"%s\")",
+        mCurClDepTSFile, mCurClDepToDestTSFile, mCurArrTSFile
+      ));
+      if (!res.isNull()) {
+        data = res.asDoubleMatrix();
+      }
+    } catch (RserveException e) {
+      e.printStackTrace();
+    } catch (REXPMismatchException e) {
+      e.printStackTrace();
+    }
+    
+    return data;
+  }
+	
   /**
-  * Prepare departure and arrival time series data for the next
-  * time series
-  * @return true if we have another departure and arrival time series
+  * Prepare departure and arrival time series data for next time series file
+  * 
+  * @return true iff we have another departure and arrival time series
   */
   public boolean nextTSFile() {
     // Are we done yet?
@@ -260,11 +283,23 @@ public class BikeModelRBridge {
     return true;
   }
   
+  /**
+   * Advance to next forecast
+   * 
+   * @return forecast interval start index in minutes
+   */
   public int nextIntvl() {
     mCurTSStartIndex += mFcastFreq;
     return mCurTSStartIndex;
   }
 	
+  /**
+   * Print forecast results
+   *
+   * @param clArrMomIndices indicies of cluster distribution moments in
+   *   {@code fcastClArrivals}
+   * @param fcastClArrivals results
+   */
 	public void printFcastResult(
 	  Map<State, int[]> clArrMomIndices,
 	  double[] fcastClArrivals
@@ -273,8 +308,12 @@ public class BikeModelRBridge {
 	}
 	
   /**
-   *
-	 */
+   * @param clArrMomIndices indicies of cluster distribution moments in
+   *   {@code fcastClArrivals}
+   * @param fcastClArrivals results
+   * @param print iff true log results
+   * @return forecast results
+   */
 	public double[][] processFcastResult(
 	  Map<State, int[]> clArrMomIndices,
 	  double[] fcastClArrivals,
