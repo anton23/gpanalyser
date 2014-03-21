@@ -115,7 +115,7 @@ public class BikeArrivalODEPostprocessor extends
 			while (true) {
         // Check if there is enough data for the forecast
         // period on the current day
-        if (!mTSF.preparePCTMCForCurIntvlPCTMC(pctmc)) {break;}
+        if (!mTSF.loadPCTMCEvents(pctmc)) {break;}
         
         // Do the calculation
         super.calculateDataPoints(constants);
