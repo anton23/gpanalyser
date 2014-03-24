@@ -1,6 +1,7 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ public class BikeModelRBridge {
   private String mCurClDepToDestTSFile;
   private String mCurArrTSFile;
   private double[][] mCurClArrTS;
+  private double[][] mCurClArrAtFreqTS;
   private double[] mCurClArrTtlTS;
   private int mCurTSFileIdx;
   private int mCurTSStartIndex;
@@ -110,9 +112,13 @@ public class BikeModelRBridge {
    * @return a duplicate instance with its on R connection where training and
    *   forecast are done on the same data
    */
-	public BikeModelRBridge trainingForecast() {
+	public BikeModelRBridge trainingForecast(
+	    final String fcastDepModel,
+	    final int fcastWarmup,
+	    final int fcastLen
+	  ) {
 	  return new BikeModelRBridge(
-	    mFcastWarmup, mFcastLen, mFcastFreq,
+	    fcastWarmup, fcastLen, mFcastFreq,
 	    mClDepStates, mClArrStates,
 	    mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles,
 	    mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles
@@ -168,6 +174,61 @@ public class BikeModelRBridge {
       e.printStackTrace();
     }
 	}
+
+  public void genErrorARIMA(double[][][] error) {
+    // Train model for error time series
+    try {
+      // Load replicated error time series into R
+      mRConn.voidEval(String.format(
+        "trainClErrorRepTS <- array(dim = c(%d, %d, %d))",
+        error.length, error[0].length, error[0][0].length
+      ));
+      for (int clId = 0; clId < error.length; clId++) {
+        mRConn.assign("errorTSTmp", REXP.createDoubleMatrix(error[clId]));
+        mRConn.voidEval(String.format(
+          "trainClErrorRepTS[%d,,] <- errorTSTmp", clId + 1
+        ));
+      }
+      mRConn.voidEval(
+        "trainClErrorRepTS <- aperm(trainClErrorRepTS, c(2,1,3))"
+      );
+      mRConn.voidEval(String.format(
+        "errModel <- genARIMARepError(%d, %d, trainClErrorRepTS)",
+        mFcastFreq, mFcastWarmup
+      ));
+    } catch (RserveException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public double[] calcErrorCorrection(LinkedList<double[]> clErrors, int fcastLen) {
+    double[] retVal = null;
+    try {
+      // Load replicated error time series into R
+      mRConn.voidEval(String.format(
+        "clErrorTS <- matrix(nrow = %d, ncol = 0)", mClDepStates.size()
+      ));
+      if (!clErrors.isEmpty()) {
+        double[][] clErr = new double[clErrors.get(0).length][clErrors.size()];
+        for (int clId = 0; clId < clErr.length; clId++) {
+          for (int obs = 0; obs < clErr[0].length; obs++) {
+            clErr[clId][obs] = clErrors.get(obs)[clId];
+          }
+        }
+        mRConn.assign("clErrorTS", REXP.createDoubleMatrix(clErr));
+      }
+      REXP ret = mRConn.eval(String.format(
+        "fcastError(errModel, %d, clErrorTS)",
+        fcastLen
+      ));
+      retVal = ret.asDoubles();
+    } catch (RserveException e) {
+      e.printStackTrace();
+    } catch (REXPMismatchException e) {
+      e.printStackTrace();
+    }
+    return retVal;
+  }
 	
 	/**
 	 * Set departure and reset events for {@code pctmc} for current interval
@@ -246,12 +307,16 @@ public class BikeModelRBridge {
     return data;
   }
 	
+  public boolean nextTSFile() {
+    return nextTSFile(true);
+  }
+  
   /**
   * Prepare departure and arrival time series data for next time series file
   * 
   * @return true iff we have another departure and arrival time series
   */
-  public boolean nextTSFile() {
+  public boolean nextTSFile(boolean print) {
     // Are we done yet?
     if (mClDepTSFiles.size() <= ++mCurTSFileIdx) {
       return false;
@@ -266,6 +331,10 @@ public class BikeModelRBridge {
         "fcastOracleArrivalTS(%d, %d, %d, \"%s\") ",
         mFcastFreq, mFcastWarmup, mFcastLen, mCurArrTSFile
       )).asDoubleMatrix();
+      mCurClArrAtFreqTS = mRConn.eval(String.format(
+        "fcastOracleArrivalTS(%d, %d, %d, \"%s\") ",
+        mFcastFreq, mFcastWarmup, mFcastFreq, mCurArrTSFile
+      )).asDoubleMatrix();
       mCurClArrTtlTS = mRConn.eval(String.format(
         "fcastOracleArrivalTS(%d, %d, %d, \"%s\") ",
         mFcastFreq, mFcastWarmup, mFcastLen,
@@ -278,7 +347,7 @@ public class BikeModelRBridge {
     }
 
     // We start every analysis from the first observation in the time series
-    PCTMCLogging.info(String.format("Interval: %s", mCurArrTSFile));
+    if (print) PCTMCLogging.info(String.format("Interval: %s", mCurArrTSFile));
     mCurTSStartIndex = 0;
     return true;
   }
@@ -304,7 +373,7 @@ public class BikeModelRBridge {
 	  Map<State, int[]> clArrMomIndices,
 	  double[] fcastClArrivals
 	) {
-	  processFcastResult(clArrMomIndices, fcastClArrivals, true);
+	  processFcastResult(clArrMomIndices, fcastClArrivals, null, true);
 	}
 	
   /**
@@ -317,23 +386,35 @@ public class BikeModelRBridge {
 	public double[][] processFcastResult(
 	  Map<State, int[]> clArrMomIndices,
 	  double[] fcastClArrivals,
+	  double[] correction,
 	  boolean print
 	) {
 	  // Compare actual arrivals with the prediction
-	  PCTMCLogging.info("Prediction #" + mCurTSStartIndex);
-    PCTMCLogging.increaseIndent();
+	  if (print) {
+	    PCTMCLogging.info("Prediction #" + mCurTSStartIndex);
+	    PCTMCLogging.increaseIndent();
+	  }
     double ttlAvg = 0;
     double ttlSD = 0;
     int actArr = 0;
-    double[][] retVal = new double[mClArrStates.size()][3];
+    double[][] retVal = new double[mClArrStates.size()][4];
     for (int clId = 0; clId < mClArrStates.size(); clId++) {
       final int actualClArrivals =
         (int) mCurClArrTS[clId][mCurTSStartIndex / mFcastFreq];
+      final int actualClArrivalsAtFreq =
+        (int) mCurClArrAtFreqTS[clId][mCurTSStartIndex / mFcastFreq];
       final int[] indices = clArrMomIndices.get(mClArrStates.get(clId));
-      final double fcastClAvg = retVal[clId][0] = fcastClArrivals[indices[0]];
-      final double fcastClAvgSq = retVal[clId][2] = fcastClArrivals[indices[1]];
+      double fcastClAvg =
+        retVal[clId][0] = fcastClArrivals[indices[0]];
+      if (correction != null) {
+        fcastClAvg = Math.max(fcastClAvg + correction[clId], 0);
+        retVal[clId][0] = fcastClAvg;
+      }
+      final double fcastClAvgSq = fcastClArrivals[indices[1]];
       final double fcastClSD = retVal[clId][1] = 
         Math.sqrt(fcastClAvgSq - fcastClAvg * fcastClAvg);
+      retVal[clId][2] = actualClArrivals;
+      retVal[clId][3] = actualClArrivalsAtFreq;
       ttlAvg += fcastClAvg;
       ttlSD += fcastClSD;
       actArr += actualClArrivals;
@@ -350,8 +431,8 @@ public class BikeModelRBridge {
       PCTMCLogging.info(String.format(
         "Ttl: Mean:%.2f SD:%.2f Actual:%d All:%d", ttlAvg, ttlSD, actArr, ttlArr
       ));
+      PCTMCLogging.decreaseIndent();
     }
-    PCTMCLogging.decreaseIndent();
     return retVal;
 	}
 }

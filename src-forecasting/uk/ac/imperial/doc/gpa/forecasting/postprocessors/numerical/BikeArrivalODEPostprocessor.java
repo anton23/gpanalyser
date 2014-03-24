@@ -1,6 +1,8 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,7 @@ import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class BikeArrivalODEPostprocessor extends
   InhomogeneousODEAnalysisNumericalPostprocessor
@@ -110,25 +113,75 @@ public class BikeArrivalODEPostprocessor extends
 		  );
 		}
 
+		// Train the error model with oracle departure knowledge.
+		// Also we only predict next frequency step - if we predicted the actual
+		// fcastLen our error model would need to look into the future to work on the
+		// unseen data. Clearly this would mean that the forecast would no longer be
+		// out of sample so we can't do this.
+    final int stopTimeIdx =
+      (int) ((mTSF.mFcastWarmup + mTSF.mFcastFreq + stepSize) / stepSize);
+		final BikeModelRBridge trainTSF =
+		  mTSF.trainingForecast("oracle", mTSF.mFcastWarmup, mTSF.mFcastFreq);
+		trainTSF.genTSDepModel(mDepFcastMode);
+		LinkedList<LinkedList<double[]>> resError =
+		  new LinkedList<LinkedList<double[]>>();
+    while (trainTSF.nextTSFile(false)) {
+      resError.add(new LinkedList<double[]>());
+      while (trainTSF.loadPCTMCEvents(pctmc)) {
+        // Forecast
+        super.calculateDataPoints(constants);
+        double result[][] = trainTSF.processFcastResult(
+          clArrMomIndices, dataPoints[stopTimeIdx], null, false
+        );
+        double[] resCurError = new double[result.length];
+        resError.getLast().add(resCurError);
+        for (int clId = 0; clId < result.length; clId++) {
+          resCurError[clId] = result[clId][0] - result[clId][2];
+        }
+        trainTSF.nextIntvl();
+      }
+    }
+    double[][][] error = new double[resError.getLast().getLast().length]
+      [resError.size()][resError.getLast().size()];
+    for (int cl = 0; cl < error.length; cl++) {
+      for (int rep = 0; rep < error[0].length; rep++) {
+        for (int obs = 0; obs < error[0][0].length; obs++) {
+          error[cl][rep][obs] = resError.get(rep).get(obs)[cl];
+        }
+      }
+    }
+    trainTSF.genErrorARIMA(error);
+
+    // Forecast
     mTSF.genTSDepModel(mDepFcastMode);
 		while (mTSF.nextTSFile()) {
-			while (true) {
-        // Check if there is enough data for the forecast
-        // period on the current day
-        if (!mTSF.loadPCTMCEvents(pctmc)) {break;}
-        
-        // Do the calculation
+		  LinkedList<double[]> clErrors = new LinkedList<double[]>();
+			while (mTSF.loadPCTMCEvents(pctmc)) {
+			  // Predict error correction
+        double[] clErrCorrect = trainTSF.calcErrorCorrection(clErrors, mTSF.mFcastLen);
+			  
+        // Forecast
         super.calculateDataPoints(constants);
-
-        // Forecast vs Reality output predict arrivals and actual arrivals
-        // originating from each cluster
-        mTSF.printFcastResult(
-          clArrMomIndices, dataPoints[dataPoints.length - 1]
+        
+        // - Gather current 5 minute error
+        double[][] result = mTSF.processFcastResult(
+          clArrMomIndices, dataPoints[stopTimeIdx], null, false
         );
+        double[] resCurError = new double[result.length];
+        clErrors.add(resCurError);
+        for (int clId = 0; clId < result.length; clId++) {
+          resCurError[clId] = result[clId][0] - result[clId][3];
+        }
+        // - Correct current result using predicted error (not using current error!)
+        mTSF.processFcastResult(    
+          clArrMomIndices, dataPoints[dataPoints.length - 1], clErrCorrect, true
+        );
+        PCTMCLogging.info(Arrays.toString(clErrCorrect));
         mTSF.nextIntvl();
 			}
 		}
 		mTSF.closeConnection();
+    trainTSF.closeConnection();
 	}
 	
 	@Override

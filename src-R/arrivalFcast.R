@@ -16,13 +16,12 @@ source("departureFcast.R")
 #   for each cluster
 # w number of warmup intervals (this determine the forecast start warmup)
 # nx number of xreg observations used
-# h number of forecast intervals
 #
 # Return best departure -> arrival regression model with ARIMA error
 #   for each cluster trying all possible RepARIMA on p x d x q for
 #   each cluster in RepARIMATrainDepTs observations
 fitRepARIMAArrivals <- function(
-  p, d, q, normTrainClDep, normTrainClArr, w, nx, h
+  p, d, q, normTrainClDep, normTrainClArr, w, nx
 ) {
   # Configurations that we will check
   configs = as.matrix(expand.grid(p = p, d = d, q = q))
@@ -134,9 +133,9 @@ genARIMAArrFcastModel <- function(
   normTrainClArr <- normClRepTS(clArrRepTS)
   
   # Fit arrival model for all clusters
-  arrModels <- fitRepARIMAArrivals(0, 0, 0, NULL, normTrainClArr, w, 0, h)
+  arrModels <- fitRepARIMAArrivals(0, 0, 0, NULL, normTrainClArr, w, 0)
   if (!zerofcast) {
-    arrModels <- fitRepARIMAArrivals(1, 0, 0:1, NULL, normTrainClArr, w, 0, h)
+    arrModels <- fitRepARIMAArrivals(1, 0, 0:1, NULL, normTrainClArr, w, 0)
   }
   
   list(name = "ARIMAArrForecast",
@@ -188,10 +187,10 @@ genLinRegARIMAArrFcastModel <- function (
   
   # Fit arrival model for all clusters
   arrModels <-
-    fitRepARIMAArrivals(0, 0, 0, normTrainClDep, normTrainClArr, w, nx, h)
+    fitRepARIMAArrivals(0, 0, 0, normTrainClDep, normTrainClArr, w, nx)
   if (!zerofcast) {
     arrModels <-
-      fitRepARIMAArrivals(1, 0, 0:1, normTrainClDep, normTrainClArr, w, nx, h)
+      fitRepARIMAArrivals(1, 0, 0:1, normTrainClDep, normTrainClArr, w, nx)
   }
   
   list(name = "LinRegARIMAArrForecast",
@@ -301,4 +300,53 @@ fcastOracleArrivalTS <- function (
     fcastArrTS <- rbind(fcastArrTS, fcastArr)
   }
   fcastArrTS
+}
+
+genARIMARepError <- function (
+  fcastFreq,
+  fcastWarmup,
+  clErrorRepTS
+) {
+  w <- fcastWarmup / fcastFreq
+  clErrorRepTSExtended <- array(0, dim = dim(clErrorRepTS) + c(0,0,w))
+  for (clId in 1:dim(clErrorRepTS)[2]) {
+    clErrorRepTSExtended[,clId, w + (1 : dim(clErrorRepTS)[3])] <-
+      clErrorRepTS[,clId,]
+  }
+  clErrorRepTSNorm <- normClRepTS(clErrorRepTSExtended)
+  errModels <- fitRepARIMAArrivals(0:1, 0:1, 0:1, NULL, clErrorRepTSNorm, w, 0)
+  
+  list(name = "ARIMAErrorForecast",
+    fcastTPt = function(cId, fcastLen, errTS) {
+      h <- fcastLen / fcastFreq
+      errMod <- errModels[[cId]]
+      # Normalise
+      errTSNorm <- normTS(
+        c(rep(0, w), errTS),
+        errMod$arrAvgTS, errMod$arrSDTS
+      )
+      # Forecast
+      clErrRepARIMA <- Arima(
+        errTSNorm, order = errMod$order, fixed = errMod$coef,
+        transform.pars = FALSE
+      )
+      errTSNorm <- c(errTSNorm, forecast(clErrRepARIMA, h = h)$mean)
+      # Denormalise
+      errTSFcast <- denormTS(errTSNorm, errMod$arrAvgTS, errMod$arrSDTS)
+      # We are interested in the sum of all errors for the fcast horizon
+      -sum(tail(errTSFcast, h))
+    }
+  )
+}
+
+fcastError <- function (
+  errModel,
+  fcastLen,
+  clErrTS
+) {
+  fcastErr <- c()
+  for (clId in 1 : dim(clErrTS)[1]) {
+    fcastErr <- c(fcastErr, errModel$fcastTPt(clId, fcastLen, clErrTS[clId, ]))
+  }
+  fcastErr
 }
