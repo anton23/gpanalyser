@@ -89,7 +89,7 @@ public class BikeArrivalSimPostprocessor extends
     }
 
     mTSF.genTSDepModel(mDepFcastMode);
-		while (mTSF.nextTSFile(true)) {
+		while (mTSF.nextTSFile()) {
 			while (true) {
 				// Check if there is enough data for the forecast
 				// period on the current day
@@ -101,7 +101,7 @@ public class BikeArrivalSimPostprocessor extends
         // Forecast vs Reality output predict arrivals and actual arrivals
         // originating from each cluster
 				mTSF.processFcastResult(
-          clArrMomIndices, dataPoints[dataPoints.length - 1], null, true
+          clArrMomIndices, dataPoints[dataPoints.length - 1], null
         );
 				mTSF.nextFcast();
 			}

@@ -84,7 +84,7 @@ public class BikeArrivalTSRPostprocessor extends NumericalPostprocessor {
     mTSF.genTSDepModel(mDepFcastMode);
     mTSF.genTSArrivalFcastModel(mArrFcastMode, mMinXreg);
     double[] intvlArrFcast = new double[mTSF.mClArrStates.size()];
-    while (mTSF.nextTSFile(true)) {
+    while (mTSF.nextTSFile()) {
       dataPoints = mTSF.tsArrivalForecast();
       int intvl = 0;
       while (intvl < dataPoints[0].length) {
@@ -93,7 +93,7 @@ public class BikeArrivalTSRPostprocessor extends NumericalPostprocessor {
         }
         // Forecast vs Reality output predict arrivals and actual arrivals
         // originating from each cluster
-        mTSF.processFcastResult(clArrMomIndices, intvlArrFcast, null, true);
+        mTSF.processFcastResult(clArrMomIndices, intvlArrFcast, null);
         mTSF.nextFcast();
         intvl++;
       }

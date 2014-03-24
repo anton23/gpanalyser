@@ -111,61 +111,51 @@ public class BikeArrivalODEPostprocessor extends
 		  );
 		}
 
-		// Train the error model with oracle departure knowledge.
-		// Also we only predict next frequency step - if we predicted the actual
-		// fcastLen our error model would need to look into the future to work on the
-		// unseen data. Clearly this would mean that the forecast would no longer be
-		// out of sample so we can't do this.
+		// Train the error model on training data. We only predict next forecast
+		// frequency step - if we trained the error model on the actual fcastLen our
+		// error model would no longer be able to produce genuine out-of-sample
+		// forecasts.
     final int stopTimeIdx =
       (int) ((mTSF.mFcastWarmup + mTSF.mFcastFreq + stepSize) / stepSize);
 		final BikeModelRBridge trainTSF =
 		  mTSF.trainingForecast(mTSF.mFcastWarmup, mTSF.mFcastFreq);
+		trainTSF.setLogging(false);
 		trainTSF.genTSDepModel("oracle");
-		LinkedList<LinkedList<double[]>> resError =
+		LinkedList<LinkedList<double[]>> clErrorRepTS =
 		  new LinkedList<LinkedList<double[]>>();
-    while (trainTSF.nextTSFile(false)) {
-      resError.add(new LinkedList<double[]>());
+    while (trainTSF.nextTSFile()) {
+      clErrorRepTS.add(new LinkedList<double[]>());
       while (trainTSF.loadPCTMCEvents(pctmc)) {
         // Forecast
         super.calculateDataPoints(constants);
-        resError.getLast().add(trainTSF.processFcastResult(
-          clArrMomIndices, dataPoints[stopTimeIdx], null, false
+        clErrorRepTS.getLast().add(trainTSF.processFcastResult(
+          clArrMomIndices, dataPoints[stopTimeIdx], null
         ));
         trainTSF.nextFcast();
       }
     }
-    double[][][] error = new double[resError.getLast().getLast().length]
-      [resError.size()][resError.getLast().size()];
-    for (int cl = 0; cl < error.length; cl++) {
-      for (int rep = 0; rep < error[0].length; rep++) {
-        for (int obs = 0; obs < error[0][0].length; obs++) {
-          error[cl][rep][obs] = resError.get(rep).get(obs)[cl];
-        }
-      }
-    }
-    trainTSF.genErrorARIMA(error, mTSF.mFcastLen);
+    trainTSF.genErrorARIMA(clErrorRepTS, mTSF.mFcastLen);
 
     // Forecast
     mTSF.genTSDepModel(mDepFcastMode);
     final BikeModelRBridge mTSFShort = mTSF.newInstance(mTSF.mFcastFreq);
-		while (mTSF.nextTSFile(true) && mTSFShort.nextTSFile(false)) {
+    mTSFShort.setLogging(false);
+		while (mTSF.nextTSFile() && mTSFShort.nextTSFile()) {
 		  LinkedList<double[]> clErrors = new LinkedList<double[]>();
 			while (mTSF.loadPCTMCEvents(pctmc)) {
-			  // Predict error
-        double[] clFcastError = trainTSF.calcErrorCorrection(clErrors);
-			  
         // Forecast
         super.calculateDataPoints(constants);
 
-        // Correct current result using predicted error
-        // Note: We are not using current error!
+        // Correct current result using predicted error and print log msg
+        // Note: We are not using current forecast error!
         mTSF.processFcastResult(    
-          clArrMomIndices, dataPoints[dataPoints.length - 1], clFcastError, true
+          clArrMomIndices, dataPoints[dataPoints.length - 1],
+          trainTSF.calcErrorCorrection(clErrors)
         );
         
         // Store current fcast error for next prediction
         clErrors.add(mTSFShort.processFcastResult(
-          clArrMomIndices, dataPoints[stopTimeIdx], null, false
+          clArrMomIndices, dataPoints[stopTimeIdx], null
         ));
 
         mTSF.nextFcast();

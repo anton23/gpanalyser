@@ -33,6 +33,7 @@ public class BikeModelRBridge {
   private final List<String> mClArrTSFiles;
   
   // These fields may change during analysis
+  private boolean mLogging = true;
   private String mCurClDepTSFile;
   private String mCurClDepToDestTSFile;
   private String mCurArrTSFile;
@@ -93,6 +94,10 @@ public class BikeModelRBridge {
     // Initialise the series
     mCurTSFileIdx = -1;
     mCurTSStartIndex = 0;
+	}
+	
+	public void setLogging(boolean logging) {
+	  mLogging = logging;
 	}
 	
 	/**
@@ -187,16 +192,28 @@ public class BikeModelRBridge {
     }
 	}
 
-  public void genErrorARIMA(double[][][] error, int fcastLen) {
-    // Train model for error time series
+  public void genErrorARIMA(
+    final LinkedList<LinkedList<double[]>> clErrorRepTS,
+    final int fcastLen
+  ) {
+    // Train models for cluster error time series
+    double[][][] clError = new double[clErrorRepTS.getLast().getLast().length]
+      [clErrorRepTS.size()][clErrorRepTS.getLast().size()];
+    for (int cl = 0; cl < clError.length; cl++) {
+      for (int rep = 0; rep < clError[0].length; rep++) {
+        for (int obs = 0; obs < clError[0][0].length; obs++) {
+          clError[cl][rep][obs] = clErrorRepTS.get(rep).get(obs)[cl];
+        }
+      }
+    }
     try {
       // Load replicated error time series into R
       mRConn.voidEval(String.format(
         "trainClErrorRepTS <- array(dim = c(%d, %d, %d))",
-        error.length, error[0].length, error[0][0].length
+        clError.length, clError[0].length, clError[0][0].length
       ));
-      for (int clId = 0; clId < error.length; clId++) {
-        mRConn.assign("errorTSTmp", REXP.createDoubleMatrix(error[clId]));
+      for (int clId = 0; clId < clError.length; clId++) {
+        mRConn.assign("errorTSTmp", REXP.createDoubleMatrix(clError[clId]));
         mRConn.voidEval(String.format(
           "trainClErrorRepTS[%d,,] <- errorTSTmp", clId + 1
         ));
@@ -323,7 +340,7 @@ public class BikeModelRBridge {
   * 
   * @return true iff we have another departure and arrival time series
   */
-  public boolean nextTSFile(boolean log) {
+  public boolean nextTSFile() {
     // Are we done yet?
     if (mClDepTSFiles.size() <= ++mCurTSFileIdx) {
       return false;
@@ -350,7 +367,9 @@ public class BikeModelRBridge {
     }
 
     // We start every analysis from the first observation in the time series
-    if (log) PCTMCLogging.info(String.format("Interval: %s", mCurArrTSFile));
+    if (mLogging) {
+      PCTMCLogging.info(String.format("Interval: %s", mCurArrTSFile));
+    }
     mCurTSStartIndex = 0;
     return true;
   }
@@ -375,11 +394,10 @@ public class BikeModelRBridge {
 	public double[] processFcastResult(
 	  Map<State, int[]> clArrMomIndices,
 	  double[] fcastClArrivals,
-	  double[] clFcastError,
-	  boolean log
+	  double[] clFcastError
 	) {
 	  // Compare actual arrivals with the prediction
-	  if (log) {
+	  if (mLogging) {
 	    PCTMCLogging.info("Prediction #" + mCurTSStartIndex);
 	    PCTMCLogging.increaseIndent();
 	  }
@@ -409,7 +427,7 @@ public class BikeModelRBridge {
       ttlAvg += fcastClAvg;
       ttlSD += fcastClSD;
       actArr += actualClArrivals;
-      if (log) {
+      if (mLogging) {
         PCTMCLogging.info(String.format(
           "Cl:%d Mean:%.2f SD:%.2f Actual:%d",
           clId, fcastClAvg, fcastClSD, actualClArrivals
@@ -418,7 +436,7 @@ public class BikeModelRBridge {
     }
     // Compute actual cluster arrivals during current time window
     final int ttlArr = (int) mCurClArrTtlTS[mCurTSStartIndex / mFcastFreq];
-    if (log) {
+    if (mLogging) {
       PCTMCLogging.info(String.format(
         "Ttl: Mean:%.2f SD:%.2f Actual:%d All:%d", ttlAvg, ttlSD, actArr, ttlArr
       ));
