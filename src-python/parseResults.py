@@ -15,10 +15,21 @@ def MASE(actualTS, naiveTS, fcastTS):
   fcastE = [abs(a - b) for (a, b) in zip(actualTS, fcastTS)]
   return sum(fcastE) / (len(actualTS) * avgNaiveE)
 
+def MASEObsRepTS(actualObsRepTS, naiveObsRepTS, fcastObsRepTS):
+  return [MASE(actualObsRepTS[i], naiveObsRepTS[i], fcastObsRepTS[i]) for i
+    in range(len(actualObsRepTS))]
+
 # Root mean square error
 def RMSE(actualTS, fcastTS):
   return \
     math.sqrt(np.mean([(a - b) * (a - b) for (a, b) in zip(actualTS, fcastTS)]))
+
+def RMSEObsRepTS(actualObsRepTS, fcastObsRepTS): 
+  return [RMSE(actualObsRepTS[i], fcastObsRepTS[i]) for i
+    in range(len(actualObsRepTS))]
+
+def listStr(l):
+  return str(["%.2f" % elem for elem in l])
 
 # Get TS by cluster
 def getTSByCluster(clId, fcastResult):
@@ -30,6 +41,15 @@ def getTSByCluster(clId, fcastResult):
 		  for a in range(len(fcastResult))]
   return (meanFcast, sdFcast, act)
 
+def getObsRepTSByCluster(clId, fcastResult):
+  meanFcast = [[float(fcastResult[a][b][clId][0]) for a in range(len(fcastResult))]
+		  for b in range(len(fcastResult[0]))]
+  sdFcast = [[float(fcastResult[a][b][clId][1]) for a in range(len(fcastResult))]
+		  for b in range(len(fcastResult[0]))]
+  act = [[float(fcastResult[a][b][clId][2]) for a in range(len(fcastResult))]
+		  for b in range(len(fcastResult[0]))]
+  return (meanFcast, sdFcast, act)
+
 # Analysis
 def analyse(fcasts, analysis):
   fcastRes = fcasts[analysis]
@@ -37,16 +57,26 @@ def analyse(fcasts, analysis):
   numClusters = len(fcastRes[0][0]) - 1
   print("%s results:" % analysis)
   for clId in range(numClusters):
+    # Overall error
     (m, sd, act) = getTSByCluster(clId, fcastRes)
     (mNaive, sdNaive, act2) = getTSByCluster(clId, naiveRes)
     print(
       "Cl#%d: MASE: %.4f RMSE: %.4f" % (clId, MASE(act, mNaive, m), RMSE(act, m))
-    ) 
+    )
+    # Time dependent error
+    (mObs, sdObs, actObs) = getObsRepTSByCluster(clId, fcastRes)
+    (mNaiveObs, sdNaiveObs, actNaiveObs) = getObsRepTSByCluster(clId, naiveRes)
+    #print("MASE: " + listStr(MASEObsRepTS(actObs, mNaiveObs, mObs)))
+    #print("RMSE: " + listStr(RMSEObsRepTS(actObs, mObs)))
   (m, sd, act) = getTSByCluster(numClusters, fcastRes)
   (mNaive, sdNaive, act2) = getTSByCluster(numClusters, naiveRes)
   print(
     "Ttl:  MASE: %.4f RMSE: %.4f" % (MASE(act, mNaive, m), RMSE(act, m))
   )
+  (mObs, sdObs, actObs) = getObsRepTSByCluster(numClusters, fcastRes)
+  (mNaiveObs, sdNaiveObs, actNaiveObs) = getObsRepTSByCluster(numClusters, naiveRes)
+  print("MASE: " + listStr(MASEObsRepTS(actObs, mNaiveObs, mObs)))
+  print("RMSE: " + listStr(RMSEObsRepTS(actObs, mObs)))
 
 reAnalysis    = re.compile(".*Running analysis.*")
 reARIMAError  = re.compile(".*With ARIMAError.*")
