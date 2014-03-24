@@ -305,48 +305,46 @@ fcastOracleArrivalTS <- function (
 genARIMARepError <- function (
   fcastFreq,
   fcastWarmup,
+  fcastLen,
   clErrorRepTS
 ) {
   w <- fcastWarmup / fcastFreq
-  clErrorRepTSExtended <- array(0, dim = dim(clErrorRepTS) + c(0,0,w))
-  for (clId in 1:dim(clErrorRepTS)[2]) {
-    clErrorRepTSExtended[,clId, w + (1 : dim(clErrorRepTS)[3])] <-
-      clErrorRepTS[,clId,]
-  }
-  clErrorRepTSNorm <- normClRepTS(clErrorRepTSExtended)
-  errModels <- fitRepARIMAArrivals(0:1, 0:1, 0:1, NULL, clErrorRepTSNorm, w, 0)
+  h <- fcastLen / fcastFreq
+  # Pad the repTS data
+  clErrorRepTSExtended <- array(0, dim = dim(clErrorRepTS) + c(0, 0, w))
+  clErrorRepTSExtended[,, w + (1 : dim(clErrorRepTS)[3])] <- clErrorRepTS[,,]
+  # Normalise repTS and fit model
+  clErrModels <- fitRepARIMAArrivals(
+    0:2, 0, 0:1, NULL, normClRepTS(clErrorRepTSExtended), w, 0
+  )
   
   list(name = "ARIMAErrorForecast",
-    fcastTPt = function(cId, fcastLen, errTS) {
-      h <- fcastLen / fcastFreq
-      errMod <- errModels[[cId]]
+    fcastTPt = function(cId, errTS) {
+      clErrMod <- clErrModels[[cId]]
       # Normalise
-      errTSNorm <- normTS(
+      clErrTSNorm <- normTS(
         c(rep(0, w), errTS),
-        errMod$arrAvgTS, errMod$arrSDTS
+        clErrMod$arrAvgTS, clErrMod$arrSDTS
       )
       # Forecast
       clErrRepARIMA <- Arima(
-        errTSNorm, order = errMod$order, fixed = errMod$coef,
+        clErrTSNorm, order = clErrMod$order, fixed = clErrMod$coef,
         transform.pars = FALSE
       )
-      errTSNorm <- c(errTSNorm, forecast(clErrRepARIMA, h = h)$mean)
-      # Denormalise
-      errTSFcast <- denormTS(errTSNorm, errMod$arrAvgTS, errMod$arrSDTS)
+      clErrTSNorm <- c(clErrTSNorm, forecast(clErrRepARIMA, h = h)$mean)
       # We are interested in the sum of all errors for the fcast horizon
-      -sum(tail(errTSFcast, h))
+      -sum(tail(denormTS(clErrTSNorm, clErrMod$arrAvgTS, clErrMod$arrSDTS), h))
     }
   )
 }
 
 fcastError <- function (
   errModel,
-  fcastLen,
   clErrTS
 ) {
   fcastErr <- c()
   for (clId in 1 : dim(clErrTS)[1]) {
-    fcastErr <- c(fcastErr, errModel$fcastTPt(clId, fcastLen, clErrTS[clId, ]))
+    fcastErr <- c(fcastErr, errModel$fcastTPt(clId, clErrTS[clId, ]))
   }
   fcastErr
 }

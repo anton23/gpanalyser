@@ -113,7 +113,6 @@ public class BikeModelRBridge {
    *   forecast are done on the same data
    */
 	public BikeModelRBridge trainingForecast(
-	    final String fcastDepModel,
 	    final int fcastWarmup,
 	    final int fcastLen
 	  ) {
@@ -175,7 +174,7 @@ public class BikeModelRBridge {
     }
 	}
 
-  public void genErrorARIMA(double[][][] error) {
+  public void genErrorARIMA(double[][][] error, int fcastLen) {
     // Train model for error time series
     try {
       // Load replicated error time series into R
@@ -193,15 +192,15 @@ public class BikeModelRBridge {
         "trainClErrorRepTS <- aperm(trainClErrorRepTS, c(2,1,3))"
       );
       mRConn.voidEval(String.format(
-        "errModel <- genARIMARepError(%d, %d, trainClErrorRepTS)",
-        mFcastFreq, mFcastWarmup
+        "errModel <- genARIMARepError(%d, %d, %d, trainClErrorRepTS)",
+        mFcastFreq, mFcastWarmup, fcastLen
       ));
     } catch (RserveException e) {
       e.printStackTrace();
     }
   }
   
-  public double[] calcErrorCorrection(LinkedList<double[]> clErrors, int fcastLen) {
+  public double[] calcErrorCorrection(LinkedList<double[]> clErrors) {
     double[] retVal = null;
     try {
       // Load replicated error time series into R
@@ -218,8 +217,7 @@ public class BikeModelRBridge {
         mRConn.assign("clErrorTS", REXP.createDoubleMatrix(clErr));
       }
       REXP ret = mRConn.eval(String.format(
-        "fcastError(errModel, %d, clErrorTS)",
-        fcastLen
+        "fcastError(errModel, clErrorTS)"
       ));
       retVal = ret.asDoubles();
     } catch (RserveException e) {
