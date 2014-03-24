@@ -13,6 +13,7 @@ ODE_BIKE_FCAST: 'OdeBikeFcast';
 SIM_BIKE_FCAST: 'SimBikeFcast';
 TS_R_BIKE_FCAST: 'TSRBikeFcast';
 
+ARIMA_ERROR: 'arimaError';
 ARR_FCAST_MODE: 'arrFcastMode';
 FCAST_WARMUP: 'fcastWarmup';
 FCAST_LEN: 'fcastLen';

@@ -190,6 +190,7 @@ returns [
     )?
     stepSize = expression COMMA 
     density = INTEGER COMMA
+    arimaError = LOWERCASENAME COMMA
     depFcastMode = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   )
@@ -201,12 +202,12 @@ returns [
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new BikeArrivalODEPostprocessor(
         stepEval.getResult(), Integer.parseInt($density.text),
-        $depFcastMode.text, $cfg.cfg
+        Boolean.valueOf($arimaError.text), $depFcastMode.text, $cfg.cfg
       );
     } else {
       $postprocessor = new BikeArrivalODEPostprocessor(
         stepEval.getResult(), Integer.parseInt($density.text),
-        $depFcastMode.text, $cfg.cfg,
+        Boolean.valueOf($arimaError.text), $depFcastMode.text, $cfg.cfg,
         postprocessorParameters
       );
     }
@@ -226,6 +227,7 @@ returns [
   ^(SIM_BIKE_FCAST
     stepSize = expression COMMA
     replications = INTEGER COMMA
+    arimaError = LOWERCASENAME COMMA
     depFcastMode = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   )
@@ -237,12 +239,12 @@ returns [
     if (postprocessorParameters.isEmpty()) {
       $postprocessor = new BikeArrivalSimPostprocessor(
         stepEval.getResult(), Integer.parseInt($replications.text),
-        $depFcastMode.text, $cfg.cfg
+        Boolean.valueOf($arimaError.text), $depFcastMode.text, $cfg.cfg
       );
     } else {
       $postprocessor = new BikeArrivalSimPostprocessor(
         stepEval.getResult(), Integer.parseInt($replications.text),
-        $depFcastMode.text, $cfg.cfg,
+        Boolean.valueOf($arimaError.text), $depFcastMode.text, $cfg.cfg,
         postprocessorParameters
       );
     }
@@ -287,9 +289,9 @@ bikeFcastConfig returns [
   BikeModelRBridge cfg
 ]:
   ^(BIKE_FCAST_CFG 
+    fcastFreq = INTEGER COMMA
     fcastWarmup = INTEGER COMMA
     fcastLen = INTEGER COMMA
-    fcastFreq = INTEGER COMMA
     clDepStates = listOfStates COMMA
     clArrStates = listOfStates COMMA
     trainClDepTS = listOfFiles COMMA
@@ -300,9 +302,9 @@ bikeFcastConfig returns [
     clArrTS = listOfFiles
   ) {
     $cfg = new BikeModelRBridge(
+      Integer.parseInt($fcastFreq.text),
       Integer.parseInt($fcastWarmup.text),
       Integer.parseInt($fcastLen.text),
-      Integer.parseInt($fcastFreq.text),
       $clDepStates.l,
       $clArrStates.l,
       $trainClDepTS.l,

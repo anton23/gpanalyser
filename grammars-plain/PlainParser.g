@@ -50,9 +50,9 @@ tokens{
 //This is a hack until the composite grammars are implemented in a better way
 @members{
   public final String fcastSettingsHint =
+    "  fcastFreq=<integer>,\n" +
     "  fcastWarmup=<integer>,\n" +
     "  fcastLen=<integer>,\n" +
-    "  fcastFreq=<integer>,\n" +
     "  clDepStates={<state>,...},\n" +
     "  clArrStates={<state>,...},\n" +
     "  trainClDepTS={\"file1\",...},\n" +
@@ -164,6 +164,7 @@ odeBikeFcast:
     hint.push("ODE based bike journey forecasting analysis has syntax\n"+
       "OdeBikeFcast(\n  stepSize=<number>,\n" +
       "  density=<integer>,\n" +
+      "  arimaError=<boolean>,\n" +
       "  depFcastMode=<lowercasename>,\n" +
       fcastSettingsHint + ")"
     );
@@ -171,6 +172,7 @@ odeBikeFcast:
   LPAR
     STEPSIZE DEF stepSize = expression COMMA
     DENSITY DEF density = INTEGER COMMA
+    ARIMA_ERROR DEF arimaError = LOWERCASENAME COMMA
     DEP_FCAST_MODE DEF depFcastM = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   RPAR
@@ -179,7 +181,8 @@ odeBikeFcast:
   }
   ->
   ^(ODE_BIKE_FCAST
-    (odeParameters COMMA)? $stepSize COMMA $density COMMA $depFcastM COMMA $cfg
+    (odeParameters COMMA)?
+      $stepSize COMMA $density COMMA $arimaError COMMA $depFcastM COMMA $cfg
   )
 ;
 
@@ -189,6 +192,7 @@ simBikeFcast:
     hint.push("Simulation based bike journey forecasting analysis has syntax\n"+
       "SimBikeFcast(\n  stepSize=<number>,\n" +
       "  replications=<integer>,\n" +
+      "  arimaError=<boolean>,\n" +
       "  depFcastMode=<lowercasename>,\n" +
       fcastSettingsHint + ")"
     );
@@ -196,6 +200,7 @@ simBikeFcast:
   LPAR
     STEPSIZE DEF stepSize = expression COMMA
     REPLICATIONS DEF replications = INTEGER COMMA
+    ARIMA_ERROR DEF arimaError = LOWERCASENAME COMMA
     DEP_FCAST_MODE DEF depFcastM = LOWERCASENAME COMMA
     cfg = bikeFcastConfig
   RPAR
@@ -204,7 +209,7 @@ simBikeFcast:
   }
   ->
   ^(SIM_BIKE_FCAST
-    $stepSize COMMA $replications COMMA $depFcastM COMMA $cfg
+    $stepSize COMMA $replications COMMA $arimaError COMMA $depFcastM COMMA $cfg
   )
 ;
 
@@ -235,9 +240,9 @@ tsRBikeFcast:
 
 
 bikeFcastConfig:
+  FCAST_FREQ DEF fcastFreq = INTEGER COMMA
   FCAST_WARMUP DEF fcastWarmup = INTEGER COMMA
   FCAST_LEN DEF fcastLen = INTEGER COMMA
-  FCAST_FREQ DEF fcastFreq = INTEGER COMMA
   CL_DEP_STATES DEF clDepStates = listOfStates COMMA
   CL_ARR_STATES DEF clArrStates = listOfStates COMMA  
   TRAIN_CL_DEP_TS DEF trainClDepTS = listOfFiles COMMA
@@ -248,7 +253,7 @@ bikeFcastConfig:
   CL_ARR_TS DEF clArrTS = listOfFiles
   ->
   ^(BIKE_FCAST_CFG
-    $fcastWarmup COMMA $fcastLen COMMA $fcastFreq COMMA
+    $fcastFreq COMMA $fcastWarmup COMMA $fcastLen COMMA
     $clDepStates COMMA $clArrStates COMMA
     $trainClDepTS COMMA $trainClDepToDestTS COMMA $trainClArrTS COMMA
     $clDepTS COMMA $clDepToDestTS COMMA $clArrTS

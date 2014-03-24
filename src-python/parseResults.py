@@ -49,6 +49,7 @@ def analyse(fcasts, analysis):
   )
 
 reAnalysis    = re.compile(".*Running analysis.*")
+reARIMAError  = re.compile(".*With ARIMAError.*")
 reInterval    = re.compile(".*Interval: (.*)")
 rePrediction  = re.compile(".*Prediction #(\d+)")
 reResStr      = "Mean:(\d+\.\d+) SD:(\d+\.\d+|NaN) Actual:(\d+)"
@@ -56,11 +57,12 @@ reResCl       = re.compile(".*Cl:(\d+) " + reResStr)
 reResTtl      = re.compile(".*Ttl: " + reResStr + " All:(\d+)")
 fcasts = {
   'IPCTMC' : [],
+  'IPCTMC_ARIMA' : [],
   'Naive' : [],
   'Avg' : [],
   'ARIMA' : [],
   'LinReg' : [],
-  'LinRegARIMA' : []
+  'LinReg_ARIMA' : []
 }
 with open(sys.argv[1], "r") as f:
   analysis = 'dummy'
@@ -69,14 +71,16 @@ with open(sys.argv[1], "r") as f:
   for line in f:
     # Which results are we analysing
     if (reAnalysis.match(line) is not None):
-      if 'ODE' in line: analysis = 'IPCTMC'
+      if 'ODEs' in line: analysis = 'IPCTMC'
       if 'naive' in line: analysis = 'Naive'
       if 'avg' in line: analysis = 'Avg'
       if 'arima' in line: analysis = 'ARIMA'
       if 'linreg' in line: analysis = 'LinReg'
-      if 'linregarima' in line: analysis = 'LinRegARIMA'
+      if 'linregarima' in line: analysis = 'LinReg_ARIMA'
       continue
-    
+    if (reARIMAError.match(line) is not None):
+      analysis = analysis + "_ARIMA"
+
     # A new interval
     if (reInterval.match(line) is not None):
       fcasts[analysis].append([])
@@ -92,5 +96,5 @@ with open(sys.argv[1], "r") as f:
       fcasts[analysis][-1][-1].append(reResTtl.match(line).groups()[0:4])
 
 # Analysis
-for analysis in fcasts.keys():
+for analysis in sorted(fcasts.keys()):
   analyse(fcasts, analysis)

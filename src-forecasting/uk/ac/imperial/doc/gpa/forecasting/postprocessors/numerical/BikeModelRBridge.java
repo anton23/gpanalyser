@@ -20,9 +20,9 @@ public class BikeModelRBridge {
   private RConnection mRConn;
   
   // These are the input fields
+  public final int mFcastFreq;
   public final int mFcastWarmup;
   public final int mFcastLen;
-  public final int mFcastFreq;
   public final List<State> mClDepStates;
   public final List<State> mClArrStates;
   private final List<String> mTrainClDepTSFiles;
@@ -43,16 +43,16 @@ public class BikeModelRBridge {
   private int mCurTSStartIndex;
   
 	public BikeModelRBridge(
-    final int fcastWarmup, final int fcastLen, final int fcastFreq,
+	  final int fcastFreq, final int fcastWarmup, final int fcastLen,
     final List<State> clDepStates, final List<State> clArrStates,
     final List<String> trainClDepTSFiles,
     final List<String> trainClDepToDestTSFiles,
     final List<String> trainClArrTSFiles, final List<String> clDepTSFiles,
     final List<String> clDepToDestTSFiles, final List<String> clArrTSFiles
 	) {
+    mFcastFreq = fcastFreq;
     mFcastWarmup = fcastWarmup;
     mFcastLen = fcastLen;
-    mFcastFreq = fcastFreq;
     mClDepStates = clDepStates;
     mClArrStates = clArrStates;
     mTrainClDepTSFiles = trainClDepTSFiles;
@@ -105,7 +105,7 @@ public class BikeModelRBridge {
 	 */
 	public BikeModelRBridge newInstance() {
 	  return new BikeModelRBridge(
-	    mFcastWarmup, mFcastLen, mFcastFreq,
+	    mFcastFreq, mFcastWarmup, mFcastLen,
 	    mClDepStates, mClArrStates,
 	    mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles,
 	    mClDepTSFiles, mClDepToDestTSFiles, mClArrTSFiles
@@ -119,7 +119,7 @@ public class BikeModelRBridge {
     final int fcastLen    
   ) {
     return new BikeModelRBridge(
-      mFcastWarmup, fcastLen, mFcastFreq,
+      mFcastFreq, mFcastWarmup, fcastLen,
       mClDepStates, mClArrStates,
       mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles,
       mClDepTSFiles, mClDepToDestTSFiles, mClArrTSFiles
@@ -135,7 +135,7 @@ public class BikeModelRBridge {
 	    final int fcastLen
 	  ) {
 	  return new BikeModelRBridge(
-	    fcastWarmup, fcastLen, mFcastFreq,
+	    mFcastFreq, fcastWarmup, fcastLen,
 	    mClDepStates, mClArrStates,
 	    mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles,
 	    mTrainClDepTSFiles, mTrainClDepToDestTSFiles, mTrainClArrTSFiles

@@ -17,17 +17,20 @@ import uk.ac.imperial.doc.pctmc.representation.State;
 
 public class BikeArrivalSimPostprocessor extends
   InhomogeneousSimulationAnalysisNumericalPostprocessor
-{	
+{
+  private final boolean mArimaErrorModel;
   private final String mDepFcastMode;
   private final BikeModelRBridge mTSF;
 
 	public BikeArrivalSimPostprocessor(
 	  final double stepSize,
 	  final int replications,
+	  final boolean arima,
 	  final String depFcastMode,
     final BikeModelRBridge tsf
 	) {
     super(tsf.mFcastWarmup + tsf.mFcastLen + stepSize, stepSize, replications);
+    mArimaErrorModel = arima;
     mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
@@ -35,6 +38,7 @@ public class BikeArrivalSimPostprocessor extends
 	public BikeArrivalSimPostprocessor(
 	  final double stepSize,
 	  final int replications,
+    final boolean arima,
 	  final String depFcastMode,
 	  final BikeModelRBridge tsf,
 	  Map<String, Object> params
@@ -43,6 +47,7 @@ public class BikeArrivalSimPostprocessor extends
       tsf.mFcastWarmup + tsf.mFcastLen + stepSize,
       stepSize, replications, params
     );
+    mArimaErrorModel = arima;
     mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
@@ -50,7 +55,8 @@ public class BikeArrivalSimPostprocessor extends
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new BikeArrivalSimPostprocessor(
-	    stepSize, replications, mDepFcastMode, mTSF.newInstance()
+	    stepSize, replications, mArimaErrorModel,
+	    mDepFcastMode, mTSF.newInstance()
 		);
 	}
 	

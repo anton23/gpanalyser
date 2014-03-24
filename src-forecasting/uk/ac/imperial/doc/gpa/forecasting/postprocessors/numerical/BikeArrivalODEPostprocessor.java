@@ -18,20 +18,24 @@ import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
+import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class BikeArrivalODEPostprocessor extends
   InhomogeneousODEAnalysisNumericalPostprocessor
 {	
+  private final boolean mArimaErrorModel;
   private final String mDepFcastMode;
   private final BikeModelRBridge mTSF;
 
 	public BikeArrivalODEPostprocessor (
 	  final double stepSize,
 	  final int density,
+	  final boolean arima,
 	  final String depFcastMode,
     final BikeModelRBridge tsf
 	) {
     super(tsf.mFcastWarmup + tsf.mFcastLen + stepSize, stepSize, density);
+    mArimaErrorModel = arima;
     mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
@@ -39,6 +43,7 @@ public class BikeArrivalODEPostprocessor extends
 	public BikeArrivalODEPostprocessor (
 	  final double stepSize,
 	  final int density,
+	  final boolean arima,
 	  final String depFcastMode,
     final BikeModelRBridge tsf,
     Map<String, Object> params
@@ -47,6 +52,7 @@ public class BikeArrivalODEPostprocessor extends
       tsf.mFcastWarmup + tsf.mFcastLen + stepSize,
       stepSize, density, params
     );
+    mArimaErrorModel = arima;
     mDepFcastMode = depFcastMode;
     mTSF = tsf;
 	}
@@ -55,20 +61,22 @@ public class BikeArrivalODEPostprocessor extends
 	  final double stopTime,
 	  final double stepSize,
 	  final int density,
+	  final boolean arima,
 		final PCTMCODEAnalysis odeAnalysis,
 		final JavaODEsPreprocessed preprocessedImplementation,
     final String depFcastMode,
     final BikeModelRBridge tsf
 	) {
 		super(stopTime, stepSize, density, odeAnalysis, preprocessedImplementation);
-    mDepFcastMode = depFcastMode;
+    mArimaErrorModel = arima;
+		mDepFcastMode = depFcastMode;
 		mTSF = tsf;
 	}
 	
 	@Override
 	public PCTMCAnalysisPostprocessor regenerate() {
 		return new BikeArrivalODEPostprocessor(
-		  stepSize, density, mDepFcastMode, mTSF.newInstance()
+		  stepSize, density, mArimaErrorModel, mDepFcastMode, mTSF.newInstance()
 		);
 	}
 
@@ -79,7 +87,7 @@ public class BikeArrivalODEPostprocessor extends
 		  new PCTMCJavaImplementationProvider();
 		BikeArrivalODEPostprocessor ret =
 		  new BikeArrivalODEPostprocessor(
-		    stopTime, stepSize, density, odeAnalysis,
+		    stopTime, stepSize, density, mArimaErrorModel, odeAnalysis,
 		    javaImplementation.getPreprocessedODEImplementation(
 		      odeAnalysis.getOdeMethod(), constants, momentIndex
 		    ),
@@ -93,6 +101,7 @@ public class BikeArrivalODEPostprocessor extends
 	public void calculateDataPoints(Constants constants) {
 		// Do analysis for all time series points
 		PlainPCTMC pctmc = getPlainPCMTC(odeAnalysis);
+		if(mArimaErrorModel) {PCTMCLogging.info("With ARIMAError");}
 		
 		// Find arrival populations for all clusters
 		final Map<State, int[]> clArrMomIndices = new HashMap<State, int[]>();
@@ -110,7 +119,23 @@ public class BikeArrivalODEPostprocessor extends
 		    } 
 		  );
 		}
-
+		
+		if(!mArimaErrorModel) {
+	    mTSF.genTSDepModel(mDepFcastMode);
+	    while (mTSF.nextTSFile()) {
+	      while (mTSF.loadPCTMCEvents(pctmc)) {
+	        // Forecast
+	        super.calculateDataPoints(constants);
+	        mTSF.processFcastResult(    
+	          clArrMomIndices, dataPoints[dataPoints.length - 1], null
+	        );
+	        mTSF.nextFcast();
+	      }
+	    }
+	    mTSF.closeConnection();
+	    return;
+		}
+		  
 		// Train the error model on training data. We only predict next forecast
 		// frequency step - if we trained the error model on the actual fcastLen our
 		// error model would no longer be able to produce genuine out-of-sample
