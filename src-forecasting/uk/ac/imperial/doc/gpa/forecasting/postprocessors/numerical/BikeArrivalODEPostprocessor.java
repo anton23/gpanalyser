@@ -121,8 +121,8 @@ public class BikeArrivalODEPostprocessor extends
     final int stopTimeIdx =
       (int) ((mTSF.mFcastWarmup + mTSF.mFcastFreq + stepSize) / stepSize);
 		final BikeModelRBridge trainTSF =
-		  mTSF.trainingForecast("oracle", mTSF.mFcastWarmup, mTSF.mFcastFreq);
-		trainTSF.genTSDepModel(mDepFcastMode);
+		  mTSF.trainingForecast(mTSF.mFcastWarmup, mTSF.mFcastFreq);
+		trainTSF.genTSDepModel("oracle");
 		LinkedList<LinkedList<double[]>> resError =
 		  new LinkedList<LinkedList<double[]>>();
     while (trainTSF.nextTSFile(false)) {
@@ -150,7 +150,7 @@ public class BikeArrivalODEPostprocessor extends
         }
       }
     }
-    trainTSF.genErrorARIMA(error);
+    trainTSF.genErrorARIMA(error, mTSF.mFcastLen);
 
     // Forecast
     mTSF.genTSDepModel(mDepFcastMode);
@@ -158,7 +158,7 @@ public class BikeArrivalODEPostprocessor extends
 		  LinkedList<double[]> clErrors = new LinkedList<double[]>();
 			while (mTSF.loadPCTMCEvents(pctmc)) {
 			  // Predict error correction
-        double[] clErrCorrect = trainTSF.calcErrorCorrection(clErrors, mTSF.mFcastLen);
+        double[] clErrCorrect = trainTSF.calcErrorCorrection(clErrors);
 			  
         // Forecast
         super.calculateDataPoints(constants);
