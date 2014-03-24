@@ -1,6 +1,5 @@
 package uk.ac.imperial.doc.gpa.forecasting.postprocessors.numerical;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +18,6 @@ import uk.ac.imperial.doc.pctmc.javaoutput.PCTMCJavaImplementationProvider;
 import uk.ac.imperial.doc.pctmc.odeanalysis.PCTMCODEAnalysis;
 import uk.ac.imperial.doc.pctmc.postprocessors.numerical.NumericalPostprocessor;
 import uk.ac.imperial.doc.pctmc.representation.State;
-import uk.ac.imperial.doc.pctmc.utils.PCTMCLogging;
 
 public class BikeArrivalODEPostprocessor extends
   InhomogeneousODEAnalysisNumericalPostprocessor
@@ -130,15 +128,10 @@ public class BikeArrivalODEPostprocessor extends
       while (trainTSF.loadPCTMCEvents(pctmc)) {
         // Forecast
         super.calculateDataPoints(constants);
-        double result[][] = trainTSF.processFcastResult(
+        resError.getLast().add(trainTSF.processFcastResult(
           clArrMomIndices, dataPoints[stopTimeIdx], null, false
-        );
-        double[] resCurError = new double[result.length];
-        resError.getLast().add(resCurError);
-        for (int clId = 0; clId < result.length; clId++) {
-          resCurError[clId] = result[clId][0] - result[clId][2];
-        }
-        trainTSF.nextIntvl();
+        ));
+        trainTSF.nextFcast();
       }
     }
     double[][][] error = new double[resError.getLast().getLast().length]
@@ -154,30 +147,29 @@ public class BikeArrivalODEPostprocessor extends
 
     // Forecast
     mTSF.genTSDepModel(mDepFcastMode);
-		while (mTSF.nextTSFile()) {
+    final BikeModelRBridge mTSFShort = mTSF.newInstance(mTSF.mFcastFreq);
+		while (mTSF.nextTSFile(true) && mTSFShort.nextTSFile(false)) {
 		  LinkedList<double[]> clErrors = new LinkedList<double[]>();
 			while (mTSF.loadPCTMCEvents(pctmc)) {
-			  // Predict error correction
-        double[] clErrCorrect = trainTSF.calcErrorCorrection(clErrors);
+			  // Predict error
+        double[] clFcastError = trainTSF.calcErrorCorrection(clErrors);
 			  
         // Forecast
         super.calculateDataPoints(constants);
-        
-        // - Gather current 5 minute error
-        double[][] result = mTSF.processFcastResult(
-          clArrMomIndices, dataPoints[stopTimeIdx], null, false
-        );
-        double[] resCurError = new double[result.length];
-        clErrors.add(resCurError);
-        for (int clId = 0; clId < result.length; clId++) {
-          resCurError[clId] = result[clId][0] - result[clId][3];
-        }
-        // - Correct current result using predicted error (not using current error!)
+
+        // Correct current result using predicted error
+        // Note: We are not using current error!
         mTSF.processFcastResult(    
-          clArrMomIndices, dataPoints[dataPoints.length - 1], clErrCorrect, true
+          clArrMomIndices, dataPoints[dataPoints.length - 1], clFcastError, true
         );
-        PCTMCLogging.info(Arrays.toString(clErrCorrect));
-        mTSF.nextIntvl();
+        
+        // Store current fcast error for next prediction
+        clErrors.add(mTSFShort.processFcastResult(
+          clArrMomIndices, dataPoints[stopTimeIdx], null, false
+        ));
+
+        mTSF.nextFcast();
+        mTSFShort.nextFcast();
 			}
 		}
 		mTSF.closeConnection();
