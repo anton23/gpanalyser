@@ -12,8 +12,8 @@ import numpy as np
 # Mean absolute scaled error
 def MASE(actualTS, naiveTS, fcastTS):
   avgNaiveE = np.mean([abs(a - b) for (a, b) in zip(actualTS, naiveTS)])
-  fcastE = [abs(a - b) for (a, b) in zip(actualTS, fcastTS)]
-  return sum(fcastE) / (len(actualTS) * avgNaiveE)
+  avgFcastE = np.mean([abs(a - b) for (a, b) in zip(actualTS, fcastTS)])
+  return avgFcastE / avgNaiveE
 
 def MASEObsRepTS(actualObsRepTS, naiveObsRepTS, fcastObsRepTS):
   return [MASE(actualObsRepTS[i], naiveObsRepTS[i], fcastObsRepTS[i]) for i
