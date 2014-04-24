@@ -89,11 +89,25 @@ genArrFcastModel <- function(
       trainClArrRepTSFiles,
       TRUE
     ),
+    linregnonorm = genLinRegARIMAArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen, minXreg,
+      trainClDepRepTSFiles,
+      trainClDepToDestRepTSFiles,
+      trainClArrRepTSFiles,
+      TRUE, TRUE
+    ),
     linregarima = genLinRegARIMAArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen, minXreg,
       trainClDepRepTSFiles,
       trainClDepToDestRepTSFiles,
       trainClArrRepTSFiles
+    ),
+    linregarimanonorm = genLinRegARIMAArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen, minXreg,
+      trainClDepRepTSFiles,
+      trainClDepToDestRepTSFiles,
+      trainClArrRepTSFiles,
+      FALSE, TRUE
     ),
     oracle = genOracleArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen
@@ -122,7 +136,7 @@ genARIMAArrFcastModel <- function(
   fcastWarmup,
   fcastLen,
   trainClArrRepTSFiles,
-  zerofcast = FALSE
+  linregonly = FALSE
 ) {
   # Load repTS and change time series sample frequency to fcastFreq
   clArrRepTS <- lowerClRepTSFreq(loadRepTS(trainClArrRepTSFiles), fcastFreq)
@@ -134,7 +148,7 @@ genARIMAArrFcastModel <- function(
   
   # Fit arrival model for all clusters
   arrModels <- fitRepARIMAArrivals(0, 0, 0, NULL, normTrainClArr, w, 0)
-  if (!zerofcast) {
+  if (!linregonly) {
     arrModels <- fitRepARIMAArrivals(1, 0, 0:1, NULL, normTrainClArr, w, 0)
   }
   
@@ -168,7 +182,8 @@ genLinRegARIMAArrFcastModel <- function (
   trainClDepRepTSFiles = NULL,
   trainClDepToDestRepTSFiles = NULL,
   trainClArrRepTSFiles = NULL,
-  zerofcast = FALSE
+  linregonly = FALSE,
+  unnorm = FALSE
 ) {
   assert_that(fcastWarmup > minXreg)
   assert_that(minXreg %% fcastFreq == 0)
@@ -182,15 +197,19 @@ genLinRegARIMAArrFcastModel <- function (
   h <- fcastLen / fcastFreq
   
   # Normalise samples
-  normTrainClDep <- normClRepTS(clDepRepTS)
-  normTrainClArr <- normClRepTS(clArrRepTS)
+  normTrainClDep <- normClRepTS(clDepRepTS, avgAndSDRepTSNoNorm)
+  normTrainClArr <- normClRepTS(clArrRepTS, avgAndSDRepTSNoNorm)
+  if (!unnorm) {
+    normTrainClDep <- normClRepTS(clDepRepTS)
+    normTrainClArr <- normClRepTS(clArrRepTS)
+  }
   
   # Fit arrival model for all clusters
   arrModels <-
     fitRepARIMAArrivals(0, 0, 0, normTrainClDep, normTrainClArr, w, nx)
-  if (!zerofcast) {
+  if (!linregonly) {
     arrModels <-
-      fitRepARIMAArrivals(1, 0, 0:1, normTrainClDep, normTrainClArr, w, nx)
+      fitRepARIMAArrivals(1, 0:1, 0:1, normTrainClDep, normTrainClArr, w, nx)
   }
   
   list(name = "LinRegARIMAArrForecast",
