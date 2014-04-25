@@ -75,8 +75,8 @@ def analyse(fcasts, analysis):
   )
   (mObs, sdObs, actObs) = getObsRepTSByCluster(numClusters, fcastRes)
   (mNaiveObs, sdNaiveObs, actNaiveObs) = getObsRepTSByCluster(numClusters, naiveRes)
-  print("MASE: " + listStr(MASEObsRepTS(actObs, mNaiveObs, mObs)))
-  print("RMSE: " + listStr(RMSEObsRepTS(actObs, mObs)))
+  #print("MASE: " + listStr(MASEObsRepTS(actObs, mNaiveObs, mObs)))
+  #print("RMSE: " + listStr(RMSEObsRepTS(actObs, mObs)))
 
 reAnalysis    = re.compile(".*Running analysis.*")
 reARIMAError  = re.compile(".*With ARIMAError.*")
@@ -92,7 +92,10 @@ fcasts = {
   'Avg' : [],
   'ARIMA' : [],
   'LinReg' : [],
-  'LinReg_ARIMA' : []
+  'LinReg_ARIMA' : [],
+  'LinReg_NoNorm' : [],
+  'LinReg_NoNorm_ARIMA' : [],
+  'LinReg_NoNorm_ARIMA_NoNorm' : []
 }
 with open(sys.argv[1], "r") as f:
   analysis = 'dummy'
@@ -106,7 +109,10 @@ with open(sys.argv[1], "r") as f:
       if 'avg' in line: analysis = 'Avg'
       if 'arima' in line: analysis = 'ARIMA'
       if 'linreg' in line: analysis = 'LinReg'
-      if 'linregarima' in line: analysis = 'LinReg_ARIMA'
+      if 'linreg_arima' in line: analysis = 'LinReg_ARIMA'
+      if 'linreg_nonorm' in line: analysis = 'LinReg_NoNorm'
+      if 'linreg_nonorm_arima' in line: analysis = 'LinReg_NoNorm_ARIMA'
+      if 'linreg_nonorm_arima_nonorm' in line: analysis = 'LinReg_NoNorm_ARIMA_NoNorm'
       continue
     if (reARIMAError.match(line) is not None):
       analysis = analysis + "_ARIMA"

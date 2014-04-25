@@ -89,25 +89,31 @@ genArrFcastModel <- function(
       trainClArrRepTSFiles,
       TRUE
     ),
-    linregnonorm = genLinRegARIMAArrFcastModel(
+    linreg_arima = genLinRegARIMAArrFcastModel(
+      fcastFreq, fcastWarmup, fcastLen, minXreg,
+      trainClDepRepTSFiles,
+      trainClDepToDestRepTSFiles,
+      trainClArrRepTSFiles
+    ),
+    linreg_nonorm = genLinRegARIMAArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen, minXreg,
       trainClDepRepTSFiles,
       trainClDepToDestRepTSFiles,
       trainClArrRepTSFiles,
       TRUE, TRUE
     ),
-    linregarima = genLinRegARIMAArrFcastModel(
-      fcastFreq, fcastWarmup, fcastLen, minXreg,
-      trainClDepRepTSFiles,
-      trainClDepToDestRepTSFiles,
-      trainClArrRepTSFiles
-    ),
-    linregarimanonorm = genLinRegARIMAArrFcastModel(
+    linreg_nonorm_arima_nonorm = genLinRegARIMAArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen, minXreg,
       trainClDepRepTSFiles,
       trainClDepToDestRepTSFiles,
       trainClArrRepTSFiles,
       FALSE, TRUE
+    ),
+    linreg_nonorm_arima = genLinRegARIMAArrFcastModelNoNorm(
+      fcastFreq, fcastWarmup, fcastLen, minXreg,
+      trainClDepRepTSFiles,
+      trainClDepToDestRepTSFiles,
+      trainClArrRepTSFiles
     ),
     oracle = genOracleArrFcastModel(
       fcastFreq, fcastWarmup, fcastLen
@@ -209,14 +215,14 @@ genLinRegARIMAArrFcastModel <- function (
     fitRepARIMAArrivals(0, 0, 0, normTrainClDep, normTrainClArr, w, nx)
   if (!linregonly) {
     arrModels <-
-      fitRepARIMAArrivals(1, 0:1, 0:1, normTrainClDep, normTrainClArr, w, nx)
+      fitRepARIMAArrivals(0:1, 0:1, 0:1, normTrainClDep, normTrainClArr, w, nx)
   }
-  
+
   list(name = "LinRegARIMAArrForecast",
     fcastTPt = function(cId, startTPt, depModel, depTS, depToDestTS, arrTS) {
       arrMod <- arrModels[[cId]]
       # Calculate the xreg using known and forecasted departures
-      depTSFcast <- depModel$genTS(cId, startTPt, depTS, depToDestTS)
+      depTSFcast <- depModel$genTS(cId, startTPt, fcastLen, depTS, depToDestTS)
       depTSFcastNorm <- normTS(
         lowerTSFreq(
           # Append history and forecast
@@ -245,6 +251,86 @@ genLinRegARIMAArrFcastModel <- function (
       arrTSFcast <- denormTS(arrTSNorm, arrMod$arrAvgTS, arrMod$arrSDTS)
       # We are interested in sum of all arrivals within fcast horizon
       max(sum(tail(arrTSFcast, h)), 0)
+    }
+  )
+}
+
+genLinRegARIMAArrFcastModelNoNorm <- function (
+  fcastFreq,
+  fcastWarmup,
+  fcastLen,
+  minXreg,
+  trainClDepRepTSFiles = NULL,
+  trainClDepToDestRepTSFiles = NULL,
+  trainClArrRepTSFiles = NULL
+) {
+  oracleDep <- genDepFcastModel(
+    "oracle",
+    fcastFreq,
+    fcastWarmup,
+    trainClDepRepTSFiles,
+    trainClDepToDestRepTSFiles
+  )
+  oracleArr <- genArrFcastModel(
+    "oracle",
+    fcastFreq,
+    fcastWarmup,
+    fcastFreq,
+    minXreg,
+    trainClDepRepTSFiles,
+    trainClDepToDestRepTSFiles,
+    trainClArrRepTSFiles
+  )
+  linregNoNormModelFreq <- genArrFcastModel(
+    "linreg_nonorm",
+    fcastFreq,
+    fcastWarmup,
+    fcastFreq,
+    minXreg,
+    trainClDepRepTSFiles,
+    trainClDepToDestRepTSFiles,
+    trainClArrRepTSFiles
+  )
+  
+  # Train the regression time series error model
+  oracleTrainArrs <- fcastArrivalTS(oracleDep, oracleArr, trainClDepRepTSFiles[1], trainClDepToDestRepTSFiles[1], trainClArrRepTSFiles[1])
+  clErrorRepTS <- array(dim=c(length(trainClDepRepTSFiles),dim(oracleTrainArrs)))
+  for (f in 1:length(trainClDepRepTSFiles)) {
+    # Evaluate the error
+    oracleTrainArrs <- fcastArrivalTS(oracleDep, oracleArr, trainClDepRepTSFiles[f], trainClDepToDestRepTSFiles[f], trainClArrRepTSFiles[f])
+    nonormFreqArrs <- fcastArrivalTS(oracleDep, linregNoNormModelFreq, trainClDepRepTSFiles[f], trainClDepToDestRepTSFiles[f], trainClArrRepTSFiles[f])
+    clErrorRepTS[f,,] <- oracleTrainArrs - nonormFreqArrs
+  }
+  errModel <- genARIMARepError(fcastFreq, fcastWarmup, fcastLen, clErrorRepTS)
+  
+  # Train the regression model
+  linregNoNormModel <- genArrFcastModel(
+    "linreg_nonorm",
+    fcastFreq,
+    fcastWarmup,
+    fcastLen,
+    minXreg,
+    trainClDepRepTSFiles,
+    trainClDepToDestRepTSFiles,
+    trainClArrRepTSFiles
+  )
+  
+  list(name = "LinRegARIMAArrForecastNoNorm",
+    fcastTPt = function(clId, startTPt, depModel, depTS, depToDestTS, arrTS) {
+      # Regression
+      regResult <- linregNoNormModel$fcastTPt(clId, startTPt, depModel, depTS, depToDestTS, arrTS)
+      # We only know the error up to last startTPt
+      if (startTPt-fcastFreq > 0) {
+        clErrTS <- c()
+        for (s in seq(1, startTPt-fcastFreq, fcastFreq)) {
+          # Error correction
+          regFreqResult <- linregNoNormModelFreq$fcastTPt(clId, s, depModel, depTS, depToDestTS, arrTS)
+          oracleResult <- oracleArr$fcastTPt(clId, s, depModel, depTS, depToDestTS, arrTS)
+          clErrTS <- c(clErrTS, oracleResult - regFreqResult)
+        }
+        regResult <- regResult - errModel$fcastTPt(clId, clErrTS)
+      }
+      max(regResult,0)
     }
   )
 }
@@ -334,7 +420,7 @@ genARIMARepError <- function (
   clErrorRepTSExtended[,, w + (1 : dim(clErrorRepTS)[3])] <- clErrorRepTS[,,]
   # Normalise repTS and fit model
   clErrModels <- fitRepARIMAArrivals(
-    0:2, 0, 0:1, NULL, normClRepTS(clErrorRepTSExtended), w, 0
+    0:2, 0:1, 0:1, NULL, normClRepTS(clErrorRepTSExtended), w, 0
   )
   
   list(name = "ARIMAErrorForecast",

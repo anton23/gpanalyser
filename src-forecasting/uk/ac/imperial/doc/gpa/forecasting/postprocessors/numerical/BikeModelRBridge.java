@@ -160,9 +160,9 @@ public class BikeModelRBridge {
 	  // Train departure time series
 	  try {
       mRConn.voidEval(String.format(
-        "depModel <- genDepFcastModel(\"%s\", %d, %d, %d, "+
+        "depModel <- genDepFcastModel(\"%s\", %d, %d, "+
         "trainClDepRepTSF, trainClDepToDestRepTSF)",
-        depFcastMode, mFcastFreq, mFcastWarmup, mFcastLen
+        depFcastMode, mFcastFreq, mFcastWarmup
       ));
     } catch (RserveException e) {
       e.printStackTrace();
@@ -275,8 +275,8 @@ public class BikeModelRBridge {
 		double[][] data = null;
 	  try {
       REXP res = mRConn.eval(String.format(
-        "fcastDepartureTS(depModel, \"%s\", \"%s\", %d)",
-        mCurClDepTSFile, mCurClDepToDestTSFile, mCurTSStartIndex + 1
+        "fcastDepartureTS(depModel, %d, %d, \"%s\", \"%s\")",
+        mCurTSStartIndex + 1, mFcastLen, mCurClDepTSFile, mCurClDepToDestTSFile
       ));
       if (!res.isNull()) {
         data = res.asDoubleMatrix();
