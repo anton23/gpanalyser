@@ -95,10 +95,14 @@ fitRepARIMA <- function (repTS, p, d, q, w, xreg = NULL) {
     transform.pars = FALSE
   )
   # Our return structure for the RepARIMA
+  numXreg <- 0
+  if (!is.null(xreg)) {
+    numXreg <- dim(xreg)[3]
+  }
   model <- list(
     coef = interleavedSARIMAToARIMACoeffs(model$coef, p, q, m),
     order = c(p, d, q),
-    numXreg = length(xreg),
+    numXreg = numXreg,
     loglik = model$loglik,
     aic = model$aic
   )

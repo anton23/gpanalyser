@@ -133,4 +133,6 @@ with open(sys.argv[1], "r") as f:
 
 # Analysis
 for analysis in sorted(fcasts.keys()):
+  if (len(fcasts[analysis]) is 0):
+    continue
   analyse(fcasts, analysis)
