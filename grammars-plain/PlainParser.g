@@ -149,12 +149,44 @@ analysis:
       odeAnalysis
     | simulation
     | accurateSimulation
-    | compare
+    | odeTIAnalysis
+    | simTIAnalysis
     | odeBikeFcast
     | simBikeFcast
     | tsRBikeFcast
+    | compare
   )
   (LBRACE plotDescription* RBRACE)?
+;
+
+
+odeTIAnalysis:
+  ODES_TI
+  odeParameters?
+  {
+    hint.push("Time inhomogeneous ODE analysis has syntax\n" + 
+      "ODEsTI(stopTime=<number>, stepSize=<number>, density=<integer>)"
+    );
+  }
+  odeSettings
+  {
+    hint.pop();
+  }
+  -> ^(ODES_TI odeParameters? odeSettings)
+;
+
+simTIAnalysis:
+  SIM_TI
+  {
+    hint.push("Time inhomogeneous Simulation analysis has syntax\n" + 
+      "SimTI(stopTime=<number>, stepSize=<number>, replications=<integer>)"
+    );
+  }
+  simulationSettings
+  {
+    hint.pop();
+  }
+  -> ^(SIM_TI simulationSettings)
 ;
 
 odeBikeFcast:

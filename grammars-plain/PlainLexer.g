@@ -12,6 +12,8 @@ COUNT: '#';
 ODE_BIKE_FCAST: 'OdeBikeFcast';
 SIM_BIKE_FCAST: 'SimBikeFcast';
 TS_R_BIKE_FCAST: 'TSRBikeFcast';
+ODES_TI: 'ODEsTI';
+SIM_TI: 'SimTI';
 
 ARIMA_ERROR: 'arimaError';
 ARR_FCAST_MODE: 'arrFcastMode';
