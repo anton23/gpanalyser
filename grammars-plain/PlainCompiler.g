@@ -159,11 +159,13 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
   (
       o=odeAnalysis[pctmc,constants] {$analysis=$o.analysis; $postprocessor=$o.postprocessor;}
     | accs=accurateSimulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
-    | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
     | s=simulation[pctmc,constants] {$analysis=$s.analysis; $postprocessor=$s.postprocessor;}
+    | oTI=odeTIAnalysis[pctmc,constants] {$analysis=$oTI.analysis; $postprocessor=$oTI.postprocessor;}
+    | sTI=simTIAnalysis[pctmc,constants] {$analysis=$sTI.analysis; $postprocessor=$sTI.postprocessor;}
     | f=odeBikeFcastAnalysis[pctmc,constants] {$analysis=$f.analysis; $postprocessor=$f.postprocessor;}
     | fs=simBikeFcastAnalysis[pctmc,constants] {$analysis=$fs.analysis; $postprocessor=$fs.postprocessor;}
     | ls=tsRBikeFcastAnalysis[pctmc,constants] {$analysis=$ls.analysis; $postprocessor=$ls.postprocessor;}
+    | c=compare[pctmc, constants, plots] {$analysis=$c.analysis; $postprocessor=$c.postprocessor;}
   )
   (LBRACE ps = plotDescriptions RBRACE
     {
@@ -171,6 +173,64 @@ returns [AbstractPCTMCAnalysis analysis, NumericalPostprocessor postprocessor]:
     }
   )? 
 ;
+
+odeTIAnalysis[PCTMC pctmc, Constants constants]
+  returns [PCTMCODEAnalysis analysis, NumericalPostprocessor postprocessor]
+  @init{
+    Map<String, Object> parameters = new HashMap<String, Object>();
+    Map<String, Object> postprocessorParameters = new HashMap<String, Object>();
+  }:
+  ^(ODES_TI
+    (LBRACK
+      p1=parameter {parameters.put($p1.name, $p1.value);}
+      (COMMA p=parameter {parameters.put($p.name, $p.value);})*
+    RBRACK)?
+    settings=odeSettings
+  {
+    $analysis = new PCTMCODEAnalysis($pctmc, parameters);
+    ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+    $settings.stopTime.accept(stopEval);
+    ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+    $settings.stepSize.accept(stepEval);
+    if (postprocessorParameters.isEmpty()) {
+      $postprocessor = new InhomogeneousODEAnalysisNumericalPostprocessor(
+        stopEval.getResult(), stepEval.getResult(), $settings.density
+      );
+    } else {
+      $postprocessor = new InhomogeneousODEAnalysisNumericalPostprocessor(
+        stopEval.getResult(), stepEval.getResult(), $settings.density, postprocessorParameters
+      );
+    }
+    $analysis.addPostprocessor($postprocessor);
+  }
+  );
+
+simTIAnalysis[PCTMC pctmc, Constants constants]
+  returns [PCTMCSimulation analysis, InhomogeneousSimulationAnalysisNumericalPostprocessor postprocessor]
+  @init{
+    Map<String, Object> parameters = new HashMap<String, Object>();
+  }:
+  ^(SIM_TI settings=simulationSettings
+    (COMMA p=parameter {parameters.put($p.name, $p.value);})*
+  {
+    $analysis = new PCTMCSimulation($pctmc);
+
+    ExpressionEvaluatorWithConstants stopEval = new ExpressionEvaluatorWithConstants($constants);
+    $settings.stopTime.accept(stopEval);
+    ExpressionEvaluatorWithConstants stepEval = new ExpressionEvaluatorWithConstants($constants);
+    $settings.stepSize.accept(stepEval);
+    if (parameters.isEmpty()) {
+      $postprocessor = new InhomogeneousSimulationAnalysisNumericalPostprocessor(
+        stopEval.getResult(), stepEval.getResult(), $settings.replications
+      );
+    } else {
+      $postprocessor = new InhomogeneousSimulationAnalysisNumericalPostprocessor(
+        stopEval.getResult(), stepEval.getResult(), $settings.replications, parameters
+      );
+    }
+    $analysis.addPostprocessor($postprocessor);
+  }
+  );
 
 odeBikeFcastAnalysis[PCTMC pctmc, Constants constants]
 returns [
