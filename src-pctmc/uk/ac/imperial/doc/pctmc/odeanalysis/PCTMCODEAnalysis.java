@@ -12,6 +12,7 @@ import uk.ac.imperial.doc.pctmc.odeanalysis.closures.LognormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.MomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosure;
 import uk.ac.imperial.doc.pctmc.odeanalysis.closures.NormalMomentClosureMinApproximation;
+import uk.ac.imperial.doc.pctmc.odeanalysis.closures.SpatialMomentClosure;
 import uk.ac.imperial.doc.pctmc.representation.PCTMC;
 import uk.ac.imperial.doc.pctmc.statements.odeanalysis.ODEMethod;
 
@@ -31,6 +32,7 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 		s_momentClosures.put(NormalMomentClosure.NAME, NormalMomentClosure.class);
 		s_momentClosures.put(LognormalMomentClosure.NAME, LognormalMomentClosure.class);
 		s_momentClosures.put(NormalMomentClosureMinApproximation.NAME, NormalMomentClosureMinApproximation.class);
+    s_momentClosures.put(SpatialMomentClosure.NAME, SpatialMomentClosure.class);
 	}
 	
 	@Override
@@ -103,11 +105,16 @@ public class PCTMCODEAnalysis extends AbstractPCTMCAnalysis
 			{
 				try
 				{
-					m_momentClosure = s_momentClosures.get(name).getConstructor(Map.class).newInstance(parameters);
+				  m_momentClosure = s_momentClosures.get(name).getConstructor(Map.class).newInstance(parameters);
 				}
 				catch (Exception e)
 				{
-					throw new AssertionError("Unexpected internal error " + e);
+				  try {
+				    m_momentClosure = s_momentClosures.get(name).getConstructor(PCTMC.class, Map.class).newInstance(pctmc, parameters);
+				  }
+				  catch (Exception e2) {
+				    throw new AssertionError("Unexpected internal error " + e2);
+				  }
 				} 
 			}
 			else
