@@ -1,0 +1,62 @@
+// Definition of constants
+infect = 0.01;
+recover = 1;
+n_S = 10000;
+
+
+// Definition of "reactions"
+{S} + {I} -> {I} + {I} @ infect * {S}{I};
+{I} -> {R} @ recover * {I};
+
+// Initial conditions
+{S} = n_S;
+{I} = 10;
+{R} = 0;
+
+
+// Simple ODE analysis 
+ODEs(stopTime=1.0,stepSize=0.001,density=10){
+    E[{S}],E[{I}],E[{R}];
+}
+
+// Can look at higher moments
+ODEs(stopTime=1.0,stepSize=0.001,density=10){
+    E[{S}],E[{I}],E[{R}] -> "means.csv"; // can optionally output data to a file
+    Var[{S}],Var[{I}],Var[{R}];
+    E[{I}], E[{I}]+Var[{I}]^0.5, E[{I}]-Var[{I}]^0.5;
+}
+
+
+// Run simulation for reference 
+Simulation(stopTime=1.0,stepSize=0.001,replications=10000){
+    E[{S}],E[{I}],E[{R}];
+    Var[{S}],Var[{I}],Var[{R}];
+    SCM[{S},3],SCM[{I},3],SCM[{R},3];
+}
+
+// Compute distribution over time
+Distribution
+Simulation(stopTime=0.5,stepSize=0.002,replications=10000){}
+computes {
+   {S} at 0.1 into 100 bins;
+   {S} into 50 bins;
+   {I} into 50 bins;
+   {R} into 50 bins;
+}
+
+// Explore effects of a single parameter
+Iterate infect from 0.0 to 0.1 in 200 steps
+ODEs(stopTime=1.0,stepSize=0.001,density=10){}
+plot {                        
+    E[{I}] + E[{R}] at 0.1;
+    E[{I}] + E[{R}] at 0.2;
+}
+
+// Two parameters 
+Iterate infect from 0.0 to 0.05 in 20 steps
+        n_S from 1000.0 to 10000.0 in 20 steps
+ODEs(stopTime=1.0,stepSize=0.001,density=10){}
+plot {                        
+    (E[{I}] + E[{R}])/n_S at 0.1;
+    (E[{I}] + E[{R}])/n_S at 0.2;
+}
